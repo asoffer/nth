@@ -108,105 +108,73 @@ TEST(Integer, SmallConstruction) {
   EXPECT_TRUE(uint64_t{1} != int64_min);
 }
 
-namespace internal_integer_test {
-template <typename T>
-T Words(Integer const &n) {
+std::vector<uintptr_t> Words(Integer const &n) {
   std::span span = n.span();
   return std::vector(span.begin(), span.end());
 }
 
-std::vector<uintptr_t> Words(Integer const &n) {
-  return Words<std::vector<uintptr_t>>(n);
-}
-
-}  // namespace internal_integer_test
-
 TEST(Integer, Span) {
-  EXPECT_THAT(internal_integer_test::Words(Integer(0)), ElementsAre(0, 0));
-  EXPECT_THAT(internal_integer_test::Words(Integer(1)), ElementsAre(1, 0));
-  EXPECT_THAT(internal_integer_test::Words(Integer(10)), ElementsAre(10, 0));
-  EXPECT_THAT(internal_integer_test::Words(Integer(15)), ElementsAre(15, 0));
-  EXPECT_THAT(internal_integer_test::Words(Integer(16)), ElementsAre(16, 0));
-  EXPECT_THAT(internal_integer_test::Words(Integer(255)), ElementsAre(255, 0));
-  EXPECT_THAT(internal_integer_test::Words(Integer(256)), ElementsAre(256, 0));
-  EXPECT_THAT(internal_integer_test::Words(Integer(1) << 64),
-              ElementsAre(0, 1));
-  EXPECT_THAT(internal_integer_test::Words(Integer(1) << 65),
-              ElementsAre(0, 2));
-  EXPECT_THAT(internal_integer_test::Words(Integer(1) << 66),
-              ElementsAre(0, 4));
-  EXPECT_THAT(internal_integer_test::Words(Integer(1) << 67),
-              ElementsAre(0, 8));
-  EXPECT_THAT(internal_integer_test::Words(Integer(1) << 68),
-              ElementsAre(0, 16));
-  EXPECT_THAT(internal_integer_test::Words(Integer(1) << 72),
-              ElementsAre(0, 256));
-  EXPECT_THAT(internal_integer_test::Words(Integer(~uintptr_t{}) << 1),
-              ElementsAre(~uintptr_t{1}, 1));
-  EXPECT_THAT(internal_integer_test::Words(Integer(~uintptr_t{}) << 2),
-              ElementsAre(~uintptr_t{3}, 3));
-  EXPECT_THAT(internal_integer_test::Words(Integer(~uintptr_t{}) << 3),
-              ElementsAre(~uintptr_t{7}, 7));
+  EXPECT_THAT(Words(Integer(0)), ElementsAre(0, 0));
+  EXPECT_THAT(Words(Integer(1)), ElementsAre(1, 0));
+  EXPECT_THAT(Words(Integer(10)), ElementsAre(10, 0));
+  EXPECT_THAT(Words(Integer(15)), ElementsAre(15, 0));
+  EXPECT_THAT(Words(Integer(16)), ElementsAre(16, 0));
+  EXPECT_THAT(Words(Integer(255)), ElementsAre(255, 0));
+  EXPECT_THAT(Words(Integer(256)), ElementsAre(256, 0));
+  EXPECT_THAT(Words(Integer(1) << 64), ElementsAre(0, 1));
+  EXPECT_THAT(Words(Integer(1) << 65), ElementsAre(0, 2));
+  EXPECT_THAT(Words(Integer(1) << 66), ElementsAre(0, 4));
+  EXPECT_THAT(Words(Integer(1) << 67), ElementsAre(0, 8));
+  EXPECT_THAT(Words(Integer(1) << 68), ElementsAre(0, 16));
+  EXPECT_THAT(Words(Integer(1) << 72), ElementsAre(0, 256));
+  EXPECT_THAT(Words(Integer(~uintptr_t{}) << 1), ElementsAre(~uintptr_t{1}, 1));
+  EXPECT_THAT(Words(Integer(~uintptr_t{}) << 2), ElementsAre(~uintptr_t{3}, 3));
+  EXPECT_THAT(Words(Integer(~uintptr_t{}) << 3), ElementsAre(~uintptr_t{7}, 7));
 
-  EXPECT_THAT(internal_integer_test::Words(Integer(std::numeric_limits<uintptr_t>::max()) << 4),
+  EXPECT_THAT(Words(Integer(std::numeric_limits<uintptr_t>::max()) << 4),
               ElementsAre(~uintptr_t{} - 0xf, 0xf));
 
   static constexpr uintptr_t BitsPerWord = sizeof(uintptr_t) * CHAR_BIT;
-  EXPECT_THAT(internal_integer_test::Words(Integer(5) << (BitsPerWord - 1)),
+  EXPECT_THAT(Words(Integer(5) << (BitsPerWord - 1)),
               ElementsAre(uintptr_t{1} << (BitsPerWord - 1), 2));
-  EXPECT_THAT(internal_integer_test::Words(Integer(5) << BitsPerWord),
-              ElementsAre(0, 5));
-  EXPECT_THAT(internal_integer_test::Words(Integer(5) << (BitsPerWord + 4)),
-              ElementsAre(0, 80));
+  EXPECT_THAT(Words(Integer(5) << BitsPerWord), ElementsAre(0, 5));
+  EXPECT_THAT(Words(Integer(5) << (BitsPerWord + 4)), ElementsAre(0, 80));
 
-  EXPECT_THAT(internal_integer_test::Words(Integer(5) << (2 * BitsPerWord - 2)),
+  EXPECT_THAT(Words(Integer(5) << (2 * BitsPerWord - 2)),
               ElementsAre(0, uintptr_t{1} << (BitsPerWord - 2), 1));
 
-  EXPECT_THAT(internal_integer_test::Words(Integer(5) << (2 * BitsPerWord - 1)),
+  EXPECT_THAT(Words(Integer(5) << (2 * BitsPerWord - 1)),
               ElementsAre(0, uintptr_t{1} << (BitsPerWord - 1), 2));
-  EXPECT_THAT(internal_integer_test::Words(Integer(5) << (2 * BitsPerWord)),
-              ElementsAre(0, 0, 5));
-  EXPECT_THAT(internal_integer_test::Words(Integer(5) << (2 * BitsPerWord + 1)),
+  EXPECT_THAT(Words(Integer(5) << (2 * BitsPerWord)), ElementsAre(0, 0, 5));
+  EXPECT_THAT(Words(Integer(5) << (2 * BitsPerWord + 1)),
               ElementsAre(0, 0, 10));
 
-  EXPECT_THAT(internal_integer_test::Words(Integer(-1)), ElementsAre(1, 0));
-  EXPECT_THAT(internal_integer_test::Words(Integer(-10)), ElementsAre(10, 0));
-  EXPECT_THAT(internal_integer_test::Words(Integer(-15)), ElementsAre(15, 0));
-  EXPECT_THAT(internal_integer_test::Words(Integer(-16)), ElementsAre(16, 0));
-  EXPECT_THAT(internal_integer_test::Words(Integer(-255)), ElementsAre(255, 0));
-  EXPECT_THAT(internal_integer_test::Words(Integer(-256)), ElementsAre(256, 0));
-  EXPECT_THAT(internal_integer_test::Words(Integer(-1) << 64),
-              ElementsAre(0, 1));
-  EXPECT_THAT(internal_integer_test::Words(Integer(-1) << 65),
-              ElementsAre(0, 2));
-  EXPECT_THAT(internal_integer_test::Words(Integer(-1) << 66),
-              ElementsAre(0, 4));
-  EXPECT_THAT(internal_integer_test::Words(Integer(-1) << 67),
-              ElementsAre(0, 8));
-  EXPECT_THAT(internal_integer_test::Words(Integer(-1) << 68),
-              ElementsAre(0, 16));
-  EXPECT_THAT(internal_integer_test::Words(Integer(-1) << 72),
-              ElementsAre(0, 256));
+  EXPECT_THAT(Words(Integer(-1)), ElementsAre(1, 0));
+  EXPECT_THAT(Words(Integer(-10)), ElementsAre(10, 0));
+  EXPECT_THAT(Words(Integer(-15)), ElementsAre(15, 0));
+  EXPECT_THAT(Words(Integer(-16)), ElementsAre(16, 0));
+  EXPECT_THAT(Words(Integer(-255)), ElementsAre(255, 0));
+  EXPECT_THAT(Words(Integer(-256)), ElementsAre(256, 0));
+  EXPECT_THAT(Words(Integer(-1) << 64), ElementsAre(0, 1));
+  EXPECT_THAT(Words(Integer(-1) << 65), ElementsAre(0, 2));
+  EXPECT_THAT(Words(Integer(-1) << 66), ElementsAre(0, 4));
+  EXPECT_THAT(Words(Integer(-1) << 67), ElementsAre(0, 8));
+  EXPECT_THAT(Words(Integer(-1) << 68), ElementsAre(0, 16));
+  EXPECT_THAT(Words(Integer(-1) << 72), ElementsAre(0, 256));
 
-  EXPECT_THAT(internal_integer_test::Words(Integer(-5) << (BitsPerWord - 1)),
+  EXPECT_THAT(Words(Integer(-5) << (BitsPerWord - 1)),
               ElementsAre(uintptr_t{1} << (BitsPerWord - 1), 2));
-  EXPECT_THAT(internal_integer_test::Words(Integer(-5) << BitsPerWord),
-              ElementsAre(0, 5));
-  EXPECT_THAT(internal_integer_test::Words(Integer(-5) << (BitsPerWord + 4)),
-              ElementsAre(0, 80));
+  EXPECT_THAT(Words(Integer(-5) << BitsPerWord), ElementsAre(0, 5));
+  EXPECT_THAT(Words(Integer(-5) << (BitsPerWord + 4)), ElementsAre(0, 80));
 
-  EXPECT_THAT(
-      internal_integer_test::Words(Integer(-5) << (2 * BitsPerWord - 2)),
-      ElementsAre(0, uintptr_t{1} << (BitsPerWord - 2), 1));
+  EXPECT_THAT(Words(Integer(-5) << (2 * BitsPerWord - 2)),
+              ElementsAre(0, uintptr_t{1} << (BitsPerWord - 2), 1));
 
-  EXPECT_THAT(
-      internal_integer_test::Words(Integer(-5) << (2 * BitsPerWord - 1)),
-      ElementsAre(0, uintptr_t{1} << (BitsPerWord - 1), 2));
-  EXPECT_THAT(internal_integer_test::Words(Integer(-5) << (2 * BitsPerWord)),
-              ElementsAre(0, 0, 5));
-  EXPECT_THAT(
-      internal_integer_test::Words(Integer(-5) << (2 * BitsPerWord + 1)),
-      ElementsAre(0, 0, 10));
+  EXPECT_THAT(Words(Integer(-5) << (2 * BitsPerWord - 1)),
+              ElementsAre(0, uintptr_t{1} << (BitsPerWord - 1), 2));
+  EXPECT_THAT(Words(Integer(-5) << (2 * BitsPerWord)), ElementsAre(0, 0, 5));
+  EXPECT_THAT(Words(Integer(-5) << (2 * BitsPerWord + 1)),
+              ElementsAre(0, 0, 10));
 }
 
 TEST(Integer, CopyMoveConstruction) {

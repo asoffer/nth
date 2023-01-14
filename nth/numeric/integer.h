@@ -11,12 +11,6 @@
 #include <type_traits>
 
 namespace nth {
-struct Integer;
-
-namespace internal_integer_test {
-template <typename T>
-T Words(Integer const &);
-}  // namespace internal_integer_test
 
 struct Integer {
   Integer() : d_{reinterpret_cast<uintptr_t>(&d_[1]) | SsbFlag, 0, 0} {}
@@ -98,10 +92,11 @@ struct Integer {
   // Do not call directly. For use by GoogleTest only.
   friend void PrintTo(Integer const &n, std::ostream *os);
 
- private:
-  template <typename T>
-  friend T internal_integer_test::Words(Integer const &);
+  // Returns a `std::span` over the `uintptr_t` words order from least- to
+  // most-significant.
+  std::span<uintptr_t const> span() const;
 
+ private:
   static_assert(alignof(uintptr_t) > 4);
   static_assert(std::is_same_v<uintptr_t, uint64_t>);
 
@@ -153,7 +148,6 @@ struct Integer {
   void set_nonssb_capacity(uintptr_t n);
 
   std::span<uintptr_t> span();
-  std::span<uintptr_t const> span() const;
 
   void set_negative_flag(bool b) {
     d_[0] &= ~NegativeFlag;
