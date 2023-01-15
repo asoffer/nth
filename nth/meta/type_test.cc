@@ -77,9 +77,19 @@ TEST(Type, IsA) {
 }
 
 TEST(Type, Address) {
-  auto x = nth::type<int>;
-  auto y = x;
-  EXPECT_EQ(&x, &y);
+  auto t1 = nth::type<int>;
+  auto t2 = nth::type<int>;
+  auto t3 = t1;
+  nth::TypeId id1 = t1;
+  nth::TypeId id2 = t2;
+  nth::TypeId id3 = t3;
+  EXPECT_EQ(id1, id2);
+  EXPECT_EQ(id2, id3);
+  EXPECT_EQ(id1, id3);
+
+  std::stringstream ss;
+  ss << t1;
+  EXPECT_EQ(ss.str(), "int");
 }
 
 }  // namespace

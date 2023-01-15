@@ -9,6 +9,33 @@ namespace nth {
 namespace internal_type {
 
 template <typename T>
+struct Type;
+
+}  // namespace internal_type
+
+struct TypeId {
+  TypeId() = delete;
+
+  friend bool operator==(TypeId lhs, TypeId rhs) = default;
+  friend bool operator!=(TypeId lhs, TypeId rhs) = default;
+
+  friend std::ostream& operator<<(std::ostream& os, TypeId id) {
+    id.id_(os);
+    return os;
+  }
+
+ private:
+  template <typename T>
+  friend struct ::nth::internal_type::Type;
+
+  explicit TypeId(void (*id)(std::ostream&)) : id_(id) {}
+
+  void  (*id_)(std::ostream&) = 0;
+};
+
+namespace internal_type {
+
+template <typename T>
 void WriteTo(std::ostream& os) {
   if constexpr (std::is_same_v<T, bool>) {
     os << "bool";
@@ -78,9 +105,7 @@ struct Type {
     return IsAImpl<T, P>::value;
   }
 
-  // Guarantees that taking the address returns the same unique pointer value
-  // regardless of which copy of the object is used.
-  Type const* operator&();
+  operator TypeId() const { return TypeId(&WriteTo<T>); }
 
   constexpr Type<std::decay_t<T>> decayed() const { return {}; }
 
@@ -106,14 +131,6 @@ inline constexpr internal_type::Type<T> type;
 template <Type auto t>
 using type_t = typename decltype(t)::type;
 
-namespace internal_type {
-
-template <typename T>
-Type<T> const* Type<T>::operator&() {
-  return std::addressof(::nth::type<T>);
-}
-
-}  // namespace internal_type
 }  // namespace nth
 
 #endif  // NTH_META_TYPE_H
