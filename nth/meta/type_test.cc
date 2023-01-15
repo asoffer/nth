@@ -1,5 +1,7 @@
 #include "nth/meta/type.h"
 
+#include <optional>
+#include <variant>
 #include <sstream>
 #include <string>
 
@@ -52,6 +54,26 @@ TEST(Type, Print) {
   EXPECT_EQ(to_string(nth::type<int>), "int");
   EXPECT_EQ(to_string(nth::type<int**>), "int**");
   EXPECT_EQ(to_string(nth::type<const int* const*>), "int const* const*");
+}
+
+TEST(Type, IsA) {
+  constexpr bool b0 = nth::type<int>.is_a<std::optional>();
+  EXPECT_FALSE(b0);
+
+  constexpr bool b1 = nth::type<std::optional<int>>.is_a<std::optional>();
+  EXPECT_TRUE(b1);
+
+  constexpr bool b2 = nth::type<std::variant<int>>.is_a<std::optional>();
+  EXPECT_FALSE(b2);
+
+  constexpr bool b3 = nth::type<std::variant<int, bool>>.is_a<std::variant>();
+  EXPECT_TRUE(b3);
+
+  constexpr bool b4 = nth::type<std::optional<int>>.is_a<std::variant>();
+  EXPECT_FALSE(b4);
+
+  constexpr bool b5 = nth::type<std::string>.is_a<std::basic_string>();
+  EXPECT_TRUE(b5);
 }
 
 }  // namespace

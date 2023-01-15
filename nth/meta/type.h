@@ -53,6 +53,11 @@ void WriteTo(std::ostream& os) {
   }
 }
 
+template <typename, template <typename...> typename>
+struct IsAImpl : std::false_type {};
+template <typename... TemplateArgs, template <typename...> typename P>
+struct IsAImpl<P<TemplateArgs...>, P> : std::true_type {};
+
 template <typename T>
 struct Type {
   using type = T;
@@ -65,6 +70,11 @@ struct Type {
   template <typename R>
   constexpr bool operator!=(Type<R> m) const {
     return not operator==(m);
+  }
+
+  template <template <typename...> typename P>
+  constexpr bool is_a() const {
+    return IsAImpl<T, P>::value;
   }
 
   constexpr Type<std::decay_t<T>> decayed() const { return {}; }
