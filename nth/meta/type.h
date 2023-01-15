@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <memory>
+#include <sstream>
 #include <type_traits>
 
 namespace nth {
@@ -18,6 +19,13 @@ struct TypeId {
 
   friend bool operator==(TypeId lhs, TypeId rhs) = default;
   friend bool operator!=(TypeId lhs, TypeId rhs) = default;
+
+  template <typename S>
+  void AbslStringify(S& sink, TypeId id) {
+    std::stringstream ss;
+    ss << id;
+    sink.Append(ss.str());
+  }
 
   friend std::ostream& operator<<(std::ostream& os, TypeId id) {
     id.id_(os);
@@ -108,6 +116,13 @@ struct Type {
   operator TypeId() const { return TypeId(&WriteTo<T>); }
 
   constexpr Type<std::decay_t<T>> decayed() const { return {}; }
+
+  template <typename S>
+  void AbslStringify(S& sink, Type) {
+    std::stringstream ss;
+    WriteTo<T>(ss);
+    sink.Append(ss.str());
+  }
 
   friend std::ostream& operator<<(std::ostream& os, Type) {
     WriteTo<T>(os);
