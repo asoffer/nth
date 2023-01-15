@@ -1,16 +1,16 @@
 package(default_visibility = ["//visibility:public"])
 
 cc_library(
-    name = "type",
-    hdrs = ["type.h"],
+    name = "concepts",
+    hdrs = ["concepts.h"],
     deps = [],
 )
 
 cc_test(
-    name = "type_test",
-    srcs = ["type_test.cc"],
+    name = "concepts_test",
+    srcs = ["concepts_test.cc"],
     deps = [
-        ":type",
+        ":concepts",
         "@com_google_googletest//:gtest_main",
     ],
 )
@@ -26,6 +26,21 @@ cc_test(
     srcs = ["sequence_test.cc"],
     deps = [
         ":sequence",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_library(
+    name = "type",
+    hdrs = ["type.h"],
+    deps = [],
+)
+
+cc_test(
+    name = "type_test",
+    srcs = ["type_test.cc"],
+    deps = [
+        ":type",
         "@com_google_googletest//:gtest_main",
     ],
 )

@@ -33,5 +33,6 @@ cc_toolchain_config(
         "-Wextra",
         "-Wpedantic",
         "-Wuninitialized",
+        "-Wno-gcc-compat", # https://github.com/abseil/abseil-cpp/issues/1360
     ]
 )
