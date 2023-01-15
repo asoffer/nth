@@ -1,3 +1,6 @@
+#ifndef NTH_META_CONCEPTS_H
+#define NTH_META_CONCEPTS_H
+
 #include <concepts>
 #include <cstddef>
 #include <type_traits>
@@ -11,3 +14,5 @@ concept hasher = std::invocable<H, T> and
     std::convertible_to<std::invoke_result_t<H, T>, size_t>;
 
 }  // namespace nth
+
+#endif  // NTH_META_CONCEPTS_H
