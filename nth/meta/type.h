@@ -2,6 +2,7 @@
 #define NTH_META_TYPE_H
 
 #include <iostream>
+#include <memory>
 #include <type_traits>
 
 namespace nth {
@@ -77,6 +78,10 @@ struct Type {
     return IsAImpl<T, P>::value;
   }
 
+  // Guarantees that taking the address returns the same unique pointer value
+  // regardless of which copy of the object is used.
+  Type const* operator&();
+
   constexpr Type<std::decay_t<T>> decayed() const { return {}; }
 
   friend std::ostream& operator<<(std::ostream& os, Type) {
@@ -101,6 +106,14 @@ inline constexpr internal_type::Type<T> type;
 template <Type auto t>
 using type_t = typename decltype(t)::type;
 
+namespace internal_type {
+
+template <typename T>
+Type<T> const* Type<T>::operator&() {
+  return std::addressof(::nth::type<T>);
+}
+
+}  // namespace internal_type
 }  // namespace nth
 
 #endif  // NTH_META_TYPE_H

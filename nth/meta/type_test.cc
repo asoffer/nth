@@ -76,4 +76,10 @@ TEST(Type, IsA) {
   EXPECT_TRUE(b5);
 }
 
+TEST(Type, Address) {
+  auto x = nth::type<int>;
+  auto y = x;
+  EXPECT_EQ(&x, &y);
+}
+
 }  // namespace
