@@ -21,7 +21,7 @@ struct TypeId {
   friend bool operator!=(TypeId lhs, TypeId rhs) = default;
 
   template <typename S>
-  void AbslStringify(S& sink, TypeId id) {
+  friend void AbslStringify(S& sink, TypeId id) {
     std::stringstream ss;
     ss << id;
     sink.Append(ss.str());
@@ -118,7 +118,7 @@ struct Type {
   constexpr Type<std::decay_t<T>> decayed() const { return {}; }
 
   template <typename S>
-  void AbslStringify(S& sink, Type) {
+  friend void AbslStringify(S& sink, Type) {
     std::stringstream ss;
     WriteTo<T>(ss);
     sink.Append(ss.str());
