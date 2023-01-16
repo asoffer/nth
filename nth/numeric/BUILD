@@ -13,6 +13,7 @@ cc_test(
     srcs = ["integer_test.cc"],
     deps = [
         ":integer",
+        "@com_google_absl//absl/hash:hash_testing",
         "@com_google_googletest//:gtest_main",
     ]
 )

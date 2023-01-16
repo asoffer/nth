@@ -43,7 +43,9 @@ struct Integer {
 
   template <typename H>
   friend H AbslHashValue(H h, Integer const &n) {
-    return H::combine(std::move(h), n.span());
+    std::span span = n.span();
+    h = H::combine(std::move(h), n.negative());
+    return H::combine_contiguous(std::move(h), span.data(), span.size());
   }
 
   friend Integer operator+(Integer const &lhs, Integer const &rhs);

@@ -1,7 +1,8 @@
 #include "nth/numeric/integer.h"
 
-#include "gtest/gtest.h"
+#include "absl/hash/hash_testing.h"
 #include "gmock/gmock.h"
+#include "gtest/gtest.h"
 
 namespace nth {
 using ::testing::ElementsAre;
@@ -256,6 +257,21 @@ TEST(Integer, Negation) {
   EXPECT_EQ(-one, minus_one);
 }
 
+TEST(Integer, Hashing) {
+  EXPECT_TRUE(absl::VerifyTypeImplementsAbslHashCorrectly({
+      Integer(0),
+      Integer(-1),
+      Integer(1),
+      Integer(std::numeric_limits<intptr_t>::max()),
+      Integer(std::numeric_limits<intptr_t>::min()),
+      -Integer::FromHex("ffffffffffffffffffffffffffffffff"),
+      Integer::FromHex("ffffffffffffffffffffffffffffffff"),
+      -Integer::FromHex(
+          "1000000000000000000000000000000000000000000000000000000000000000"),
+      Integer::FromHex(
+          "1000000000000000000000000000000000000000000000000000000000000000"),
+  }));
+}
 
 TEST(Integer, FromHex) {
   EXPECT_EQ(Integer::FromHex(""), 0);
