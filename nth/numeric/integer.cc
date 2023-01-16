@@ -168,6 +168,16 @@ Integer &Integer::operator-=(Integer const &rhs) {
   return *this;
 }
 
+Integer &Integer::operator*=(Integer const &rhs) {
+  *this = *this * rhs;
+  return *this;
+}
+
+Integer operator*(Integer const &lhs, Integer const &rhs) {
+  // TODO: Not yet implemented correctly.
+  return lhs.span()[0] * rhs.span()[0];
+}
+
 void Integer::MagnitudeAddImpl(std::span<uintptr_t const> rhs) {
   ZeroExtendInWords(rhs.size());
   std::span s = span();
