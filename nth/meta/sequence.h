@@ -72,6 +72,20 @@ struct Sequence {
     return (conditional<Predicate(Vs), Sequence<Vs>, Sequence<>> + ...);
   }
 
+  static constexpr auto unique() {
+    if constexpr (empty()) {
+      return Sequence<>{};
+    } else {
+      constexpr auto t = tail().unique();
+      constexpr auto h = head();
+      if constexpr (t.template contains<h>()) {
+        return t;
+      } else {
+        return Sequence<h>{} + t;
+      }
+    }
+  }
+
   static constexpr auto head() requires(sizeof...(Vs) > 0) {
     return SplitFirst<Vs...>::head_value;
   }
@@ -98,19 +112,19 @@ struct Sequence {
     return (Vs + ...);
   }
 
-  template <template <auto> typename Predicate>
+  template <auto Predicate>
   static constexpr bool all() {
-    return (Predicate<Vs>::value and ...);
+    return (Predicate(Vs) and ...);
   }
 
-  template <template <auto> typename Predicate>
+  template <auto Predicate>
   static constexpr bool any() {
-    return (Predicate<Vs>::value or ...);
+    return (Predicate(Vs) or ...);
   }
 
-  template <template <auto> typename Predicate>
+  template <auto Predicate>
   static constexpr int count() {
-    return (static_cast<int>(Predicate<Vs>::value) + ...);
+    return (static_cast<int>(Predicate(Vs)) + ...);
   }
 
   template <auto... Rs>
@@ -140,10 +154,10 @@ struct Sequence {
     return ((V == Vs) or ...);
   }
 
-  template <template <auto> typename Predicate>
+  template <auto Predicate>
   static constexpr int find_if() {
     int result = -1;
-    ((++result, Predicate<Vs>::value) or ...);
+    ((++result, Predicate(Vs)) or ...);
     return result;
   }
 

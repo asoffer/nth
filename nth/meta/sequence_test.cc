@@ -87,4 +87,65 @@ TEST(Sequence, Head) {
   EXPECT_EQ(b, c);
 }
 
+TEST(Sequence, Any) {
+  constexpr auto a = nth::sequence<>.any<[](auto x) { return x % 2 == 0; }>();
+  EXPECT_FALSE(a);
+
+  constexpr auto b = nth::sequence<1>.any<[](auto x) { return x % 2 == 0; }>();
+  EXPECT_FALSE(b);
+
+  constexpr auto c =
+      nth::sequence<1, 3>.any<[](auto x) { return x % 2 == 0; }>();
+  EXPECT_FALSE(c);
+
+  constexpr auto d = nth::sequence<2>.any<[](auto x) { return x % 2 == 0; }>();
+  EXPECT_TRUE(d);
+
+  constexpr auto e =
+      nth::sequence<2, 4>.any<[](auto x) { return x % 2 == 0; }>();
+  EXPECT_TRUE(e);
+
+  constexpr auto f =
+      nth::sequence<1, 2>.any<[](auto x) { return x % 2 == 0; }>();
+  EXPECT_TRUE(f);
+}
+
+TEST(Sequence, All) {
+  constexpr auto a = nth::sequence<>.all<[](auto x) { return x % 2 == 0; }>();
+  EXPECT_TRUE(a);
+
+  constexpr auto b = nth::sequence<1>.all<[](auto x) { return x % 2 == 0; }>();
+  EXPECT_FALSE(b);
+
+  constexpr auto c =
+      nth::sequence<1, 3>.all<[](auto x) { return x % 2 == 0; }>();
+  EXPECT_FALSE(c);
+
+  constexpr auto d = nth::sequence<2>.all<[](auto x) { return x % 2 == 0; }>();
+  EXPECT_TRUE(d);
+
+  constexpr auto e =
+      nth::sequence<2, 4>.all<[](auto x) { return x % 2 == 0; }>();
+  EXPECT_TRUE(e);
+
+  constexpr auto f =
+      nth::sequence<1, 2>.all<[](auto x) { return x % 2 == 0; }>();
+  EXPECT_FALSE(f);
+}
+
+TEST(Sequence, Unique) {
+  constexpr auto s0 = nth::sequence<>.unique();
+  EXPECT_EQ(s0, nth::sequence<>);
+
+  constexpr auto s1 = nth::sequence<1>;
+  EXPECT_EQ(s1, nth::sequence<1>);
+
+  constexpr auto s2 = nth::sequence<1, 2, 3>.unique();
+  EXPECT_EQ(s2, (nth::sequence<1, 2, 3>));
+
+  constexpr auto s3  = nth::sequence<1, 2, 1, 3>.unique();
+  constexpr auto seq = nth::sequence<2, 1, 3>;
+  EXPECT_EQ(s3, seq);
+}
+
 }  // namespace
