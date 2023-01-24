@@ -72,6 +72,15 @@ struct Sequence {
     return (conditional<Predicate(Vs), Sequence<Vs>, Sequence<>> + ...);
   }
 
+  static constexpr auto head() requires(sizeof...(Vs) > 0) {
+    return SplitFirst<Vs...>::head_value;
+  }
+
+  static constexpr auto tail() requires(sizeof...(Vs) > 0) {
+    using split_type = SplitFirst<Vs...>;
+    return typename split_type::template tail<Sequence>{};
+  }
+
   static constexpr auto reverse() {
     if constexpr (size() == 0) {
       return Sequence<>{};
@@ -142,23 +151,6 @@ struct Sequence {
     char const* separator = "[";
     (((os << separator << Vs), separator = ", "), ...);
     return os << "]";
-  }
-
- private:
-  template <int N>
-  static constexpr auto get_impl() requires(N < sizeof...(Vs) and
-                                            -N <= sizeof...(Vs)) {
-    if constexpr (N < 0) {
-      return get_impl<sizeof...(Vs) + N>();
-    } else {
-      using split_type = SplitFirst<Vs...>;
-      if constexpr (N == 0) {
-        return Sequence<split_type::head_value>{};
-      } else {
-        return typename split_type::template tail<Sequence>{}
-            .template get_impl<N - 1>();
-      }
-    }
   }
 };
 

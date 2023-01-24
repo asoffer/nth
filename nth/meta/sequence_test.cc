@@ -72,4 +72,19 @@ TEST(Sequence, Contains) {
   EXPECT_TRUE(contains4);
 }
 
+TEST(Sequence, Head) {
+  constexpr auto x = nth::sequence<1>.head();
+  EXPECT_EQ(x, 1);
+
+  constexpr auto y = nth::sequence<2, 3, 4>.head();
+  EXPECT_EQ(y, 2);
+
+  constexpr auto a = nth::sequence<1>.tail();
+  EXPECT_EQ(a, nth::sequence<>);
+
+  constexpr auto b = nth::sequence<2, 3, 4>.tail();
+  constexpr auto c = nth::sequence<3, 4>;
+  EXPECT_EQ(b, c);
+}
+
 }  // namespace
