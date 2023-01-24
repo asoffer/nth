@@ -4,6 +4,33 @@
 
 namespace nth {
 
+TEST(Concept, AnyOf) {
+  {
+    constexpr bool b = any_of<int, int>;
+    EXPECT_TRUE(b);
+  }
+  {
+    constexpr bool b = any_of<int, bool>;
+    EXPECT_FALSE(b);
+  }
+  {
+    constexpr bool b = any_of<int>;
+    EXPECT_FALSE(b);
+  }
+  {
+    constexpr bool b = any_of<int, bool, int>;
+    EXPECT_TRUE(b);
+  }
+  {
+    constexpr bool b = any_of<int, int, int>;
+    EXPECT_TRUE(b);
+  }
+  {
+    constexpr bool b = any_of<int, bool, char>;
+    EXPECT_FALSE(b);
+  }
+}
+
 TEST(Concept, NotAHasher) {
   struct NotAHasher {};
   constexpr bool i = hasher<NotAHasher, int>;
@@ -18,7 +45,7 @@ TEST(Concept, HashesIntNotPointer) {
   constexpr bool b = hasher<HashesIntNotPointer, bool>;
   constexpr bool p = hasher<HashesIntNotPointer, int*>;
   EXPECT_TRUE(i);
-  EXPECT_TRUE(b); // Implicit conversion from `bool` to `int`.
+  EXPECT_TRUE(b);  // Implicit conversion from `bool` to `int`.
   EXPECT_FALSE(p);
 }
 

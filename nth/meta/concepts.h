@@ -7,6 +7,10 @@
 
 namespace nth {
 
+// A concept matching any of the listed types.
+template <typename T, typename... Ts>
+concept any_of = (std::is_same_v<T, Ts> or ...);
+
 // A concept matching anything that can hash a `T`. Specifically, any object
 // invocable with a `T` returning a type convertible to `size_t`.
 template <typename H, typename T>
