@@ -27,7 +27,7 @@ struct Ordered {
 };
 
 template <bool B, typename T, typename F>
-auto conditional() {
+constexpr auto conditional() {
   if constexpr (B) {
     return T{};
   } else {
