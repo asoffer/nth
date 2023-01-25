@@ -69,7 +69,8 @@ struct Sequence {
 
   template <auto Predicate>
   static constexpr auto filter() {
-    return (conditional<Predicate(Vs), Sequence<Vs>, Sequence<>> + ...);
+    return (conditional<Predicate(Vs), Sequence<Vs>, Sequence<>>() + ... +
+            Sequence<>());
   }
 
   static constexpr auto unique() {

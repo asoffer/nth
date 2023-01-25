@@ -148,4 +148,20 @@ TEST(Sequence, Unique) {
   EXPECT_EQ(s3, seq);
 }
 
+TEST(Sequence, Filter) {
+  constexpr auto s0 = nth::sequence<>;
+  constexpr auto s1 = nth::sequence<1>;
+  constexpr auto s2 = nth::sequence<1, 2>;
+  constexpr auto s3 = nth::sequence<1, 2, 3>;
+  constexpr auto s4 = nth::sequence<1, 2, 3, 1, 2, 3>;
+
+  constexpr auto Even = [](int n) { return n % 2 == 0; };
+  constexpr auto seq = nth::sequence<2,2>;
+  EXPECT_EQ(s0.filter<Even>(), nth::sequence<>);
+  EXPECT_EQ(s1.filter<Even>(), nth::sequence<>);
+  EXPECT_EQ(s2.filter<Even>(), nth::sequence<2>);
+  EXPECT_EQ(s3.filter<Even>(), nth::sequence<2>);
+  EXPECT_EQ(s4.filter<Even>(), seq);
+}
+
 }  // namespace
