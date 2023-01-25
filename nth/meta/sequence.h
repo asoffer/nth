@@ -128,6 +128,8 @@ struct Sequence {
     return (static_cast<int>(Predicate(Vs)) + ...);
   }
 
+  static constexpr void each(auto f) { (f(Vs), ...); }
+
   template <auto... Rs>
   constexpr Sequence<Vs..., Rs...> operator+(Sequence<Rs...>) const {
     return {};

@@ -164,4 +164,23 @@ TEST(Sequence, Filter) {
   EXPECT_EQ(s4.filter<Even>(), seq);
 }
 
+TEST(Sequence, Each) {
+  constexpr auto s0 = nth::sequence<>;
+  constexpr auto s1 = nth::sequence<1>;
+  constexpr auto s2 = nth::sequence<1, 2>;
+  constexpr auto s3 = nth::sequence<1, 2, 3>;
+  constexpr auto s4 = nth::sequence<1, 2, 3, 1, 2, 3>;
+
+  size_t i = 0;
+  s0.each([&](int n) { i += n; });
+  EXPECT_EQ(i, 0);
+  s1.each([&](int n) { i += n; });
+  EXPECT_EQ(i, 1);
+  s2.each([&](int n) { i += n; });
+  EXPECT_EQ(i, 4);
+  s3.each([&](int n) { i += n; });
+  EXPECT_EQ(i, 10);
+  s4.each([&](int n) { i += n; });
+  EXPECT_EQ(i, 22);
+}
 }  // namespace

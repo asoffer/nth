@@ -117,6 +117,9 @@ struct Type {
 
   constexpr Type<std::decay_t<T>> decayed() const { return {}; }
 
+  constexpr static size_t size() { return sizeof(T); }
+  constexpr static size_t alignment() { return alignof(T); }
+
   template <typename S>
   friend void AbslStringify(S& sink, Type) {
     std::stringstream ss;
