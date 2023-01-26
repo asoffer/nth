@@ -11,6 +11,10 @@ namespace nth {
 template <typename T, typename... Ts>
 concept any_of = (std::is_same_v<T, Ts> or ...);
 
+// A concept matching any enumeration type (scoped or unscoped).
+template <typename T>
+concept enumeration = std::is_enum_v<T>;
+
 // A concept matching anything that can hash a `T`. Specifically, any object
 // invocable with a `T` returning a type convertible to `size_t`.
 template <typename H, typename T>

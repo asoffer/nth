@@ -31,6 +31,18 @@ TEST(Concept, AnyOf) {
   }
 }
 
+TEST(Concept, Enumeration) {
+  enum E {};
+  struct S {};
+  enum class C {};
+  constexpr bool e = enumeration<E>;
+  constexpr bool s = enumeration<S>;
+  constexpr bool c = enumeration<C>;
+  EXPECT_TRUE(e);
+  EXPECT_FALSE(s);
+  EXPECT_TRUE(c);
+}
+
 TEST(Concept, NotAHasher) {
   struct NotAHasher {};
   constexpr bool i = hasher<NotAHasher, int>;
