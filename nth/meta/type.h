@@ -120,6 +120,10 @@ struct Type {
   constexpr static size_t size() { return sizeof(T); }
   constexpr static size_t alignment() { return alignof(T); }
 
+  constexpr auto dependent(auto&& value) const {
+    return std::forward<decltype(value)>(value);
+  }
+
   template <typename S>
   friend void AbslStringify(S& sink, Type) {
     std::stringstream ss;

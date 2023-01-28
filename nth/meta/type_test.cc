@@ -92,4 +92,16 @@ TEST(Type, Address) {
   EXPECT_EQ(ss.str(), "int");
 }
 
+TEST(Type, Dependent) {
+  EXPECT_TRUE(nth::type<int>.dependent(true));
+  EXPECT_FALSE(nth::type<int>.dependent(false));
+}
+
+// Construct but never invoke an expression that would static_assert false to
+// prove that the dependent value is indeed dependent.
+template <typename T>
+void Dependent() {
+  static_assert(nth::type<T>.dependent(false));
+}
+
 }  // namespace
