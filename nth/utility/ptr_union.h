@@ -1,5 +1,5 @@
-#ifndef ICARUS_BASE_PTR_UNION_H
-#define ICARUS_BASE_PTR_UNION_H
+#ifndef NTH_UTILITY_PTR_UNION_H
+#define NTH_UTILITY_PTR_UNION_H
 
 #include <algorithm>
 #include <cassert>
@@ -105,4 +105,4 @@ struct PtrUnion {
 
 }  // namespace nth
 
-#endif  // ICARUS_BASE_PTR_UNION_H
+#endif  // NTH_UTILITY_PTR_UNION_H
