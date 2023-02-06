@@ -1,5 +1,5 @@
-#ifndef ICARUS_NTH_NO_DESTRUCTOR_H
-#define ICARUS_NTH_NO_DESTRUCTOR_H
+#ifndef NTH_UTILITY_NO_DESTRUCTOR_H
+#define NTH_UTILITY_NO_DESTRUCTOR_H
 
 #include <utility>
 
@@ -31,4 +31,4 @@ NoDestructor(T) -> NoDestructor<T>;
 
 }  // namespace nth
 
-#endif  // ICARUS_NTH_NO_DESTRUCTOR_H
+#endif  // NTH_UTILITY_NO_DESTRUCTOR_H
