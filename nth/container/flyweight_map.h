@@ -154,6 +154,7 @@ struct flyweight_map {
   // Returns a reference to the element indexed by `n` if one exists. Behavior
   // is undefined if no such element exists.
   value_type const& from_index(size_t n) const { return values_[n]; }
+  value_type& from_index(size_t n) { return values_[n]; }
 
   // Returns the index of an element equivalent if it is in the container. If
   // not present, returns `end_index()`

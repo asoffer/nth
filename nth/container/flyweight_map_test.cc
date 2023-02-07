@@ -7,6 +7,7 @@ namespace nth {
 namespace {
 
 using ::testing::ElementsAre;
+using ::testing::Eq;
 using ::testing::Pair;
 
 MATCHER_P(IteratorRefersTo, matcher, "") {
@@ -194,6 +195,20 @@ TEST(FlyweightMap, Find) {
   EXPECT_THAT(*f.find(4), Pair(4, "d"));
   ASSERT_NE(f.find(4), f.end());
   EXPECT_EQ(std::distance(f.begin(), f.find(4)), 3);
+}
+
+TEST(FlyweightMap, FromIndex) {
+  flyweight_map<int, std::string> f{{1, "a"}, {2, "b"}, {3, "c"}, {4, "d"}};
+  EXPECT_THAT(f.from_index(0), Pair(1, "a"));
+  EXPECT_THAT(f.from_index(1), Pair(2, "b"));
+  EXPECT_THAT(f.from_index(2), Pair(3, "c"));
+  EXPECT_THAT(f.from_index(3), Pair(4, "d"));
+
+  auto const& cf = f;
+  EXPECT_THAT(cf.from_index(0), Pair(1, "a"));
+  EXPECT_THAT(cf.from_index(1), Pair(2, "b"));
+  EXPECT_THAT(cf.from_index(2), Pair(3, "c"));
+  EXPECT_THAT(cf.from_index(3), Pair(4, "d"));
 }
 
 TEST(FlyweightMap, StressTest) {

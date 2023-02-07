@@ -146,5 +146,13 @@ TEST(FlyweightSet, StressTest) {
   }
 }
 
+TEST(FlyweightSet, FromIndex) {
+  flyweight_set<std::string> f{"a", "b", "c", "d"};
+  EXPECT_EQ(f.from_index(0), "a");
+  EXPECT_EQ(f.from_index(1), "b");
+  EXPECT_EQ(f.from_index(2), "c");
+  EXPECT_EQ(f.from_index(3), "d");
+}
+
 }  // namespace
 }  // namespace nth
