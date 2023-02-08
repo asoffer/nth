@@ -119,6 +119,7 @@ TEST(FlyweightMap, MoveConstruction) {
   EXPECT_EQ(g.size(), 4);
   EXPECT_THAT(
       g, ElementsAre(Pair(1, "a"), Pair(2, "b"), Pair(3, "c"), Pair(4, "d")));
+  EXPECT_NE(g.find(1), g.end());
 }
 
 TEST(FlyweightMap, CopyAssignment) {

@@ -80,6 +80,7 @@ TEST(FlyweightSet, MoveConstruction) {
   EXPECT_FALSE(g.empty());
   EXPECT_EQ(g.size(), 4);
   EXPECT_THAT(g, ElementsAre("a", "b", "c", "d"));
+  EXPECT_NE(g.find("a"), g.end());
 }
 
 TEST(FlyweightSet, CopyAssignment) {

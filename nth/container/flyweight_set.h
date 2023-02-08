@@ -36,16 +36,17 @@ struct flyweight_set {
 
   flyweight_set() : set_(0, H(&values_), E(&values_)) {}
   flyweight_set(flyweight_set&& s)
-      : values_(std::move(s.values_)), set_(std::move(s.set_)) {
-    set_.hash_function().set_deque_pointer(&values_);
-    set_.key_eq().set_deque_pointer(&values_);
-  }
+      : values_(std::move(s.values_)),
+        set_(std::make_move_iterator(s.set_.begin()),
+             std::make_move_iterator(s.set_.end()), s.set_.bucket_count(),
+             H(&values_), E(&values_)) {}
 
   flyweight_set& operator=(flyweight_set&& s) {
     values_ = std::move(s.values_);
-    set_    = std::move(s.set_);
-    set_.hash_function().set_deque_pointer(&values_);
-    set_.key_eq().set_deque_pointer(&values_);
+    set_    = absl::flat_hash_set<internal_container::Index, H, E>(
+        std::make_move_iterator(s.set_.begin()),
+        std::make_move_iterator(s.set_.end()), s.set_.bucket_count(),
+        H(&values_), E(&values_));
     return *this;
   }
 
@@ -58,8 +59,6 @@ struct flyweight_set {
   flyweight_set& operator=(flyweight_set const& f) {
     values_.clear();
     set_.clear();
-    set_.hash_function().set_deque_pointer(&values_);
-    set_.key_eq().set_deque_pointer(&values_);
     for (auto i = f.begin(); i < f.end(); ++i) { insert(*i); }
     return *this;
   }
@@ -172,18 +171,8 @@ struct flyweight_set {
       return operator()((*values_)[p.value]);
     }
 
-    // Though `const` is a lie here, this is not exposed outside
-    // `flyweight_set`, and the pointer itself does not affect the hash function
-    // (only the values held in the pointed-to container. Thus, it is safe to
-    // call `set_deque_pointer` if `p` points to a `std::deque` that compares
-    // equal to `values_`. This allows us to efficiently implement
-    // move construction/assignment operators without incurring a rehash.
-    void set_deque_pointer(std::deque<value_type> const* p) const {
-      values_ = p;
-    }
-
    private:
-    mutable std::deque<value_type> const* values_;
+    std::deque<value_type> const* values_;
   };
 
   struct E : private key_equal {
@@ -215,18 +204,8 @@ struct flyweight_set {
                                    (*values_)[rhs.value]);
     }
 
-    // Though `const` is a lie here, this is not exposed outside
-    // `flyweight_set`, and the pointer itself does not affect the hash function
-    // (only the values held in the pointed-to container. Thus, it is safe to
-    // call `set_deque_pointer` if `p` points to a `std::deque` that compares
-    // equal to `values_`. This allows us to efficiently implement
-    // move construction/assignment operators without incurring a rehash.
-    void set_deque_pointer(std::deque<value_type> const* p) const {
-      values_ = p;
-    }
-
    private:
-    mutable std::deque<value_type> const* values_;
+    std::deque<value_type> const* values_;
   };
 
   std::deque<value_type> values_;
