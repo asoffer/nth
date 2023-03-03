@@ -123,6 +123,8 @@ struct Sequence {
     return (Predicate(Vs) or ...);
   }
 
+  static constexpr auto to_array() { return std::array{Vs...}; }
+
   template <auto Predicate>
   static constexpr int count() {
     return (static_cast<int>(Predicate(Vs)) + ...);

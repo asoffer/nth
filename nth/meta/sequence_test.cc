@@ -1,8 +1,11 @@
 #include "nth/meta/sequence.h"
 
+#include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
 namespace {
+
+using ::testing::ElementsAre;
 
 TEST(Sequence, Size) {
   constexpr size_t l0 = nth::sequence<>.size();
@@ -183,4 +186,17 @@ TEST(Sequence, Each) {
   s4.each([&](int n) { i += n; });
   EXPECT_EQ(i, 22);
 }
+
+TEST(Sequence, ToArray) {
+  constexpr auto a1 = nth::sequence<1>.to_array();
+  constexpr auto a2 = nth::sequence<1, 2>.to_array();
+  constexpr auto a3 = nth::sequence<1, 2, 3>.to_array();
+  constexpr auto a4 = nth::sequence<1, 2, 3, 1, 2, 3>.to_array();
+
+  EXPECT_THAT(a1, ElementsAre(1));
+  EXPECT_THAT(a2, ElementsAre(1, 2));
+  EXPECT_THAT(a3, ElementsAre(1, 2, 3));
+  EXPECT_THAT(a4, ElementsAre(1, 2, 3, 1, 2, 3));
+}
+
 }  // namespace
