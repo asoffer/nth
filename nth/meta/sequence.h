@@ -3,11 +3,17 @@
 
 #include <concepts>
 #include <ostream>
+#include <type_traits>
 
 #include "nth/meta/type.h"
 
 namespace nth {
 namespace internal_meta {
+
+template <auto V>
+struct TypeWrap {
+  static constexpr auto value = V;
+};
 
 template <typename T>
 concept EqualityComparable = requires(T t) {
@@ -96,14 +102,16 @@ struct Sequence {
     return typename split_type::template tail<Sequence>{};
   }
 
+  template <size_t... Ns>
+  static constexpr auto select() {
+    return Sequence<__type_pack_element<Ns, TypeWrap<Vs>...>::value...>{};
+  }
+
   static constexpr auto reverse() {
-    if constexpr (size() == 0) {
-      return Sequence<>{};
-    } else {
-      using split_type = SplitFirst<Vs...>;
-      return Sequence<split_type::head_value>{} +
-             typename split_type::template tail<Sequence>{};
+    return []<size_t... Ns>(std::integer_sequence<size_t, Ns...>) {
+      return select<(sizeof...(Vs) - 1 - Ns)...>();
     }
+    (std::make_index_sequence<sizeof...(Vs)>{});
   }
 
   static constexpr auto flatten() requires(

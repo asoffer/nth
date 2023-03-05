@@ -187,6 +187,35 @@ TEST(Sequence, Each) {
   EXPECT_EQ(i, 22);
 }
 
+TEST(Sequence, Select) {
+  static constexpr auto a0 = nth::sequence<>.select<>();
+  static constexpr auto a1 = nth::sequence<1>.select<>();
+  static constexpr auto a2 = nth::sequence<1, 2>.select<1>();
+  static constexpr auto a3 = nth::sequence<1, 2, 3>.select<0, 2>();
+  static constexpr auto a4 =
+      nth::sequence<1, 2, 3, 1, 2, 3>.select<0, 4, 5, 1, 1, 0>();
+
+  EXPECT_EQ(a0, (nth::sequence<>));
+  EXPECT_EQ(a1, (nth::sequence<>));
+  EXPECT_EQ(a2, (nth::sequence<2>));
+  EXPECT_EQ(a3, (nth::sequence<1, 3>));
+  EXPECT_EQ(a4, (nth::sequence<1, 2, 3, 2, 2, 1>));
+}
+
+TEST(Sequence, Reverse) {
+  static constexpr auto a0 = nth::sequence<>.reverse();
+  static constexpr auto a1 = nth::sequence<1>.reverse();
+  static constexpr auto a2 = nth::sequence<1, 2>.reverse();
+  static constexpr auto a3 = nth::sequence<1, 2, 3>.reverse();
+  static constexpr auto a4 = nth::sequence<1, 2, 3, 1, 2, 3>.reverse();
+
+  EXPECT_EQ(a0, (nth::sequence<>));
+  EXPECT_EQ(a1, (nth::sequence<1>));
+  EXPECT_EQ(a2, (nth::sequence<2, 1>));
+  EXPECT_EQ(a3, (nth::sequence<3, 2, 1>));
+  EXPECT_EQ(a4, (nth::sequence<3, 2, 1, 3, 2, 1>));
+}
+
 TEST(Sequence, ToArray) {
   constexpr auto a1 = nth::sequence<1>.to_array();
   constexpr auto a2 = nth::sequence<1, 2>.to_array();
