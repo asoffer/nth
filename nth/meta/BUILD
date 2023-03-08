@@ -1,6 +1,21 @@
 package(default_visibility = ["//visibility:public"])
 
 cc_library(
+    name = "compile_time_string",
+    hdrs = ["compile_time_string.h"],
+    deps = [],
+)
+
+cc_test(
+    name = "compile_time_string_test",
+    srcs = ["compile_time_string_test.cc"],
+    deps = [
+        ":compile_time_string",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_library(
     name = "concepts",
     hdrs = ["concepts.h"],
     deps = [],
