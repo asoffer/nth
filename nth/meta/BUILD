@@ -33,13 +33,13 @@ cc_test(
 cc_library(
     name = "sequence",
     hdrs = ["sequence.h"],
-    deps = [":type"],
 )
 
 cc_test(
     name = "sequence_test",
     srcs = ["sequence_test.cc"],
     deps = [
+        ":type",
         ":sequence",
         "@com_google_googletest//:gtest_main",
     ],
@@ -48,7 +48,7 @@ cc_test(
 cc_library(
     name = "type",
     hdrs = ["type.h"],
-    deps = [],
+    deps = [":sequence"],
 )
 
 cc_test(

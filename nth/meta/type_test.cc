@@ -104,4 +104,17 @@ void Dependent() {
   static_assert(nth::type<T>.dependent(false));
 }
 
+TEST(Type, FunctionType) {
+  EXPECT_EQ(nth::type<int()>.return_type(), nth::type<int>);
+  EXPECT_EQ(nth::type<void()>.return_type(), nth::type<void>);
+  EXPECT_EQ((nth::type<void(int, bool)>.return_type()), nth::type<void>);
+
+  EXPECT_EQ(nth::type<int()>.parameters(), nth::type_sequence<>);
+  EXPECT_EQ(nth::type<void()>.parameters(), nth::type_sequence<>);
+  EXPECT_EQ(nth::type<void(void)>.parameters(), nth::type_sequence<>);
+  EXPECT_EQ(nth::type<void(int)>.parameters(), nth::type_sequence<int>);
+  EXPECT_EQ((nth::type<void(int, bool)>.parameters()),
+            (nth::type_sequence<int, bool>));
+}
+
 }  // namespace

@@ -1,11 +1,11 @@
 #ifndef NTH_META_SEQUENCE_H
 #define NTH_META_SEQUENCE_H
 
+#include <array>
 #include <concepts>
 #include <ostream>
 #include <type_traits>
-
-#include "nth/meta/type.h"
+#include <utility>
 
 namespace nth {
 namespace internal_meta {
@@ -149,7 +149,7 @@ struct Sequence {
   constexpr bool operator==(Sequence<Rs...>) const
       requires((EqualityComparable<decltype(Rs)> and ...)) {
     if constexpr (sizeof...(Vs) == sizeof...(Rs) and
-                  ((type<decltype(Vs)> == type<decltype(Rs)>)and...)) {
+                  ((std::is_same_v<decltype(Vs), decltype(Rs)>)and...)) {
       return ((Vs == Rs) and ...);
     } else {
       return false;
@@ -200,9 +200,6 @@ concept Sequence = decltype(internal_meta::IsSequenceImpl(
 
 template <auto... Vs>
 inline constexpr internal_meta::Sequence<Vs...> sequence;
-
-template <typename... Ts>
-inline constexpr auto type_sequence = sequence<type<Ts>...>;
 
 template <unsigned N>
 static constexpr auto index_sequence =
