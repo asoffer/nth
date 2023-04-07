@@ -47,3 +47,22 @@ cc_test(
         "@com_google_googletest//:gtest_main",
     ],
 )
+
+cc_library(
+    name = "required",
+    hdrs = ["required.h"],
+    deps = [
+        "//nth/meta:type",
+    ],
+)
+
+cc_test(
+    name = "required_test",
+    srcs = ["required_test.cc"],
+    deps = [
+        ":required",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+
