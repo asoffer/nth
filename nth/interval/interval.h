@@ -1,6 +1,7 @@
 #ifndef NTH_INTERVAL_INTERVAL_H
 #define NTH_INTERVAL_INTERVAL_H
 
+#include <cassert>
 #include <concepts>
 #include <cstddef>
 #include <utility>
@@ -19,36 +20,52 @@ struct LengthBase {};
 
 }  // namespace internal_interval
 
+// Represents the half-open interval consisting of values greater than or equal
+// to the lower bound and less than the upper bound.
 template <std::totally_ordered T>
 struct Interval : internal_interval::LengthBase<T> {
   template <std::convertible_to<T> L, std::convertible_to<T> R>
-  explicit Interval(L&& l, R&& r)
-      : start_(std::forward<L>(l)), end_(std::forward<R>(r)) {}
+  explicit constexpr Interval(L&& l, R&& r)
+      : lower_bound_(std::forward<L>(l)), upper_bound_(std::forward<R>(r)) {
+    assert(lower_bound_ < upper_bound_);
+  }
 
-  T const& start() const& { return start_; }
-  T&& start() && { return std::move(start_); }
-  T const& end() const& { return end_; }
-  T&& end() && { return std::move(end_); }
+  constexpr T const& lower_bound() const& { return lower_bound_; }
+  constexpr T&& lower_bound() && { return std::move(lower_bound_); }
+
+  constexpr T const& upper_bound() const& { return upper_bound_; }
+  constexpr T&& upper_bound() && { return std::move(upper_bound_); }
+
+  // Returns `true` if and only if the element `u` is at least as large as
+  // `this->lower_bound()` and strictly less than `upper_bound()`.
+  template <std::totally_ordered_with<T> U>
+  constexpr bool contains(U const& u) {
+    return lower_bound() <= u and u < upper_bound();
+  }
+
+  // Returns `true` if the interval is empty and `false` otherwise.
+  constexpr bool empty() const { return lower_bound() == upper_bound(); }
 
   template <size_t N>
-  T const& get() const& requires(N == 0 or N == 1) {
+  requires(N == 0 or N == 1) constexpr T const& get() const& {
     if constexpr (N == 0) {
-      return start();
+      return lower_bound();
     } else {
-      return end();
+      return upper_bound();
     }
   }
+
   template <size_t N>
-      T&& get() && requires(N == 0 or N == 1) {
+  requires(N == 0 or N == 1) constexpr T&& get() && {
     if constexpr (N == 0) {
-      return std::move(*this).start();
+      return std::move(*this).lower_bound();
     } else {
-      return std::move(*this).end();
+      return std::move(*this).upper_bound();
     }
   }
 
  private:
-  T start_, end_;
+  T lower_bound_, upper_bound_;
 };
 
 template <typename T>
@@ -60,11 +77,10 @@ template <typename T>
 requires(Subtractable<T>) struct LengthBase<T> {
   using length_type = decltype(std::declval<T>() - std::declval<T>());
   length_type length() const {
-    auto& [start, end] = static_cast<Interval<T> const&>(*this);
-    return end - start;
+    auto& [lower_bound, upper_bound] = static_cast<Interval<T> const&>(*this);
+    return upper_bound - lower_bound;
   }
 };
-
 
 }  // namespace internal_interval
 }  // namespace nth
