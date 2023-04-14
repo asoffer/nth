@@ -1,6 +1,7 @@
 #ifndef NTH_UTILITY_LAZY_H
 #define NTH_UTILITY_LAZY_H
 
+#include <concepts>
 #include <type_traits>
 #include <utility>
 

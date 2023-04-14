@@ -100,6 +100,7 @@ def _impl(ctx):
             "-fbracket-depth=1024",
             "-fdiagnostics-color=always",
             "-fno-exceptions",
+            "-D_LIBCPP_ENABLE_CXX20_REMOVED_TYPE_TRAITS",
         ]),
         linking_flags([
             "-ldl",
@@ -128,7 +129,8 @@ def _impl(ctx):
         cxx_builtin_include_directories = {
             "macosx": [
                 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/",
-                "/Library/Developer/CommandLineTools/usr/lib/clang/13.1.6/include/"
+                "/Library/Developer/CommandLineTools/usr/lib/clang/14.0.3/include/",
+                "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/System/Library/Frameworks/CoreFoundation.framework/Headers/",
             ],
         }.get(ctx.attr.os, [
             "/usr/lib",
