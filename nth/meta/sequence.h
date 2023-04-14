@@ -107,6 +107,11 @@ struct Sequence {
     return Sequence<__type_pack_element<Ns, TypeWrap<Vs>...>::value...>{};
   }
 
+  template <size_t N>
+  static constexpr auto get() requires(N <= sizeof...(Vs)) {
+    return select<N>().head();
+  }
+
   static constexpr auto reverse() {
     return []<size_t... Ns>(std::integer_sequence<size_t, Ns...>) {
       return select<(sizeof...(Vs) - 1 - Ns)...>();

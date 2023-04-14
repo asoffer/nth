@@ -229,4 +229,16 @@ TEST(Sequence, ToArray) {
   EXPECT_THAT(a4, ElementsAre(1, 2, 3, 1, 2, 3));
 }
 
+TEST(Sequence, Get) {
+  constexpr auto a1 = nth::sequence<1>.get<0>();
+  constexpr auto a2 = nth::sequence<1, 2>.get<0>();
+  constexpr auto a3 = nth::sequence<1, 2, 3>.get<1>();
+  constexpr auto a4 = nth::sequence<1, 2, 3, 1, 2, 3>.get<4>();
+
+  EXPECT_EQ(a1, 1);
+  EXPECT_EQ(a2, 1);
+  EXPECT_EQ(a3, 2);
+  EXPECT_EQ(a4, 2);
+}
+
 }  // namespace
