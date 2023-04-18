@@ -1,29 +1,25 @@
 #ifndef NTH_UTILITY_NO_DESTRUCTOR_H
 #define NTH_UTILITY_NO_DESTRUCTOR_H
 
-#include <utility>
+#include <memory>
+
+#include "nth/utility/buffer.h"
 
 namespace nth {
 template <typename T>
-struct alignas(T) NoDestructor {
- public:
+struct NoDestructor : private buffer<sizeof(T), alignof(T)> {
   template <typename... Args>
-  constexpr NoDestructor(Args &&...args) {
-    new (buf_) T(std::forward<Args>(args)...);
-  }
+  constexpr NoDestructor(Args &&...args)
+      : buffer<sizeof(T), alignof(T)>(buffer_construct<T>,
+                                      std::forward<Args>(args)...) {}
 
-  T const &operator*() const & { return *get(); }
-  T &operator*() & { return *get(); }
-  T &&operator*() && { return static_cast<T &&>(*get()); }
-  T const &&operator*() const && { return static_cast<T const &&>(*get()); }
+  T &operator*() & { return this->template as<T>(); }
+  T const &operator*() const & { return this->template as<T>(); }
+  T &&operator*() && { return std::move(*this).template as<T>(); }
+  T const &&operator*() const && { return std::move(*this).template as<T>(); }
 
-  T const *operator->() const { return get(); }
-  T *operator->() { return get(); }
-
- private:
-  T *get() { return reinterpret_cast<T *>(buf_); }
-  T const *get() const { return reinterpret_cast<T const *>(buf_); }
-  alignas(T) char buf_[sizeof(T)];
+  T const *operator->() const { return std::addressof(this->template as<T>()); }
+  T *operator->() { return std::addressof(this->template as<T>()); }
 };
 
 template <typename T>

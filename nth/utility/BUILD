@@ -1,6 +1,22 @@
 package(default_visibility = ["//visibility:public"])
 
 cc_library(
+    name = "buffer",
+    hdrs = ["buffer.h"],
+    deps = [],
+)
+
+
+cc_test(
+    name = "buffer_test",
+    srcs = ["buffer_test.cc"],
+    deps = [
+        ":buffer",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_library(
     name = "lazy",
     hdrs = ["lazy.h"],
     deps = [],
@@ -18,7 +34,9 @@ cc_test(
 cc_library(
     name = "no_destructor",
     hdrs = ["no_destructor.h"],
-    deps = [],
+    deps = [
+      ":buffer",
+    ],
 )
 
 cc_test(
