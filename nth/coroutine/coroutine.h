@@ -42,14 +42,21 @@ struct CoroutineBase {
   // `co_yielded` value. Behavior is undefined if the `co_yielded` value is not
   // of type `T`.
   template <typename T>
-  T get() requires(::nth::buffer_type_sufficient_for<StorageType, T>) {
+  T get() requires(::nth::buffer_type_sufficient_for<StorageType, T> or
+                   ::nth::type<T> == ::nth::type<void>) {
     handle_.resume();
-    auto& buffer =
-        static_cast<typename promise_type::storage_type&>(handle_.promise());
-    T result     = buffer.template as<T>();
-    buffer.template destroy<T>();
-    return result;
+    if constexpr (::nth::type<T> != ::nth::type<void>) {
+      auto& buffer =
+          static_cast<typename promise_type::storage_type&>(handle_.promise());
+      T result = buffer.template as<T>();
+      buffer.template destroy<T>();
+      return result;
+    }
   }
+
+  // Executes the coroutine until the next suspension point. Behavior is
+  // undefined if this suspension point is not the final suspension point.
+  void complete() { handle_.resume(); }
 
  protected:
   using promise_type = Promise<ResultType, StorageType>;
@@ -78,17 +85,21 @@ struct coroutine : internal_coroutine::CoroutineBase<ResultType, StorageType> {
 
   // Returns a reference to the value `co_return`ed by the coroutine stored in
   // the associated promise. Behavior is undefined if `co_return` was not yet
-  // executed on the coroutine.
-  result_type const& result() const& requires(::nth::type<result_type> !=
-                                              ::nth::type<void>) {
+  // executed on the coroutine. This member function is marked `[[nodiscard]]`.
+  // If you wish to ensure that the coroutine is completed but do not need the
+  // result, call `complete` instead.
+  [[nodiscard]] result_type const& result() const& requires(
+      ::nth::type<result_type> != ::nth::type<void>) {
     this->handle_.resume();
     return this->handle_.promise().result();
   }
 
   // Returns a reference to the value `co_return`ed by the coroutine stored in
   // the associated promise. Behavior is undefined if `co_return` was not yet
-  // executed on the coroutine.
-  result_type&& result() &&
+  // executed on the coroutine. This member function is marked `[[nodiscard]]`.
+  // If you wish to ensure that the coroutine is completed but do not need the
+  // result, call `complete` instead.
+  [[nodiscard]] result_type&& result() &&
       requires(::nth::type<result_type> != ::nth::type<void>) {
     this->handle_.resume();
     return std::move(this->handle_.promise()).result();
@@ -123,12 +134,14 @@ struct Awaitable {
 
   void await_suspend(std::coroutine_handle<>) {}
 
-  auto await_resume() const {
-    auto& buffer =
-        static_cast<typename PromiseBaseType::storage_type&>(promise_);
-    T result = std::move(buffer).template as<T>();
-    buffer.template destroy<T>();
-    return result;
+  T await_resume() const {
+    if constexpr (::nth::type<T> != ::nth::type<void>) {
+      auto& buffer =
+          static_cast<typename PromiseBaseType::storage_type&>(promise_);
+      T result = std::move(buffer).template as<T>();
+      buffer.template destroy<T>();
+      return result;
+    }
   }
 
  private:

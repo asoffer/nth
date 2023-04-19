@@ -110,4 +110,29 @@ TEST(Coroutine, MultipleInteractingCoroutines) {
   EXPECT_EQ(f.result(), 3628800);
 }
 
+TEST(Coroutine, Complete) {
+  int value = 0;
+  struct Reset {
+    Reset(int& value) : value_(value) {}
+    ~Reset() { value_ = 0; }
+
+   private:
+    int& value_;
+  };
+
+  auto coro = [&]() -> coroutine<void> {
+    value = 1234;
+    Reset resetter(value);
+    co_await type<void>;
+
+    co_return;
+  };
+  auto c         = coro();
+  EXPECT_EQ(value, 0);
+  c.get<void>();
+  EXPECT_EQ(value, 1234);
+  c.complete();
+  EXPECT_EQ(value, 0);
+}
+
 }  // namespace nth
