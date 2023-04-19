@@ -18,6 +18,17 @@ struct Counter {
   int *dtor_count_;
 };
 
+TEST(Buffer, PrimitiveType) {
+  int n = 1234;
+
+  nth::buffer<sizeof(int), alignof(int)> buffer(nth::buffer_construct<int>, n);
+  EXPECT_EQ(buffer.as<int>(), 1234);
+  buffer.destroy<int>();
+  buffer.construct<int>(5678);
+  EXPECT_EQ(buffer.as<int>(), 5678);
+  buffer.destroy<int>();
+}
+
 TEST(Buffer, Manual) {
   int ctor_count = 0, dtor_count = 0;
 
