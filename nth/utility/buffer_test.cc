@@ -70,4 +70,9 @@ static_assert(nth::type<nth::buffer_sufficient_for<uint32_t>> ==
 static_assert(nth::type<nth::buffer_sufficient_for<uint64_t, int32_t>> ==
               nth::type<nth::buffer<sizeof(uint64_t), alignof(uint64_t)>>);
 
+static_assert(std::is_empty_v<nth::buffer<0, 0>>);
+
+static_assert(nth::buffer<8, 4>::size == 8);
+static_assert(nth::buffer<8, 4>::alignment == 4);
+
 }  // namespace

@@ -8,6 +8,8 @@
 namespace nth {
 namespace internal_buffer {
 
+struct BufferBase {};
+
 template <typename T, size_t Size, size_t Alignment>
 concept FitsInBuffer = (sizeof(T) <= Size and alignof(T) <= Alignment);
 
@@ -21,7 +23,10 @@ inline constexpr buffer_construct_t<T> buffer_construct;
 // Constructs a buffer sufficient to hold any value of any type whose size is no
 // more than `Size` and alignment divides `Alignment`.
 template <size_t Size, size_t Alignment>
-struct alignas(Alignment) buffer {
+struct alignas(Alignment) buffer : internal_buffer::BufferBase {
+  static constexpr size_t size      = Size;
+  static constexpr size_t alignment = Alignment;
+
   // Constructs an empty buffer with no value held.
   constexpr buffer() = default;
 
@@ -87,6 +92,14 @@ struct alignas(Alignment) buffer {
 
   alignas(Alignment) char buf_[Size];
 };
+
+template <>
+struct buffer<0, 0> {};
+
+template <typename Buffer, typename... Ts>
+concept buffer_type_sufficient_for =
+    std::derived_from<Buffer, internal_buffer::BufferBase> and
+    (internal_buffer::FitsInBuffer<Ts, Buffer::size, Buffer::alignment> and...);
 
 template <typename... Ts>
 using buffer_sufficient_for =
