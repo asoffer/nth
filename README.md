@@ -44,26 +44,6 @@ checksum as desired.
 
 Anything I find generally useful across more than one project.
 
-## Long term support
-
-As it is currently in the early exploratory stages of development, we are not
-ready to make any guarantees, even for short-term stability.
-
-In the future we intend to provide significant long-term support, but in a
-somewhat unconventional way: `nth` will never make guarantees of either API
-stability or ABI stability. While we aim to make API changes unobtrusive, we
-will add, change, or remove APIs. This enables us to always be able to provide
-the best possible software for our users.
-
-Though any change can be a breaking change, we aim to advertize the potential
-breakge (e.g., removing a public function). Moreover, we aim to make such
-changes in such a way that upgrading the version of `nth` can be done in a
-change of its own, separate from any refactoring that may be required to make
-the upgrade. Concretely, this means that if we want to, for example, rename a
-function, we will add a function with the new name and mark the old one as
-deprecated in one change, and remove the deprecated function in a separate
-change.
-
 ## Why is it called `nth`?
 
 Mostly because I use a Dvorak keyboard layout, and those three characters in
