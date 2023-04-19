@@ -1,6 +1,7 @@
 #ifndef NTH_UTILITY_BUFFER_H
 #define NTH_UTILITY_BUFFER_H
 
+#include <cstddef>
 #include <utility>
 
 namespace nth {

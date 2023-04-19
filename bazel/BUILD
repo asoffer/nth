@@ -54,7 +54,7 @@ cc_toolchain(
 cc_toolchain_config(
     name = "k8_toolchain_config",
     os = "k8",
-    compiler_path = "/usr/bin/clang-14",
+    compiler_path = "/usr/bin/clang++-14",
     warnings = [
         "-Wall",
         "-Werror",
