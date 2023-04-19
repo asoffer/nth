@@ -12,6 +12,7 @@ cc_test(
     srcs = ["buffer_test.cc"],
     deps = [
         ":buffer",
+        "//nth/meta:type",
         "@com_google_googletest//:gtest_main",
     ],
 )

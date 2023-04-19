@@ -3,6 +3,7 @@
 #include <string>
 
 #include "gtest/gtest.h"
+#include "nth/meta/type.h"
 
 namespace {
 
@@ -62,5 +63,11 @@ TEST(Buffer, Access) {
   EXPECT_EQ(buffer.as<S>().n, 100);
   buffer.destroy<S>();
 }
+
+static_assert(nth::type<nth::buffer_sufficient_for<uint32_t>> ==
+              nth::type<nth::buffer<sizeof(uint32_t), alignof(uint32_t)>>);
+
+static_assert(nth::type<nth::buffer_sufficient_for<uint64_t, int32_t>> ==
+              nth::type<nth::buffer<sizeof(uint64_t), alignof(uint64_t)>>);
 
 }  // namespace

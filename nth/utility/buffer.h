@@ -1,6 +1,7 @@
 #ifndef NTH_UTILITY_BUFFER_H
 #define NTH_UTILITY_BUFFER_H
 
+#include <algorithm>
 #include <cstddef>
 #include <utility>
 
@@ -86,6 +87,10 @@ struct alignas(Alignment) buffer {
 
   alignas(Alignment) char buf_[Size];
 };
+
+template <typename... Ts>
+using buffer_sufficient_for =
+    ::nth::buffer<std::max({sizeof(Ts)...}), std::max({alignof(Ts)...})>;
 
 }  // namespace nth
 
