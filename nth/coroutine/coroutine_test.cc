@@ -50,7 +50,7 @@ TEST(Coroutine, WithMultipleInputs) {
 }
 
 TEST(Coroutine, Yielding) {
-  auto coro = []() -> coroutine<void, buffer_sufficient_for<int>> {
+  auto coro = []() -> coroutine<> {
     int a = 0, b = 1;
     while (true) {
       co_yield a;
@@ -70,7 +70,7 @@ TEST(Coroutine, Yielding) {
 }
 
 TEST(Coroutine, YieldingWithReturn) {
-  auto coro = [](int n) -> coroutine<std::string, buffer_sufficient_for<size_t>> {
+  auto coro = [](int n) -> coroutine<std::string> {
     std::string a = "a", b = "b";
     for (int i = 0; i < n; ++i) {
       co_yield a.size();
@@ -89,7 +89,7 @@ TEST(Coroutine, YieldingWithReturn) {
 }
 
 TEST(Coroutine, MultipleInteractingCoroutines) {
-  auto iota = []() -> coroutine<void, buffer_sufficient_for<int>> {
+  auto iota = []() -> coroutine<> {
     int n = 1;
     while (true) {
       co_yield n;
@@ -120,7 +120,7 @@ TEST(Coroutine, Complete) {
     int& value_;
   };
 
-  auto coro = [&]() -> coroutine<void> {
+  auto coro = [&]() -> coroutine<> {
     value = 1234;
     Reset resetter(value);
     co_await type<void>;
