@@ -73,7 +73,9 @@ struct coroutine : internal_coroutine::CoroutineBase<ResultType, StorageType> {
   using result_type  = ResultType;
   using promise_type = internal_coroutine::Promise<ResultType, StorageType>;
 
-  ~coroutine() { this->handle_.destroy(); }
+  ~coroutine() {
+    if (this->handle_) { this->handle_.destroy(); }
+  }
 
   // Returns the value `co_return`ed by the coroutine. Behavior is undefined if
   // `co_return` was not yet executed on the coroutine. This member function is
@@ -91,8 +93,11 @@ struct coroutine : internal_coroutine::CoroutineBase<ResultType, StorageType> {
 
  private:
   friend promise_type;
-  using internal_coroutine::CoroutineBase<ResultType,
-                                          StorageType>::CoroutineBase;
+
+  explicit coroutine(std::coroutine_handle<promise_type> handle)
+      : internal_coroutine::CoroutineBase<result_type, StorageType>(handle) {
+    this->handle_.promise().coroutine_ = this;
+  }
 };
 
 template <typename StorageType>
@@ -101,11 +106,17 @@ struct coroutine<void, StorageType>
   using result_type  = void;
   using promise_type = internal_coroutine::Promise<void, StorageType>;
 
-  ~coroutine() { this->handle_.destroy(); }
+  ~coroutine() {
+    if (this->handle_) { this->handle_.destroy(); }
+  }
 
  private:
   friend promise_type;
-  using internal_coroutine::CoroutineBase<void, StorageType>::CoroutineBase;
+
+  explicit coroutine(std::coroutine_handle<promise_type> handle)
+      : internal_coroutine::CoroutineBase<result_type, StorageType>(handle) {
+    this->handle_.promise().coroutine_ = this;
+  }
 };
 
 namespace internal_coroutine {
@@ -161,6 +172,24 @@ struct Promise : PromiseBase {
     return Awaitable<typename T::type, Promise>(*this);
   }
 
+  template <typename R, typename S>
+  std::suspend_never await_transform(coroutine<R, S>& c) {
+    c.handle_.promise().buffer_ =
+        std::exchange(coroutine_->handle_.promise().buffer_, nullptr);
+    coroutine_->handle_ = std::exchange(c.handle_, nullptr);
+    coroutine_->handle_.resume();
+    return {};
+  }
+
+  template <typename R, typename S>
+  std::suspend_never await_transform(coroutine<R, S>&& c) {
+    c.handle_.promise().buffer_ =
+        std::exchange(coroutine_->handle_.promise().buffer_, nullptr);
+    coroutine_->handle_ = std::exchange(c.handle_, nullptr);
+    coroutine_->handle_.resume();
+    return {};
+  }
+
   coroutine<result_type, StorageType> get_return_object() {
     return coroutine<result_type, StorageType>(
         std::coroutine_handle<Promise>::from_promise(*this));
@@ -180,6 +209,7 @@ struct Promise : PromiseBase {
 
   friend coroutine<result_type, StorageType>;
   storage_type storage_;
+  coroutine<result_type, StorageType>* coroutine_;
 };
 
 // Implementation of a promise type that `co_return`s void.
@@ -191,6 +221,24 @@ struct Promise<void, StorageType> : PromiseBase {
   template <::nth::Type T>
   auto await_transform(T) {
     return Awaitable<typename T::type, Promise>(*this);
+  }
+
+  template <typename R, typename S>
+  std::suspend_never await_transform(coroutine<R, S>& c) {
+    c.handle_.promise().buffer_ =
+        std::exchange(coroutine_->handle_.promise().buffer_, nullptr);
+    coroutine_->handle_ = std::exchange(c.handle_, nullptr);
+    coroutine_->handle_.resume();
+    return {};
+  }
+
+  template <typename R, typename S>
+  std::suspend_never await_transform(coroutine<R, S>&& c) {
+    c.handle_.promise().buffer_ =
+        std::exchange(coroutine_->handle_.promise().buffer_, nullptr);
+    coroutine_->handle_ = std::exchange(c.handle_, nullptr);
+    coroutine_->handle_.resume();
+    return {};
   }
 
   coroutine<void, StorageType> get_return_object() {
@@ -209,6 +257,7 @@ struct Promise<void, StorageType> : PromiseBase {
   friend coroutine<result_type, StorageType>;
 
   storage_type storage_;
+  coroutine<result_type, StorageType>* coroutine_;
 };
 
 }  // namespace internal_coroutine

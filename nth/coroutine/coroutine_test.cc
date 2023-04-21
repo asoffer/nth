@@ -135,4 +135,28 @@ TEST(Coroutine, Complete) {
   EXPECT_EQ(value, 0);
 }
 
+
+TEST(Coroutine, CoAwaitAnotherCoroutine) {
+  auto coro = []() -> coroutine<> {
+    auto coro = []() -> coroutine<> {
+      co_yield 1;
+      co_yield 2;
+      co_yield 3;
+    };
+
+    auto c = coro();
+    co_yield -1;
+    co_yield c.get<int>();
+    co_yield -2;
+    co_await c;
+  };
+
+  auto c = coro();
+  EXPECT_EQ(c.get<int>(), -1);
+  EXPECT_EQ(c.get<int>(), 1);
+  EXPECT_EQ(c.get<int>(), -2);
+  EXPECT_EQ(c.get<int>(), 2);
+  EXPECT_EQ(c.get<int>(), 3);
+}
+
 }  // namespace nth
