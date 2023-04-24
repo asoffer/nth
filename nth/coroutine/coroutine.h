@@ -27,6 +27,15 @@ struct Promise;
 // `result_type`s.
 template <typename ResultType, typename StorageType>
 struct CoroutineBase {
+  CoroutineBase(CoroutineBase const&)            = delete;
+  CoroutineBase& operator=(CoroutineBase const&) = delete;
+
+  CoroutineBase(CoroutineBase&& c)
+      : handle_(std::exchange(c.handle_, nullptr)) {}
+  CoroutineBase& operator=(CoroutineBase&& c) {
+    handle_ = std::exchange(c.handle_, nullptr);
+  }
+
   // Executes the coroutine until its next suspension point, converts `value` to
   // type `T`, and provides that value to the coroutine. Behavior is undefined
   // if the next co_awaited type is not `T`.
@@ -73,6 +82,12 @@ struct coroutine : internal_coroutine::CoroutineBase<ResultType, StorageType> {
   using result_type  = ResultType;
   using promise_type = internal_coroutine::Promise<ResultType, StorageType>;
 
+  coroutine(coroutine const&)            = delete;
+  coroutine(coroutine&&)                 = default;
+
+  coroutine& operator=(coroutine const&) = delete;
+  coroutine& operator=(coroutine&&)      = default;
+
   ~coroutine() {
     if (this->handle_) { this->handle_.destroy(); }
   }
@@ -105,6 +120,12 @@ struct coroutine<void, StorageType>
     : internal_coroutine::CoroutineBase<void, StorageType> {
   using result_type  = void;
   using promise_type = internal_coroutine::Promise<void, StorageType>;
+
+  coroutine(coroutine const&)            = delete;
+  coroutine(coroutine&&)                 = default;
+
+  coroutine& operator=(coroutine const&) = delete;
+  coroutine& operator=(coroutine&&)      = default;
 
   ~coroutine() {
     if (this->handle_) { this->handle_.destroy(); }
