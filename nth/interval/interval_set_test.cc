@@ -84,5 +84,32 @@ TEST(IntervalSet, Length) {
   EXPECT_EQ(set.length(), 12);
 }
 
+TEST(IntervalSet, Union) {
+  {
+    IntervalSet<int> a, b;
+    a.insert(Interval(3, 5));
+    b.insert(Interval(13, 15));
+    EXPECT_THAT(nth::Union(a, b).intervals(),
+                ElementsAre(Interval(3, 5), Interval(13, 15)));
+
+    EXPECT_THAT(nth::Union(b, a).intervals(),
+                ElementsAre(Interval(3, 5), Interval(13, 15)));
+    EXPECT_THAT((a + b).intervals(),
+                ElementsAre(Interval(3, 5), Interval(13, 15)));
+    EXPECT_THAT((b + a).intervals(),
+                ElementsAre(Interval(3, 5), Interval(13, 15)));
+  }
+  {
+    IntervalSet<int> a, b;
+    a.insert(Interval(3, 5));
+    a.insert(Interval(13, 15));
+    b.insert(Interval(4, 14));
+    EXPECT_THAT(nth::Union(a, b).intervals(), ElementsAre(Interval(3, 15)));
+    EXPECT_THAT(nth::Union(b, a).intervals(), ElementsAre(Interval(3, 15)));
+    EXPECT_THAT((a + b).intervals(), ElementsAre(Interval(3, 15)));
+    EXPECT_THAT((b + a).intervals(), ElementsAre(Interval(3, 15)));
+  }
+}
+
 }  // namespace
 }  // namespace nth

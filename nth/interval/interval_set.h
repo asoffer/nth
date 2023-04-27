@@ -57,7 +57,29 @@ struct IntervalSet {
   }
 
   template <std::totally_ordered_with<T> U>
-  void insert(Interval<U> const& i);
+  void insert(Interval<U> const& i) {
+    insert_hint(intervals_.begin(), i);
+  }
+
+  template <std::totally_ordered_with<T> U>
+  IntervalSet& operator+=(IntervalSet<U> const& rhs);
+
+  friend IntervalSet operator+(IntervalSet const& lhs, IntervalSet const& rhs) {
+    IntervalSet copy(lhs);
+    return copy += rhs;
+  }
+
+  friend IntervalSet operator+(IntervalSet&& lhs, IntervalSet const& rhs) {
+    return std::move(lhs += rhs);
+  }
+
+  friend IntervalSet operator+(IntervalSet const& lhs, IntervalSet&& rhs) {
+    return std::move(rhs += lhs);
+  }
+
+  friend IntervalSet operator+(IntervalSet&& lhs, IntervalSet&& rhs) {
+    return std::move(lhs += rhs);
+  }
 
   // Returns a view into the intervals present in the interval set in increasing
   // order. The view is valid until the next non-const member function is
@@ -65,8 +87,14 @@ struct IntervalSet {
   std::span<Interval<T> const> intervals() const { return intervals_; }
 
  private:
+  using iterator = typename std::vector<Interval<T>>::iterator;
+
+  template <std::totally_ordered_with<T> U>
+  iterator insert_hint(iterator iter, Interval<U> const& i);
+
   std::vector<Interval<T>> intervals_;
 };
+
 
 template <std::totally_ordered T>
 IntervalSet(T&&, T&&) -> IntervalSet<std::decay_t<T>>;
@@ -115,15 +143,16 @@ constexpr bool IntervalSet<T>::covers(IntervalSet<U> const& is) const {
 
 template <std::totally_ordered T>
 template <std::totally_ordered_with<T> U>
-void IntervalSet<T>::insert(Interval<U> const& i) {
+typename IntervalSet<T>::iterator IntervalSet<T>::insert_hint(
+    iterator iter, Interval<U> const& i) {
   auto lower_iter = std::partition_point(
-      intervals_.begin(), intervals_.end(), [&](Interval<T> const& interval) {
+      iter, intervals_.end(), [&](Interval<T> const& interval) {
         return interval.upper_bound() < i.lower_bound();
       });
 
   if (lower_iter == intervals_.end()) {
     intervals_.push_back(i);
-    return;
+    return std::prev(intervals_.end());
   }
 
   auto upper_iter = std::partition_point(
@@ -134,10 +163,10 @@ void IntervalSet<T>::insert(Interval<U> const& i) {
   if (upper_iter == lower_iter) {
     if (upper_iter->lower_bound() == i.upper_bound()) {
       *upper_iter = Interval(i.lower_bound(), upper_iter->upper_bound());
+      return upper_iter;
     } else {
-      intervals_.insert(lower_iter, i);
+      return intervals_.insert(lower_iter, i);
     }
-    return;
   }
   --upper_iter;
   assert(lower_iter <= upper_iter);
@@ -148,6 +177,38 @@ void IntervalSet<T>::insert(Interval<U> const& i) {
   if (lower_iter != upper_iter) {
     intervals_.erase(std::next(lower_iter), std::next(upper_iter));
   }
+  return lower_iter;
+}
+
+template <std::totally_ordered T>
+template <std::totally_ordered_with<T> U>
+IntervalSet<T>& IntervalSet<T>::operator+=(IntervalSet<U> const& rhs) {
+  auto start_iter = intervals_.begin();
+  for (auto iter = rhs.intervals_.begin(); iter != rhs.intervals_.end();
+       ++iter) {
+    start_iter = insert_hint(start_iter, *iter);
+  }
+  return *this;
+}
+
+template <std::totally_ordered T>
+IntervalSet<T> Union(IntervalSet<T> const& lhs, IntervalSet<T> const& rhs) {
+  return lhs + rhs;
+}
+
+template <std::totally_ordered T>
+IntervalSet<T> Union(IntervalSet<T> const& lhs, IntervalSet<T>&& rhs) {
+  return lhs + std::move(rhs);
+}
+
+template <std::totally_ordered T>
+IntervalSet<T> Union(IntervalSet<T>&& lhs, IntervalSet<T> const& rhs) {
+  return std::move(lhs) + rhs;
+}
+
+template <std::totally_ordered T>
+IntervalSet<T> Union(IntervalSet<T>&& lhs, IntervalSet<T>&& rhs) {
+  return std::move(lhs) + std::move(rhs);
 }
 
 }  // namespace nth
