@@ -14,3 +14,20 @@ cc_test(
         "@com_google_googletest//:gtest_main",
     ],
 )
+
+cc_library(
+    name = "interval_set",
+    hdrs = ["interval_set.h"],
+    deps = [
+        ":interval",
+    ],
+)
+
+cc_test(
+    name = "interval_set_test",
+    srcs = ["interval_set_test.cc"],
+    deps = [
+        ":interval_set",
+        "@com_google_googletest//:gtest_main",
+    ],
+)

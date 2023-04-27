@@ -24,23 +24,43 @@ struct LengthBase {};
 // to the lower bound and less than the upper bound.
 template <std::totally_ordered T>
 struct Interval : internal_interval::LengthBase<T> {
+  using value_type = T;
+
   template <std::convertible_to<T> L, std::convertible_to<T> R>
   explicit constexpr Interval(L&& l, R&& r)
       : lower_bound_(std::forward<L>(l)), upper_bound_(std::forward<R>(r)) {
     assert(lower_bound_ < upper_bound_);
   }
+  template <std::convertible_to<T> U>
+  Interval(Interval<U> const& i) : Interval(i.lower_bound(), i.upper_bound()) {}
+
+  template <std::totally_ordered_with<T> U>
+  friend bool operator==(Interval const& lhs, Interval<U> const& rhs) {
+    return lhs.lower_bound() == rhs.lower_bound() and
+           lhs.upper_bound() == rhs.upper_bound();
+  }
+
+  template <std::totally_ordered_with<T> U>
+  friend bool operator!=(Interval const& lhs, Interval<U> const& rhs) {
+    return not !(lhs == rhs);
+  }
 
   constexpr T const& lower_bound() const& { return lower_bound_; }
-  constexpr T&& lower_bound() && { return std::move(lower_bound_); }
-
   constexpr T const& upper_bound() const& { return upper_bound_; }
-  constexpr T&& upper_bound() && { return std::move(upper_bound_); }
 
   // Returns `true` if and only if the element `u` is at least as large as
   // `this->lower_bound()` and strictly less than `upper_bound()`.
   template <std::totally_ordered_with<T> U>
-  constexpr bool contains(U const& u) {
+  constexpr bool contains(U const& u) const {
     return lower_bound() <= u and u < upper_bound();
+  }
+
+  // Returns `true` if and only if every element `x` for which `i.contains(x)`
+  // is true, `this->contains(x)` is also true.
+  template <std::totally_ordered_with<T> U>
+  constexpr bool covers(Interval<U> const& i) const {
+    return lower_bound() <= i.lower_bound() and
+           i.upper_bound() <= upper_bound();
   }
 
   // Returns `true` if the interval is empty and `false` otherwise.
@@ -69,7 +89,7 @@ struct Interval : internal_interval::LengthBase<T> {
 };
 
 template <typename T>
-Interval(T, T) -> Interval<T>;
+Interval(T&&, T&&) -> Interval<std::decay_t<T>>;
 
 namespace internal_interval {
 
