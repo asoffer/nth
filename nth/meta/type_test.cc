@@ -54,8 +54,8 @@ TEST(Type, Print) {
   };
 
   EXPECT_EQ(to_string(nth::type<int>), "int");
-  EXPECT_EQ(to_string(nth::type<int**>), "int**");
-  EXPECT_EQ(to_string(nth::type<const int* const*>), "int const* const*");
+  EXPECT_EQ(to_string(nth::type<int**>), "int **");
+  EXPECT_EQ(to_string(nth::type<const int* const*>), "const int *const *");
   EXPECT_EQ(to_string(nth::type<SomeStruct>), "SomeStruct");
 }
 
