@@ -45,8 +45,18 @@ struct Interval : internal_interval::LengthBase<T> {
     return not !(lhs == rhs);
   }
 
+  // Returns a reference to the lower bound of the interval.
   constexpr T const& lower_bound() const& { return lower_bound_; }
+  // Returns a reference to the upper bound of the interval.
   constexpr T const& upper_bound() const& { return upper_bound_; }
+  // Returns an rvalue-reference to the lower bound of the interval. Once the
+  // referenced object is is modified the interval may be invalidated and is
+  // only safe to be destroyed or assigned-to.
+  constexpr T && lower_bound() && { return std::move(lower_bound_); }
+  // Returns an rvalue-reference to the upper bound of the interval. Once the
+  // referenced object is is modified the interval may be invalidated and is
+  // only safe to be destroyed or assigned-to.
+  constexpr T && upper_bound() && { return std::move(upper_bound_); }
 
   // Returns `true` if and only if the element `u` is at least as large as
   // `this->lower_bound()` and strictly less than `upper_bound()`.
