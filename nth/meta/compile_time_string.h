@@ -20,10 +20,32 @@ struct CompileTimeString {
   constexpr size_t length() const { return Length; }
   constexpr size_t size() const { return Length; }
 
+  constexpr auto operator<=>(CompileTimeString const&) const = default;
+  template <size_t L>
+  constexpr auto operator<=>(CompileTimeString<L> const&) const {
+    return false;
+  }
+
   constexpr operator char const*() const { return NthInternalCompileTimeStringDataMember; }
   constexpr operator std::string_view() const { return NthInternalCompileTimeStringDataMember; }
 
+  template <size_t Offset, size_t Len = Length - Offset>
+  constexpr CompileTimeString<Len> substr() const {
+    return CompileTimeString<Len>(data() + Offset, 0);
+  }
+
   char NthInternalCompileTimeStringDataMember[Length + 1];
+
+ private:
+  template <size_t>
+  friend struct CompileTimeString;
+
+  constexpr CompileTimeString(char const* ptr, int) {
+    for (size_t i = 0; i < Length; ++i) {
+      NthInternalCompileTimeStringDataMember[i] = ptr[i];
+    }
+    NthInternalCompileTimeStringDataMember[Length] = 0;
+  }
 };
 #define NthInternalCompileTimeStringDataMember                                 \
   data() + [] {                                                                \

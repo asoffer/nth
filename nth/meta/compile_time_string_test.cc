@@ -22,4 +22,21 @@ TEST(CompileTimeString, TemplateParameters) {
   EXPECT_EQ(Wrapper<"abc">::view, "abc");
 }
 
+TEST(CompileTimeString, Substring) {
+  constexpr CompileTimeString s1("abcdef");
+  constexpr CompileTimeString s2 = s1.substr<2, 3>();
+  EXPECT_EQ(s2, std::string_view("cde"));
+  constexpr CompileTimeString s3 = s1.substr<3>();
+  EXPECT_EQ(s3, std::string_view("def"));
+}
+
+TEST(CompileTimeString, SubstringEquality) {
+  constexpr CompileTimeString s("hello, hello");
+  constexpr CompileTimeString a = s.substr<0, 5>();
+  constexpr CompileTimeString b = s.substr<7>();
+  constexpr CompileTimeString c = s.substr<8>();
+  EXPECT_EQ(a, b);
+  EXPECT_NE(a, c);
+}
+
 }  // namespace nth

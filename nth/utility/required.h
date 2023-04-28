@@ -25,7 +25,7 @@ struct Impl {
   // On compilers that do not eagerly instantiate this template, we can provide
   // a useful diagnostic indicating that field is required.
   {
-    static_assert(type<T>.dependent(false), "This field is required.");
+    static_assert(::nth::type<T>.dependent(false), "This field is required.");
   }
 #endif
 };
