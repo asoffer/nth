@@ -48,7 +48,10 @@ cc_test(
 cc_library(
     name = "type",
     hdrs = ["type.h"],
-    deps = [":sequence"],
+    deps = [
+        ":compile_time_string",
+        ":sequence"
+    ],
 )
 
 cc_test(
