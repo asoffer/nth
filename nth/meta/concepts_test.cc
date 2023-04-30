@@ -1,8 +1,11 @@
 #include "nth/meta/concepts.h"
 
+#include <tuple>
+
 #include "gtest/gtest.h"
 
 namespace nth {
+namespace {
 
 TEST(Concept, AnyOf) {
   {
@@ -94,4 +97,80 @@ TEST(Concept, AcceptsTemplate) {
   EXPECT_TRUE(p);
 }
 
+TEST(Concept, DecaysTo) {
+  constexpr bool ref    = decays_to<int&, int>;
+  constexpr bool cvref  = decays_to<int const volatile&, int>;
+  constexpr bool fn_ptr = decays_to<void(), void (*)()>;
+  constexpr bool array  = decays_to<int[3], int*>;
+  EXPECT_TRUE(ref);
+  EXPECT_TRUE(cvref);
+  EXPECT_TRUE(fn_ptr);
+  EXPECT_TRUE(array);
+}
+
+struct TupleLike {
+  int a, b, c;
+};
+
+struct DoesntSpecializeSize {
+  int a, b, c;
+};
+struct MissesOneElementSpecialization {
+  int a, b, c;
+};
+
+}  // namespace
+}  // namespace nth
+
+template <>
+struct std::tuple_size<nth::TupleLike> : std::integral_constant<size_t, 3> {};
+
+template <size_t N>
+struct std::tuple_element<N, nth::TupleLike> {
+  using type = int;
+};
+
+template <>
+struct std::tuple_size<nth::MissesOneElementSpecialization>
+    : std::integral_constant<size_t, 3> {};
+
+template <>
+struct std::tuple_element<0, nth::MissesOneElementSpecialization> {
+  using type = int;
+};
+
+template <>
+struct std::tuple_element<1, nth::MissesOneElementSpecialization> {
+  using type = int;
+};
+
+template <size_t N>
+struct std::tuple_element<N, nth::DoesntSpecializeSize> {
+  using type = int;
+};
+
+namespace nth {
+namespace {
+
+TEST(Concept, TupleProtocol) {
+  constexpr bool t0 = tuple_like<std::tuple<>>;
+  EXPECT_TRUE(t0);
+
+  constexpr bool t1 = tuple_like<std::tuple<int>>;
+  EXPECT_TRUE(t1);
+
+  constexpr bool t2 = tuple_like<std::tuple<int, bool>>;
+  EXPECT_TRUE(t2);
+
+  constexpr bool t = tuple_like<TupleLike>;
+  EXPECT_TRUE(t);
+
+  constexpr bool size = tuple_like<DoesntSpecializeSize>;
+  EXPECT_FALSE(size);
+
+  constexpr bool element = tuple_like<MissesOneElementSpecialization>;
+  EXPECT_FALSE(element);
+}
+
+}  // namespace
 }  // namespace nth
