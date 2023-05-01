@@ -3,10 +3,12 @@
 
 #include <functional>
 #include <memory>
+#include <optional>
 #include <ostream>
 #include <sstream>
 #include <string_view>
 #include <utility>
+#include <variant>
 
 #include "nth/io/printer.h"
 #include "nth/meta/concepts.h"
@@ -29,14 +31,16 @@ void UniversalPrint(Printer auto &p, auto const &value) {
     p.write(value);
   } else if constexpr (type == nth::type<bool>) {
     p.write(value ? "true" : "false");
-  } else if constexpr (requires {
-                         {
-                           std::declval<std::ostream &>() << value
-                           } -> std::same_as<std::ostream &>;
-                       }) {
-    std::ostringstream out;
-    out << value;
-    p.write(out.str());
+  } else if constexpr (type == nth::type<std::nullopt_t>) {
+    p.write("std::nullopt");
+  } else if constexpr (type.template is_a<std::optional>()) {
+    if (value.has_value()) {
+      UniversalPrint(p, *value);
+    } else {
+      UniversalPrint(p, std::nullopt);
+    }
+  } else if constexpr (type.template is_a<std::variant>()) {
+    std::visit([&](auto const &value) { UniversalPrint(p, value); }, value);
   } else if constexpr (nth::tuple_like<nth::type_t<type>>) {
     p.write("{");
     std::apply(
@@ -48,6 +52,14 @@ void UniversalPrint(Printer auto &p, auto const &value) {
         },
         value);
     p.write("}");
+  } else if constexpr (requires {
+                         {
+                           std::declval<std::ostream &>() << value
+                           } -> std::same_as<std::ostream &>;
+                       }) {
+    std::ostringstream out;
+    out << value;
+    p.write(out.str());
   } else {
     static constexpr std::string_view HexDigits = "0123456789abcdef";
     std::string_view bytes(

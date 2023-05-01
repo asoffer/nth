@@ -63,6 +63,29 @@ TEST(UniversalPrint, Tuple) {
 
 }
 
+TEST(UniversalPrint, Optional) {
+  std::string s;
+  StringPrinter p(s);
+  UniversalPrint(p, std::nullopt);
+  EXPECT_EQ(s, "std::nullopt");
+  s.clear();
+  UniversalPrint(p, std::optional<int>());
+  EXPECT_EQ(s, "std::nullopt");
+  s.clear();
+  UniversalPrint(p, std::optional<int>(3));
+  EXPECT_EQ(s, "3");
+}
+
+TEST(UniversalPrint, Variant) {
+  std::string s;
+  StringPrinter p(s);
+  UniversalPrint(p, std::variant<int, bool>(5));
+  EXPECT_EQ(s, "5");
+  s.clear();
+  UniversalPrint(p, std::variant<int, bool>(true));
+  EXPECT_EQ(s, "true");
+}
+
 TEST(UniversalPrint, Fallback) {
   std::string s;
   StringPrinter p(s);
