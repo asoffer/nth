@@ -16,6 +16,21 @@ cc_test(
 )
 
 cc_library(
+    name = "string_printer",
+    hdrs = ["string_printer.h"],
+    deps = [],
+)
+
+cc_test(
+    name = "string_printer_test",
+    srcs = ["string_printer_test.cc"],
+    deps = [
+        ":string_printer",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_library(
     name = "universal_print",
     hdrs = ["universal_print.h"],
     deps = [
@@ -25,11 +40,11 @@ cc_library(
     ],
 )
 
-
 cc_test(
     name = "universal_print_test",
     srcs = ["universal_print_test.cc"],
     deps = [
+        ":string_printer",
         ":universal_print",
         "@com_google_googletest//:gtest_main",
     ],

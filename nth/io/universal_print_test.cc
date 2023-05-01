@@ -3,18 +3,10 @@
 #include <string_view>
 
 #include "gtest/gtest.h"
+#include "nth/io/string_printer.h"
 
 namespace nth {
 namespace {
-
-struct StringPrinter {
-  explicit constexpr StringPrinter(std::string& s) : s_(s) {}
-  void write(char c) { s_.push_back(c); }
-  void write(std::string_view s) { s_.append(s); }
-
- private:
-  std::string& s_;
-};
 
 TEST(UniversalPrint, Builtin) {
   std::string s;
