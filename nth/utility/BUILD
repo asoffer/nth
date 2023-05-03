@@ -50,6 +50,23 @@ cc_test(
 )
 
 cc_library(
+    name = "projected_span",
+    hdrs = ["projected_span.h"],
+    deps = [
+        "//nth/meta:type",
+    ],
+)
+
+cc_test(
+    name = "projected_span_test",
+    srcs = ["projected_span_test.cc"],
+    deps = [
+        ":projected_span",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_library(
     name = "ptr_union",
     hdrs = ["ptr_union.h"],
     deps = [
@@ -83,5 +100,3 @@ cc_test(
         "@com_google_googletest//:gtest_main",
     ],
 )
-
-
