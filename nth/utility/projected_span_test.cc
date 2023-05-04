@@ -31,6 +31,17 @@ static_assert(
     not HasConstIterator<ProjectedSpan<int, [](int& n) { return &n; }>>);
 static_assert(HasIterator<ProjectedSpan<int, [](int& n) { return &n; }>>);
 
+static_assert(std::random_access_iterator<typename ProjectedSpan<
+                  int, [](int const& n) { return &n; }>::const_iterator>);
+static_assert(
+    std::random_access_iterator<typename ProjectedSpan<int, [](int const& n) {
+      return &n;
+    }>::const_reverse_iterator>);
+static_assert(std::random_access_iterator<
+              ProjectedSpan<int, [](int& n) { return &n; }>::iterator>);
+static_assert(std::random_access_iterator<
+              ProjectedSpan<int, [](int& n) { return &n; }>::reverse_iterator>);
+
 TEST(ProjectedSpan, ContainerConstruction) {
   std::array<int, 5> a{1, 2, 3, 4, 5};
   ProjectedSpan<int, [](int const& n) { return &n; }> span(a);
