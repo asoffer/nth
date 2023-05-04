@@ -75,6 +75,15 @@ struct Type {
 
   constexpr static Type<std::decay_t<T>> decayed() { return {}; }
 
+  constexpr static Type<std::remove_reference_t<T>> without_reference() {
+    return {};
+  }
+
+  constexpr static Type<std::remove_const_t<T>> without_const() { return {}; }
+  constexpr static Type<std::remove_volatile_t<T>> without_volatile() {
+    return {};
+  }
+
   constexpr static size_t size() { return sizeof(T); }
   constexpr static size_t alignment() { return alignof(T); }
 

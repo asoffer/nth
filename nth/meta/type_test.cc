@@ -120,4 +120,25 @@ TEST(Type, FunctionType) {
             (nth::type_sequence<int, bool>));
 }
 
+TEST(Type, WithoutQualifiers) {
+  EXPECT_EQ(nth::type<int>.without_const(), nth::type<int>);
+  EXPECT_EQ(nth::type<int const>.without_const(), nth::type<int>);
+  EXPECT_EQ(nth::type<int const volatile>.without_const(),
+            nth::type<int volatile>);
+  EXPECT_EQ(nth::type<int const &>.without_const(), nth::type<int const &>);
+
+  EXPECT_EQ(nth::type<int>.without_volatile(), nth::type<int>);
+  EXPECT_EQ(nth::type<int volatile>.without_volatile(), nth::type<int>);
+  EXPECT_EQ(nth::type<int const volatile>.without_volatile(),
+            nth::type<int const>);
+  EXPECT_EQ(nth::type<int volatile &>.without_volatile(),
+            nth::type<int volatile &>);
+
+  EXPECT_EQ(nth::type<int>.without_reference(), nth::type<int>);
+  EXPECT_EQ(nth::type<int &>.without_reference(), nth::type<int>);
+  EXPECT_EQ(nth::type<int &&>.without_reference(), nth::type<int>);
+  EXPECT_EQ(nth::type<int const &>.without_reference(), nth::type<int const>);
+  EXPECT_EQ(nth::type<int const &&>.without_reference(), nth::type<int const>);
+}
+
 }  // namespace
