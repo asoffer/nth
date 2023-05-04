@@ -12,9 +12,28 @@ namespace {
 using ::testing::ElementsAre;
 using ::testing::Pointee;
 
+template <typename T>
+concept HasConstIterator = requires {
+  typename T::const_iterator;
+};
+template <typename T>
+concept HasIterator = requires {
+  typename T::iterator;
+};
+
+static_assert(
+    HasConstIterator<ProjectedSpan<int, [](int const& n) { return &n; }>>);
+static_assert(
+    not HasIterator<ProjectedSpan<int, [](int const& n) { return &n; }>>);
+static_assert(
+    not HasIterator<ProjectedSpan<int const, [](int const& n) { return &n; }>>);
+static_assert(
+    not HasConstIterator<ProjectedSpan<int, [](int& n) { return &n; }>>);
+static_assert(HasIterator<ProjectedSpan<int, [](int& n) { return &n; }>>);
+
 TEST(ProjectedSpan, ContainerConstruction) {
   std::array<int, 5> a{1, 2, 3, 4, 5};
-  ProjectedSpan<[](int const& n) { return &n; }> span(a);
+  ProjectedSpan<int, [](int const& n) { return &n; }> span(a);
   EXPECT_EQ(span.size(), 5);
   EXPECT_THAT(span.front(), Pointee(1));
   EXPECT_THAT(span.back(), Pointee(5));
@@ -32,7 +51,7 @@ TEST(ProjectedSpan, ContainerConstruction) {
 
 TEST(ProjectedSpan, IteratorPairConstruction) {
   std::array<int, 5> a{1, 2, 3, 4, 5};
-  ProjectedSpan<[](int const& n) { return &n; }> span(a.begin(), a.end());
+  ProjectedSpan<int, [](int const& n) { return &n; }> span(a.begin(), a.end());
   EXPECT_EQ(span.size(), 5);
   EXPECT_THAT(span.front(), Pointee(1));
   EXPECT_THAT(span.back(), Pointee(5));
@@ -42,7 +61,7 @@ TEST(ProjectedSpan, IteratorPairConstruction) {
 
 TEST(ProjectedSpan, RemoveEnds) {
   std::array<int, 5> a{1, 2, 3, 4, 5};
-  ProjectedSpan<[](int const& n) { return &n; }> span(a);
+  ProjectedSpan<int, [](int const& n) { return &n; }> span(a);
   span.remove_prefix(1);
   EXPECT_EQ(span.size(), 4);
   EXPECT_THAT(span.front(), Pointee(2));
@@ -57,7 +76,7 @@ TEST(ProjectedSpan, RemoveEnds) {
 }
 
 TEST(ProjectedSpan, Empty) {
-  ProjectedSpan<[](int const& n) { return &n; }> span;
+  ProjectedSpan<int, [](int const& n) { return &n; }> span;
   EXPECT_TRUE(span.empty());
   std::array<int, 1> a{1};
   span = a;
@@ -68,25 +87,38 @@ TEST(ProjectedSpan, Empty) {
 
 TEST(ProjectedSpan, Data) {
   std::array<int, 1> a{1};
-  ProjectedSpan<[](int const& n) { return &n; }> span(a);
+  ProjectedSpan<int, [](int const& n) { return &n; }> span(a);
   EXPECT_EQ(span.data(), a.data());
 }
 
 TEST(ProjectedSpan, CArray) {
   int a[5] = {1, 2, 3, 4, 5};
-  ProjectedSpan<[](int const& n) { return &n; }> span(a);
+  ProjectedSpan<int, [](int const& n) { return &n; }> span(a);
   EXPECT_EQ(span.size(), 5);
 }
 
 TEST(ProjectedSpan, DecltypeAuto) {
   std::pair<int, int> a[3] = {{1, 2}, {3, 4}, {5, 6}};
-  ProjectedSpan<[](std::pair<int, int> const& p) -> int const& {
-    return p.first;
-  }>
+  ProjectedSpan<std::pair<int, int>,
+                [](std::pair<int, int> const& p) -> int const& {
+                  return p.first;
+                }>
       span(a);
   EXPECT_EQ(&span.front(), &a[0].first);
   EXPECT_EQ(&span.back(), &a[2].first);
   EXPECT_EQ(&span[1], &a[1].first);
+}
+
+TEST(ProjectedSpan, MutableAccess) {
+  std::pair<int, int> a[3] = {{1, 2}, {3, 4}, {5, 6}};
+  ProjectedSpan<std::pair<int, int>,
+                [](std::pair<int, int>& p) -> int& { return p.first; }>
+      span(a);
+  EXPECT_EQ(&span.front(), &a[0].first);
+  EXPECT_EQ(&span.back(), &a[2].first);
+  EXPECT_EQ(&span[1], &a[1].first);
+  span[1] = 30;
+  EXPECT_EQ(a[1].first, 30);
 }
 
 }  // namespace
