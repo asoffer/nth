@@ -10,6 +10,7 @@ namespace nth {
 namespace {
 
 using ::testing::ElementsAre;
+using ::testing::Pair;
 using ::testing::Pointee;
 
 template <typename T>
@@ -130,6 +131,29 @@ TEST(ProjectedSpan, MutableAccess) {
   EXPECT_EQ(&span[1], &a[1].first);
   span[1] = 30;
   EXPECT_EQ(a[1].first, 30);
+}
+
+TEST(ProjectedSpan, MutableAndImmutableAccess) {
+  static constexpr auto Proj = [](auto& p) -> decltype(auto) {
+    return (p.first);
+  };
+  std::pair<int, int> a[3] = {{1, 2}, {3, 4}, {5, 6}};
+  ProjectedSpan<std::pair<int, int>, Proj> m(a);
+  ProjectedSpan<std::pair<int, int> const, Proj> c(a);
+  EXPECT_EQ(&m.front(), &a[0].first);
+  EXPECT_EQ(&m.back(), &a[2].first);
+  EXPECT_EQ(&m[1], &a[1].first);
+
+  EXPECT_EQ(&c.front(), &a[0].first);
+  EXPECT_EQ(&c.back(), &a[2].first);
+  EXPECT_EQ(&c[1], &a[1].first);
+
+  m[1] = 30;
+  EXPECT_EQ(m[1], 30);
+
+  EXPECT_THAT(c, ElementsAre(1, 30, 5));
+  EXPECT_THAT(m, ElementsAre(1, 30, 5));
+  EXPECT_THAT(a, ElementsAre(Pair(1, 2), Pair(30, 4), Pair(5, 6)));
 }
 
 }  // namespace
