@@ -65,6 +65,59 @@ struct reverse_ptr {
   T *ptr_;
 };
 
+template <typename Ptr, typename Iter>
+struct iterator_base {
+  explicit constexpr iterator_base(Ptr ptr = nullptr) : ptr_(ptr) {}
+
+  friend constexpr auto operator<=>(iterator_base, iterator_base) = default;
+
+  constexpr Iter &operator++() {
+    ++ptr_;
+    return static_cast<Iter &>(*this);
+  }
+
+  constexpr Iter operator++(int) { return Iter{ptr_++}; }
+
+  constexpr Iter &operator--() {
+    --ptr_;
+    return static_cast<Iter &>(*this);
+  }
+
+  constexpr Iter operator--(int) { return Iter{ptr_--}; }
+
+  constexpr Iter &operator+=(ptrdiff_t rhs) {
+    ptr_ += rhs;
+    return *this;
+  }
+  friend constexpr Iter operator+(iterator_base lhs, ptrdiff_t rhs) {
+    return Iter{lhs.ptr_ + rhs};
+  }
+  friend constexpr Iter operator+(ptrdiff_t lhs, iterator_base rhs) {
+    return rhs + lhs;
+  }
+
+  constexpr Iter &operator-=(ptrdiff_t rhs) {
+    ptr_ -= rhs;
+    return *this;
+  }
+  friend constexpr Iter operator-(iterator_base lhs, ptrdiff_t rhs) {
+    return Iter{lhs.ptr_ - rhs};
+  }
+  friend constexpr ptrdiff_t operator-(iterator_base lhs, iterator_base rhs) {
+    return lhs.ptr_ - rhs.ptr_;
+  }
+
+  constexpr decltype(auto) operator[](ptrdiff_t rhs) const {
+    return *(*this + rhs);
+  }
+
+ protected:
+  constexpr Ptr get() const { return ptr_; }
+
+ private:
+  Ptr ptr_;
+};
+
 template <typename T, auto Projection>
 struct ConditionallyExposeIterator {};
 
@@ -80,116 +133,42 @@ requires(not std::is_const_v<T> and not requires {
   // Iterator over the spanned elements. Invoking `operator*` on this iterator
   // invokes `Projection` on a reference to the underlying value referred to
   // by the iterator.
-  struct iterator {
+  struct iterator : iterator_base<T *, iterator> {
     using difference_type = ptrdiff_t;
     using value_type      = value_type;
 
     iterator() = default;
 
-    constexpr decltype(auto) operator*() const { return Projection(*ptr_); }
-    constexpr iterator &operator++() {
-      ++ptr_;
-      return *this;
+    constexpr decltype(auto) operator*() const {
+      return Projection(*this->get());
     }
-    constexpr iterator operator++(int) { return iterator{ptr_++}; }
-    constexpr iterator &operator--() {
-      --ptr_;
-      return *this;
-    }
-    constexpr iterator operator--(int) { return iterator{ptr_--}; }
-    constexpr iterator &operator+=(difference_type rhs) {
-      ptr_ += rhs;
-      return *this;
-    }
-    constexpr iterator &operator-=(difference_type rhs) {
-      ptr_ -= rhs;
-      return *this;
-    }
-    friend constexpr iterator operator+(iterator lhs, difference_type rhs) {
-      return iterator{lhs.ptr_ + rhs};
-    }
-    friend constexpr iterator operator+(difference_type lhs, iterator rhs) {
-      return rhs + lhs;
-    }
-    friend constexpr iterator operator-(iterator lhs, difference_type rhs) {
-      return iterator{lhs.ptr_ - rhs};
-    }
-    friend constexpr difference_type operator-(iterator lhs, iterator rhs) {
-      return lhs.ptr_ - rhs.ptr_;
-    }
-    constexpr decltype(auto) operator[](difference_type rhs) const {
-      return *(*this + rhs);
-    }
-
-    friend constexpr std::strong_ordering operator<=>(iterator,
-                                                      iterator) = default;
 
    private:
     friend struct ProjectedSpan<T, Projection>;
-    constexpr explicit iterator(T *ptr) : ptr_(ptr) {}
-    T *ptr_ = nullptr;
+    template <typename, typename>
+    friend struct iterator_base;
+    constexpr explicit iterator(T *ptr) : iterator_base<T *, iterator>(ptr) {}
   };
 
   // Reverse iterator over the spanned elements. Invoking `operator*` on this
   // iterator invokes `Projection` on a reference to the underlying value
   // referred to by the iterator.
-  struct reverse_iterator {
+  struct reverse_iterator : iterator_base<reverse_ptr<T>, reverse_iterator> {
     using difference_type = ptrdiff_t;
     using value_type      = value_type;
 
     reverse_iterator() = default;
 
-    constexpr decltype(auto) operator*() const { return Projection(*ptr_); }
-    constexpr reverse_iterator &operator++() {
-      ++ptr_;
-      return *this;
+    constexpr decltype(auto) operator*() const {
+      return Projection(*this->get());
     }
-    constexpr reverse_iterator operator++(int) {
-      return reverse_iterator{ptr_++};
-    }
-    constexpr reverse_iterator &operator+=(difference_type rhs) {
-      ptr_ += rhs;
-      return *this;
-    }
-    friend constexpr reverse_iterator operator+(reverse_iterator lhs,
-                                                difference_type rhs) {
-      return reverse_iterator{lhs.ptr_ + rhs};
-    }
-    friend constexpr reverse_iterator operator+(difference_type lhs,
-                                                reverse_iterator rhs) {
-      return rhs + lhs;
-    }
-    constexpr reverse_iterator &operator--() {
-      --ptr_;
-      return *this;
-    }
-    constexpr reverse_iterator operator--(int) {
-      return reverse_iterator{ptr_--};
-    }
-    constexpr reverse_iterator &operator-=(difference_type rhs) {
-      ptr_ -= rhs;
-      return *this;
-    }
-    friend constexpr reverse_iterator operator-(reverse_iterator lhs,
-                                                difference_type rhs) {
-      return reverse_iterator{lhs.ptr_ - rhs};
-    }
-
-    friend constexpr difference_type operator-(reverse_iterator lhs,
-                                               reverse_iterator rhs) {
-      return lhs.ptr_ - rhs.ptr_;
-    }
-    constexpr decltype(auto) operator[](difference_type rhs) const {
-      return *(*this + rhs);
-    }
-    friend constexpr std::strong_ordering operator<=>(
-        reverse_iterator, reverse_iterator) = default;
 
    private:
     friend struct ProjectedSpan<T, Projection>;
-    constexpr explicit reverse_iterator(T *ptr) : ptr_(ptr) {}
-    constexpr explicit reverse_iterator(reverse_ptr<T> ptr) : ptr_(ptr) {}
-    reverse_ptr<T> ptr_ = nullptr;
+    template <typename, typename>
+    friend struct iterator_base;
+    constexpr explicit reverse_iterator(reverse_ptr<T> ptr)
+        : iterator_base<reverse_ptr<T>, reverse_iterator>(ptr) {}
   };
 };
 
@@ -209,120 +188,44 @@ requires(requires {
   // Iterator over the spanned elements. Invoking `operator*` on this iterator
   // invokes `Projection` on a reference to the underlying value referred to by
   // the iterator.
-  struct const_iterator {
+  struct const_iterator : iterator_base<T *, const_iterator> {
     using difference_type = ptrdiff_t;
     using value_type      = value_type;
 
     const_iterator() = default;
 
-    constexpr decltype(auto) operator*() const { return Projection(*ptr_); }
-    constexpr const_iterator &operator++() {
-      ++ptr_;
-      return *this;
+    constexpr decltype(auto) operator*() const {
+      return Projection(*this->get());
     }
-    constexpr const_iterator operator++(int) { return const_iterator{ptr_++}; }
-    constexpr const_iterator &operator--() {
-      --ptr_;
-      return *this;
-    }
-    constexpr const_iterator operator--(int) { return const_iterator{ptr_--}; }
-    friend constexpr const_iterator operator+(const_iterator lhs,
-                                              difference_type rhs) {
-      return const_iterator{lhs.ptr_ + rhs};
-    }
-    friend constexpr const_iterator operator+(difference_type lhs,
-                                              const_iterator rhs) {
-      return rhs + lhs;
-    }
-    constexpr const_iterator &operator+=(difference_type rhs) {
-      ptr_ += rhs;
-      return *this;
-    }
-    constexpr const_iterator &operator-=(difference_type rhs) {
-      ptr_ -= rhs;
-      return *this;
-    }
-    friend constexpr const_iterator operator-(const_iterator lhs,
-                                              difference_type rhs) {
-      return const_iterator{lhs.ptr_ - rhs};
-    }
-    friend constexpr difference_type operator-(const_iterator lhs,
-                                               const_iterator rhs) {
-      return lhs.ptr_ - rhs.ptr_;
-    }
-    constexpr decltype(auto) operator[](difference_type rhs) const {
-      return *(*this + rhs);
-    }
-
-    friend constexpr std::strong_ordering operator<=>(const_iterator,
-                                                      const_iterator) = default;
 
    private:
     friend struct ProjectedSpan<T, Projection>;
-    constexpr explicit const_iterator(T *ptr) : ptr_(ptr) {}
-    T *ptr_ = nullptr;
+    template <typename, typename>
+    friend struct iterator_base;
+    constexpr explicit const_iterator(T *ptr)
+        : iterator_base<T *, const_iterator>(ptr) {}
   };
 
   // Reverse iterator over the spanned elements. Invoking `operator*` on this
   // iterator invokes `Projection` on a reference to the underlying value
   // referred to by the iterator.
-  struct const_reverse_iterator {
+  struct const_reverse_iterator
+      : iterator_base<reverse_ptr<T>, const_reverse_iterator> {
     using difference_type = ptrdiff_t;
     using value_type      = value_type;
 
     const_reverse_iterator() = default;
 
-    constexpr decltype(auto) operator*() const { return Projection(*ptr_); }
-    constexpr const_reverse_iterator &operator++() {
-      ++ptr_;
-      return *this;
+    constexpr decltype(auto) operator*() const {
+      return Projection(*this->get());
     }
-    constexpr const_reverse_iterator operator++(int) {
-      return const_reverse_iterator{ptr_++};
-    }
-    constexpr const_reverse_iterator &operator--() {
-      --ptr_;
-      return *this;
-    }
-    constexpr const_reverse_iterator operator--(int) {
-      return const_reverse_iterator{ptr_--};
-    }
-    friend constexpr const_reverse_iterator operator+(
-        const_reverse_iterator lhs, difference_type rhs) {
-      return const_reverse_iterator{lhs.ptr_ + rhs};
-    }
-    friend constexpr const_reverse_iterator operator+(
-        difference_type lhs, const_reverse_iterator rhs) {
-      return rhs + lhs;
-    }
-    constexpr const_reverse_iterator &operator+=(difference_type rhs) {
-      ptr_ += rhs;
-      return *this;
-    }
-    constexpr const_reverse_iterator &operator-=(difference_type rhs) {
-      ptr_ -= rhs;
-      return *this;
-    }
-    friend constexpr const_reverse_iterator operator-(
-        const_reverse_iterator lhs, difference_type rhs) {
-      return const_reverse_iterator{lhs.ptr_ - rhs};
-    }
-    friend constexpr difference_type operator-(const_reverse_iterator lhs,
-                                               const_reverse_iterator rhs) {
-      return lhs.ptr_ - rhs.ptr_;
-    }
-    constexpr decltype(auto) operator[](difference_type rhs) const {
-      return *(*this + rhs);
-    }
-
-    friend constexpr std::strong_ordering operator<=>(
-        const_reverse_iterator, const_reverse_iterator) = default;
 
    private:
     friend struct ProjectedSpan<T, Projection>;
-    constexpr explicit const_reverse_iterator(T *ptr) : ptr_(ptr) {}
-    constexpr explicit const_reverse_iterator(reverse_ptr<T> ptr) : ptr_(ptr) {}
-    reverse_ptr<T> ptr_ = nullptr;
+    template <typename, typename>
+    friend struct iterator_base;
+    constexpr explicit const_reverse_iterator(reverse_ptr<T> ptr)
+        : iterator_base<reverse_ptr<T>, const_reverse_iterator>(ptr) {}
   };
 };
 
