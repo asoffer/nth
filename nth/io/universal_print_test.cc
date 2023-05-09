@@ -23,7 +23,6 @@ TEST(UniversalPrint, Ostream) {
   EXPECT_EQ(s, "1234");
 }
 
-
 TEST(UniversalPrint, Bools) {
   std::string s;
   StringPrinter p(s);
@@ -52,7 +51,6 @@ TEST(UniversalPrint, Tuple) {
   UniversalPrint(p, std::tuple<int, bool>{});
   EXPECT_EQ(s, "{0, false}");
   s.clear();
-
 }
 
 TEST(UniversalPrint, Optional) {
@@ -85,6 +83,27 @@ TEST(UniversalPrint, Fallback) {
   EXPECT_EQ(
       s,
       "[Unprintable value of type nth::(anonymous namespace)::S: 11 00 00 00]");
+}
+
+TEST(UniversalPrint, Depth) {
+  std::string s;
+  StringPrinter p(s);
+  UniversalPrint(p, std::optional<std::optional<std::optional<int>>>(5));
+  EXPECT_EQ(s, "5");
+
+  s.clear();
+  UniversalPrint(p, std::optional<int>(5), {.depth = 1, .fallback = "[...]"});
+  EXPECT_EQ(s, "5");
+
+  s.clear();
+  UniversalPrint(p, std::optional<std::optional<int>>(5),
+                 {.depth = 1, .fallback = "[...]"});
+  EXPECT_EQ(s, "[...]");
+
+  s.clear();
+  UniversalPrint(p, std::optional<std::optional<std::optional<int>>>(5),
+                 {.depth = 1, .fallback = "[...]"});
+  EXPECT_EQ(s, "[...]");
 }
 
 }  // namespace

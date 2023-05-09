@@ -13,8 +13,18 @@
 #include "nth/io/printer.h"
 #include "nth/meta/concepts.h"
 #include "nth/meta/type.h"
+#include "nth/utility/required.h"
 
 namespace nth {
+
+struct UniversalPrintOptions {
+  // How many recursive instantiations of `UniversalPrint` should be followed at
+  // runtime before falling back to printing `fallback`.
+  uint32_t depth = required;
+  // The string to be printed as a fallback after we have followed `depth`
+  // recursive instantiations of `UniversalPrint`.
+  std::string_view fallback = required;
+};
 
 // Prints some representation of `value` to `p`. There are no guarantees on the
 // quality of representation, or any sort of specification for what will be
@@ -23,7 +33,26 @@ namespace nth {
 // users are responsible for ensuring that any templates instantiated are
 // properly constrained so that `requires` expressions querying for the validity
 // of such expressions are accurate.
-void UniversalPrint(Printer auto &p, auto const &value) {
+void UniversalPrint(Printer auto &p, auto const &value,
+                    UniversalPrintOptions options = {.depth    = 3,
+                                                     .fallback = "..."});
+
+namespace internal_universal_print {
+
+void UniversalPrintImpl(Printer auto &p, auto const &value,
+                        UniversalPrintOptions options) {
+  if (options.depth == 0) {
+    p.write(options.fallback);
+  } else {
+    --options.depth;
+    UniversalPrint(p, value, options);
+  }
+}
+
+}  // namespace internal_universal_print
+
+void UniversalPrint(Printer auto &p, auto const &value,
+                    UniversalPrintOptions options) {
   constexpr auto type = nth::type<decltype(value)>.decayed();
   if constexpr (requires { p.write(value); } and
                 (type == nth::type<char> or
@@ -35,19 +64,23 @@ void UniversalPrint(Printer auto &p, auto const &value) {
     p.write("std::nullopt");
   } else if constexpr (type.template is_a<std::optional>()) {
     if (value.has_value()) {
-      UniversalPrint(p, *value);
+      internal_universal_print::UniversalPrintImpl(p, *value, options);
     } else {
-      UniversalPrint(p, std::nullopt);
+      internal_universal_print::UniversalPrintImpl(p, std::nullopt, options);
     }
   } else if constexpr (type.template is_a<std::variant>()) {
-    std::visit([&](auto const &value) { UniversalPrint(p, value); }, value);
+    std::visit(
+        [&](auto const &value) {
+          internal_universal_print::UniversalPrintImpl(p, value, options);
+        },
+        value);
   } else if constexpr (nth::tuple_like<nth::type_t<type>>) {
     p.write("{");
     std::apply(
         [&](auto &...elements) {
           std::string_view separator = "";
           ((p.write(std::exchange(separator, ", ")),
-            UniversalPrint(p, elements)),
+            internal_universal_print::UniversalPrintImpl(p, elements, options)),
            ...);
         },
         value);

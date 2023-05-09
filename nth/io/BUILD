@@ -37,6 +37,7 @@ cc_library(
         ":printer",
         "//nth/meta:concepts",
         "//nth/meta:type",
+        "//nth/utility:required",
     ],
 )
 
