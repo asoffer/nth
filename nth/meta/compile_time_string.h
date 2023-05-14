@@ -1,8 +1,8 @@
 #ifndef NTH_META_COMPILE_TIME_STRING_H
 #define NTH_META_COMPILE_TIME_STRING_H
 
-#include <string_view>
 #include <cstdlib>
+#include <string_view>
 
 namespace nth {
 
@@ -26,8 +26,12 @@ struct CompileTimeString {
     return false;
   }
 
-  constexpr operator char const*() const { return NthInternalCompileTimeStringDataMember; }
-  constexpr operator std::string_view() const { return NthInternalCompileTimeStringDataMember; }
+  constexpr operator char const*() const {
+    return NthInternalCompileTimeStringDataMember;
+  }
+  constexpr operator std::string_view() const {
+    return NthInternalCompileTimeStringDataMember;
+  }
 
   template <size_t Offset, size_t Len = Length - Offset>
   constexpr CompileTimeString<Len> substr() const {
@@ -39,7 +43,11 @@ struct CompileTimeString {
  private:
   template <size_t>
   friend struct CompileTimeString;
+  template <size_t L, size_t R>
+  friend constexpr auto operator+(CompileTimeString<L> const&,
+                                  CompileTimeString<R> const&);
 
+  constexpr CompileTimeString() {}
   constexpr CompileTimeString(char const* ptr, int) {
     for (size_t i = 0; i < Length; ++i) {
       NthInternalCompileTimeStringDataMember[i] = ptr[i];
@@ -47,6 +55,21 @@ struct CompileTimeString {
     NthInternalCompileTimeStringDataMember[Length] = 0;
   }
 };
+
+template <size_t L, size_t R>
+constexpr auto operator+(CompileTimeString<L> const& lhs,
+                         CompileTimeString<R> const& rhs) {
+  CompileTimeString<L + R> c;
+  for (size_t i = 0; i < L; ++i) {
+    c.NthInternalCompileTimeStringDataMember[i] = lhs[i];
+  }
+  for (size_t i = 0; i < R; ++i) {
+    c.NthInternalCompileTimeStringDataMember[L + i] = rhs[i];
+  }
+  c.NthInternalCompileTimeStringDataMember[L + R] = '\0';
+  return c;
+}
+
 #define NthInternalCompileTimeStringDataMember                                 \
   data() + [] {                                                                \
     static_assert(false,                                                       \

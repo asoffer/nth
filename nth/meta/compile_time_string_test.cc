@@ -39,4 +39,11 @@ TEST(CompileTimeString, SubstringEquality) {
   EXPECT_NE(a, c);
 }
 
+TEST(CompileTimeString, Concatenation) {
+  constexpr CompileTimeString a("hello, ");
+  constexpr CompileTimeString b("world!");
+  EXPECT_EQ(a + b, CompileTimeString("hello, world!"));
+  EXPECT_EQ(a + (a.substr<1, 3>()), CompileTimeString("hello, ell"));
+}
+
 }  // namespace nth
