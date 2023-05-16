@@ -18,7 +18,7 @@
   } while (false)
 
 template <typename... Ts>
-NTH_DECLARE_TRACE_API(std::vector<Ts...>, (front)(back)(size)(operator[]));
+NTH_DECLARE_TRACE_API(std::vector<Ts...>, (data)(front)(back)(size)(operator[]));
 
 namespace nth {
 namespace {
@@ -27,9 +27,7 @@ TEST(Trace, Construction) {
   std::vector<double> vec{1, 2, 4};
   auto v = nth::Trace<"v">(vec);
 
-  NTH_GTEST_EXPECT(v.size() + v[2] == v.size() * v.size() / 2);
-  NTH_GTEST_EXPECT(v.front() + v[2] == v.size() * v.size() / 2);
-  NTH_GTEST_ASSERT(v.back() + v[2] == v.size() * v.size() / 2);
+  NTH_GTEST_EXPECT(&v[1] - 1 == v.data());
 }
 
 }  // namespace

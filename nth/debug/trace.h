@@ -35,7 +35,7 @@ struct TracedValue : TracedBase {
   template <typename U>
   friend decltype(auto) Evaluate(U const &value);
 
-  std::decay_t<type> value_;
+  type value_;
 };
 
 template <typename Action, typename... Ts>
@@ -45,7 +45,9 @@ struct Traced : TracedValue<typename Action::template invoke_type<Ts...>> {
 
   Traced(Ts const &...ts)
       : TracedValue<typename action_type::template invoke_type<Ts...>>(
-            [&](auto const &...vs) { return action_type::invoke(vs...); },
+            [&](auto const &...vs) -> decltype(auto) {
+              return action_type::invoke(vs...);
+            },
             ts...),
         ptrs_{std::addressof(ts)...} {}
 
@@ -94,7 +96,7 @@ decltype(auto) Evaluate(T const &value) {
     using invoke_type =                                                        \
         decltype(::nth::internal_trace::Evaluate(std::declval<L const &>())    \
                      op ::nth::internal_trace::Evaluate(                       \
-                         std::declval<L const &>()));                          \
+                         std::declval<R const &>()));                          \
   };                                                                           \
   template <typename L, typename R>                                            \
   requires(::nth::internal_trace::IsTraced<L> or                               \
@@ -147,6 +149,7 @@ auto operator,(L const &lhs,
 
 #define NTH_INTERNAL_DEFINE_PREFIX_UNARY_OPERATOR(Op, op)                      \
   struct Op {                                                                  \
+    static constexpr char name[] = "operator" #op;                             \
     template <typename T>                                                      \
     static constexpr decltype(auto) invoke(T const &t) {                       \
       return op ::nth::internal_trace::Evaluate(t);                            \
