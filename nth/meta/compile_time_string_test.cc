@@ -46,4 +46,13 @@ TEST(CompileTimeString, Concatenation) {
   EXPECT_EQ(a + (a.substr<1, 3>()), CompileTimeString("hello, ell"));
 }
 
+TEST(CompileTimeString, Empty) {
+  constexpr CompileTimeString a("hello, ");
+  constexpr CompileTimeString b("");
+  constexpr CompileTimeString c("\0");
+  EXPECT_FALSE(a.empty());
+  EXPECT_TRUE(b.empty());
+  EXPECT_FALSE(c.empty());
+}
+
 }  // namespace nth

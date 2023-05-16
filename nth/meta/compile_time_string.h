@@ -19,6 +19,7 @@ struct CompileTimeString {
   }
   constexpr size_t length() const { return Length; }
   constexpr size_t size() const { return Length; }
+  constexpr bool empty() const { return Length == 0; }
 
   constexpr auto operator<=>(CompileTimeString const&) const = default;
   template <size_t L>
