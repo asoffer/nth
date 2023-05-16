@@ -99,9 +99,9 @@ decltype(auto) Evaluate(T const &value) {
                          std::declval<R const &>()));                          \
   };                                                                           \
   template <typename L, typename R>                                            \
-  requires(::nth::internal_trace::IsTraced<L> or                               \
-           ::nth::internal_trace::IsTraced<R>) auto                            \
-  operator op(L const &lhs, R const &rhs) {                                    \
+  auto operator op(L const &lhs, R const &rhs) requires(                       \
+      ::nth::internal_trace::IsTraced<L> or                                    \
+      ::nth::internal_trace::IsTraced<R>) {                                    \
     return Traced<Op, L, R>(lhs, rhs);                                         \
   }
 
@@ -211,15 +211,23 @@ struct TracedTraversal {
     if constexpr (::nth::internal_trace::IsTraced<T>) {
       if constexpr (
           ::nth::type<typename T::action_type>.template is_a<::nth::internal_trace::Identity>()) {
-        std::cerr << std::string(indentation, ' ')
-                  << ::nth::internal_trace::Evaluate(trace) << " [traced value "
-                  << std::quoted(T::action_type::name.data()) << "]\n";
+        if constexpr (T::action_type::name.empty()) {
+          std::cerr << std::string(indentation, ' ')
+                    << ::nth::internal_trace::Evaluate(trace)
+                    << " [traced value]\n";
+        } else {
+          std::cerr << std::string(indentation, ' ')
+                    << ::nth::internal_trace::Evaluate(trace)
+                    << " [traced value "
+                    << std::quoted(T::action_type::name.data()) << "]\n";
+        }
       } else {
         T::argument_types.reduce([&](auto... ts) {
           std::cerr << std::string(indentation, ' ') << T::action_type::name
                     << std::string(
-                           40 - indentation - sizeof(T::action_type::name), ' ')
-                    << "(= " << ::nth::internal_trace::Evaluate(trace) << ")\n";
+                           40 - indentation - sizeof(T::action_type::name), ' ');
+            std::cerr << "(= " << ::nth::internal_trace::Evaluate(trace)
+                      << ")\n";
           indentation += 2;
           size_t i = 0;
           ((*this)(*static_cast<::nth::type_t<ts> const *>(trace.ptrs_[i++])),
@@ -252,9 +260,27 @@ struct Explain {
   }
 };
 
+struct TraceInjector {};
+template <typename T>
+decltype(auto) operator->*(TraceInjector, T const &value) {
+  if constexpr (IsTraced<T>) {
+    return value;
+  } else {
+    return Traced<Identity<CompileTimeStringType<"">>, T>(value);
+  }
+}
+template <typename T>
+decltype(auto) operator->*(T const &value, TraceInjector) {
+  if constexpr (IsTraced<T>) {
+    return value;
+  } else {
+    return Traced<Identity<CompileTimeStringType<"">>, T>(value);
+  }
+}
+
 }  // namespace internal_trace
 
-template <::nth::CompileTimeString S, int &..., typename T>
+template <nth::CompileTimeString S, int &..., typename T>
 ::nth::internal_trace::Traced<
     ::nth::internal_trace::Identity<
         ::nth::internal_trace::CompileTimeStringType<S>>,
@@ -269,17 +295,24 @@ Trace(T const &value) {
 #define NTH_EXPECT(...)                                                        \
   if (::nth::internal_trace::Responder<::nth::internal_trace::Explain, [] {}>  \
           responder;                                                           \
-      responder.set((#__VA_ARGS__), (__VA_ARGS__), __FILE__, __LINE__)) {}
+      responder.set(                                                           \
+          (#__VA_ARGS__),                                                      \
+          (::nth::internal_trace::TraceInjector{}                              \
+               ->*__VA_ARGS__->*::nth::internal_trace::TraceInjector{}),       \
+          __FILE__, __LINE__)) {}
 
 #define NTH_ASSERT(...)                                                        \
   if (::nth::internal_trace::Responder<::nth::internal_trace::Explain,         \
                                        std::abort>                             \
           responder;                                                           \
-      responder.set((#__VA_ARGS__), (__VA_ARGS__), __FILE__, __LINE__)) {}
+      responder.set(                                                           \
+          (#__VA_ARGS__),                                                      \
+          (::nth::internal_trace::TraceInjector{}                              \
+               ->*__VA_ARGS__->*::nth::internal_trace::TraceInjector{}),       \
+          __FILE__, __LINE__)) {}
 
 #define NTH_INTERNAL_BODY(memfn)                                               \
-  template <nth::CompileTimeString>                                            \
-  struct Impl;                                                                 \
+ private:                                                                      \
   template <>                                                                  \
   struct Impl<#memfn> {                                                        \
     static constexpr char const name[] = #memfn;                               \
@@ -294,6 +327,7 @@ Trace(T const &value) {
     }                                                                          \
   };                                                                           \
                                                                                \
+ public:                                                                       \
   template <typename... NthTypes>                                              \
   auto memfn(NthTypes const &...ts) const {                                    \
     return nth::internal_trace::Traced<                                        \
@@ -311,6 +345,11 @@ Trace(T const &value) {
 #define NTH_DECLARE_TRACE_API(t, types)                                        \
   struct nth::internal_trace::DefineTrace<t>                                   \
       : nth::internal_trace::TracedValue<t> {                                  \
+   private:                                                                    \
+    template <nth::CompileTimeString>                                          \
+    struct Impl;                                                               \
+                                                                               \
+   public:                                                                     \
     using type                    = t;                                         \
     static constexpr bool defined = true;                                      \
     DefineTrace(auto f) : nth::internal_trace::TracedValue<type>(f) {}         \
