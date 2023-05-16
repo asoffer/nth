@@ -6,6 +6,8 @@
 #include <iostream>
 #include <memory>
 
+#include "nth/io/string_printer.h"
+#include "nth/io/universal_print.h"
 #include "nth/meta/compile_time_string.h"
 #include "nth/meta/sequence.h"
 #include "nth/meta/type.h"
@@ -21,31 +23,42 @@ struct CompileTimeStringType {
 };
 
 template <typename T>
-concept IsTraced = std::derived_from<T, TracedBase>;
+struct TracedValue : TracedBase {
+  using type = T;
 
-template <typename T, auto U>
-concept TracedEvaluatingTo = IsTraced<T> and U == ::nth::type<typename T::type>;
+ protected:
+  constexpr TracedValue(auto f, auto const &...ts) : value_(f(ts...)) {}
+
+  type const &value() const & { return value_; }
+
+ private:
+  template <typename U>
+  friend decltype(auto) Evaluate(U const &value);
+
+  std::decay_t<type> value_;
+};
 
 template <typename Action, typename... Ts>
-struct Traced : TracedBase {
+struct Traced : TracedValue<typename Action::template invoke_type<Ts...>> {
   using action_type                    = Action;
   static constexpr auto argument_types = nth::type_sequence<Ts...>;
-  using type = typename Action::template invoke_type<Ts...>;
 
-  Traced(Ts const &...ts) : ptrs_{std::addressof(ts)...} {}
+  Traced(Ts const &...ts)
+      : TracedValue<typename action_type::template invoke_type<Ts...>>(
+            [&](auto const &...vs) { return action_type::invoke(vs...); },
+            ts...),
+        ptrs_{std::addressof(ts)...} {}
 
-  // private:
-  template <typename T>
-  friend decltype(auto) Evaluate(T const &value);
-
-  decltype(auto) value() const {
-    return nth::index_sequence<sizeof...(Ts)>.reduce([&](auto... ns) {
-      return Action::invoke((*static_cast<Ts const *>(ptrs_[ns]))...);
-    });
-  };
+ private:
+  friend struct TracedTraversal;
 
   void const *ptrs_[sizeof...(Ts)];
 };
+
+template <typename T>
+concept IsTraced = std::derived_from<T, TracedBase>;
+template <typename T, typename U>
+concept TracedEvaluatingTo = std::derived_from<T, TracedValue<U>>;
 
 template <typename S>
 struct Identity {
@@ -60,33 +73,16 @@ struct Identity {
   }
 };
 
-template <typename S, typename T>
-struct Traced<Identity<S>, T> : TracedBase {
-  using action_type                    = Identity<S>;
-  static constexpr auto argument_types = nth::type_sequence<>;
-  using type                           = T;
-
-  template <typename U>
-  constexpr Traced(U &&u) : value_(std::forward<U>(u)) {}
-
-  template <typename U>
-  friend decltype(auto) Evaluate(U const &value);
-
-  type const &value() const { return value_; };
-
-  T value_;
-};
-
 template <typename T>
 decltype(auto) Evaluate(T const &value) {
   if constexpr (::nth::internal_trace::IsTraced<T>) {
-    return value.value();
+    return value.value_;
   } else {
     return value;
   }
 }
 
-#define NTH_TRACE_INTERNAL_DEFINE_BINARY_OPERATOR(Op, op)                      \
+#define NTH_INTERNAL_DEFINE_BINARY_OPERATOR(Op, op)                            \
   struct Op {                                                                  \
     static constexpr char name[] = "operator" #op;                             \
     template <typename L, typename R>                                          \
@@ -101,32 +97,33 @@ decltype(auto) Evaluate(T const &value) {
                          std::declval<L const &>()));                          \
   };                                                                           \
   template <typename L, typename R>                                            \
-  requires(::nth::internal_trace::IsTraced<L> or IsTraced<R>) auto             \
+  requires(::nth::internal_trace::IsTraced<L> or                               \
+           ::nth::internal_trace::IsTraced<R>) auto                            \
   operator op(L const &lhs, R const &rhs) {                                    \
     return Traced<Op, L, R>(lhs, rhs);                                         \
   }
 
-NTH_TRACE_INTERNAL_DEFINE_BINARY_OPERATOR(Le, <=)
-NTH_TRACE_INTERNAL_DEFINE_BINARY_OPERATOR(Lt, <)
-NTH_TRACE_INTERNAL_DEFINE_BINARY_OPERATOR(Eq, ==)
-NTH_TRACE_INTERNAL_DEFINE_BINARY_OPERATOR(Ne, !=)
-NTH_TRACE_INTERNAL_DEFINE_BINARY_OPERATOR(Ge, >=)
-NTH_TRACE_INTERNAL_DEFINE_BINARY_OPERATOR(Gt, >)
-NTH_TRACE_INTERNAL_DEFINE_BINARY_OPERATOR(Cmp, <=>)
+NTH_INTERNAL_DEFINE_BINARY_OPERATOR(Le, <=)
+NTH_INTERNAL_DEFINE_BINARY_OPERATOR(Lt, <)
+NTH_INTERNAL_DEFINE_BINARY_OPERATOR(Eq, ==)
+NTH_INTERNAL_DEFINE_BINARY_OPERATOR(Ne, !=)
+NTH_INTERNAL_DEFINE_BINARY_OPERATOR(Ge, >=)
+NTH_INTERNAL_DEFINE_BINARY_OPERATOR(Gt, >)
+NTH_INTERNAL_DEFINE_BINARY_OPERATOR(Cmp, <=>)
 
-NTH_TRACE_INTERNAL_DEFINE_BINARY_OPERATOR(And, &)
-NTH_TRACE_INTERNAL_DEFINE_BINARY_OPERATOR(Or, |)
-NTH_TRACE_INTERNAL_DEFINE_BINARY_OPERATOR(Xor, ^)
+NTH_INTERNAL_DEFINE_BINARY_OPERATOR(And, &)
+NTH_INTERNAL_DEFINE_BINARY_OPERATOR(Or, |)
+NTH_INTERNAL_DEFINE_BINARY_OPERATOR(Xor, ^)
 
-NTH_TRACE_INTERNAL_DEFINE_BINARY_OPERATOR(Add, +)
-NTH_TRACE_INTERNAL_DEFINE_BINARY_OPERATOR(Sub, -)
-NTH_TRACE_INTERNAL_DEFINE_BINARY_OPERATOR(Mul, *)
-NTH_TRACE_INTERNAL_DEFINE_BINARY_OPERATOR(Div, /)
-NTH_TRACE_INTERNAL_DEFINE_BINARY_OPERATOR(Mod, %)
+NTH_INTERNAL_DEFINE_BINARY_OPERATOR(Add, +)
+NTH_INTERNAL_DEFINE_BINARY_OPERATOR(Sub, -)
+NTH_INTERNAL_DEFINE_BINARY_OPERATOR(Mul, *)
+NTH_INTERNAL_DEFINE_BINARY_OPERATOR(Div, /)
+NTH_INTERNAL_DEFINE_BINARY_OPERATOR(Mod, %)
 
-NTH_TRACE_INTERNAL_DEFINE_BINARY_OPERATOR(LSh, <<)
-NTH_TRACE_INTERNAL_DEFINE_BINARY_OPERATOR(RSh, >>)
-NTH_TRACE_INTERNAL_DEFINE_BINARY_OPERATOR(ArrowPtr, ->*)
+NTH_INTERNAL_DEFINE_BINARY_OPERATOR(LSh, <<)
+NTH_INTERNAL_DEFINE_BINARY_OPERATOR(RSh, >>)
+NTH_INTERNAL_DEFINE_BINARY_OPERATOR(ArrowPtr, ->*)
 
 struct Comma {
   template <typename L, typename R>
@@ -146,9 +143,9 @@ auto operator,(L const &lhs,
   return Traced<Comma, L, R>(lhs, rhs);
 }
 
-#undef NTH_TRACE_INTERNAL_DEFINE_BINARY_OPERATOR
+#undef NTH_INTERNAL_DEFINE_BINARY_OPERATOR
 
-#define NTH_TRACE_INTERNAL_DEFINE_PREFIX_UNARY_OPERATOR(Op, op)                \
+#define NTH_INTERNAL_DEFINE_PREFIX_UNARY_OPERATOR(Op, op)                      \
   struct Op {                                                                  \
     template <typename T>                                                      \
     static constexpr decltype(auto) invoke(T const &t) {                       \
@@ -163,22 +160,20 @@ auto operator,(L const &lhs,
     return Traced<Op, T>(t);                                                   \
   }
 
-NTH_TRACE_INTERNAL_DEFINE_PREFIX_UNARY_OPERATOR(Tilde, ~)
-NTH_TRACE_INTERNAL_DEFINE_PREFIX_UNARY_OPERATOR(Not, !)
-NTH_TRACE_INTERNAL_DEFINE_PREFIX_UNARY_OPERATOR(Neg, -)
-NTH_TRACE_INTERNAL_DEFINE_PREFIX_UNARY_OPERATOR(Pos, +)
-NTH_TRACE_INTERNAL_DEFINE_PREFIX_UNARY_OPERATOR(Addr, &)
-NTH_TRACE_INTERNAL_DEFINE_PREFIX_UNARY_OPERATOR(Ref, *)
+NTH_INTERNAL_DEFINE_PREFIX_UNARY_OPERATOR(Tilde, ~)
+NTH_INTERNAL_DEFINE_PREFIX_UNARY_OPERATOR(Not, !)
+NTH_INTERNAL_DEFINE_PREFIX_UNARY_OPERATOR(Neg, -)
+NTH_INTERNAL_DEFINE_PREFIX_UNARY_OPERATOR(Pos, +)
+NTH_INTERNAL_DEFINE_PREFIX_UNARY_OPERATOR(Addr, &)
+NTH_INTERNAL_DEFINE_PREFIX_UNARY_OPERATOR(Ref, *)
 
-#undef NTH_TRACE_INTERNAL_DEFINE_PREFIX_UNARY_OPERATOR
+#undef NTH_INTERNAL_DEFINE_PREFIX_UNARY_OPERATOR
 
 template <typename PreFn, std::invocable<> auto PostFn>
 struct Responder {
-  bool set(
-      char const *expression,
-      ::nth::internal_trace::TracedEvaluatingTo<::nth::type<bool>> auto const
-          &b,
-      char const *file_name, int line_number) {
+  bool set(char const *expression,
+           ::nth::internal_trace::TracedEvaluatingTo<bool> auto const &b,
+           char const *file_name, int line_number) {
     value_ = ::nth::internal_trace::Evaluate(b);
     if (not value_) { PreFn{}(expression, b, file_name, line_number); }
     return value_;
@@ -192,14 +187,29 @@ struct Responder {
   bool value_;
 };
 
+template <typename T>
+struct DefineTrace {
+  static constexpr bool defined = false;
+};
+
+template <typename Action, typename... Ts>
+requires(DefineTrace<typename Action::template invoke_type<Ts...>>::
+             defined) struct Traced<Action, Ts...>
+    : DefineTrace<typename Action::template invoke_type<Ts...>> {
+  template <typename U>
+  constexpr Traced(U &&u)
+      : DefineTrace<typename Action::template invoke_type<Ts...>>(
+            [&] { return std::forward<U>(u); }) {}
+};
+
 struct TracedTraversal {
   template <typename T>
   void operator()(T const &trace) {
     if constexpr (::nth::internal_trace::IsTraced<T>) {
       if constexpr (
           ::nth::type<typename T::action_type>.template is_a<::nth::internal_trace::Identity>()) {
-        std::cerr << std::string(indentation, ' ') << trace.value()
-                  << " [traced value "
+        std::cerr << std::string(indentation, ' ')
+                  << ::nth::internal_trace::Evaluate(trace) << " [traced value "
                   << std::quoted(T::action_type::name.data()) << "]\n";
       } else {
         T::argument_types.reduce([&](auto... ts) {
@@ -215,7 +225,10 @@ struct TracedTraversal {
         });
       }
     } else {
-      std::cerr << std::string(indentation, ' ') << trace << '\n';
+      std::string s;
+      nth::StringPrinter p(s);
+      nth::UniversalPrint(p, trace);
+      std::cerr << std::string(indentation, ' ') << s << '\n';
     }
   }
 
@@ -223,11 +236,9 @@ struct TracedTraversal {
 };
 
 struct Explain {
-  void operator()(
-      char const *expression,
-      ::nth::internal_trace::TracedEvaluatingTo<::nth::type<bool>> auto const
-          &b,
-      char const *file_name, int line_number) {
+  void operator()(char const *expression,
+                  ::nth::internal_trace::TracedEvaluatingTo<bool> auto const &b,
+                  char const *file_name, int line_number) {
     std::cerr << "\033[31m"
                  "NTH_ASSERT failed at "
               << "\033[1m" << file_name << ':' << line_number << ":\033[m\n  "
@@ -262,6 +273,46 @@ Trace(T const &value) {
                                        std::abort>                             \
           responder;                                                           \
       responder.set((#__VA_ARGS__), (__VA_ARGS__), __FILE__, __LINE__)) {}
+
+#define NTH_INTERNAL_BODY(memfn)                                               \
+  template <nth::CompileTimeString>                                            \
+  struct Impl;                                                                 \
+  template <>                                                                  \
+  struct Impl<#memfn> {                                                        \
+    static constexpr char const name[] = #memfn;                               \
+    template <typename NthType, typename... NthTypes>                          \
+    using invoke_type = decltype(std::declval<NthType const &>().memfn(        \
+        std::declval<NthTypes const &>()...));                                 \
+                                                                               \
+    template <typename NthType, typename... NthTypes>                          \
+    static constexpr decltype(auto) invoke(NthType const &t,                   \
+                                           NthTypes const &...ts) {            \
+      return t.memfn(ts...);                                                   \
+    }                                                                          \
+  };                                                                           \
+                                                                               \
+  template <typename... NthTypes>                                              \
+  auto memfn(NthTypes const &...ts) const {                                    \
+    return nth::internal_trace::Traced<                                        \
+        Impl<#memfn>, typename std::decay_t<decltype(*this)>::type,            \
+        NthTypes...>(this->value(), ts...);                                    \
+  }
+
+#define NTH_INTERNAL_EXPAND_A(x) NTH_INTERNAL_BODY(x) NTH_INTERNAL_EXPAND_B
+#define NTH_INTERNAL_EXPAND_B(x) NTH_INTERNAL_BODY(x) NTH_INTERNAL_EXPAND_A
+#define NTH_INTERNAL_EXPAND_A_END
+#define NTH_INTERNAL_EXPAND_B_END
+#define NTH_INTERNAL_END(...) NTH_INTERNAL_END_IMPL(__VA_ARGS__)
+#define NTH_INTERNAL_END_IMPL(...) __VA_ARGS__##_END
+
+#define NTH_DECLARE_TRACE_API(t, types)                                        \
+  struct nth::internal_trace::DefineTrace<t>                                   \
+      : nth::internal_trace::TracedValue<t> {                                  \
+    using type                    = t;                                         \
+    static constexpr bool defined = true;                                      \
+    DefineTrace(auto f) : nth::internal_trace::TracedValue<type>(f) {}         \
+    NTH_INTERNAL_END(NTH_INTERNAL_EXPAND_A types)                              \
+  }
 
 }  // namespace nth
 

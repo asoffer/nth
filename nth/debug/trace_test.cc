@@ -17,51 +17,19 @@
     }                                                                          \
   } while (false)
 
-template <nth::CompileTimeString S, typename T>
-struct nth::internal_trace::Traced<
-    nth::internal_trace::Identity<
-        nth::internal_trace::CompileTimeStringType<S>>,
-    std::vector<T>> {
-  using type = std::vector<T>;
-
-  template <typename U>
-  constexpr Traced(U &&u) : value_(std::forward<U>(u)) {}
-
-  template <typename U>
-  friend decltype(auto) Evaluate(U const &value);
-
-  type const &value() const { return value_; };
-
-  decltype(auto) size() const {
-    return nth::internal_trace::Traced<
-        nth::internal_trace::Identity<
-            nth::internal_trace::CompileTimeStringType<
-                S + nth::CompileTimeString(".size()")>>,
-        size_t>(value_.size());
-  }
-
-  decltype(auto) operator[](size_t n) const {
-    return nth::internal_trace::Traced<
-        nth::internal_trace::Identity<
-            nth::internal_trace::CompileTimeStringType<
-                S + nth::CompileTimeString("[?]")>>,
-        size_t>(value_[n]);
-  }
-
- private:
-  std::vector<T> value_;
-};
+template <typename... Ts>
+NTH_DECLARE_TRACE_API(std::vector<Ts...>, (front)(back)(size)(operator[]));
 
 namespace nth {
 namespace {
 
 TEST(Trace, Construction) {
-  std::vector<double> vec{1, 2, 4, 3};
+  std::vector<double> vec{1, 2, 4};
   auto v = nth::Trace<"v">(vec);
 
   NTH_GTEST_EXPECT(v.size() + v[2] == v.size() * v.size() / 2);
-  NTH_GTEST_EXPECT(v.size() + v[2] == v.size() * v.size() / 2);
-  NTH_GTEST_ASSERT(v.size() + v[2] == v.size() * v.size() / 2);
+  NTH_GTEST_EXPECT(v.front() + v[2] == v.size() * v.size() / 2);
+  NTH_GTEST_ASSERT(v.back() + v[2] == v.size() * v.size() / 2);
 }
 
 }  // namespace

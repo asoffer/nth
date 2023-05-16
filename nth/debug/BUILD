@@ -5,6 +5,8 @@ cc_library(
     hdrs = ["trace.h"],
     deps = [
       "//nth/meta:type",
+      "//nth/io:string_printer",
+      "//nth/io:universal_print",
     ],
 )
 
