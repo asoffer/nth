@@ -1,361 +1,140 @@
 #ifndef NTH_DEBUG_TRACE_H
 #define NTH_DEBUG_TRACE_H
 
-#include <concepts>
-#include <iomanip>
-#include <iostream>
-#include <memory>
-
-#include "nth/io/string_printer.h"
-#include "nth/io/universal_print.h"
+#include "nth/base/attributes.h"
+#include "nth/debug/internal/trace.h"
+#include "nth/debug/internal/trace_declare_api.h"
+#include "nth/debug/internal/trace_operators.h"
 #include "nth/meta/compile_time_string.h"
-#include "nth/meta/sequence.h"
-#include "nth/meta/type.h"
 
+// `nth::Trace` is debugging library aimed at producing better runtime
+// assertions than the `assert` macro defined in the `<cassert>` standard
+// library header. At its core there are two primary macros macros which do the
+// heavy lifting: `NTH_ASSERT` and `NTH_EXPECT`. Either of these macros may be
+// passed a side-effect-free boolean expression. Depending on build
+// configuration, these expressions will be evaluated either zero or once (the
+// fact that they may not be evaluated is why the expression must be side-effect
+// free; build configuration must not affect the semantics). If evaluated, and
+// the expression evaluates to true, execution continues. Otherwise, if the
+// expression is evaluated and evaluates to false, some configurable error
+// handler will be triggered. In the case of `NTH_EXPECT`, this is all that
+// happens, and execution continues. In the case of `NTH_ASSERT`, execution will
+// be aborted immediately after the error handler is invoked.
+//
+// For example:
+// ```
+// NTH_EXPECT(1 == 0 + 1); // Ok, execution will continue.
+// NTH_ASSERT(2 == 1 + 1); // Ok, execution will continue.
+// NTH_EXPECT(3 == 2 * 2); // Error handler is invoked and execution continues.
+// NTH_ASSERT(4 == 3 * 3); // Error handler is invoked and execution is aborted.
+// ```
+//
+// Both macros expand to `if (<unspecified>) {}`, meaning that users may add an
+// `else` clause following either `NTH_EXPECT` or `NTH_ASSERT`. In either case,
+// if the expression is evaluated and evaluates to false, the body of the `else`
+// clause will be invoked. In the case of `NTH_ASSERT`, the program will abort
+// immediately following execution of the `else` clause, regardless of how
+// control flow leaves the `else` clause.
+//
+// For example:
+// ```
+// NTH_EXPECT(my_container.empty()) {
+//   std::cerr << "my_container has " << my_container.size() << " elements.";
+// }
+// ```
+//
+// On a best-effort basis, this macro attempts to peer into the contents of the
+// boolean expression so as to provide improved error messages regarding the
+// values of subexpressions. If, for example `NTH_ASSERT(a == b * c)` fails, the
+// error message can helpfully tell you the values of `a`, `b`, and `c`.
+// However, there are limitations depending on the structure of the expression.
+// For example, `NTH_ASSERT(a == b * c + d)` will be able to report the values
+// of `a`, `d`, and `b * c`, but it will not be able to decompose `b * c` into
+// the values of `b` and `c`. In order to improve debugging, users may wrap any
+// value in a call `nth::Trace`. This takes a compile-time string template
+// argument representing the name of the traced value, so typical usage would
+// look like `nth::Trace<"b">(b)`. Then, any expression using operators
+// containing `b` as a sub-expression will have proper tracing enabled.
+//
+// There are several limitations to this tracing ability. First, free functions
+// and function templates cannot have traced values passed into them. Thus
+// `NTH_ASSERT(std::max(a, b) == a)` cannot provide improved tracing support by
+// wrapping `b` in `nth::Trace`.
+//
+// Second, member functions can support tracing provided the object on which the
+// member function is called is traced, and that the underlying library supports
+// tracing. Tracing is supported via the `NTH_TRACE_DECLARE_API` macro.
+// Specifically, this macro takes two arguments. The first argument is the name
+// of the type to which you wish to add tracing support. The second argument is
+// a parenthetical list (of the form "(a)(b)(c)") of the names of all const
+// member functions. It is okay if a member function is part of an overload set
+// consisting of both const and non-const overloads.
+//
+// For example,
+// ```
+// NTH_TRACE_DECLARE_API(std::string,
+//                       (at)(back)(c_str)(capacity)(compare)(data)(ends_with)
+//                       (find)(find_first_not_of)(find_first_of)
+//                       (find_last_not_of)(find_last_of)(front)(length)
+//                       (max_size)(operator[])(rfind)(size)(starts_with));
+// ```
+//
+// Moreover, this macro also works with struct templates:
+// ```
+// template <typename T>
+// NTH_TRACE_DECLARE_API(std::basic_string<T>,
+//                       (at)(back)(c_str)(capacity)(compare)(data)(ends_with)
+//                       (find)(find_first_not_of)(find_first_of)
+//                       (find_last_not_of)(find_last_of)(front)(length)
+//                       (max_size)(operator[])(rfind)(size)(starts_with));
+// ```
+//
 namespace nth {
-namespace internal_trace {
 
-struct TracedBase {};
-
-template <::nth::CompileTimeString S>
-struct CompileTimeStringType {
-  static constexpr ::nth::CompileTimeString string = S;
-};
-
-template <typename T>
-struct TracedValue : TracedBase {
-  using type = T;
-
- protected:
-  constexpr TracedValue(auto f, auto const &...ts) : value_(f(ts...)) {}
-
-  type const &value() const & { return value_; }
-
- private:
-  template <typename U>
-  friend decltype(auto) Evaluate(U const &value);
-
-  type value_;
-};
-
-template <typename Action, typename... Ts>
-struct Traced : TracedValue<typename Action::template invoke_type<Ts...>> {
-  using action_type                    = Action;
-  static constexpr auto argument_types = nth::type_sequence<Ts...>;
-
-  Traced(Ts const &...ts)
-      : TracedValue<typename action_type::template invoke_type<Ts...>>(
-            [&](auto const &...vs) -> decltype(auto) {
-              return action_type::invoke(vs...);
-            },
-            ts...),
-        ptrs_{std::addressof(ts)...} {}
-
- private:
-  friend struct TracedTraversal;
-
-  void const *ptrs_[sizeof...(Ts)];
-};
-
-template <typename T>
-concept IsTraced = std::derived_from<T, TracedBase>;
-template <typename T, typename U>
-concept TracedEvaluatingTo = std::derived_from<T, TracedValue<U>>;
-
-template <typename S>
-struct Identity {
-  static constexpr auto name = S::string;
-
-  template <typename T>
-  using invoke_type = T;
-
-  template <typename T>
-  static constexpr decltype(auto) invoke(T const &t) {
-    return t;
-  }
-};
-
-template <typename T>
-decltype(auto) Evaluate(T const &value) {
-  if constexpr (::nth::internal_trace::IsTraced<T>) {
-    return value.value_;
-  } else {
-    return value;
-  }
-}
-
-#define NTH_INTERNAL_DEFINE_BINARY_OPERATOR(Op, op)                            \
-  struct Op {                                                                  \
-    static constexpr char name[] = "operator" #op;                             \
-    template <typename L, typename R>                                          \
-    static constexpr decltype(auto) invoke(L const &lhs, R const &rhs) {       \
-      return ::nth::internal_trace::Evaluate(lhs)                              \
-          op ::nth::internal_trace::Evaluate(rhs);                             \
-    }                                                                          \
-    template <typename L, typename R>                                          \
-    using invoke_type =                                                        \
-        decltype(::nth::internal_trace::Evaluate(std::declval<L const &>())    \
-                     op ::nth::internal_trace::Evaluate(                       \
-                         std::declval<R const &>()));                          \
-  };                                                                           \
-  template <typename L, typename R>                                            \
-  auto operator op(L const &lhs, R const &rhs) requires(                       \
-      ::nth::internal_trace::IsTraced<L> or                                    \
-      ::nth::internal_trace::IsTraced<R>) {                                    \
-    return Traced<Op, L, R>(lhs, rhs);                                         \
-  }
-
-NTH_INTERNAL_DEFINE_BINARY_OPERATOR(Le, <=)
-NTH_INTERNAL_DEFINE_BINARY_OPERATOR(Lt, <)
-NTH_INTERNAL_DEFINE_BINARY_OPERATOR(Eq, ==)
-NTH_INTERNAL_DEFINE_BINARY_OPERATOR(Ne, !=)
-NTH_INTERNAL_DEFINE_BINARY_OPERATOR(Ge, >=)
-NTH_INTERNAL_DEFINE_BINARY_OPERATOR(Gt, >)
-NTH_INTERNAL_DEFINE_BINARY_OPERATOR(Cmp, <=>)
-
-NTH_INTERNAL_DEFINE_BINARY_OPERATOR(And, &)
-NTH_INTERNAL_DEFINE_BINARY_OPERATOR(Or, |)
-NTH_INTERNAL_DEFINE_BINARY_OPERATOR(Xor, ^)
-
-NTH_INTERNAL_DEFINE_BINARY_OPERATOR(Add, +)
-NTH_INTERNAL_DEFINE_BINARY_OPERATOR(Sub, -)
-NTH_INTERNAL_DEFINE_BINARY_OPERATOR(Mul, *)
-NTH_INTERNAL_DEFINE_BINARY_OPERATOR(Div, /)
-NTH_INTERNAL_DEFINE_BINARY_OPERATOR(Mod, %)
-
-NTH_INTERNAL_DEFINE_BINARY_OPERATOR(LSh, <<)
-NTH_INTERNAL_DEFINE_BINARY_OPERATOR(RSh, >>)
-NTH_INTERNAL_DEFINE_BINARY_OPERATOR(ArrowPtr, ->*)
-
-struct Comma {
-  template <typename L, typename R>
-  static constexpr decltype(auto) invoke(L const &lhs, R const &rhs) {
-    return (::nth::internal_trace::Evaluate(lhs),
-            ::nth::internal_trace::Evaluate(rhs));
-  }
-  template <typename L, typename R>
-  using invoke_type =
-      decltype((::nth::internal_trace::Evaluate(std::declval<L const &>()),
-                ::nth::internal_trace::Evaluate(std::declval<L const &>())));
-};
-template <typename L, typename R>
-auto operator,(L const &lhs,
-               R const &rhs) requires(::nth::internal_trace::IsTraced<L> or
-                                      ::nth::internal_trace::IsTraced<R>) {
-  return Traced<Comma, L, R>(lhs, rhs);
-}
-
-#undef NTH_INTERNAL_DEFINE_BINARY_OPERATOR
-
-#define NTH_INTERNAL_DEFINE_PREFIX_UNARY_OPERATOR(Op, op)                      \
-  struct Op {                                                                  \
-    static constexpr char name[] = "operator" #op;                             \
-    template <typename T>                                                      \
-    static constexpr decltype(auto) invoke(T const &t) {                       \
-      return op ::nth::internal_trace::Evaluate(t);                            \
-    }                                                                          \
-    template <typename T>                                                      \
-    using invoke_type = decltype(op ::nth::internal_trace::Evaluate(           \
-        std::declval<T const &>()));                                           \
-  };                                                                           \
-  template <::nth::internal_trace::IsTraced T>                                 \
-  auto operator op(T const &t) {                                               \
-    return Traced<Op, T>(t);                                                   \
-  }
-
-NTH_INTERNAL_DEFINE_PREFIX_UNARY_OPERATOR(Tilde, ~)
-NTH_INTERNAL_DEFINE_PREFIX_UNARY_OPERATOR(Not, !)
-NTH_INTERNAL_DEFINE_PREFIX_UNARY_OPERATOR(Neg, -)
-NTH_INTERNAL_DEFINE_PREFIX_UNARY_OPERATOR(Pos, +)
-NTH_INTERNAL_DEFINE_PREFIX_UNARY_OPERATOR(Addr, &)
-NTH_INTERNAL_DEFINE_PREFIX_UNARY_OPERATOR(Ref, *)
-
-#undef NTH_INTERNAL_DEFINE_PREFIX_UNARY_OPERATOR
-
-template <typename PreFn, std::invocable<> auto PostFn>
-struct Responder {
-  bool set(char const *expression,
-           ::nth::internal_trace::TracedEvaluatingTo<bool> auto const &b,
-           char const *file_name, int line_number) {
-    value_ = ::nth::internal_trace::Evaluate(b);
-    if (not value_) { PreFn{}(expression, b, file_name, line_number); }
-    return value_;
-  }
-
-  ~Responder() {
-    if (not value_) { PostFn(); }
-  }
-
- private:
-  bool value_;
-};
-
-template <typename T>
-struct DefineTrace {
-  static constexpr bool defined = false;
-};
-
-template <typename Action, typename... Ts>
-requires(DefineTrace<typename Action::template invoke_type<Ts...>>::
-             defined) struct Traced<Action, Ts...>
-    : DefineTrace<typename Action::template invoke_type<Ts...>> {
-  template <typename U>
-  constexpr Traced(U &&u)
-      : DefineTrace<typename Action::template invoke_type<Ts...>>(
-            [&] { return std::forward<U>(u); }) {}
-};
-
-struct TracedTraversal {
-  template <typename T>
-  void operator()(T const &trace) {
-    if constexpr (::nth::internal_trace::IsTraced<T>) {
-      if constexpr (
-          ::nth::type<typename T::action_type>.template is_a<::nth::internal_trace::Identity>()) {
-        if constexpr (T::action_type::name.empty()) {
-          std::cerr << std::string(indentation, ' ')
-                    << ::nth::internal_trace::Evaluate(trace)
-                    << " [traced value]\n";
-        } else {
-          std::cerr << std::string(indentation, ' ')
-                    << ::nth::internal_trace::Evaluate(trace)
-                    << " [traced value "
-                    << std::quoted(T::action_type::name.data()) << "]\n";
-        }
-      } else {
-        T::argument_types.reduce([&](auto... ts) {
-          std::cerr << std::string(indentation, ' ') << T::action_type::name
-                    << std::string(
-                           40 - indentation - sizeof(T::action_type::name), ' ');
-            std::cerr << "(= " << ::nth::internal_trace::Evaluate(trace)
-                      << ")\n";
-          indentation += 2;
-          size_t i = 0;
-          ((*this)(*static_cast<::nth::type_t<ts> const *>(trace.ptrs_[i++])),
-           ...);
-          indentation -= 2;
-        });
-      }
-    } else {
-      std::string s;
-      nth::StringPrinter p(s);
-      nth::UniversalPrint(p, trace);
-      std::cerr << std::string(indentation, ' ') << s << '\n';
-    }
-  }
-
-  int indentation = 0;
-};
-
-struct Explain {
-  void operator()(char const *expression,
-                  ::nth::internal_trace::TracedEvaluatingTo<bool> auto const &b,
-                  char const *file_name, int line_number) {
-    std::cerr << "\033[31m"
-                 "NTH_ASSERT failed at "
-              << "\033[1m" << file_name << ':' << line_number << ":\033[m\n  "
-              << expression << "\n\n";
-
-    TracedTraversal traverser;
-    traverser(b);
-  }
-};
-
-struct TraceInjector {};
-template <typename T>
-decltype(auto) operator->*(TraceInjector, T const &value) {
-  if constexpr (IsTraced<T>) {
-    return value;
-  } else {
-    return Traced<Identity<CompileTimeStringType<"">>, T>(value);
-  }
-}
-template <typename T>
-decltype(auto) operator->*(T const &value, TraceInjector) {
-  if constexpr (IsTraced<T>) {
-    return value;
-  } else {
-    return Traced<Identity<CompileTimeStringType<"">>, T>(value);
-  }
-}
-
-}  // namespace internal_trace
-
+// `nth::Trace` is a function template wrapping a `T const &`, where `T` must be
+// deduced. The wrapped object may be a temporary, however, a reference is
+// stored in the wrapper so the object must persist for the lifetime of the
+// return value. Compilers which support `NTH_ATTRIBUTE(lifetimebound)`
+// this requirement is enforced. This function template takes a compile-time
+// string as a template argument. This string may be used to indicate a name for
+// a traced value in diagnostics if the asserted/expected expression evaluates
+// to `false`.
 template <nth::CompileTimeString S, int &..., typename T>
-::nth::internal_trace::Traced<
-    ::nth::internal_trace::Identity<
-        ::nth::internal_trace::CompileTimeStringType<S>>,
-    T>
-Trace(T const &value) {
-  return ::nth::internal_trace::Traced<
-      ::nth::internal_trace::Identity<
-          ::nth::internal_trace::CompileTimeStringType<S>>,
-      T>(value);
+::nth::internal_trace::Traced<::nth::internal_trace::Identity<S>, T> Trace(
+    NTH_ATTRIBUTE(lifetimebound) T const &value) {
+  namespace nit = ::nth::internal_trace ;
+  return nit::Traced<nit::Identity<S>, T>(value);
 }
-
-#define NTH_EXPECT(...)                                                        \
-  if (::nth::internal_trace::Responder<::nth::internal_trace::Explain, [] {}>  \
-          responder;                                                           \
-      responder.set(                                                           \
-          (#__VA_ARGS__),                                                      \
-          (::nth::internal_trace::TraceInjector{}                              \
-               ->*__VA_ARGS__->*::nth::internal_trace::TraceInjector{}),       \
-          __FILE__, __LINE__)) {}
-
-#define NTH_ASSERT(...)                                                        \
-  if (::nth::internal_trace::Responder<::nth::internal_trace::Explain,         \
-                                       std::abort>                             \
-          responder;                                                           \
-      responder.set(                                                           \
-          (#__VA_ARGS__),                                                      \
-          (::nth::internal_trace::TraceInjector{}                              \
-               ->*__VA_ARGS__->*::nth::internal_trace::TraceInjector{}),       \
-          __FILE__, __LINE__)) {}
-
-#define NTH_INTERNAL_BODY(memfn)                                               \
- private:                                                                      \
-  template <>                                                                  \
-  struct Impl<#memfn> {                                                        \
-    static constexpr char const name[] = #memfn;                               \
-    template <typename NthType, typename... NthTypes>                          \
-    using invoke_type = decltype(std::declval<NthType const &>().memfn(        \
-        std::declval<NthTypes const &>()...));                                 \
-                                                                               \
-    template <typename NthType, typename... NthTypes>                          \
-    static constexpr decltype(auto) invoke(NthType const &t,                   \
-                                           NthTypes const &...ts) {            \
-      return t.memfn(ts...);                                                   \
-    }                                                                          \
-  };                                                                           \
-                                                                               \
- public:                                                                       \
-  template <typename... NthTypes>                                              \
-  auto memfn(NthTypes const &...ts) const {                                    \
-    return nth::internal_trace::Traced<                                        \
-        Impl<#memfn>, typename std::decay_t<decltype(*this)>::type,            \
-        NthTypes...>(this->value(), ts...);                                    \
-  }
-
-#define NTH_INTERNAL_EXPAND_A(x) NTH_INTERNAL_BODY(x) NTH_INTERNAL_EXPAND_B
-#define NTH_INTERNAL_EXPAND_B(x) NTH_INTERNAL_BODY(x) NTH_INTERNAL_EXPAND_A
-#define NTH_INTERNAL_EXPAND_A_END
-#define NTH_INTERNAL_EXPAND_B_END
-#define NTH_INTERNAL_END(...) NTH_INTERNAL_END_IMPL(__VA_ARGS__)
-#define NTH_INTERNAL_END_IMPL(...) __VA_ARGS__##_END
-
-#define NTH_DECLARE_TRACE_API(t, types)                                        \
-  struct nth::internal_trace::DefineTrace<t>                                   \
-      : nth::internal_trace::TracedValue<t> {                                  \
-   private:                                                                    \
-    template <nth::CompileTimeString>                                          \
-    struct Impl;                                                               \
-                                                                               \
-   public:                                                                     \
-    using type                    = t;                                         \
-    static constexpr bool defined = true;                                      \
-    DefineTrace(auto f) : nth::internal_trace::TracedValue<type>(f) {}         \
-    NTH_INTERNAL_END(NTH_INTERNAL_EXPAND_A types)                              \
-  }
 
 }  // namespace nth
+
+// The `NTH_EXPECT` macro injects tracing into the wrapped expression and
+// evaluates the it. If the wrapped expression evaluates to `true`, control flow
+// proceeds with no visible side-effects. If the expression evaluates to
+// `false`, a diagnostic is reported. If the macro is immediately succeeded by
+// an `else` clause, the body of that `else` clause is executed.
+#define NTH_EXPECT(...) NTH_DEBUG_INTERNAL_TRACE_EXPECT(__VA_ARGS__)
+
+// The `NTH_ASSERT` macro injects tracing into the wrapped expression and
+// evaluates the it. If the wrapped expression evaluates to `true`, control flow
+// proceeds with no visible side-effects. If the expression evaluates to
+// `false`, a diagnostic is reported. If the macro is immediately succeeded by
+// an `else` clause, the body of that `else` clause is executed after which
+// execution is aborted. If no `else` clause is present, execution is aborted.
+#define NTH_ASSERT(...) NTH_DEBUG_INTERNAL_TRACE_ASSERT(__VA_ARGS__)
+
+// Declares the member functions of the type `type` which should be traceable.
+// The argument `member_function_names` must be a parenthesized list (i.e., of
+// the form "(a)(b)(c)") of member functions names. Special member functions are
+// not allowed, but operators are allowed. struct templates and struct template
+// specialization are also supported, via the syntax:
+//
+// ```
+// template <typename T>
+// NTH_TRACE_DECLARE_API(MyTemplate<T>, (member_function1)(member_function2));
+// ```
+//
+#define NTH_TRACE_DECLARE_API(type, member_function_names)                     \
+  NTH_DEBUG_INTERNAL_TRACE_DECLARE_API(type, member_function_names)
 
 #endif  // NTH_DEBUG_TRACE_H

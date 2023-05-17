@@ -18,7 +18,7 @@
   } while (false)
 
 template <typename... Ts>
-NTH_DECLARE_TRACE_API(
+NTH_TRACE_DECLARE_API(
     std::vector<Ts...>,
     (at)(back)(capacity)(data)(empty)(front)(max_size)(operator[])(size));
 
