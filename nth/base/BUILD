@@ -6,6 +6,12 @@ cc_library(
     deps = [],
 )
 
+cc_test(
+    name = "attributes_test",
+    srcs = ["attributes_test.cc"],
+    deps = [":attributes"],
+)
+
 cc_library(
     name = "configuration",
     hdrs = ["configuration.h"],
