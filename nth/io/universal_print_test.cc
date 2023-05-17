@@ -56,6 +56,10 @@ TEST(UniversalPrint, Tuple) {
 TEST(UniversalPrint, Optional) {
   std::string s;
   StringPrinter p(s);
+  UniversalPrint(p, nullptr);
+  EXPECT_EQ(s, "nullptr");
+  s.clear();
+
   UniversalPrint(p, std::nullopt);
   EXPECT_EQ(s, "std::nullopt");
   s.clear();
