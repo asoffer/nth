@@ -26,23 +26,25 @@ struct TracedValue : TracedBase {
   // Constructs the traced value by invoking `f` with the arguments `ts...`.
   constexpr TracedValue(auto f, auto const &...ts) : value_(f(ts...)) {}
 
-  // Returns a reference to a const `type`, the computed value.
-  type const &value() const & { return value_; }
-
  private:
   // Friend function template abstracting over a `TracedValue<T>` and a `T`.
   template <typename U>
-  friend decltype(auto) Evaluate(U const &value);
+  friend constexpr decltype(auto) Evaluate(U const &value);
 
   type value_;
 };
 
+// `Traced` is the primary workhorse of this library. It takes an `Action`
+// template parameter indicating how the value is computed, and a collection of
+// `Ts` which are input types to that action. It stores the computed value as
+// well as pointers to each of the values used in the computation (which must
+// remain valid for the lifetime of this object.
 template <typename Action, typename... Ts>
 struct Traced : TracedValue<typename Action::template invoke_type<Ts...>> {
   using action_type                    = Action;
   static constexpr auto argument_types = nth::type_sequence<Ts...>;
 
-  Traced(Ts const &...ts)
+  constexpr Traced(NTH_ATTRIBUTE(lifetimebound) Ts const &...ts)
       : TracedValue<typename action_type::template invoke_type<Ts...>>(
             [&](auto const &...vs) -> decltype(auto) {
               return action_type::invoke(vs...);
@@ -56,8 +58,12 @@ struct Traced : TracedValue<typename Action::template invoke_type<Ts...>> {
   void const *ptrs_[sizeof...(Ts)];
 };
 
+// A concept matching any type deriving from `TracedBase`. Only `TracedValue`
+// instantiations are allowed to inherit from `TracedBase` so this concept
+// matches any "traced" type.
 template <typename T>
-concept IsTraced = std::derived_from<T, TracedBase>;
+concept TracedImpl = std::derived_from<T, internal_trace::TracedBase>;
+
 template <typename T, typename U>
 concept TracedEvaluatingTo =
     std::derived_from<T, nth::internal_trace::TracedValue<U>>;
@@ -79,9 +85,9 @@ struct Identity {
 // reference to the underlying value, and otherwise returns a constant reference
 // to the passed in `value` unmodified.
 template <typename T>
-decltype(auto) Evaluate(NTH_ATTRIBUTE(lifetimebound) T const &value) {
-  if constexpr (IsTraced<T>) {
-    return value.value_;
+decltype(auto) constexpr Evaluate(NTH_ATTRIBUTE(lifetimebound) T const &value) {
+  if constexpr (nth::internal_trace::TracedImpl<T>) {
+    return (value.value_);
   } else {
     return value;
   }
@@ -89,14 +95,15 @@ decltype(auto) Evaluate(NTH_ATTRIBUTE(lifetimebound) T const &value) {
 
 template <typename PreFn, std::invocable<> auto PostFn>
 struct Responder {
-  bool set(char const *expression, TracedEvaluatingTo<bool> auto const &b,
-           char const *file_name, int line_number) {
+  constexpr bool set(char const *expression,
+                     TracedEvaluatingTo<bool> auto const &b,
+                     char const *file_name, int line_number) {
     value_ = Evaluate(b);
     if (not value_) { PreFn{}(expression, b, file_name, line_number); }
     return value_;
   }
 
-  ~Responder() {
+  constexpr ~Responder() {
     if (not value_) { PostFn(); }
   }
 
@@ -104,45 +111,34 @@ struct Responder {
   bool value_;
 };
 
-template <typename T>
-struct DefineTrace {
-  static constexpr bool defined = false;
-};
-
-template <typename Action, typename... Ts>
-requires(DefineTrace<typename Action::template invoke_type<Ts...>>::
-             defined) struct Traced<Action, Ts...>
-    : DefineTrace<typename Action::template invoke_type<Ts...>> {
-  template <typename U>
-  constexpr Traced(U &&u)
-      : DefineTrace<typename Action::template invoke_type<Ts...>>(
-            [&] { return std::forward<U>(u); }) {}
-};
-
 struct TracedTraversal {
   template <typename T>
   void operator()(T const &trace) {
-    if constexpr (nth::internal_trace::IsTraced<T>) {
+    if constexpr (nth::internal_trace::TracedImpl<T>) {
       if constexpr (requires { T::action_type::name; } and
                     nth::type<typename T::action_type> ==
                         nth::type<nth::internal_trace::Identity<
                             T::action_type::name>>) {
+        std::string s(indentation, ' ');
+        nth::StringPrinter p(s);
+        nth::UniversalPrint(p, nth::internal_trace::Evaluate(trace));
         if constexpr (T::action_type::name.empty()) {
-          std::cerr << std::string(indentation, ' ')
-                    << nth::internal_trace::Evaluate(trace)
-                    << " [traced value]\n";
+          std::cerr << s << " [traced value]\n";
         } else {
-          std::cerr << std::string(indentation, ' ')
-                    << nth::internal_trace::Evaluate(trace) << " [traced value "
+          std::cerr << s << " [traced value "
                     << std::quoted(T::action_type::name.data()) << "]\n";
         }
       } else {
+        std::string s;
+        nth::StringPrinter p(s);
+        nth::UniversalPrint(p, nth::internal_trace::Evaluate(trace));
+
         T::argument_types.reduce([&](auto... ts) {
           std::cerr << std::string(indentation, ' ') << T::action_type::name
                     << std::string(
                            40 - indentation - sizeof(T::action_type::name),
                            ' ');
-          std::cerr << "(= " << ::nth::internal_trace::Evaluate(trace) << ")\n";
+          std::cerr << "(= " << s << ")\n";
           indentation += 2;
           size_t i = 0;
           ((*this)(*static_cast<::nth::type_t<ts> const *>(trace.ptrs_[i++])),
@@ -177,16 +173,16 @@ struct Explain {
 
 struct TraceInjector {};
 template <typename T>
-decltype(auto) operator->*(TraceInjector, T const &value) {
-  if constexpr (nth::internal_trace::IsTraced<T>) {
+constexpr decltype(auto) operator->*(TraceInjector, T const &value) {
+  if constexpr (nth::internal_trace::TracedImpl<T>) {
     return value;
   } else {
     return Traced<Identity<"">, T>(value);
   }
 }
 template <typename T>
-decltype(auto) operator->*(T const &value, TraceInjector) {
-  if constexpr (nth::internal_trace::IsTraced<T>) {
+constexpr decltype(auto) operator->*(T const &value, TraceInjector) {
+  if constexpr (nth::internal_trace::TracedImpl<T>) {
     return value;
   } else {
     return Traced<Identity<"">, T>(value);

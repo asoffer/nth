@@ -20,9 +20,9 @@ namespace nth::internal_trace {
                          std::declval<R const &>()));                          \
   };                                                                           \
   template <typename L, typename R>                                            \
-  auto operator op(L const &lhs, R const &rhs) requires(                       \
-      ::nth::internal_trace::IsTraced<L> or                                    \
-      ::nth::internal_trace::IsTraced<R>) {                                    \
+  constexpr auto operator op(L const &lhs, R const &rhs) requires(             \
+      ::nth::internal_trace::TracedImpl<L> or                                  \
+      ::nth::internal_trace::TracedImpl<R>) {                                  \
     return Traced<Op, L, R>(lhs, rhs);                                         \
   }
 
@@ -62,9 +62,9 @@ struct Comma {
                 ::nth::internal_trace::Evaluate(std::declval<L const &>())));
 };
 template <typename L, typename R>
-auto operator,(L const &lhs,
-               R const &rhs) requires(::nth::internal_trace::IsTraced<L> or
-                                      ::nth::internal_trace::IsTraced<R>) {
+constexpr auto operator,(L const &lhs,
+                         R const &rhs) requires(::nth::internal_trace::TracedImpl<L> or
+                                                ::nth::internal_trace::TracedImpl<R>) {
   return Traced<Comma, L, R>(lhs, rhs);
 }
 
@@ -81,8 +81,8 @@ auto operator,(L const &lhs,
     using invoke_type = decltype(op ::nth::internal_trace::Evaluate(           \
         std::declval<T const &>()));                                           \
   };                                                                           \
-  template <::nth::internal_trace::IsTraced T>                                 \
-  auto operator op(T const &t) {                                               \
+  template <::nth::internal_trace::TracedImpl T>                                                   \
+  constexpr auto operator op(T const &t) {                                     \
     return Traced<Op, T>(t);                                                   \
   }
 

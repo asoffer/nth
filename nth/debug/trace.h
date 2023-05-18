@@ -79,14 +79,16 @@
 //                       (max_size)(operator[])(rfind)(size)(starts_with));
 // ```
 //
-// Moreover, this macro also works with struct templates:
+// Moreover, by appending `_TEMPLATE` to the macro, the same syntax allows us to
+// work with class templates.
 // ```
 // template <typename T>
-// NTH_TRACE_DECLARE_API(std::basic_string<T>,
-//                       (at)(back)(c_str)(capacity)(compare)(data)(ends_with)
-//                       (find)(find_first_not_of)(find_first_of)
-//                       (find_last_not_of)(find_last_of)(front)(length)
-//                       (max_size)(operator[])(rfind)(size)(starts_with));
+// NTH_TRACE_DECLARE_API_TEMPLATE(std::basic_string<T>,
+//                                (at)(back)(c_str)(capacity)(compare)(data)
+//                                (ends_with)(find)(find_first_not_of)
+//                                (find_first_of)(find_last_not_of)
+//                                (find_last_of)(front)(length)(max_size)
+//                                (operator[])(rfind)(size)(starts_with));
 // ```
 //
 namespace nth {
@@ -100,11 +102,15 @@ namespace nth {
 // a traced value in diagnostics if the asserted/expected expression evaluates
 // to `false`.
 template <nth::CompileTimeString S, int &..., typename T>
-::nth::internal_trace::Traced<::nth::internal_trace::Identity<S>, T> Trace(
-    NTH_ATTRIBUTE(lifetimebound) T const &value) {
+constexpr ::nth::internal_trace::Traced<::nth::internal_trace::Identity<S>, T>
+Trace(NTH_ATTRIBUTE(lifetimebound) T const &value) {
   namespace nit = ::nth::internal_trace ;
   return nit::Traced<nit::Identity<S>, T>(value);
 }
+
+// A concept matching any traced type.
+template <typename T>
+concept Traced = ::nth::internal_trace::TracedImpl<T>;
 
 }  // namespace nth
 
@@ -131,10 +137,15 @@ template <nth::CompileTimeString S, int &..., typename T>
 //
 // ```
 // template <typename T>
-// NTH_TRACE_DECLARE_API(MyTemplate<T>, (member_function1)(member_function2));
+// NTH_TRACE_DECLARE_API_TEMPLATE(MyTemplate<T>,
+//                                (member_function1)(member_function2));
 // ```
 //
 #define NTH_TRACE_DECLARE_API(type, member_function_names)                     \
+  template <>                                                                  \
+  NTH_DEBUG_INTERNAL_TRACE_DECLARE_API(type, member_function_names)
+
+#define NTH_TRACE_DECLARE_API_TEMPLATE(type, member_function_names)            \
   NTH_DEBUG_INTERNAL_TRACE_DECLARE_API(type, member_function_names)
 
 #endif  // NTH_DEBUG_TRACE_H

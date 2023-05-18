@@ -7,7 +7,7 @@
  private:                                                                      \
   template <>                                                                  \
   struct Impl<#memfn> {                                                        \
-    static constexpr char const name[] = #memfn;                               \
+    [[maybe_unused]] static constexpr char const name[] = #memfn;              \
     template <typename NthType, typename... NthTypes>                          \
     using invoke_type = decltype(std::declval<NthType const &>().memfn(        \
         std::declval<NthTypes const &>()...));                                 \
@@ -20,12 +20,39 @@
   };                                                                           \
                                                                                \
  public:                                                                       \
-  template <typename... NthTypes>                                              \
+  template <int &..., typename... NthTypes>                                    \
   auto memfn(NthTypes const &...ts) const {                                    \
     return nth::internal_trace::Traced<                                        \
         Impl<#memfn>, typename std::decay_t<decltype(*this)>::type,            \
-        NthTypes...>(this->value(), ts...);                                    \
+        NthTypes...>(::nth::internal_trace::Evaluate(*this), ts...);           \
   }
+
+namespace nth::internal_trace {
+
+template <typename T>
+struct DefineTrace {
+  static constexpr bool defined = false;
+};
+
+template <typename Action, typename... Ts>
+requires(DefineTrace<typename Action::template invoke_type<Ts...>>::defined)  //
+    struct Traced<Action, Ts...>
+    : DefineTrace<typename Action::template invoke_type<Ts...>> {
+  using action_type = Action;
+  static constexpr auto argument_types = nth::type_sequence<Ts...>;
+
+  constexpr Traced(auto const &...ts)
+      : DefineTrace<typename action_type::template invoke_type<Ts...>>(
+            [&] { return action_type::invoke(ts...); }),
+        ptrs_{std::addressof(ts)...} {}
+
+ private:
+  friend struct TracedTraversal;
+
+  void const *ptrs_[sizeof...(Ts)];
+};
+
+}  // namespace nth::internal_trace
 
 #define NTH_DEBUG_INTERNAL_EXPAND_A(x)                                         \
   NTH_DEBUG_INTERNAL_BODY(x) NTH_DEBUG_INTERNAL_EXPAND_B
@@ -46,7 +73,8 @@
    public:                                                                     \
     using type                    = t;                                         \
     static constexpr bool defined = true;                                      \
-    DefineTrace(auto f) : nth::internal_trace::TracedValue<type>(f) {}         \
+    constexpr DefineTrace(auto f)                                              \
+        : nth::internal_trace::TracedValue<type>(f) {}                         \
     NTH_DEBUG_INTERNAL_END(NTH_DEBUG_INTERNAL_EXPAND_A member_function_names)  \
   }
 
