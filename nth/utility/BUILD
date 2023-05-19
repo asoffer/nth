@@ -18,6 +18,23 @@ cc_test(
 )
 
 cc_library(
+    name = "iterator_range",
+    hdrs = ["iterator_range.h"],
+    deps = [],
+)
+
+
+cc_test(
+    name = "iterator_range_test",
+    srcs = ["iterator_range_test.cc"],
+    deps = [
+        ":iterator_range",
+        "//nth/meta:type",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_library(
     name = "lazy",
     hdrs = ["lazy.h"],
     deps = [],
