@@ -33,4 +33,23 @@
 #define NTH_BASE_ATTRIBUTES_INTERNAL_lifetimebound
 #endif
 
+// NTH_ATTRIBUTE(weak)
+// Defines an attribute which may be used to mark symbol declarations and
+// definitions as 'weak'. All unattributed symbols are implicitly declared
+// strong. During linking, if any strong symbol of the same name exists all weak
+// symbols will be ignored. Beyond this rule, the one-definition rule still
+// applies: There must be either exactly one strong symbol definition, or no
+// strong symbol definitions and one weak symbol definition.
+#if (defined(__clang__) and (__clang_major__ >= 6)) or                         \
+    (defined(__GNUC__) and __GNUC__ >= 6)
+#define NTH_BASE_ATTRIBUTES_INTERNAL_SUPPORTS_weak true
+#define NTH_BASE_ATTRIBUTES_INTERNAL_weak [[gnu::weak]]
+#else
+#define NTH_BASE_ATTRIBUTES_INTERNAL_SUPPORTS_weak false
+#define NTH_BASE_ATTRIBUTES_INTERNAL_weak                                      \
+  static_assert(false,                                                         \
+                "Weak symbols are not supported in this build configuration.")
+#endif
+
+
 #endif  // NTH_BASE_ATTRIBUTES_H
