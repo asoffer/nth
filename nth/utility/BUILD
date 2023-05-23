@@ -6,7 +6,6 @@ cc_library(
     deps = [],
 )
 
-
 cc_test(
     name = "buffer_test",
     srcs = ["buffer_test.cc"],
@@ -97,6 +96,24 @@ cc_test(
     srcs = ["ptr_union_test.cc"],
     deps = [
         ":ptr_union",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_library(
+    name = "registration",
+    hdrs = ["registration.h"],
+    deps = [
+        ":no_destructor",
+        "//nth/base:macros",
+    ],
+)
+
+cc_test(
+    name = "registration_test",
+    srcs = ["registration_test.cc"],
+    deps = [
+        ":registration",
         "@com_google_googletest//:gtest_main",
     ],
 )
