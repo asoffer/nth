@@ -17,3 +17,9 @@ cc_library(
     hdrs = ["configuration.h"],
     deps = [],
 )
+
+cc_library(
+    name = "macros",
+    hdrs = ["macros.h"],
+    deps = [],
+)
