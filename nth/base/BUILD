@@ -23,3 +23,11 @@ cc_library(
     hdrs = ["macros.h"],
     deps = [],
 )
+
+cc_test(
+    name = "macros_test",
+    srcs = ["macros_test.cc"],
+    deps = [
+        ":macros"
+    ],
+)
