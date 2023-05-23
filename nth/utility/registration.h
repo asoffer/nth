@@ -11,7 +11,7 @@ namespace internal_registration {
 
 struct Registry {
   template <typename T>
-  T &get() const {
+  auto &get() const {
     return NthRegisterer(static_cast<T const *>(nullptr));
   }
 };
@@ -30,7 +30,10 @@ inline constexpr internal_registration::Registry registry;
 // type-argument. The second type-argument will be registered as the
 // implementation for the virtual base class. Calls to
 // `nth::registry.get<MyBaseClass>()` will return references to an eternal
-// object that derives from `MyBaseClass`.
+// object that derives from `MyBaseClass`. The base class may be
+// const-qualified, in which case the associated invocation to `NTH_REGISTER`
+// must have the same qualification. In such situations, the reterned reference
+// will be a const-reference.
 #define NTH_DECLARE_REGISTRATION_POINT(...)                                    \
   NTH_REQUIRE_EXPANSION_IN_GLOBAL_NAMESPACE;                                   \
   NTH_TYPE(0, __VA_ARGS__) & NthRegisterer(NTH_TYPE(0, __VA_ARGS__) const *);
