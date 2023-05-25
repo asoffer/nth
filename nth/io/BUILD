@@ -3,9 +3,9 @@ package(default_visibility = ["//visibility:public"])
 cc_library(
     name = "format",
     hdrs = ["format.h"],
+    srcs = ["internal/format.h"],
     deps = [
         ":printer",
-        ":universal_print",
         "//nth/meta:compile_time_string",
     ],
 )
@@ -16,10 +16,10 @@ cc_test(
     deps = [
         ":format",
         ":string_printer",
+        ":universal_print",
         "@com_google_googletest//:gtest_main",
     ],
 )
-
 
 cc_library(
     name = "printer",

@@ -113,6 +113,12 @@ void UniversalPrint(Printer auto &p, auto const &value,
  }
 }
 
+struct UniversalFormatter {
+  void operator()(nth::Printer auto& p, auto const& v) const {
+    nth::UniversalPrint(p, v);
+  }
+};
+
 }  // namespace nth
 
 #endif  // NTH_IO_UNIVERSAL_PRINT_H
