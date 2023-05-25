@@ -16,9 +16,11 @@ struct APrinter {
 
 TEST(Printer, DistinguishesPrintersCorrectly) {
   constexpr bool n = Printer<NotAPrinter>;
-  constexpr bool y = Printer<APrinter>;
+  constexpr bool a = Printer<APrinter>;
+  constexpr bool m = Printer<MinimalPrinter>;
   EXPECT_FALSE(n);
-  EXPECT_TRUE(y);
+  EXPECT_TRUE(a);
+  EXPECT_TRUE(m);
 }
 
 }  // namespace
