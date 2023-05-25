@@ -90,6 +90,13 @@ TEST(FormatString, Construction) {
   [[maybe_unused]] constexpr FormatString f2("{}{}");
 }
 
+TEST(FormatString, UTf8Construction) {
+  [[maybe_unused]] constexpr FormatString f1("\xc0\x80");
+  [[maybe_unused]] constexpr FormatString f2("\xc0\x80{}");
+  EXPECT_DEATH({ FormatString("\xc0\x80}"); }, "");
+}
+
+
 struct TrivialFormatter {
   void operator()(nth::Printer auto& p, std::string_view s) const {
     p.write(s);
@@ -114,6 +121,10 @@ TEST(FormatString, Printer) {
 
   Format<"{}abc{}{}">(p, t, "1", "2", "3");
   EXPECT_EQ(s, "1abc23");
+  s.clear();
+
+  Format<"{}años">(p, t, "cumple");
+  EXPECT_EQ(s, "cumpleaños");
 }
 
 TEST(FormatString, UniversalFormatter) {
@@ -134,6 +145,10 @@ TEST(FormatString, UniversalFormatter) {
 
   Format<"{}abc{}{}">(p, f, 1, 2, 3);
   EXPECT_EQ(s, "1abc23");
+  s.clear();
+
+  Format<"{}años">(p, f, "cumple");
+  EXPECT_EQ(s, "cumpleaños");
 }
 
 }  // namespace
