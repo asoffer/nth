@@ -54,13 +54,13 @@ cc_toolchain(
 cc_toolchain_config(
     name = "k8_toolchain_config",
     os = "k8",
-    compiler_path = "/usr/bin/clang++-14",
+    compiler_path = "/usr/bin/clang++-16",
     warnings = [
         "-Wall",
         "-Werror",
         "-Wextra",
         "-Wpedantic",
         "-Wuninitialized",
-        "-Wno-gcc-compat", # https://github.com/abseil/abseil-cpp/issues/1360
+        "-Wno-gcc-compat",
     ]
 )

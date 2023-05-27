@@ -10,7 +10,7 @@ building and testing. You will need a C++20-compliant compiler and a relatively
 recent copy of [Bazel](https://bazel.build/). Specifically,
 
 * Bazel version 5.4.0 or greater
-* Clang 14.0.0
+* Clang 16.0.0
 
 The `nth` libraries are intended to be used from your C++ code and always built
 from source. For this reason, we does not provide any installation or setup
