@@ -1,7 +1,10 @@
 #ifndef NTH_IO_UNIVERSAL_PRINT_H
 #define NTH_IO_UNIVERSAL_PRINT_H
 
+#include <chrono>
+#include <ctime>
 #include <functional>
+#include <iomanip>
 #include <memory>
 #include <optional>
 #include <ostream>
@@ -70,6 +73,9 @@ void UniversalPrint(Printer auto &p, auto const &value,
    } else {
      internal_universal_print::UniversalPrintImpl(p, std::nullopt, options);
    }
+ } else if constexpr (type.template is_a<std::chrono::time_point>()) {
+   std::time_t t = std::chrono::system_clock::to_time_t(value);
+   UniversalPrint(p, std::put_time(std::localtime(&t), "%F %T"), options);
  } else if constexpr (type.template is_a<std::variant>()) {
    std::visit(
        [&](auto const &value) {
