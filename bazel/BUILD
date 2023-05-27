@@ -27,7 +27,7 @@ cc_toolchain(
 cc_toolchain_config(
     name = "macosx_toolchain_config",
     os = "macosx",
-    compiler_path = "/usr/bin/clang",
+    compiler_path = "/usr/local/bin/clang-16",
     warnings = [
         "-Wall",
         "-Werror",

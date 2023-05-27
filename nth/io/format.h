@@ -80,7 +80,9 @@ constexpr void Format(nth::Printer auto& p,
                       Ts const&... ts) requires(sizeof...(Ts) ==
                                                 Fmt.placeholders()) {
   constexpr std::string_view format(Fmt.NthInternalFormatStringDataMember);
-  constexpr std::array replacements = internal_format::Replacements<Fmt>();
+  std::array<internal_format::PlaceholderRange, Fmt.placeholders()>
+      replacements;
+  internal_format::Replacements<Fmt>(replacements);
 
   size_t i        = 0;
   size_t last_end = 0;

@@ -16,7 +16,7 @@ inline constexpr std::optional<uint32_t> ExtractNextUtf8Codepoint(
     std::string_view& text) {
   uint32_t value;
   if constexpr (std::is_signed_v<char>) {
-    if (text[0]>= 0) {
+    if (text[0] >= 0) {
       value = text[0];
     } else {
       value = static_cast<uint32_t>(static_cast<int32_t>(text[0]) + 128);
@@ -24,7 +24,7 @@ inline constexpr std::optional<uint32_t> ExtractNextUtf8Codepoint(
   } else {
     value = text[0];
   }
-  auto bytes     = std::countl_one(value);
+  auto bytes = std::countl_one(value);
   if (text.size() < static_cast<size_t>(bytes)) { return std::nullopt; }
   switch (bytes) {
     case 0: text.remove_prefix(1); break;
@@ -93,9 +93,8 @@ struct PlaceholderRange {
 };
 
 template <auto Fmt>
-constexpr auto Replacements() {
-  std::array<PlaceholderRange, Fmt.placeholders()> array;
-
+constexpr void Replacements(
+    std::array<PlaceholderRange, Fmt.placeholders()>& array) {
   auto* array_ptr = array.data();
   char const* p   = Fmt.NthInternalFormatStringDataMember;
   for (size_t i = 0; i < Fmt.size(); ++i) {
@@ -107,7 +106,6 @@ constexpr auto Replacements() {
       } break;
     }
   }
-  return array;
 }
 
 }  // namespace nth::internal_format

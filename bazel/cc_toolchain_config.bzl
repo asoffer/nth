@@ -128,9 +128,10 @@ def _impl(ctx):
         abi_libc_version = "unknown",
         cxx_builtin_include_directories = {
             "macosx": [
-                "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/",
-                "/Library/Developer/CommandLineTools/usr/lib/clang/14.0.3/include/",
-                "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/System/Library/Frameworks/CoreFoundation.framework/Headers/",
+                "/opt/homebrew/Cellar/llvm/16.0.4/lib/clang/16/include/",
+                "/opt/homebrew/Cellar/llvm/16.0.4/lib/clang/16/share/",
+                "/Library/Developer/CommandLineTools/SDKs/MacOSX13.sdk/usr/include/",
+                "/Library/Developer/CommandLineTools/SDKs/MacOSX13.sdk/System/Library/Frameworks/CoreFoundation.framework/Headers"
             ],
         }.get(ctx.attr.os, [
             "/usr/lib",

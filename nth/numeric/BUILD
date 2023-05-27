@@ -1,12 +1,12 @@
 package(default_visibility = ["//visibility:private"])
 
-cc_library(
-    name = "integer",
-    visibility = ["//visibility:public"],
-    hdrs = ["integer.h"],
-    srcs = ["integer.cc"],
-    deps = []
-)
+# cc_library(
+#     name = "integer",
+#     visibility = ["//visibility:public"],
+#     hdrs = ["integer.h"],
+#     srcs = ["integer.cc"],
+#     deps = []
+# )
 
 # cc_test(
 #     name = "integer_test",
