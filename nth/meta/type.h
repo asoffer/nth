@@ -142,6 +142,24 @@ inline constexpr auto type_sequence = sequence<type<Ts>...>;
 template <Type auto t>
 using type_t = typename decltype(t)::type;
 
+// An alias which evaluates to its first argument. This alias is primarily
+// useful in two common scenarios: First, when the you need to retrieve the
+// first element of a pack (which could alternately be computed via
+// `nth::type_t<nth::type_sequence<Pack...>.head()>`). Second, when you want to
+// repeat the same type for each element of a pack, you can use 
+//
+//   ```
+//   nth::first_t<T, Pack>...
+//   ```
+// where you might otherwise need to coerce the cumbersome
+//
+//   ```
+//   nth::type_sequence<Pack...>.template transform<[](auto) { return nth::type<T>; }>();
+//   ```
+// back into a pack.
+template <typename T, typename...>
+using first_t = T;
+
 }  // namespace nth
 
 #endif  // NTH_META_TYPE_H
