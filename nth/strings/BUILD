@@ -1,6 +1,27 @@
 package(default_visibility = ["//visibility:public"])
 
 cc_library(
+    name = "format",
+    hdrs = ["format.h"],
+    srcs = ["internal/format.h"],
+    deps = [
+        "//nth/io:printer",
+        "//nth/meta:compile_time_string",
+    ],
+)
+
+cc_test(
+    name = "format_test",
+    srcs = ["format_test.cc"],
+    deps = [
+        ":format",
+        "//nth/io:string_printer",
+        "//nth/io:universal_print",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_library(
     name = "null_termination",
     hdrs = ["null_termination.h"],
     srcs = [

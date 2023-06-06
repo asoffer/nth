@@ -4,7 +4,7 @@
 #include <array>
 #include <memory>
 
-#include "nth/io/format.h"
+#include "nth/strings/format.h"
 
 namespace nth::internal_log {
 

@@ -6,10 +6,10 @@
 #include <iostream>
 #include <string_view>
 
-#include "nth/io/format.h"
 #include "nth/io/universal_print.h"
 #include "nth/log/internal/entry.h"
 #include "nth/log/internal/indicator.h"
+#include "nth/strings/format.h"
 
 namespace nth {
 

@@ -18,28 +18,6 @@ cc_test(
     ],
 )
 
-
-cc_library(
-    name = "format",
-    hdrs = ["format.h"],
-    srcs = ["internal/format.h"],
-    deps = [
-        ":printer",
-        "//nth/meta:compile_time_string",
-    ],
-)
-
-cc_test(
-    name = "format_test",
-    srcs = ["format_test.cc"],
-    deps = [
-        ":format",
-        ":string_printer",
-        ":universal_print",
-        "@com_google_googletest//:gtest_main",
-    ],
-)
-
 cc_library(
     name = "printer",
     hdrs = ["printer.h"],

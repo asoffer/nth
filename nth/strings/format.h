@@ -1,5 +1,5 @@
-#ifndef NTH_IO_FORMAT_H
-#define NTH_IO_FORMAT_H
+#ifndef NTH_STRINGS_FORMAT_H
+#define NTH_STRINGS_FORMAT_H
 
 #include <array>
 #include <concepts>
@@ -7,9 +7,9 @@
 #include <string_view>
 #include <type_traits>
 
-#include "nth/io/internal/format.h"
 #include "nth/io/printer.h"
 #include "nth/meta/compile_time_string.h"
+#include "nth/strings/internal/format.h"
 
 namespace nth {
 namespace internal_format {
@@ -107,4 +107,4 @@ constexpr void Format(nth::Printer auto& p,
     return 0;                                                                  \
   }()
 
-#endif  // NTH_IO_FORMAT_H
+#endif  // NTH_STRINGS_FORMAT_H

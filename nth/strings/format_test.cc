@@ -1,4 +1,4 @@
-#include "nth/io/format.h"
+#include "nth/strings/format.h"
 
 #include "gtest/gtest.h"
 #include "nth/io/string_printer.h"
