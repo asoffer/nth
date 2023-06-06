@@ -7,12 +7,6 @@ char const *NullTerminated(NTH_ATTRIBUTE(lifetimebound) std::string const &s,
   return s.c_str();
 }
 
-char const *NullTerminated(NTH_ATTRIBUTE(lifetimebound)
-                               std::same_as<char const *> auto s,
-                           std::span<char> *) {
-  return s;
-}
-
 StringDeleter NullTerminated(std::string_view s, std::span<char> *buffer) {
   if (buffer->size() < s.size()) {
     char *p = buffer->data();

@@ -1,6 +1,25 @@
 package(default_visibility = ["//visibility:public"])
 
 cc_library(
+    name = "environment_variable",
+    hdrs = ["environment_variable.h"],
+    srcs = ["environment_variable.cc"],
+    deps = [
+        "//nth/strings:null_termination",
+    ],
+)
+
+cc_test(
+    name = "environment_variable_test",
+    srcs = ["environment_variable_test.cc"],
+    deps = [
+        ":environment_variable",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+
+cc_library(
     name = "format",
     hdrs = ["format.h"],
     srcs = ["internal/format.h"],

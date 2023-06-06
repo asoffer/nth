@@ -41,7 +41,9 @@ char const *NullTerminated(NTH_ATTRIBUTE(lifetimebound) std::string const &s,
                            std::span<char> *);
 char const *NullTerminated(NTH_ATTRIBUTE(lifetimebound)
                                std::same_as<char const *> auto s,
-                           std::span<char> *);
+                           std::span<char> *) {
+  return s;
+}
 
 StringDeleter NullTerminated(std::string_view s, std::span<char> *buffer);
 
