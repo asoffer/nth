@@ -58,7 +58,7 @@ StringDeleter NullTerminated(char const (&s)[N], std::span<char> *buffer) {
     *buffer = buffer->subspan(N + 1);
     return StringDeleter::Unowned(p);
   } else {
-    char *p = new char[N];
+    char *p = new char[N + 1];
     std::memcpy(p, s, N);
     p[N] = '\0';
     return StringDeleter::Owned(p);

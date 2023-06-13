@@ -42,7 +42,7 @@ TEST(InvokeOnNullTerminated, StringViews) {
   char const *p = nullptr;
   std::string str;
   InvokeOnNullTerminated([&](char const *s) { str = p = s; }, s);
-  EXPECT_NE(p, s);
+  EXPECT_NE(p, s.data());
   EXPECT_EQ(str, "some-string");
 }
 
