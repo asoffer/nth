@@ -1,10 +1,13 @@
-build --crosstool_top=//bazel:cc
-build --host_crosstool_top=@bazel_tools//tools/cpp:toolchain
-build --strip=never
-build --color=yes
-test  --color=yes
-test  --test_arg="--use-colour yes"
-test  --test_output=errors
+common \
+  --color=yes \
+  --experimental_enable_bzlmod
+build \
+  --crosstool_top=//bazel:cc \
+  --host_crosstool_top=@bazel_tools//tools/cpp:toolchain \
+  --strip=never
+test \
+  --test_arg="--use-colour yes" \
+  --test_output=errors
 
 build:asan \
   --copt=-fsanitize=address \
