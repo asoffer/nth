@@ -133,4 +133,5 @@ cc_test(
         ":required",
         "@com_google_googletest//:gtest_main",
     ],
+    tags = ["noasan"],
 )
