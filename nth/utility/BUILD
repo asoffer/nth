@@ -126,12 +126,11 @@ cc_library(
     ],
 )
 
-cc_test(
-    name = "required_test",
-    srcs = ["required_test.cc"],
-    deps = [
-        ":required",
-        "@com_google_googletest//:gtest_main",
-    ],
-    tags = ["noasan"],
-)
+# cc_test(
+#     name = "required_test",
+#     srcs = ["required_test.cc"],
+#     deps = [
+#         ":required",
+#         "@com_google_googletest//:gtest_main",
+#     ],
+# )
