@@ -19,7 +19,7 @@ jobs:
           bazel test -c dbg ...
       - name: Test Address Sanitizer Build
         run: >-
-          bazel test -c dbg --config=asan ... --build_tag_filters="-noasan" --test_tag_filters="-noasan"
+          bazel test -c dbg --config=asan ...
       - name: Test Undefined Behavior Sanitizer Build
         run: >-
           bazel test -c dbg --config=ubsan 
