@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <string_view>
+#include <utility>
 
 namespace nth {
 namespace internal_edit_distance {
