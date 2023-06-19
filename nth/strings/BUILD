@@ -57,3 +57,27 @@ cc_test(
         "@com_google_googletest//:gtest_main",
     ],
 )
+
+cc_library(
+    name = "text",
+    hdrs = ["text.h"],
+    srcs = ["text.cc"],
+    deps = [
+        ":text_encoding",
+    ],
+)
+
+cc_test(
+    name = "text_test",
+    srcs = ["text_test.cc"],
+    deps = [
+        ":text",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_library(
+    name = "text_encoding",
+    hdrs = ["text_encoding.h"],
+    deps = [],
+)
