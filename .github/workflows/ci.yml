@@ -19,7 +19,7 @@ jobs:
           bazel test -c dbg ...
       - name: Test Undefined Behavior Sanitizer Build
         run: >-
-          bazel test -c dbg --config=ubsan 
+          bazel test -c dbg ... --config=ubsan 
       - name: Test Optimized Build
         run: >-
           bazel test -c opt ...

@@ -1,6 +1,21 @@
 package(default_visibility = ["//visibility:public"])
 
 cc_library(
+    name = "edit_distance",
+    hdrs = ["edit_distance.h"],
+    srcs = ["edit_distance.cc"],
+)
+
+cc_test(
+    name = "edit_distance_test",
+    srcs = ["edit_distance_test.cc"],
+    deps = [
+        ":edit_distance",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_library(
     name = "format",
     hdrs = ["format.h"],
     srcs = ["internal/format.h"],
