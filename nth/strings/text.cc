@@ -20,8 +20,13 @@ std::string_view GreedyLineBreak(std::string_view& text, size_t line_width,
     char const* next_word_start = p;
     if (static_cast<size_t>(std::distance(first_word_start, next_word_end)) >
         line_width) {
-      text = std::string_view(last_word_start, text.end());
-      return std::string_view(first_word_start, last_word_end);
+      if (last_word_end == first_word_start) {
+        text = std::string_view(next_word_start, text.end());
+        return std::string_view(first_word_start, next_word_end);
+      } else {
+        text = std::string_view(last_word_start, text.end());
+        return std::string_view(first_word_start, last_word_end);
+      }
     }
     if (p == text.end()) {
       text = std::string_view(p, 0);

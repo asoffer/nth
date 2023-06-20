@@ -53,10 +53,10 @@ TEST(GreedyLineBreak, AsciiTrimsWhitespace) {
     std::string_view s        = "  \t \n\r hello";
     std::string_view original = s;
     std::string_view result   = GreedyLineBreak(s, 4, text_encoding::ascii);
-    EXPECT_EQ(result, "");
-    EXPECT_EQ(s, "hello");
+    EXPECT_EQ(result, "hello");
+    EXPECT_EQ(s, "");
     EXPECT_EQ(result.data(), &original[7]);
-    EXPECT_EQ(s.data(), &original[7]);
+    EXPECT_EQ(s.data(), &original[12]);
   }
   {
     std::string_view s        = "  \t \n\r hello";

@@ -7,18 +7,23 @@
 
 namespace nth {
 
-// Finds the first position where a line-break may occur resulting in the
-// largest possible line no longer than `line_width`. Line breaks may only occur
-// at whitespace characters. The returned line and any surrounding whitespace
-// are removed from `text`.
+// If `text` is empty, returns `text`. Otherwise, returns a non-empty
+// sub-`std::string_view` of `text` subject to the following constraints, if
+// possible:
 //
-// More technically, returns the unique sub-string_view of `text` such that,
-// there are only whitespace characters in `text` preceding it, its end either
-// coinsides with the end of `text`, or is followed in text by a whitespace
-// character, and it is the longest sub-string_view whose length is no more than
-// `line_width` subject to these first two constraints. The input `text` then
-// has a prefix removed containing the entirety of the returned sub-string_view
-// and any whitespace characters immediately following it.
+//   * There are only whitespace characters in `text` preceding the returned
+//     `std::string_view`.
+//   * The end of the returned `std::string_view` occurs at the boundary between
+//     a non-whitespace and a whitespace character.
+//   * The longest possible `std::string_view` whose length is no more than
+//     `line_width` and is subject to the first two constraints is returned.
+//
+// If no such `std::string_view` exists (because the very first contiguous
+// sequence of non-whitespace characters is longer than `line_width`), then a
+// view over the first contiguous sequence of non-whitespace characters is
+// returned. In either case, the input `text` then has a prefix removed
+// containing the entirety of the returned sub-`std::string_view` and any
+// whitespace characters immediately preceding or following it.
 std::string_view GreedyLineBreak(std::string_view& text, size_t line_width,
                                  decltype(text_encoding::ascii));
 
