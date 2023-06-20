@@ -1,6 +1,20 @@
 package(default_visibility = ["//visibility:public"])
 
 cc_library(
+    name = "source_location",
+    hdrs = ["source_location.h"],
+    deps = [],
+)
+
+cc_test(
+    name = "source_location_test",
+    srcs = ["source_location_test.cc"],
+    deps = [
+        ":source_location",
+    ],
+)
+
+cc_library(
     name = "trace",
     hdrs = ["trace.h"],
     srcs = [
@@ -21,6 +35,5 @@ cc_test(
     srcs = ["trace_test.cc"],
     deps = [
         ":trace",
-        "@com_google_googletest//:gtest_main",
     ],
 )
