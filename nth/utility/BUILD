@@ -134,3 +134,17 @@ cc_test(
         "@com_google_googletest//:gtest_main",
     ],
 )
+
+cc_library(
+    name = "unconstructible",
+    hdrs = ["unconstructible.h"],
+    deps = [],
+)
+
+cc_test(
+    name = "unconstructible_test",
+    srcs = ["unconstructible_test.cc"],
+    deps = [
+        ":unconstructible",
+    ],
+)

@@ -3,7 +3,9 @@ package(default_visibility = ["//visibility:public"])
 cc_library(
     name = "source_location",
     hdrs = ["source_location.h"],
-    deps = [],
+    deps = [
+        "//nth/utility:unconstructible",
+    ],
 )
 
 cc_test(

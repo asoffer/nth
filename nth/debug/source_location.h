@@ -3,20 +3,9 @@
 
 #include <string_view>
 
+#include "nth/utility/unconstructible.h"
+
 namespace nth {
-
-struct source_location;
-namespace internal_source_location {
-
-// Used to ensure that arguments to `source_location::current` cannot be
-// directly specified.
-struct unconstructible {
- private:
-  friend source_location;
-  unconstructible() = default;
-};
-
-}  // namespace internal_source_location
 
 // Represents a source location for the purposes of debugging. There are no
 // guarantees the values of any 
@@ -26,10 +15,10 @@ struct source_location {
   // Returns a `source_location` reperesenting the location at which this
   // function call is invoked.
   static constexpr source_location current(
-      internal_source_location::unconstructible = {},
-      char const* file                          = __builtin_FILE(),
-      char const* function                      = __builtin_FUNCTION(),
-      int line                                  = __builtin_LINE()) {
+      unconstructible_except_by<source_location> = {},
+      char const* file                           = __builtin_FILE(),
+      char const* function                       = __builtin_FUNCTION(),
+      int line                                   = __builtin_LINE()) {
     return source_location(file, function, line);
   }
 
