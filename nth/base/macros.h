@@ -62,6 +62,16 @@
 // Expands to the arguments passed in.
 #define NTH_IDENTITY(...) __VA_ARGS__
 
+// NTH_NOT
+//
+// The macro argument must expand to either `true` or `false`. The entire macro
+// will expand to `true` if the argument expands to `false`, and `false` if the
+// argument expands to `true`.
+#define NTH_NOT(b) NTH_INTERNAL_NOT(b)
+#define NTH_INTERNAL_NOT(b) NTH_INTERNAL_NOT_##b
+#define NTH_INTERNAL_NOT_true false
+#define NTH_INTERNAL_NOT_false true
+
 // NTH_IF
 //
 // Invokes either `t` or `f` on `__VA_ARGS__`. `condition` must expand to either
@@ -75,16 +85,18 @@
 #define NTH_INTERNAL_BRANCH_false(t, f, ...) f(__VA_ARGS__)
 #define NTH_INTERNAL_BRANCH_true(t, f, ...) t(__VA_ARGS__)
 
-// Expands either to its argument, if it is not parenthesesized, or to it
-// arguments with the outermost parentheses removed, if it is surrounded by
-// parentheses.
-#define NTH_IGNORE_PARENTHESES(argument)                                       \
-  NTH_IF(NTH_IS_PARENTHESIZED(argument),                                       \
-         NTH_INTERNAL_IGNORE_PARENTHESES_REMOVE, NTH_IDENTITY, argument)
+// NTH_IS_EMPTY
+//
+// Expands to `true` if no variadic arguments are passed and to `false`
+// otherwise.
+#define NTH_IS_EMPTY(...) NTH_INTERNAL_IS_EMPTY_##__VA_OPT__(false)
+#define NTH_INTERNAL_IS_EMPTY_ true
+#define NTH_INTERNAL_IS_EMPTY_false false
 
-#define NTH_INTERNAL_IGNORE_PARENTHESES_REMOVE(p)                              \
-  NTH_INTERNAL_EXPAND_WITH_PREFIX(, NTH_IDENTITY p)
-
+// NTH_IS_PARENTHESIZED
+//
+// Expands to `true` if the argument is entirely enclosed in parentheses, and to
+// `false` otherwise.
 #define NTH_IS_PARENTHESIZED(x)                                                \
   NTH_FIRST_ARGUMENT(                                                          \
       NTH_INTERNAL_EXPAND_WITH_PREFIX(NTH_INTERNAL_IS_PARENTHESIZED_PREFIXED_, \
@@ -96,5 +108,17 @@
   true
 #define NTH_INTERNAL_IS_PARENTHESIZED_PREFIXED_NTH_INTERNAL_IS_PARENTHESIZED_REMOVE \
   false,
+
+// NTH_IGNORE_PARENTHESES
+//
+// Expands either to its argument, if it is not parenthesesized, or to it
+// arguments with the outermost parentheses removed, if it is surrounded by
+// parentheses.
+#define NTH_IGNORE_PARENTHESES(argument)                                       \
+  NTH_IF(NTH_IS_PARENTHESIZED(argument),                                       \
+         NTH_INTERNAL_IGNORE_PARENTHESES_REMOVE, NTH_IDENTITY, argument)
+
+#define NTH_INTERNAL_IGNORE_PARENTHESES_REMOVE(p)                              \
+  NTH_INTERNAL_EXPAND_WITH_PREFIX(, NTH_IDENTITY p)
 
 #endif  // NTH_BASE_MACROS_H
