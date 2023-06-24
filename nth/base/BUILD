@@ -21,6 +21,7 @@ cc_library(
 cc_library(
     name = "macros",
     hdrs = ["macros.h"],
+    srcs = ["internal/macros.h"],
     deps = [],
 )
 

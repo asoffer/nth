@@ -1,83 +1,15 @@
 #ifndef NTH_BASE_MACROS_H
 #define NTH_BASE_MACROS_H
 
-#include <type_traits>
+#include "nth/base/internal/macros.h"
 
 // This file defines commonly used macros and utilities for interacting with
-// macros.
+// macros. All macros are prefixed with `NTH_`. Macros that are prefixed with
+// `NTH_INTERNAL_` are implementation details not to be explicitly invoked by
+// end users. All other macros are part of the public API.
 
-namespace nth {
-namespace internal_macros {
-
-inline constexpr bool macro_must_be_expanded_in_the_global_namespace = true;
-
-template <typename T>
-struct qualifiers {
-  static constexpr int value = 0;
-};
-template <typename T>
-struct qualifiers<T&> {
-  static constexpr int value = 1;
-};
-template <typename T>
-struct qualifiers<T&&> {
-  static constexpr int value = 2;
-};
-
-template <typename T, int Q>
-struct explicitly_qualified_type {
-  using type = T;
-};
-template <typename T>
-struct explicitly_qualified_type<T, 1> {
-  using type = T&;
-};
-template <typename T>
-struct explicitly_qualified_type<T, 2> {
-  using type = T&&;
-};
-
-// Types used below need to listed as pointers to support both incomplete types
-// and pure-virtual types. The use of `explicitly_qualified_types` also enables
-// us to support types with qualifiers.
-template <typename... Ts>
-using type_list = void (*)(nth::internal_macros::explicitly_qualified_type<
-                           std::remove_reference_t<Ts>,
-                           nth::internal_macros::qualifiers<Ts>::value>*...);
-
-// In the templates below the `type_list` is wrapped in an extra `void(...)` so
-// that the macros defined below can use `void(...)` as a mechanism to make sure
-// the macro cannot be unintentionally exploited. If the type list provided in
-// the macro was not expanded into an expression using parentheses, but just one
-// with angle-brackets, a user could attempt to close an angle-bracket inside
-// the macro and inject other code.
-
-template <typename>
-struct type_count;
-
-template <typename... Ts>
-struct type_count<void(void (*)(Ts...))> {
-  static constexpr int count = sizeof...(Ts);
-};
-
-template <int, typename>
-struct get_type;
-
-template <int N, typename... Ts>
-struct get_type<N, void(void (*)(Ts...))> : type_count<void(void (*)(Ts...))> {
-  static_assert(sizeof...(Ts) > N,
-                "Too few types expanded from macro argument.");
-
- private:
-  using explicitly_qualified_type =
-      std::remove_pointer_t<__type_pack_element<N, Ts...>>;
-
- public:
-  using type = typename explicitly_qualified_type::type;
-};
-
-}  // namespace internal_macros
-
+// NTH_REQUIRE_EXPANSION_IN_GLOBAL_NAMESPACE
+//
 // Expands to a declaration which will compile if and only if it is in the
 // global namespace.
 #define NTH_REQUIRE_EXPANSION_IN_GLOBAL_NAMESPACE                              \
@@ -86,6 +18,8 @@ struct get_type<N, void(void (*)(Ts...))> : type_count<void(void (*)(Ts...))> {
   }                                                                            \
   static_assert(true, "require a semicolon")
 
+// NTH_TYPE
+//
 // Given an integer index and a pack of types, expands to an expression
 // evaluating to the type in the pack at the given index.
 //
@@ -101,6 +35,8 @@ struct get_type<N, void(void (*)(Ts...))> : type_count<void(void (*)(Ts...))> {
   typename ::nth::internal_macros::get_type<                                   \
       index, void(nth::internal_macros::type_list<__VA_ARGS__>)>::type
 
+// NTH_TYPE_COUNT
+//
 // Expands to the number of types listed in the macro. For example, despite the
 // fact that `NTH_TYPE_COUNT(std::pair<int, bool>, char)` has three macro
 // arguments, the expanded expression will be a constant expression evaluating
@@ -109,6 +45,56 @@ struct get_type<N, void(void (*)(Ts...))> : type_count<void(void (*)(Ts...))> {
   ::nth::internal_macros::type_count<void(                                     \
       nth::internal_macros::type_list<__VA_ARGS__>)>::count
 
-}  // namespace nth
+// NTH_FIRST_ARGUMENT
+//
+// Expands to the first argument passed to the macro.
+#define NTH_FIRST_ARGUMENT(...) NTH_INTERNAL_FIRST_ARGUMENT(__VA_ARGS__)
+#define NTH_INTERNAL_FIRST_ARGUMENT(p, ...) p
+
+// NTH_INVOKE
+//
+// Invokes the first argument passed to the macro on the remaining arguments.
+#define NTH_INVOKE(...) NTH_INTERNAL_INVOKE_IMPL(__VA_ARGS__)
+#define NTH_INTERNAL_INVOKE_IMPL(f, ...) f(__VA_ARGS__)
+
+// NTH_IDENTITY
+//
+// Expands to the arguments passed in.
+#define NTH_IDENTITY(...) __VA_ARGS__
+
+// NTH_IF
+//
+// Invokes either `t` or `f` on `__VA_ARGS__`. `condition` must expand to either
+// `true` or `false`. If `condition` expands to `true`, the macro expands to the
+// macro `t` invoked on `__VA_ARGS__`. Otherwise (if `condition` expands to
+// `false`), the macro expands to the macro `f` invoked on `__VA_ARGS__`.
+#define NTH_IF(condition, t, f, ...)                                           \
+  NTH_INTERNAL_IF(condition, t, f, __VA_ARGS__)
+#define NTH_INTERNAL_IF(condition, t, f, ...)                                  \
+  NTH_INTERNAL_BRANCH_##condition(t, f, __VA_ARGS__)
+#define NTH_INTERNAL_BRANCH_false(t, f, ...) f(__VA_ARGS__)
+#define NTH_INTERNAL_BRANCH_true(t, f, ...) t(__VA_ARGS__)
+
+// Expands either to its argument, if it is not parenthesesized, or to it
+// arguments with the outermost parentheses removed, if it is surrounded by
+// parentheses.
+#define NTH_IGNORE_PARENTHESES(argument)                                       \
+  NTH_IF(NTH_IS_PARENTHESIZED(argument),                                       \
+         NTH_INTERNAL_IGNORE_PARENTHESES_REMOVE, NTH_IDENTITY, argument)
+
+#define NTH_INTERNAL_IGNORE_PARENTHESES_REMOVE(p)                              \
+  NTH_INTERNAL_EXPAND_WITH_PREFIX(, NTH_IDENTITY p)
+
+#define NTH_IS_PARENTHESIZED(x)                                                \
+  NTH_FIRST_ARGUMENT(                                                          \
+      NTH_INTERNAL_EXPAND_WITH_PREFIX(NTH_INTERNAL_IS_PARENTHESIZED_PREFIXED_, \
+                                      NTH_INTERNAL_IS_PARENTHESIZED_REMOVE x))
+
+#define NTH_INTERNAL_IS_PARENTHESIZED_REMOVE(...)                              \
+  NTH_INTERNAL_IS_PARENTHESIZED_TRUE
+#define NTH_INTERNAL_IS_PARENTHESIZED_PREFIXED_NTH_INTERNAL_IS_PARENTHESIZED_TRUE \
+  true
+#define NTH_INTERNAL_IS_PARENTHESIZED_PREFIXED_NTH_INTERNAL_IS_PARENTHESIZED_REMOVE \
+  false,
 
 #endif  // NTH_BASE_MACROS_H
