@@ -57,66 +57,68 @@ void UniversalPrintImpl(Printer auto &p, auto const &value,
 void UniversalPrint(Printer auto &p, auto const &value,
                     UniversalPrintOptions options) {
   constexpr auto type = nth::type<decltype(value)>.decayed();
- if constexpr (type == nth::type<std::nullptr_t>) {
+  if constexpr (type == nth::type<std::nullptr_t>) {
     p.write("nullptr");
- } else if constexpr (requires { p.write(value); } and
-                      (type == nth::type<char> or
-                       not std::convertible_to<nth::type_t<type>, char>)) {
-   p.write(value);
- } else if constexpr (type == nth::type<bool>) {
-   p.write(value ? "true" : "false");
- } else if constexpr (type == nth::type<std::nullopt_t>) {
-   p.write("std::nullopt");
- } else if constexpr (type.template is_a<std::optional>()) {
-   if (value.has_value()) {
-     internal_universal_print::UniversalPrintImpl(p, *value, options);
-   } else {
-     internal_universal_print::UniversalPrintImpl(p, std::nullopt, options);
-   }
- } else if constexpr (type.template is_a<std::chrono::time_point>()) {
-   std::time_t t = std::chrono::system_clock::to_time_t(value);
-   UniversalPrint(p, std::put_time(std::localtime(&t), "%F %T"), options);
- } else if constexpr (type.template is_a<std::variant>()) {
-   std::visit(
-       [&](auto const &value) {
-         internal_universal_print::UniversalPrintImpl(p, value, options);
-       },
-       value);
- } else if constexpr (nth::tuple_like<nth::type_t<type>>) {
-   p.write("{");
-   std::apply(
-       [&](auto &...elements) {
-         std::string_view separator = "";
-         ((p.write(std::exchange(separator, ", ")),
-           internal_universal_print::UniversalPrintImpl(p, elements, options)),
-          ...);
-       },
-       value);
-   p.write("}");
- } else if constexpr (requires {
-                        {
-                          std::declval<std::ostream &>() << value
-                          } -> std::same_as<std::ostream &>;
-                      }) {
-   std::ostringstream out;
-   out << value;
-   p.write(out.str());
- } else {
-   static constexpr std::string_view HexDigits = "0123456789abcdef";
-   std::string_view bytes(reinterpret_cast<char const *>(std::addressof(value)),
-                          sizeof(value));
+  } else if constexpr (requires { p.write(value); } and
+                       (type == nth::type<char> or
+                        not std::convertible_to<nth::type_t<type>, char>)) {
+    p.write(value);
+  } else if constexpr (type == nth::type<bool>) {
+    p.write(value ? "true" : "false");
+  } else if constexpr (type == nth::type<std::nullopt_t>) {
+    p.write("std::nullopt");
+  } else if constexpr (type.template is_a<std::optional>()) {
+    if (value.has_value()) {
+      internal_universal_print::UniversalPrintImpl(p, *value, options);
+    } else {
+      internal_universal_print::UniversalPrintImpl(p, std::nullopt, options);
+    }
+  } else if constexpr (type.template is_a<std::chrono::time_point>()) {
+    std::time_t t = std::chrono::system_clock::to_time_t(value);
+    UniversalPrint(p, std::put_time(std::localtime(&t), "%F %T"), options);
+  } else if constexpr (type.template is_a<std::variant>()) {
+    std::visit(
+        [&](auto const &value) {
+          internal_universal_print::UniversalPrintImpl(p, value, options);
+        },
+        value);
+  } else if constexpr (requires { NthPrint(p, value); }) {
+    NthPrint(p, value);
+  } else if constexpr (nth::tuple_like<nth::type_t<type>>) {
+    p.write("{");
+    std::apply(
+        [&](auto &...elements) {
+          std::string_view separator = "";
+          ((p.write(std::exchange(separator, ", ")),
+            internal_universal_print::UniversalPrintImpl(p, elements, options)),
+           ...);
+        },
+        value);
+    p.write("}");
+  } else if constexpr (requires {
+                         {
+                           std::declval<std::ostream &>() << value
+                           } -> std::same_as<std::ostream &>;
+                       }) {
+    std::ostringstream out;
+    out << value;
+    p.write(out.str());
+  } else {
+    static constexpr std::string_view HexDigits = "0123456789abcdef";
+    std::string_view bytes(
+        reinterpret_cast<char const *>(std::addressof(value)), sizeof(value));
 
-   p.write("[Unprintable value of type ");
-   p.write(type.name());
-   p.write(':');
-   for (char c : bytes) {
-     p.write(' ');
-     uint8_t n = static_cast<uint8_t>(c);
-     p.write(HexDigits[n >> 4]);
-     p.write(HexDigits[n & 0b1111]);
-   }
-   p.write("]");
- }
+    p.write("[Unprintable value of type ");
+    p.write(type.name());
+    p.write(':');
+    for (char c : bytes) {
+      p.write(' ');
+      uint8_t n = static_cast<uint8_t>(c);
+      p.write(HexDigits[n >> 4]);
+      p.write(HexDigits[n & 0b1111]);
+    }
+    p.write("]");
+  }
 }
 
 struct UniversalFormatter {
@@ -124,6 +126,7 @@ struct UniversalFormatter {
     nth::UniversalPrint(p, v);
   }
 };
+inline constexpr UniversalFormatter universal_formatter;
 
 }  // namespace nth
 

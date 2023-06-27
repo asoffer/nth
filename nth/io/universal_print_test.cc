@@ -70,6 +70,17 @@ TEST(UniversalPrint, Optional) {
   EXPECT_EQ(s, "3");
 }
 
+struct Thing {
+  friend void NthPrint(Printer auto& p, Thing) { p.write("thing"); }
+};
+TEST(UniversalPrint, NthPrint) {
+  std::string s;
+  StringPrinter p(s);
+  Thing t;
+  UniversalPrint(p, t);
+  EXPECT_EQ(s, "thing");
+}
+
 TEST(UniversalPrint, Variant) {
   std::string s;
   StringPrinter p(s);
