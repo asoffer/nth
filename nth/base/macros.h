@@ -51,6 +51,12 @@
 #define NTH_FIRST_ARGUMENT(...) NTH_INTERNAL_FIRST_ARGUMENT(__VA_ARGS__)
 #define NTH_INTERNAL_FIRST_ARGUMENT(p, ...) p
 
+// NTH_SECOND_ARGUMENT
+//
+// Expands to the first argument passed to the macro.
+#define NTH_SECOND_ARGUMENT(...) NTH_INTERNAL_SECOND_ARGUMENT(__VA_ARGS__)
+#define NTH_INTERNAL_SECOND_ARGUMENT(a, b, ...) b
+
 // NTH_INVOKE
 //
 // Invokes the first argument passed to the macro on the remaining arguments.
@@ -98,9 +104,13 @@
 // Expands to `true` if the argument is entirely enclosed in parentheses, and to
 // `false` otherwise.
 #define NTH_IS_PARENTHESIZED(x)                                                \
-  NTH_FIRST_ARGUMENT(                                                          \
-      NTH_INTERNAL_EXPAND_WITH_PREFIX(NTH_INTERNAL_IS_PARENTHESIZED_PREFIXED_, \
-                                      NTH_INTERNAL_IS_PARENTHESIZED_REMOVE x))
+  NTH_IS_EMPTY(NTH_SECOND_ARGUMENT(NTH_INTERNAL_EXPAND_WITH_PREFIX(            \
+      NTH_INTERNAL_IS_PARENTHESIZED_INJECT_ARGUMENTS_,                         \
+      NTH_FIRST_ARGUMENT(NTH_INTERNAL_EXPAND_WITH_PREFIX(                      \
+          NTH_INTERNAL_IS_PARENTHESIZED_PREFIXED_,                             \
+          NTH_INTERNAL_IS_PARENTHESIZED_REMOVE x)))))
+#define NTH_INTERNAL_IS_PARENTHESIZED_INJECT_ARGUMENTS_true _,
+#define NTH_INTERNAL_IS_PARENTHESIZED_INJECT_ARGUMENTS_false _, _
 
 #define NTH_INTERNAL_IS_PARENTHESIZED_REMOVE(...)                              \
   NTH_INTERNAL_IS_PARENTHESIZED_TRUE
