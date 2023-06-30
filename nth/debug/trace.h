@@ -2,6 +2,8 @@
 #define NTH_DEBUG_TRACE_H
 
 #include "nth/base/attributes.h"
+#include "nth/base/macros.h"
+#include "nth/debug/config.h"
 #include "nth/debug/internal/trace.h"
 #include "nth/debug/internal/trace_declare_api.h"
 #include "nth/debug/internal/trace_operators.h"
@@ -119,7 +121,10 @@ concept Traced = ::nth::internal_trace::TracedImpl<T>;
 // proceeds with no visible side-effects. If the expression evaluates to
 // `false`, a diagnostic is reported. If the macro is immediately succeeded by
 // an `else` clause, the body of that `else` clause is executed.
-#define NTH_EXPECT(...) NTH_DEBUG_INTERNAL_TRACE_EXPECT(__VA_ARGS__)
+#define NTH_EXPECT(...)                                                        \
+  NTH_IF(NTH_IS_PARENTHESIZED(NTH_FIRST_ARGUMENT(__VA_ARGS__)),                \
+         NTH_DEBUG_INTERNAL_TRACE_EXPECT_WITH_VERBOSITY,                       \
+         NTH_DEBUG_INTERNAL_TRACE_EXPECT, __VA_ARGS__)
 
 // The `NTH_ASSERT` macro injects tracing into the wrapped expression and
 // evaluates the it. If the wrapped expression evaluates to `true`, control flow
@@ -127,7 +132,10 @@ concept Traced = ::nth::internal_trace::TracedImpl<T>;
 // `false`, a diagnostic is reported. If the macro is immediately succeeded by
 // an `else` clause, the body of that `else` clause is executed after which
 // execution is aborted. If no `else` clause is present, execution is aborted.
-#define NTH_ASSERT(...) NTH_DEBUG_INTERNAL_TRACE_ASSERT(__VA_ARGS__)
+#define NTH_ASSERT(...)                                                        \
+  NTH_IF(NTH_IS_PARENTHESIZED(NTH_FIRST_ARGUMENT(__VA_ARGS__)),                \
+         NTH_DEBUG_INTERNAL_TRACE_ASSERT_WITH_VERBOSITY,                       \
+         NTH_DEBUG_INTERNAL_TRACE_ASSERT, __VA_ARGS__)
 
 // Declares the member functions of the type `type` which should be traceable.
 // The argument `member_function_names` must be a parenthesized list (i.e., of

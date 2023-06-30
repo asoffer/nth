@@ -1,0 +1,6 @@
+#ifndef NTH_CONFIGURATION_CONFIGURATION_H
+#define NTH_CONFIGURATION_CONFIGURATION_H
+
+#include "nth/configuration/header.gen.h"
+
+#endif  // NTH_CONFIGURATION_CONFIGURATION_H

@@ -1,6 +1,16 @@
 package(default_visibility = ["//visibility:public"])
 
 cc_library(
+    name = "config",
+    hdrs = ["config.h"],
+    srcs = ["config.cc"],
+    deps = [
+        ":verbosity",
+        "//nth/configuration",
+    ],
+)
+
+cc_library(
     name = "source_location",
     hdrs = ["source_location.h"],
     deps = [
@@ -25,10 +35,14 @@ cc_library(
         "internal/trace_operators.h",
     ],
     deps = [
+        ":config",
+        ":source_location",
         "//nth/base:attributes",
+        "//nth/base:macros",
         "//nth/meta:type",
         "//nth/io:string_printer",
         "//nth/io:universal_print",
+        "//nth/strings:format",
     ],
 )
 
@@ -39,3 +53,14 @@ cc_test(
         ":trace",
     ],
 )
+
+cc_library(
+    name = "verbosity",
+    hdrs = ["verbosity.h"],
+    deps = [
+        ":source_location",
+        "//nth/base:attributes",
+    ],
+)
+
+

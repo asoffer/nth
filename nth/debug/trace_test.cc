@@ -52,8 +52,8 @@ static_assert([] {
 
 static_assert([] {
   // More complex expression expectations
-  int n        = 3;
-  auto t       = nth::Trace<"n">(n);
+  int n  = 3;
+  auto t = nth::Trace<"n">(n);
   NTH_EXPECT(t * 2 == 6) else { return false; }
   NTH_EXPECT(t * 2 + 1 == 7) else { return false; }
   NTH_EXPECT((1 + t) * 2 + 1 == 9) else { return false; }
@@ -63,8 +63,8 @@ static_assert([] {
 
 static_assert([] {
   // Comparison assertions
-  int n        = 3;
-  auto t       = nth::Trace<"n">(n);
+  int n  = 3;
+  auto t = nth::Trace<"n">(n);
   NTH_ASSERT(t == 3) else { return false; }
   NTH_ASSERT(t <= 4) else { return false; }
   NTH_ASSERT(t < 4) else { return false; }
@@ -100,7 +100,7 @@ int main() {
   S<int> s{.n = 5};
   auto ts = nth::Trace<"s">(s);
   NTH_EXPECT(ts.triple() == 15) else { return 1; }
-  NTH_EXPECT(ts.value() == 5) else { return 1; }
+  NTH_EXPECT(ts.value() == 4) else { return 1; }
   NTH_EXPECT(ts.add(3).add(4).add(10) == S<int>{.n = 22}) else { return 1; }
 
   return 0;
