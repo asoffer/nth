@@ -83,7 +83,7 @@ struct WhenImpl {
 };
 
 struct When : VerbosityRequirement {
-  WhenImpl const& operator()(bool value) const { return impl_[value]; }
+  constexpr WhenImpl const& operator()(bool value) const { return impl_[value]; }
 
  private:
   static constexpr WhenImpl impl_[2] = {WhenImpl(false), WhenImpl(true)};

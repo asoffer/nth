@@ -1,4 +1,4 @@
-load("//nth/configuration:build_settings.bzl",  "nth_configuration")
+load("//nth/configuration:build_settings.bzl", "nth_configuration")
 
 package(default_visibility = ["//nth/configuration:__subpackages__"])
 

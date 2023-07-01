@@ -1,28 +1,28 @@
+load("//nth/configuration:provider.bzl",
+     "NTH_CONFIGURATION_PROVIDER_FIELDS",
+     "NthConfiguration")
+
+
+# Template for aggregating configuration header.
 _CONFIG_HEADER_TEMPLATE = """
-#ifndef NTH_CONFIGURATION_INTERNAL_{name}_GEN_H
-#define NTH_CONFIGURATION_INTERNAL_{name}_GEN_H
+#ifndef NTH_CONFIGURATION_INTERNAL_{name}_GENERATED_H
+#define NTH_CONFIGURATION_INTERNAL_{name}_GENERATED_H
 {includes}
-#endif  // NTH_CONFIGURATION_INTERNAL_{name}_GEN_H
+#endif  // NTH_CONFIGURATION_INTERNAL_{name}_GENERATED_H
 """
-
-
-NthConfiguration = provider(
-    fields = ["verbosity"],
-)
 
 
 def _nth_configuration_target_impl(ctx):
     target = getattr(ctx.attr._configuration[NthConfiguration], ctx.label.name)
-    includes = [
-        '#include "{}"'.format(h.path) for h in
-        target[CcInfo].compilation_context.direct_public_headers
-    ]
     config_header = ctx.actions.declare_file(ctx.label.name + ".h")
     ctx.actions.write(
         output = config_header,
         content = _CONFIG_HEADER_TEMPLATE.format(
             name = ctx.attr.name,
-            includes = '\n'.join(includes)
+            includes = '\n'.join([
+                '#include "{}"'.format(h.path) for h in
+                target[CcInfo].compilation_context.headers.to_list()
+            ]),
         )
     )
 
@@ -35,18 +35,19 @@ def _nth_configuration_target_impl(ctx):
         ),
         linking_context = target[CcInfo].linking_context,
     )
+
     return [
         cc_info, 
         DefaultInfo(
-        files = depset(
-            [config_header],
-            transitive = [
-                target[CcInfo].compilation_context.headers
-            ])
-    )]
+            files = depset(
+                [config_header],
+                transitive = [cc_info.compilation_context.headers]
+            )
+        )
+    ]
 
 
-nth_configuration_target = rule(
+_nth_configuration_target = rule(
     implementation = _nth_configuration_target_impl,
     attrs = {
         "_configuration": attr.label(default = "//nth/configuration"),
@@ -55,14 +56,26 @@ nth_configuration_target = rule(
 
 
 def _nth_configuration_impl(ctx):
-    return [NthConfiguration(
-        verbosity = ctx.attr.verbosity,
-    )]
+    return [NthConfiguration(**{
+        field: getattr(ctx.attr, field)
+        for field in NTH_CONFIGURATION_PROVIDER_FIELDS
+    })]
     
 
 nth_configuration = rule(
     implementation = _nth_configuration_impl,
     attrs = {
-        "verbosity": attr.label(default = "//nth/configuration:unconfigured_target"),
+        field: attr.label(
+            default = "//nth/configuration/unconfigured:{}".format(field)
+        )
+        for field in NTH_CONFIGURATION_PROVIDER_FIELDS
     }
 )
+
+
+def nth_define_configuration_targets():
+    for field in  NTH_CONFIGURATION_PROVIDER_FIELDS:
+        _nth_configuration_target(
+            name = field,
+            visibility = ["//nth:__subpackages__"],
+        )

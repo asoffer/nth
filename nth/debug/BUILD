@@ -25,6 +25,7 @@ cc_library(
         "internal/trace_operators.h",
     ],
     deps = [
+        ":source_location",
         "//nth/configuration:verbosity",
         "//nth/base:attributes",
         "//nth/meta:type",
