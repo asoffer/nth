@@ -6,7 +6,7 @@ label_flag(
     name = "configuration",
     build_setting_default = "//nth/configuration/default",
 )
- 
+
 nth_configuration_target(
     name = "verbosity",
 )

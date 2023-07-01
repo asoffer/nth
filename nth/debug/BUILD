@@ -25,10 +25,12 @@ cc_library(
         "internal/trace_operators.h",
     ],
     deps = [
+        "//nth/configuration:verbosity",
         "//nth/base:attributes",
         "//nth/meta:type",
         "//nth/io:string_printer",
         "//nth/io:universal_print",
+        "//nth/strings:format",
     ],
 )
 

@@ -1,6 +1,7 @@
 #ifndef NTH_DEBUG_VERBOSITY_H
 #define NTH_DEBUG_VERBOSITY_H
 
+#include <iostream>
 #include <string_view>
 
 #include "nth/base/attributes.h"
@@ -16,22 +17,22 @@ namespace nth {
 // expectation) should completed.
 //
 // There are several built-in verbosity requirements.
-//   * `nth::v.always` specifies that the action guarded by the verbosity
-//     requirement will always be performed.
-//   * `nth::v.debug` specifies that the action guarded by the verbosity
-//     requirement will be performed in debug builds.
-//   * `nth::v.harden` specifies that the action guarded by the verbosity
-//     requirement should be performed in hardened builds. All debug builds are
-//     also hardened builds.
-//   * `nth::v.when(condition)` specifies that actions guarded by the verbosity
+//   * `v.always` specifies that the action guarded by the verbosity requirement
+//      will always be performed.
+//   * `v.debug` specifies that the action guarded by the verbosity requirement
+//     will be performed in debug builds.
+//   * `v.harden` specifies that the action guarded by the verbosity requirement
+//     should be performed in hardened builds. All debug builds are also
+//     hardened builds.
+//   * `v.when(condition)` specifies that actions guarded by the verbosity
 //     requirement will be performed if the condition evaluates to `true`.
-//   * `nth::v.never` specifies that the action guarded by the verbosity
-//     requirement will never be performed.
+//   * `v.never` specifies that the action guarded by the verbosity requirement
+//     will never be performed.
 //
 // Users may also specify their own verbosity requirements. While verbosity
 // requirements in the `nth` namespace (those detailed above) may be specified
-// without the leading namespace, user-defined verbosity requirements must be
-// properly namespaced.
+// as shown above (unqualified, just with a leading `v.`), user-defined
+// verbosity requirements must be properly namespaced.
 //
 // A verbosity requirement can be specified as a type publicly inherits from
 // `nth::VerbosityRequirement`, is invocable with a `nth::source_location`, and
@@ -39,11 +40,17 @@ namespace nth {
 // a verbosity requirement, one must pass an instance of that type. It is common
 // to provide global constants for these instances.
 //
-// TODO:
 // If no verbosity requirement is provided, a configurable global default is
-// used. If no configuration is provided, the default will be
-//   * `nth::v.always` for log messages.
-//   * `nth::v.harden` for expectations and assertions.
+// used (see `//nth/configuration:verbosity` for details). If no configuration
+// is provided, the default will
+//   * Print all logs without an explicitly specified verbosity requirement (as
+//     if `v.always` was specified).
+//   * If we can detect that a test is being executed, all expectations and
+//     assertions without a specified verbosity requirement will be executed (as
+//     if `v.always` was specified).
+//   * If we cannot detect that a test is being executed, all expectations and
+//     assertions without a specified verbosity requirement will be be enacted
+//     as if `v.harden` was specified.
 
 struct VerbosityRequirement {};
 
@@ -66,17 +73,20 @@ struct Hardened : VerbosityRequirement {
   }
 };
 
+struct WhenImpl {
+  constexpr bool operator()(source_location) const { return value_; }
+
+ private:
+  friend struct When;
+  constexpr explicit WhenImpl(bool value) : value_(value) {}
+  bool value_;
+};
+
 struct When : VerbosityRequirement {
-  struct Impl {
-    constexpr bool operator()(source_location) const { return value_; }
+  WhenImpl const& operator()(bool value) const { return impl_[value]; }
 
-   private:
-    friend When;
-    constexpr explicit Impl(bool value) : value_(value) {}
-    bool value_;
-  };
-
-  constexpr Impl operator()(bool value) const { return Impl(value); }
+ private:
+  static constexpr WhenImpl impl_[2] = {WhenImpl(false), WhenImpl(true)};
 };
 
 struct Never : VerbosityRequirement {
@@ -93,7 +103,7 @@ struct V {
 
 }  // namespace internal_verbosity
 
-inline constexpr internal_verbosity::V v;
+inline constexpr internal_verbosity::V debug_verbosity;
 
 }  // namespace nth
 

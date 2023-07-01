@@ -71,8 +71,8 @@ requires(DefineTrace<typename Action::template invoke_type<Ts...>>::defined)  //
     struct Impl;                                                               \
                                                                                \
    public:                                                                     \
-    using type                    = t;                                         \
-    static constexpr bool defined = true;                                      \
+    using type                                     = t;                        \
+    [[maybe_unused]] static constexpr bool defined = true;                     \
     constexpr DefineTrace(auto f)                                              \
         : nth::internal_trace::TracedValue<type>(f) {}                         \
     NTH_DEBUG_INTERNAL_END(NTH_DEBUG_INTERNAL_EXPAND_A member_function_names)  \

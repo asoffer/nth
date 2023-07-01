@@ -8,6 +8,7 @@ cc_library(
     hdrs = ["verbosity.h"],
     deps = [
         "//nth/debug:verbosity",
+        "//nth/io:environment_variable",
     ]
 )
 

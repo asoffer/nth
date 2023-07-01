@@ -6,12 +6,27 @@
 #include <iostream>
 #include <memory>
 
+#include "nth/configuration/verbosity.h"
+#include "nth/debug/source_location.h"
 #include "nth/io/string_printer.h"
 #include "nth/io/universal_print.h"
 #include "nth/meta/sequence.h"
 #include "nth/meta/type.h"
+#include "nth/strings/format.h"
 
 namespace nth::internal_trace {
+
+struct Spacer {
+  int indentation, total;
+  std::string_view name;
+
+  friend void NthPrint(nth::Printer auto &p, Spacer spacer) {
+    p.write(std::string(spacer.indentation, ' '));
+    p.write(spacer.name);
+    p.write(std::string(spacer.total - spacer.indentation - spacer.name.size(),
+                        ' '));
+  }
+};
 
 // Base class from which all `Traced` objects inherit.
 struct TracedBase {};
@@ -93,13 +108,13 @@ decltype(auto) constexpr Evaluate(NTH_ATTRIBUTE(lifetimebound) T const &value) {
   }
 }
 
-template <typename PreFn, std::invocable<> auto PostFn>
+template <typename Config, std::invocable<> auto PostFn>
 struct Responder {
   constexpr bool set(char const *expression,
                      TracedEvaluatingTo<bool> auto const &b,
-                     char const *file_name, int line_number) {
+                     source_location location = source_location::current()) {
     value_ = Evaluate(b);
-    if (not value_) { PreFn{}(expression, b, file_name, line_number); }
+    if (not value_) { Config{}(expression, b, location); }
     return value_;
   }
 
@@ -121,24 +136,28 @@ struct TracedTraversal {
                             T::action_type::name>>) {
         std::string s(indentation, ' ');
         nth::StringPrinter p(s);
-        nth::UniversalPrint(p, nth::internal_trace::Evaluate(trace));
         if constexpr (T::action_type::name.empty()) {
-          std::cerr << s << " [traced value]\n";
+          nth::Format<"{} [traced value]\n">(
+              p, nth::universal_formatter,
+              nth::internal_trace::Evaluate(trace));
         } else {
-          std::cerr << s << " [traced value "
-                    << std::quoted(T::action_type::name.data()) << "]\n";
+          nth::Format<"{} [traced value {}]\n">(
+              p, nth::universal_formatter, nth::internal_trace::Evaluate(trace),
+              std::quoted(T::action_type::name.data()));
         }
+        std::cerr << s;
       } else {
         std::string s;
         nth::StringPrinter p(s);
-        nth::UniversalPrint(p, nth::internal_trace::Evaluate(trace));
 
         T::argument_types.reduce([&](auto... ts) {
-          std::cerr << std::string(indentation, ' ') << T::action_type::name
-                    << std::string(
-                           40 - indentation - sizeof(T::action_type::name),
-                           ' ');
-          std::cerr << "(= " << s << ")\n";
+          nth::Format<"{} (= {})\n">(
+              p, nth::universal_formatter,
+              nth::internal_trace::Spacer{.indentation = indentation,
+                                          .total       = 40,
+                                          .name        = T::action_type::name},
+              nth::internal_trace::Evaluate(trace));
+          std::cerr << s;
           indentation += 2;
           size_t i = 0;
           ((*this)(*static_cast<::nth::type_t<ts> const *>(trace.ptrs_[i++])),
@@ -159,12 +178,14 @@ struct TracedTraversal {
 
 struct Explain {
   void operator()(char const *expression,
-                  TracedEvaluatingTo<bool> auto const &b, char const *file_name,
-                  int line_number) {
-    std::cerr << "\033[31m"
-                 "NTH_ASSERT failed at "
-              << "\033[1m" << file_name << ':' << line_number << ":\033[m\n  "
-              << expression << "\n\n";
+                  TracedEvaluatingTo<bool> auto const &b,
+                  source_location location = source_location::current()) {
+    std::string s;
+    nth::StringPrinter p(s);
+    nth::Format<"\033[31mNTH_ASSERT failed at \033[1m{}:{}:\033[m\n  {}\n\n">(
+        p, nth::universal_formatter, location.file_name(), location.line(),
+        expression);
+    std::cerr << s;
 
     TracedTraversal traverser;
     traverser(b);
@@ -192,22 +213,37 @@ constexpr decltype(auto) operator->*(T const &value, TraceInjector) {
 }  // namespace nth::internal_trace
 
 #define NTH_DEBUG_INTERNAL_TRACE_EXPECT(...)                                   \
-  if (::nth::internal_trace::Responder<::nth::internal_trace::Explain, [] {}>  \
-          responder;                                                           \
-      responder.set(                                                           \
+  NTH_DEBUG_INTERNAL_TRACE_EXPECT_WITH_VERBOSITY(                              \
+      (::nth::config::default_expectation_verbosity_requirement), __VA_ARGS__)
+
+#define NTH_DEBUG_INTERNAL_TRACE_EXPECT_WITH_VERBOSITY(verbosity, ...)         \
+  if (::nth::internal_trace::Responder<nth::internal_trace::Explain, [] {}>    \
+          nth_responder;                                                       \
+      (not std::is_constant_evaluated() and                                    \
+       not [&] {                                                               \
+         [[maybe_unused]] constexpr auto &v = ::nth::debug_verbosity;          \
+         return (verbosity)(::nth::source_location::current());                \
+       }()) or                                                                 \
+      nth_responder.set(                                                       \
           (#__VA_ARGS__),                                                      \
           (::nth::internal_trace::TraceInjector{}                              \
-               ->*__VA_ARGS__->*::nth::internal_trace::TraceInjector{}),       \
-          __FILE__, __LINE__)) {}
+               ->*__VA_ARGS__->*::nth::internal_trace::TraceInjector{}))) {}
 
 #define NTH_DEBUG_INTERNAL_TRACE_ASSERT(...)                                   \
-  if (::nth::internal_trace::Responder<::nth::internal_trace::Explain,         \
+  NTH_DEBUG_INTERNAL_TRACE_ASSERT_WITH_VERBOSITY(                              \
+      (::nth::config::default_assertion_verbosity_requirement), __VA_ARGS__)
+
+#define NTH_DEBUG_INTERNAL_TRACE_ASSERT_WITH_VERBOSITY(verbosity, ...)         \
+  if (::nth::internal_trace::Responder<nth::internal_trace::Explain,           \
                                        std::abort>                             \
-          responder;                                                           \
-      responder.set(                                                           \
+          nth_responder;                                                       \
+      (not std::is_constant_evaluated() and not([&] {                          \
+        [[maybe_unused]] constexpr auto &v = ::nth::debug_verbosity;           \
+        return (verbosity)(::nth::source_location::current());                 \
+      }())) or                                                                 \
+      nth_responder.set(                                                       \
           (#__VA_ARGS__),                                                      \
           (::nth::internal_trace::TraceInjector{}                              \
-               ->*__VA_ARGS__->*::nth::internal_trace::TraceInjector{}),       \
-          __FILE__, __LINE__)) {}
+               ->*__VA_ARGS__->*::nth::internal_trace::TraceInjector{}))) {}
 
 #endif  // NTH_DEBUG_INTERNAL_TRACE_H
