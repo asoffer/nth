@@ -3,7 +3,9 @@ package(default_visibility = ["//visibility:public"])
 cc_library(
     name = "attributes",
     hdrs = ["attributes.h"],
-    deps = [],
+    deps = [
+        ":macros",
+    ],
 )
 
 cc_test(
@@ -15,7 +17,9 @@ cc_test(
 cc_library(
     name = "configuration",
     hdrs = ["configuration.h"],
-    deps = [],
+    deps = [
+        ":macros",
+    ],
 )
 
 cc_library(
@@ -31,4 +35,9 @@ cc_test(
     deps = [
         ":macros"
     ],
+)
+
+cc_library(
+    name = "target",
+    hdrs = ["target.h"],
 )

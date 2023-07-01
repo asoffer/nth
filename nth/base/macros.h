@@ -45,6 +45,12 @@
   ::nth::internal_macros::type_count<void(                                     \
       nth::internal_macros::type_list<__VA_ARGS__>)>::count
 
+// NTH_STRINGIFY
+//
+// Expands to the first argument passed to the macro.
+#define NTH_STRINGIFY(...) NTH_INTERNAL_STRINGIFY(__VA_ARGS__)
+#define NTH_INTERNAL_STRINGIFY(...) #__VA_ARGS__
+
 // NTH_FIRST_ARGUMENT
 //
 // Expands to the first argument passed to the macro.
@@ -56,6 +62,13 @@
 // Expands to the first argument passed to the macro.
 #define NTH_SECOND_ARGUMENT(...) NTH_INTERNAL_SECOND_ARGUMENT(__VA_ARGS__)
 #define NTH_INTERNAL_SECOND_ARGUMENT(a, b, ...) b
+
+// NTH_CONCATENATE
+//
+// Expands to its arguments except that the last token of the first argument and
+// the first token of the second argument are concatenated together.
+#define NTH_CONCATENATE(head, ...) NTH_INTERNAL_CONCATENATE(head, __VA_ARGS__)
+#define NTH_INTERNAL_CONCATENATE(head, ...) head##__VA_ARGS__
 
 // NTH_INVOKE
 //
@@ -104,9 +117,9 @@
 // Expands to `true` if the argument is entirely enclosed in parentheses, and to
 // `false` otherwise.
 #define NTH_IS_PARENTHESIZED(x)                                                \
-  NTH_IS_EMPTY(NTH_SECOND_ARGUMENT(NTH_INTERNAL_EXPAND_WITH_PREFIX(            \
+  NTH_IS_EMPTY(NTH_SECOND_ARGUMENT(NTH_CONCATENATE(            \
       NTH_INTERNAL_IS_PARENTHESIZED_INJECT_ARGUMENTS_,                         \
-      NTH_FIRST_ARGUMENT(NTH_INTERNAL_EXPAND_WITH_PREFIX(                      \
+      NTH_FIRST_ARGUMENT(NTH_CONCATENATE(                      \
           NTH_INTERNAL_IS_PARENTHESIZED_PREFIXED_,                             \
           NTH_INTERNAL_IS_PARENTHESIZED_REMOVE x)))))
 #define NTH_INTERNAL_IS_PARENTHESIZED_INJECT_ARGUMENTS_true _,
@@ -129,6 +142,6 @@
          NTH_INTERNAL_IGNORE_PARENTHESES_REMOVE, NTH_IDENTITY, argument)
 
 #define NTH_INTERNAL_IGNORE_PARENTHESES_REMOVE(p)                              \
-  NTH_INTERNAL_EXPAND_WITH_PREFIX(, NTH_IDENTITY p)
+  NTH_CONCATENATE(, NTH_IDENTITY p)
 
 #endif  // NTH_BASE_MACROS_H

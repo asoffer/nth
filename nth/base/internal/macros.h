@@ -74,8 +74,4 @@ struct get_type<N, void(void (*)(Ts...))> : type_count<void(void (*)(Ts...))> {
 
 }  // namespace nth::internal_macros
 
-#define NTH_INTERNAL_EXPAND_WITH_PREFIX(prefix, ...)                           \
-  NTH_INTERNAL_EXPAND_WITH_PREFIX_IMPL(prefix, __VA_ARGS__)
-#define NTH_INTERNAL_EXPAND_WITH_PREFIX_IMPL(prefix, ...) prefix##__VA_ARGS__
-
 #endif  // NTH_BASE_INTERNAL_MACROS_H
