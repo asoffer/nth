@@ -9,8 +9,8 @@
 #include "nth/base/macros.h"
 #include "nth/configuration/verbosity.h"
 #include "nth/debug/source_location.h"
-#include "nth/io/universal_print.h"
-#include "nth/strings/format.h"
+#include "nth/strings/format/format.h"
+#include "nth/strings/format/universal.h"
 
 namespace nth::internal_log {
 
@@ -33,7 +33,8 @@ struct LogEntry {
     template <typename T>
     Erased(NTH_ATTRIBUTE(lifetimebound) T const& t)
         : object_(std::addressof(t)), log_([](P& p, void const* t) {
-            nth::universal_formatter(p, *reinterpret_cast<T const*>(t));
+            universal_formatter({.depth = 4, .fallback = "..."})(
+                p, *reinterpret_cast<T const*>(t));
           }) {}
 
     friend void NthPrint(P& p, Erased e) { e.log_(p, e.object_); }
@@ -55,18 +56,19 @@ struct LogFormat {
       NTH_ATTRIBUTE(lifetimebound)
           LogEntry<cerr_printer, Fmt.placeholders()> const& entry) {
     static cerr_printer cerr_printer_impl;
+    universal_formatter formatter({.depth = 4, .fallback = "..."});
     nth::Format<"\x1b[0;34m{} {}:{}]\x1b[0m ">(
-        cerr_printer_impl, nth::universal_formatter,
+        cerr_printer_impl, formatter,
         f.source_location_.file_name(), f.source_location_.function_name(),
         f.source_location_.line());
     std::apply(
         [&](auto... entries) {
-          nth::Format<Fmt>(cerr_printer_impl, nth::universal_formatter,
+          nth::Format<Fmt>(cerr_printer_impl, formatter,
                            entries...);
         },
         entry.entries());
 
-    nth::Format<"\n">(cerr_printer_impl, nth::universal_formatter);
+    nth::Format<"\n">(cerr_printer_impl, formatter);
   }
 
  private:

@@ -1,12 +1,22 @@
-#include "nth/io/universal_print.h"
+#include "nth/strings/format/universal.h"
 
 #include <string_view>
 
 #include "gtest/gtest.h"
 #include "nth/io/string_printer.h"
+#include "nth/strings/format/format.h"
 
 namespace nth {
 namespace {
+
+void UniversalPrint(StringPrinter& p, auto const& value,
+                    universal_formatter::options options = {
+                        .depth    = 4,
+                        .fallback = "...",
+                    }) {
+  universal_formatter f(options);
+  nth::Format<"{}">(p, f, value);
+}
 
 TEST(UniversalPrint, Builtin) {
   std::string s;
@@ -107,17 +117,17 @@ TEST(UniversalPrint, Depth) {
   EXPECT_EQ(s, "5");
 
   s.clear();
-  UniversalPrint(p, std::optional<int>(5), {.depth = 1, .fallback = "[...]"});
+  UniversalPrint(p, std::optional<int>(5), {.depth = 2, .fallback = "[...]"});
   EXPECT_EQ(s, "5");
 
   s.clear();
   UniversalPrint(p, std::optional<std::optional<int>>(5),
-                 {.depth = 1, .fallback = "[...]"});
+                 {.depth = 2, .fallback = "[...]"});
   EXPECT_EQ(s, "[...]");
 
   s.clear();
   UniversalPrint(p, std::optional<std::optional<std::optional<int>>>(5),
-                 {.depth = 1, .fallback = "[...]"});
+                 {.depth = 2, .fallback = "[...]"});
   EXPECT_EQ(s, "[...]");
 }
 

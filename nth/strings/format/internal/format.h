@@ -1,5 +1,5 @@
-#ifndef NTH_STRINGS_INTERNAL_FORMAT_H
-#define NTH_STRINGS_INTERNAL_FORMAT_H
+#ifndef NTH_STRINGS_FORMAT_INTERNAL_FORMAT_H
+#define NTH_STRINGS_FORMAT_INTERNAL_FORMAT_H
 
 #include <bit>
 #include <cstdlib>
@@ -110,4 +110,4 @@ constexpr void Replacements(
 
 }  // namespace nth::internal_format
 
-#endif  // NTH_STRINGS_INTERNAL_FORMAT_H
+#endif  // NTH_STRINGS_FORMAT_INTERNAL_FORMAT_H

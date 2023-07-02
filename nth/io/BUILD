@@ -47,24 +47,3 @@ cc_test(
         "@com_google_googletest//:gtest_main",
     ],
 )
-
-cc_library(
-    name = "universal_print",
-    hdrs = ["universal_print.h"],
-    deps = [
-        ":printer",
-        "//nth/meta:concepts",
-        "//nth/meta:type",
-        "//nth/utility:required",
-    ],
-)
-
-cc_test(
-    name = "universal_print_test",
-    srcs = ["universal_print_test.cc"],
-    deps = [
-        ":string_printer",
-        ":universal_print",
-        "@com_google_googletest//:gtest_main",
-    ],
-)

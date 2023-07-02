@@ -1,8 +1,8 @@
-#include "nth/strings/format.h"
+#include "nth/strings/format/format.h"
 
 #include "gtest/gtest.h"
 #include "nth/io/string_printer.h"
-#include "nth/io/universal_print.h"
+#include "nth/strings/format/universal.h"
 
 namespace nth {
 namespace {
@@ -130,7 +130,10 @@ TEST(FormatString, Printer) {
 TEST(FormatString, UniversalFormatter) {
   std::string s;
   StringPrinter p(s);
-  UniversalFormatter f;
+  universal_formatter f({
+      .depth    = 3,
+      .fallback = "...",
+  });
   Format<"abc{}def">(p, f, false);
   EXPECT_EQ(s, "abcfalsedef");
   s.clear();

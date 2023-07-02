@@ -13,17 +13,18 @@
 // globally configured default is equivalent to `v.always`.
 //
 // The format string must be valid to pass to an `nth::FormatString` (see
-// "nth/strings/format.h" for details). Users must then use `operator<<` to pass
-// the logging arguments which will bind to the format-string's placeholders.
+// "nth/strings/format.h" for details). Users must then use `operator<<=` to
+// pass the logging arguments which will bind to the format-string's
+// placeholders.
 //
 // For example,
 // ```
-// NTH_LOG((v.debug), "The first two primes after {} are {} and {}.")
-//     << {100, 101, 103};
+// NTH_LOG((v.debug), "The first two primes after {} are {} and {}.") <<=
+//     {100, 101, 103};
 // ```
 //
 // If the format string itself takes no arguments, then one may elide the final
-// `<< {};` and simply write something like this example:
+// `<<= {};` and simply write something like this example:
 // ```
 // NTH_LOG("Hello, world!");
 // ```

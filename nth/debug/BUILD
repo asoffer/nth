@@ -10,8 +10,8 @@ cc_library(
         ":source_location",
         "//nth/configuration:verbosity",
         "//nth/base:macros",
-        "//nth/io:universal_print",
-        "//nth/strings:format",
+        "//nth/strings/format",
+        "//nth/strings/format:universal",
     ],
 )
 
@@ -46,8 +46,8 @@ cc_library(
         "//nth/base:macros",
         "//nth/meta:type",
         "//nth/io:string_printer",
-        "//nth/io:universal_print",
-        "//nth/strings:format",
+        "//nth/strings/format",
+        "//nth/strings/format:universal",
     ],
 )
 

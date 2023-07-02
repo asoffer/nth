@@ -9,10 +9,10 @@
 #include "nth/configuration/verbosity.h"
 #include "nth/debug/source_location.h"
 #include "nth/io/string_printer.h"
-#include "nth/io/universal_print.h"
 #include "nth/meta/sequence.h"
 #include "nth/meta/type.h"
-#include "nth/strings/format.h"
+#include "nth/strings/format/format.h"
+#include "nth/strings/format/universal.h"
 
 namespace nth::internal_trace {
 
@@ -136,13 +136,14 @@ struct TracedTraversal {
                             T::action_type::name>>) {
         std::string s(indentation, ' ');
         nth::StringPrinter p(s);
+
+        universal_formatter formatter({.depth = 4, .fallback = "..."});
         if constexpr (T::action_type::name.empty()) {
           nth::Format<"{} [traced value]\n">(
-              p, nth::universal_formatter,
-              nth::internal_trace::Evaluate(trace));
+              p, formatter, nth::internal_trace::Evaluate(trace));
         } else {
           nth::Format<"{} [traced value {}]\n">(
-              p, nth::universal_formatter, nth::internal_trace::Evaluate(trace),
+              p, formatter, nth::internal_trace::Evaluate(trace),
               std::quoted(T::action_type::name.data()));
         }
         std::cerr << s;
@@ -150,9 +151,10 @@ struct TracedTraversal {
         std::string s;
         nth::StringPrinter p(s);
 
+        universal_formatter formatter({.depth = 4, .fallback = "..."});
         T::argument_types.reduce([&](auto... ts) {
           nth::Format<"{} (= {})\n">(
-              p, nth::universal_formatter,
+              p, formatter,
               nth::internal_trace::Spacer{.indentation = indentation,
                                           .total       = 40,
                                           .name        = T::action_type::name},
@@ -168,7 +170,8 @@ struct TracedTraversal {
     } else {
       std::string s;
       nth::StringPrinter p(s);
-      nth::UniversalPrint(p, trace);
+      universal_formatter formatter({.depth = 4, .fallback = "..."});
+      nth::Format<"{}">(p, formatter, trace);
       std::cerr << std::string(indentation, ' ') << s << '\n';
     }
   }
@@ -182,9 +185,9 @@ struct Explain {
                   source_location location = source_location::current()) {
     std::string s;
     nth::StringPrinter p(s);
+    universal_formatter formatter({.depth = 4, .fallback = "..."});
     nth::Format<"\033[31mNTH_ASSERT failed at \033[1m{}:{}:\033[m\n  {}\n\n">(
-        p, nth::universal_formatter, location.file_name(), location.line(),
-        expression);
+        p, formatter, location.file_name(), location.line(), expression);
     std::cerr << s;
 
     TracedTraversal traverser;
