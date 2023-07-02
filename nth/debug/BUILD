@@ -1,6 +1,21 @@
 package(default_visibility = ["//visibility:public"])
 
 cc_library(
+    name = "log",
+    hdrs = ["log.h"],
+    srcs = [
+        "internal/log.h",
+    ],
+    deps = [
+        ":source_location",
+        "//nth/configuration:verbosity",
+        "//nth/base:macros",
+        "//nth/io:universal_print",
+        "//nth/strings:format",
+    ],
+)
+
+cc_library(
     name = "source_location",
     hdrs = ["source_location.h"],
     deps = [
@@ -28,6 +43,7 @@ cc_library(
         ":source_location",
         "//nth/configuration:verbosity",
         "//nth/base:attributes",
+        "//nth/base:macros",
         "//nth/meta:type",
         "//nth/io:string_printer",
         "//nth/io:universal_print",
