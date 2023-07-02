@@ -105,7 +105,7 @@ struct TrivialFormatter {
 
 TEST(FormatString, Printer) {
   std::string s;
-  StringPrinter p(s);
+  string_printer p(s);
   TrivialFormatter t;
   Format<"abc{}def">(p, t, "xyz");
   EXPECT_EQ(s, "abcxyzdef");
@@ -129,7 +129,7 @@ TEST(FormatString, Printer) {
 
 TEST(FormatString, UniversalFormatter) {
   std::string s;
-  StringPrinter p(s);
+  string_printer p(s);
   universal_formatter f({
       .depth    = 3,
       .fallback = "...",

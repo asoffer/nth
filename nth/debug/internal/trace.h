@@ -12,7 +12,6 @@
 #include "nth/meta/sequence.h"
 #include "nth/meta/type.h"
 #include "nth/strings/format/format.h"
-#include "nth/strings/format/universal.h"
 
 namespace nth::internal_trace {
 
@@ -135,9 +134,9 @@ struct TracedTraversal {
                         nth::type<nth::internal_trace::Identity<
                             T::action_type::name>>) {
         std::string s(indentation, ' ');
-        nth::StringPrinter p(s);
+        nth::string_printer p(s);
 
-        universal_formatter formatter({.depth = 4, .fallback = "..."});
+        auto formatter = nth::config::default_formatter();
         if constexpr (T::action_type::name.empty()) {
           nth::Format<"{} [traced value]\n">(
               p, formatter, nth::internal_trace::Evaluate(trace));
@@ -149,9 +148,9 @@ struct TracedTraversal {
         std::cerr << s;
       } else {
         std::string s;
-        nth::StringPrinter p(s);
+        nth::string_printer p(s);
 
-        universal_formatter formatter({.depth = 4, .fallback = "..."});
+        auto formatter = nth::config::default_formatter();
         T::argument_types.reduce([&](auto... ts) {
           nth::Format<"{} (= {})\n">(
               p, formatter,
@@ -169,8 +168,8 @@ struct TracedTraversal {
       }
     } else {
       std::string s;
-      nth::StringPrinter p(s);
-      universal_formatter formatter({.depth = 4, .fallback = "..."});
+      nth::string_printer p(s);
+      auto formatter = nth::config::default_formatter();
       nth::Format<"{}">(p, formatter, trace);
       std::cerr << std::string(indentation, ' ') << s << '\n';
     }
@@ -184,8 +183,8 @@ struct Explain {
                   TracedEvaluatingTo<bool> auto const &b,
                   source_location location = source_location::current()) {
     std::string s;
-    nth::StringPrinter p(s);
-    universal_formatter formatter({.depth = 4, .fallback = "..."});
+    nth::string_printer p(s);
+    auto formatter = nth::config::default_formatter();
     nth::Format<"\033[31mNTH_ASSERT failed at \033[1m{}:{}:\033[m\n  {}\n\n">(
         p, formatter, location.file_name(), location.line(), expression);
     std::cerr << s;

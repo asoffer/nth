@@ -9,7 +9,7 @@
 namespace nth {
 namespace {
 
-void UniversalPrint(StringPrinter& p, auto const& value,
+void UniversalPrint(string_printer& p, auto const& value,
                     universal_formatter::options options = {
                         .depth    = 4,
                         .fallback = "...",
@@ -20,7 +20,7 @@ void UniversalPrint(StringPrinter& p, auto const& value,
 
 TEST(UniversalPrint, Builtin) {
   std::string s;
-  StringPrinter p(s);
+  string_printer p(s);
   UniversalPrint(p, "hello");
   UniversalPrint(p, '!');
   EXPECT_EQ(s, "hello!");
@@ -28,14 +28,14 @@ TEST(UniversalPrint, Builtin) {
 
 TEST(UniversalPrint, Ostream) {
   std::string s;
-  StringPrinter p(s);
+  string_printer p(s);
   UniversalPrint(p, 1234);
   EXPECT_EQ(s, "1234");
 }
 
 TEST(UniversalPrint, Bools) {
   std::string s;
-  StringPrinter p(s);
+  string_printer p(s);
   UniversalPrint(p, true);
   EXPECT_EQ(s, "true");
   s.clear();
@@ -49,7 +49,7 @@ struct S {
 
 TEST(UniversalPrint, Tuple) {
   std::string s;
-  StringPrinter p(s);
+  string_printer p(s);
   UniversalPrint(p, std::tuple<>{});
   EXPECT_EQ(s, "{}");
   s.clear();
@@ -65,7 +65,7 @@ TEST(UniversalPrint, Tuple) {
 
 TEST(UniversalPrint, Optional) {
   std::string s;
-  StringPrinter p(s);
+  string_printer p(s);
   UniversalPrint(p, nullptr);
   EXPECT_EQ(s, "nullptr");
   s.clear();
@@ -85,7 +85,7 @@ struct Thing {
 };
 TEST(UniversalPrint, NthPrint) {
   std::string s;
-  StringPrinter p(s);
+  string_printer p(s);
   Thing t;
   UniversalPrint(p, t);
   EXPECT_EQ(s, "thing");
@@ -93,7 +93,7 @@ TEST(UniversalPrint, NthPrint) {
 
 TEST(UniversalPrint, Variant) {
   std::string s;
-  StringPrinter p(s);
+  string_printer p(s);
   UniversalPrint(p, std::variant<int, bool>(5));
   EXPECT_EQ(s, "5");
   s.clear();
@@ -103,7 +103,7 @@ TEST(UniversalPrint, Variant) {
 
 TEST(UniversalPrint, Fallback) {
   std::string s;
-  StringPrinter p(s);
+  string_printer p(s);
   UniversalPrint(p, S{.value = 17});
   EXPECT_EQ(
       s,
@@ -112,7 +112,7 @@ TEST(UniversalPrint, Fallback) {
 
 TEST(UniversalPrint, Depth) {
   std::string s;
-  StringPrinter p(s);
+  string_printer p(s);
   UniversalPrint(p, std::optional<std::optional<std::optional<int>>>(5));
   EXPECT_EQ(s, "5");
 

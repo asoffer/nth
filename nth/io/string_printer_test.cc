@@ -7,7 +7,7 @@ namespace {
 
 TEST(StringPrinter, Builtin) {
   std::string s;
-  StringPrinter p(s);
+  string_printer p(s);
   EXPECT_EQ(s, "");
   p.write('x');
   EXPECT_EQ(s, "x");

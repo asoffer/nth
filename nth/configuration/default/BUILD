@@ -9,6 +9,7 @@ cc_library(
     deps = [
         "//nth/debug:verbosity",
         "//nth/io:environment_variable",
+        "//nth/strings/format:universal",
     ]
 )
 

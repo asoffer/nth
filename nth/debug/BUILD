@@ -11,7 +11,7 @@ cc_library(
         "//nth/configuration:verbosity",
         "//nth/base:macros",
         "//nth/strings/format",
-        "//nth/strings/format:universal",
+        "//nth/io:file_printer",
     ],
 )
 
@@ -47,7 +47,6 @@ cc_library(
         "//nth/meta:type",
         "//nth/io:string_printer",
         "//nth/strings/format",
-        "//nth/strings/format:universal",
     ],
 )
 

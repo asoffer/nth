@@ -19,6 +19,12 @@ cc_test(
 )
 
 cc_library(
+    name = "file_printer",
+    hdrs = ["file_printer.h"],
+    deps = [],
+)
+
+cc_library(
     name = "printer",
     hdrs = ["printer.h"],
     deps = [],

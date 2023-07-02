@@ -4,20 +4,17 @@
 #include <array>
 #include <functional>
 #include <iostream>
+#include <string_view>
+#include <utility>
 
 #include "nth/base/attributes.h"
 #include "nth/base/macros.h"
 #include "nth/configuration/verbosity.h"
 #include "nth/debug/source_location.h"
+#include "nth/io/file_printer.h"
 #include "nth/strings/format/format.h"
-#include "nth/strings/format/universal.h"
 
 namespace nth::internal_log {
-
-struct cerr_printer {
-  void write(char c) { std::cerr << c; }
-  void write(std::string_view s) { std::cerr << s; }
-};
 
 template <nth::Printer P, int N>
 struct LogEntry {
@@ -33,8 +30,7 @@ struct LogEntry {
     template <typename T>
     Erased(NTH_ATTRIBUTE(lifetimebound) T const& t)
         : object_(std::addressof(t)), log_([](P& p, void const* t) {
-            universal_formatter({.depth = 4, .fallback = "..."})(
-                p, *reinterpret_cast<T const*>(t));
+            nth::config::default_formatter()(p, *reinterpret_cast<T const*>(t));
           }) {}
 
     friend void NthPrint(P& p, Erased e) { e.log_(p, e.object_); }
@@ -54,21 +50,18 @@ struct LogFormat {
   friend void operator<<=(
       LogFormat const& f,
       NTH_ATTRIBUTE(lifetimebound)
-          LogEntry<cerr_printer, Fmt.placeholders()> const& entry) {
-    static cerr_printer cerr_printer_impl;
-    universal_formatter formatter({.depth = 4, .fallback = "..."});
+          LogEntry<file_printer, Fmt.placeholders()> const& entry) {
+    auto formatter = nth::config::default_formatter();
     nth::Format<"\x1b[0;34m{} {}:{}]\x1b[0m ">(
-        cerr_printer_impl, formatter,
-        f.source_location_.file_name(), f.source_location_.function_name(),
-        f.source_location_.line());
+        stderr_printer, formatter, f.source_location_.file_name(),
+        f.source_location_.function_name(), f.source_location_.line());
     std::apply(
         [&](auto... entries) {
-          nth::Format<Fmt>(cerr_printer_impl, formatter,
-                           entries...);
+          nth::Format<Fmt>(stderr_printer, formatter, entries...);
         },
         entry.entries());
 
-    nth::Format<"\n">(cerr_printer_impl, formatter);
+    nth::Format<"\n">(stderr_printer, formatter);
   }
 
  private:
