@@ -8,7 +8,7 @@ namespace nth {
 
 struct string_printer {
   explicit constexpr string_printer(std::string& s) : s_(s) {}
-  void write(char c) { s_.push_back(c); }
+  void write(size_t n, char c) { s_.append(n, c); }
   void write(std::string_view s) { s_.append(s); }
 
  private:

@@ -200,7 +200,11 @@ constexpr decltype(auto) operator->*(TraceInjector, T const &value) {
   if constexpr (nth::internal_trace::TracedImpl<T>) {
     return value;
   } else {
-    return Traced<Identity<"">, T>(value);
+    if constexpr (std::is_array_v<T>) {
+      return Traced<Identity<"">, decltype(value)>(value);
+    } else {
+      return Traced<Identity<"">, T>(value);
+    }
   }
 }
 template <typename T>
@@ -208,7 +212,11 @@ constexpr decltype(auto) operator->*(T const &value, TraceInjector) {
   if constexpr (nth::internal_trace::TracedImpl<T>) {
     return value;
   } else {
-    return Traced<Identity<"">, T>(value);
+    if constexpr (std::is_array_v<T>) {
+      return Traced<Identity<"">, decltype(value)>(value);
+    } else {
+      return Traced<Identity<"">, T>(value);
+    }
   }
 }
 
