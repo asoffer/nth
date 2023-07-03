@@ -7,16 +7,24 @@ build \
   --strip=never
 test \
   --test_arg="--use-colour yes" \
-  --test_output=errors
+  --test_output=errors \
 
 build:asan \
   --copt=-fsanitize=address \
-  --linkopt=-fsanitize=address
+  --linkopt=-fsanitize=address \
+
 test:asan \
   --test_env=ASAN_OPTIONS=external_symbolizer_path=/usr/bin/llvm-symbolizer \
   --test_env=ASAN_OPTIONS=detect_leaks=0 \
-  --test_tag_filters="-noasan"
+  --test_tag_filters="-noasan" \
 
-build:tsan --copt=-fsanitize=thread --linkopt=-fsanitize=thread
-build:ubsan --copt=-fsanitize=undefined --linkopt=-fsanitize=undefined
-build:profile --copt=-fno-omit-frame-pointer
+build:tsan \
+  --copt=-fsanitize=thread \
+  --linkopt=-fsanitize=thread \
+
+build:ubsan \
+  --copt=-fsanitize=undefined \
+  --linkopt=-fsanitize=undefined \
+
+build:profile \
+  --copt=-fno-omit-frame-pointer \

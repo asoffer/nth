@@ -15,8 +15,8 @@ struct file_printer {
   std::FILE* file_;
 };
 
-inline file_printer const stderr_printer(stderr);
-inline file_printer const stdout_printer(stdout);
+inline file_printer stderr_printer(stderr);
+inline file_printer stdout_printer(stdout);
 
 }  // namespace nth
 

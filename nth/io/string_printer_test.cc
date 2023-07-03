@@ -9,11 +9,11 @@ TEST(StringPrinter, Builtin) {
   std::string s;
   string_printer p(s);
   EXPECT_EQ(s, "");
-  p.write('x');
+  p.write(1, 'x');
   EXPECT_EQ(s, "x");
-  p.write('y');
+  p.write(1, 'y');
   EXPECT_EQ(s, "xy");
-  p.write('z');
+  p.write(1, 'z');
   EXPECT_EQ(s, "xyz");
   p.write(std::string_view("abc"));
   EXPECT_EQ(s, "xyzabc");

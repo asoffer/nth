@@ -10,7 +10,7 @@ namespace {
 struct NotAPrinter {};
 
 struct APrinter {
-  void write(char);
+  void write(size_t, char);
   void write(std::string_view);
 };
 

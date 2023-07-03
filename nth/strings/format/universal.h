@@ -108,14 +108,15 @@ struct universal_formatter {
 
       p.write("[Unprintable value of type ");
       p.write(type.name());
-      p.write(':');
+      p.write(1, ':');
+      char buffer[4] = {' ', '\0', '\0', '\0'};
       for (char c : bytes) {
-        p.write(' ');
         uint8_t n = static_cast<uint8_t>(c);
-        p.write(HexDigits[n >> 4]);
-        p.write(HexDigits[n & 0b1111]);
+        buffer[1] = HexDigits[n >> 4];
+        buffer[2] = HexDigits[n & 0b1111];
+        p.write(std::string_view(buffer));
       }
-      p.write("]");
+      p.write(1, ']');
     }
   }
 
