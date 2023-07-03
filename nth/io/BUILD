@@ -19,6 +19,15 @@ cc_test(
 )
 
 cc_library(
+    name = "file",
+    hdrs = ["file.h"],
+    srcs = ["file.cc"],
+    deps = [
+        "//nth/debug:trace",
+    ],
+)
+
+cc_library(
     name = "file_printer",
     hdrs = ["file_printer.h"],
     srcs = ["file_printer.cc"],
@@ -29,6 +38,7 @@ cc_test(
     name = "file_printer_test",
     srcs = ["file_printer_test.cc"],
     deps = [
+        ":file",
         ":file_printer",
         "//nth/debug:trace",
     ],

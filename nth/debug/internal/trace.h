@@ -112,17 +112,19 @@ struct Responder {
   constexpr bool set(char const *expression,
                      TracedEvaluatingTo<bool> auto const &b,
                      source_location location = source_location::current()) {
+    set_   = true;
     value_ = Evaluate(b);
     if (not value_) { Config{}(expression, b, location); }
     return value_;
   }
 
   constexpr ~Responder() {
-    if (not value_) { PostFn(); }
+    if (set_ and not value_) { PostFn(); }
   }
 
  private:
-  bool value_;
+  bool value_ : 1;
+  bool set_ : 1 = false;
 };
 
 struct TracedTraversal {

@@ -8,7 +8,7 @@
 namespace nth::config {
 namespace internal_default_verbosity {
 
-decltype(auto) HardenedOrTest() {
+inline decltype(auto) HardenedOrTest() {
   if constexpr (nth::build_mode == nth::build::harden or
                 nth::build_mode == nth::build::debug) {
     return debug_verbosity.always;

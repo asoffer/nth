@@ -3,51 +3,48 @@
 #include <cstdio>
 
 #include "nth/debug/trace.h"
+#include "nth/io/file.h"
 
 bool WritesToFile() {
-  std::FILE* f = std::tmpfile();
-  NTH_EXPECT(f != nullptr) else {
-    std::perror("Failed to open file.");
-    return false;
-  }
+  nth::file f = nth::TemporaryFile();
+  nth::file_printer fp(f.get());
 
-  nth::file_printer fp(f);
   fp.write("Hello, world");
   fp.write(10, '!');
-  NTH_EXPECT(std::ftell(f) == 22) else { return false; }
+  NTH_EXPECT(f.tell() == 22u) else { return false; }
 
-  std::rewind(f);
+  f.rewind();
 
   char buffer[22];
-  std::fread(buffer, 1, 22, f);
-  NTH_EXPECT(std::string_view(buffer, 22) == "Hello, world!!!!!!!!!!") else {
+  std::span<char> span = f.read_into(buffer);
+  NTH_EXPECT(std::string_view(span.data(), span.size()) ==
+             "Hello, world!!!!!!!!!!")
+  else {
     return false;
   }
 
-  NTH_EXPECT(std::fclose(f) == 0) else { return false; }
+  NTH_EXPECT(f.close()) else { return false; }
   return true;
 }
 
 bool WritesLargeAmountOfData() {
-  std::FILE* f = std::tmpfile();
-  NTH_EXPECT(f != nullptr) else {
-    std::perror("Failed to open file.");
-    return false;
-  }
+  nth::file f = nth::TemporaryFile();
+  nth::file_printer fp(f.get());
 
-  nth::file_printer fp(f);
   fp.write(5000, '!');
-  NTH_EXPECT(std::ftell(f) == 5000) else { return false; }
+  NTH_EXPECT(f.tell() == 5000u) else { return false; }
 
-  std::rewind(f);
+  f.rewind();
 
   char buffer[5000];
-  std::fread(buffer, 1, 5000, f);
-  NTH_EXPECT(std::string_view(buffer, 5000) == std::string(5000, '!')) else {
+  std::span<char> span = f.read_into(buffer);
+  NTH_EXPECT(std::string_view(span.data(), span.size()) ==
+             std::string(5000, '!'))
+  else {
     return false;
   }
 
-  NTH_EXPECT(std::fclose(f) == 0) else { return false; }
+  NTH_EXPECT(f.close()) else { return false; }
   return true;
 }
 
