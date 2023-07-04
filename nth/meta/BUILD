@@ -31,6 +31,23 @@ cc_test(
 )
 
 cc_library(
+    name = "constant",
+    hdrs = ["constant.h"],
+    deps = [
+        ":type",
+    ],
+)
+
+cc_test(
+    name = "constant_test",
+    srcs = ["constant_test.cc"],
+    deps = [
+        ":constant",
+        ":type",
+    ],
+)
+
+cc_library(
     name = "sequence",
     hdrs = ["sequence.h"],
 )
