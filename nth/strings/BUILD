@@ -16,6 +16,29 @@ cc_test(
 )
 
 cc_library(
+    name = "interpolate",
+    hdrs = ["interpolate.h"],
+    srcs = ["internal/interpolate.h"],
+    deps = [
+        "//nth/io:printer",
+        "//nth/strings/format:formatter",
+        "//nth/meta:compile_time_string",
+    ],
+)
+
+cc_test(
+    name = "interpolate_test",
+    srcs = ["interpolate_test.cc"],
+    deps = [
+        ":interpolate",
+        "//nth/io:string_printer",
+        "//nth/strings/format:formatter",
+        "//nth/strings/format:universal", # TODO: Cut this dep.
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_library(
     name = "null_termination",
     hdrs = ["null_termination.h"],
     srcs = [

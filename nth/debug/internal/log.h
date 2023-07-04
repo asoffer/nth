@@ -13,7 +13,7 @@
 #include "nth/debug/source_location.h"
 #include "nth/io/file_printer.h"
 #include "nth/io/string_printer.h"
-#include "nth/strings/format/format.h"
+#include "nth/strings/interpolate.h"
 
 namespace nth::internal_log {
 
@@ -116,14 +116,14 @@ inline std::array<file_printer*, 1> RegisteredLoggers() {
   return {&stderr_printer};
 }
 
-template <FormatString Fmt>
+template <InterpolationString I>
 struct LogLine : private LogLineBase {
   friend void operator<<=(
       LogLine const& l,
       NTH_ATTRIBUTE(lifetimebound)
-          UnserializedLogEntry<Fmt.placeholders()> const& entry) {
+          UnserializedLogEntry<I.placeholders()> const& entry) {
     LogEntry log_entry;
-    log_entry.set_placeholder_count(Fmt.placeholders());
+    log_entry.set_placeholder_count(I.placeholders());
 
     constexpr size_t bound = 1024;
     bounded_string_printer printer(log_entry.data(), bound);
@@ -131,18 +131,18 @@ struct LogLine : private LogLineBase {
     auto formatter = nth::config::default_formatter();
     std::apply(
         [&](auto... entries) {
-          ((nth::Format<"{}">(printer, formatter, entries),
+          ((nth::Interpolate<"{}">(printer, formatter, entries),
             log_entry.demarcate()),
            ...);
         },
         entry.entries());
 
     for (auto& logger : RegisteredLoggers()) {
-      nth::Format<"\x1b[0;34m{} {}:{}]\x1b[0m ">(
+      nth::Interpolate<"\x1b[0;34m{} {}:{}]\x1b[0m ">(
           *logger, formatter, l.source_location_.file_name(),
           l.source_location_.function_name(), l.source_location_.line());
 
-      nth::InterpolateErased<Fmt>(*logger, log_entry.begin(), log_entry.end());
+      nth::InterpolateErased<I>(*logger, log_entry.begin(), log_entry.end());
 
       logger->write("\n");
     }
@@ -151,11 +151,12 @@ struct LogLine : private LogLineBase {
 
 }  // namespace nth::internal_log
 
-#define NTH_DEBUG_INTERNAL_LOG(format)                                         \
+#define NTH_DEBUG_INTERNAL_LOG(interpolation_string)                           \
   NTH_DEBUG_INTERNAL_LOG_WITH_VERBOSITY(                                       \
-      (::nth::config::default_log_verbosity_requirement), format)
+      (::nth::config::default_log_verbosity_requirement),                      \
+      interpolation_string)
 
-#define NTH_DEBUG_INTERNAL_LOG_WITH_VERBOSITY(verbosity, format)               \
+#define NTH_DEBUG_INTERNAL_LOG_WITH_VERBOSITY(verbosity, interpolation_string) \
   switch (0)                                                                   \
   default:                                                                     \
     ([&] {                                                                     \
@@ -164,7 +165,8 @@ struct LogLine : private LogLineBase {
     }())                                                                       \
         ? (void)0                                                              \
         : [&]() -> decltype(auto) {                                            \
-      static const ::nth::internal_log::LogLine<(format)> nth_log_line;        \
+      static const ::nth::internal_log::LogLine<(interpolation_string)>        \
+          nth_log_line;                                                        \
       return (nth_log_line);                                                   \
     }()
 

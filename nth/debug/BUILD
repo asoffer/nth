@@ -11,7 +11,7 @@ cc_library(
         ":source_location",
         "//nth/configuration:verbosity",
         "//nth/base:macros",
-        "//nth/strings/format",
+        "//nth/strings:interpolate",
         "//nth/io:file_printer",
         "//nth/io:string_printer",
     ],
@@ -48,7 +48,7 @@ cc_library(
         "//nth/base:macros",
         "//nth/meta:type",
         "//nth/io:string_printer",
-        "//nth/strings/format",
+        "//nth/strings:interpolate",
     ],
 )
 

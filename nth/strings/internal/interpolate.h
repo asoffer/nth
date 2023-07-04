@@ -1,12 +1,12 @@
-#ifndef NTH_STRINGS_FORMAT_INTERNAL_FORMAT_H
-#define NTH_STRINGS_FORMAT_INTERNAL_FORMAT_H
+#ifndef NTH_STRINGS_INTERNAL_INTERPOLATE_H
+#define NTH_STRINGS_INTERNAL_INTERPOLATE_H
 
 #include <bit>
 #include <cstdlib>
 #include <optional>
 #include <string_view>
 
-namespace nth::internal_format {
+namespace nth::internal_interpolate {
 
 inline constexpr bool FollowingCodeUnit(char c) {
   return (c & 0b1100'0000) == 0b1000'0000;
@@ -54,10 +54,10 @@ inline constexpr std::optional<uint32_t> ExtractNextUtf8Codepoint(
   return value;
 }
 
-inline constexpr void ValidateFormatString(std::string_view format_string) {
+inline constexpr void ValidateInterpolationString(std::string_view interpolation_string) {
   int brace_depth = 0;
-  while (not format_string.empty()) {
-    if (auto codepoint = ExtractNextUtf8Codepoint(format_string)) {
+  while (not interpolation_string.empty()) {
+    if (auto codepoint = ExtractNextUtf8Codepoint(interpolation_string)) {
       switch (*codepoint) {
         case '{': {
           if (brace_depth == 1) {
@@ -92,12 +92,12 @@ struct PlaceholderRange {
   int length = -1;
 };
 
-template <auto Fmt>
+template <auto InterpolationString>
 constexpr void Replacements(
-    std::array<PlaceholderRange, Fmt.placeholders()>& array) {
+    std::array<PlaceholderRange, InterpolationString.placeholders()>& array) {
   auto* array_ptr = array.data();
-  char const* p   = Fmt.NthInternalFormatStringDataMember;
-  for (size_t i = 0; i < Fmt.size(); ++i) {
+  char const* p = InterpolationString.NthInternalInterpolationStringDataMember;
+  for (size_t i = 0; i < InterpolationString.size(); ++i) {
     switch (p[i]) {
       case '{': array_ptr->start = i; break;
       case '}': {
@@ -108,6 +108,6 @@ constexpr void Replacements(
   }
 }
 
-}  // namespace nth::internal_format
+}  // namespace nth::internal_interpolate
 
-#endif  // NTH_STRINGS_FORMAT_INTERNAL_FORMAT_H
+#endif  // NTH_STRINGS_INTERNAL_INTERPOLATE_H

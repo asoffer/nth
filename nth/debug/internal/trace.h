@@ -11,7 +11,7 @@
 #include "nth/io/string_printer.h"
 #include "nth/meta/sequence.h"
 #include "nth/meta/type.h"
-#include "nth/strings/format/format.h"
+#include "nth/strings/interpolate.h"
 
 namespace nth::internal_trace {
 
@@ -140,10 +140,10 @@ struct TracedTraversal {
 
         auto formatter = nth::config::default_formatter();
         if constexpr (T::action_type::name.empty()) {
-          nth::Format<"{} [traced value]\n">(
+          nth::Interpolate<"{} [traced value]\n">(
               p, formatter, nth::internal_trace::Evaluate(trace));
         } else {
-          nth::Format<"{} [traced value {}]\n">(
+          nth::Interpolate<"{} [traced value {}]\n">(
               p, formatter, nth::internal_trace::Evaluate(trace),
               std::quoted(T::action_type::name.data()));
         }
@@ -154,7 +154,7 @@ struct TracedTraversal {
 
         auto formatter = nth::config::default_formatter();
         T::argument_types.reduce([&](auto... ts) {
-          nth::Format<"{} (= {})\n">(
+          nth::Interpolate<"{} (= {})\n">(
               p, formatter,
               nth::internal_trace::Spacer{.indentation = indentation,
                                           .total       = 40,
@@ -172,7 +172,7 @@ struct TracedTraversal {
       std::string s;
       nth::string_printer p(s);
       auto formatter = nth::config::default_formatter();
-      nth::Format<"{}">(p, formatter, trace);
+      nth::Interpolate<"{}">(p, formatter, trace);
       std::cerr << std::string(indentation, ' ') << s << '\n';
     }
   }
@@ -187,7 +187,8 @@ struct Explain {
     std::string s;
     nth::string_printer p(s);
     auto formatter = nth::config::default_formatter();
-    nth::Format<"\033[31mNTH_ASSERT failed at \033[1m{}:{}:\033[m\n  {}\n\n">(
+    nth::Interpolate<
+        "\033[31mNTH_ASSERT failed at \033[1m{}:{}:\033[m\n  {}\n\n">(
         p, formatter, location.file_name(), location.line(), expression);
     std::cerr << s;
 

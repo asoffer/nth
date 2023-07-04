@@ -4,7 +4,6 @@
 
 #include "gtest/gtest.h"
 #include "nth/io/string_printer.h"
-#include "nth/strings/format/format.h"
 
 namespace nth {
 namespace {
@@ -15,7 +14,7 @@ void UniversalPrint(string_printer& p, auto const& value,
                         .fallback = "...",
                     }) {
   universal_formatter f(options);
-  nth::Format<"{}">(p, f, value);
+  f(p, value);
 }
 
 TEST(UniversalPrint, Builtin) {
