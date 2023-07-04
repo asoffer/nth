@@ -1,8 +1,9 @@
-#ifndef NTH_DEBUG_LOG_H
-#define NTH_DEBUG_LOG_H
+#ifndef NTH_DEBUG_LOG_LOG_H
+#define NTH_DEBUG_LOG_LOG_H
 
 #include "nth/base/macros.h"
-#include "nth/debug/internal/log.h"
+#include "nth/debug/log/internal/log.h"
+#include "nth/debug/verbosity.h"
 
 // The `NTH_LOG` is a macro which allows one to log to a configurable logging
 // sink. The macro accepts either one argument, consisting of a format-string,
@@ -34,4 +35,4 @@
          NTH_DEBUG_INTERNAL_LOG_WITH_VERBOSITY, NTH_DEBUG_INTERNAL_LOG,        \
          __VA_ARGS__)
 
-#endif // NTH_DEBUG_LOG_H
+#endif // NTH_DEBUG_LOG_LOG_H

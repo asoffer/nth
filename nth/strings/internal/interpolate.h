@@ -108,6 +108,25 @@ constexpr void Replacements(
   }
 }
 
+inline std::vector<PlaceholderRange> Replacements(
+    std::string_view interpolation_string) {
+  std::vector<PlaceholderRange> result;
+  PlaceholderRange * ptr;
+  char const* p = interpolation_string.data();
+  for (size_t i = 0; i < interpolation_string.size(); ++i) {
+    switch (p[i]) {
+      case '{':
+        ptr        = &result.emplace_back();
+        ptr->start = i;
+        break;
+      case '}': {
+        ptr->length = i - ptr->start + 1;
+      } break;
+    }
+  }
+  return result;
+}
+
 }  // namespace nth::internal_interpolate
 
 #endif  // NTH_STRINGS_INTERNAL_INTERPOLATE_H

@@ -1,23 +1,6 @@
 package(default_visibility = ["//visibility:public"])
 
 cc_library(
-    name = "log",
-    hdrs = ["log.h"],
-    srcs = [
-        "internal/log.cc",
-        "internal/log.h",
-    ],
-    deps = [
-        ":source_location",
-        "//nth/configuration:verbosity",
-        "//nth/base:macros",
-        "//nth/strings:interpolate",
-        "//nth/io:file_printer",
-        "//nth/io:string_printer",
-    ],
-)
-
-cc_library(
     name = "source_location",
     hdrs = ["source_location.h"],
     deps = [
@@ -36,16 +19,12 @@ cc_test(
 cc_library(
     name = "trace",
     hdrs = ["trace.h"],
-    srcs = [
-        "internal/trace.h",
-        "internal/trace_declare_api.h",
-        "internal/trace_operators.h",
-    ],
     deps = [
         ":source_location",
-        "//nth/configuration:verbosity",
         "//nth/base:attributes",
         "//nth/base:macros",
+        "//nth/configuration:verbosity",
+        "//nth/debug/internal:trace",
         "//nth/meta:type",
         "//nth/io:string_printer",
         "//nth/strings:interpolate",
@@ -56,7 +35,6 @@ cc_test(
     name = "trace_test",
     srcs = ["trace_test.cc"],
     deps = [
-        ":log",
         ":trace",
     ],
 )

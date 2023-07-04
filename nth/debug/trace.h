@@ -104,15 +104,15 @@ namespace nth {
 // a traced value in diagnostics if the asserted/expected expression evaluates
 // to `false`.
 template <nth::CompileTimeString S, int &..., typename T>
-constexpr ::nth::internal_trace::Traced<::nth::internal_trace::Identity<S>, T>
+constexpr ::nth::internal_debug::Traced<::nth::internal_debug::Identity<S>, T>
 Trace(NTH_ATTRIBUTE(lifetimebound) T const &value) {
-  namespace nit = ::nth::internal_trace ;
+  namespace nit = ::nth::internal_debug;
   return nit::Traced<nit::Identity<S>, T>(value);
 }
 
 // A concept matching any traced type.
 template <typename T>
-concept Traced = ::nth::internal_trace::TracedImpl<T>;
+concept Traced = ::nth::internal_debug::TracedImpl<T>;
 
 }  // namespace nth
 

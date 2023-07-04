@@ -3,26 +3,26 @@
 
 #include "nth/debug/internal/trace.h"
 
-namespace nth::internal_trace {
+namespace nth::internal_debug {
 
 #define NTH_INTERNAL_DEFINE_BINARY_OPERATOR(Op, op)                            \
   struct Op {                                                                  \
     static constexpr char name[] = "operator" #op;                             \
     template <typename L, typename R>                                          \
     static constexpr decltype(auto) invoke(L const &lhs, R const &rhs) {       \
-      return ::nth::internal_trace::Evaluate(lhs)                              \
-          op ::nth::internal_trace::Evaluate(rhs);                             \
+      return ::nth::internal_debug::Evaluate(lhs)                              \
+          op ::nth::internal_debug::Evaluate(rhs);                             \
     }                                                                          \
     template <typename L, typename R>                                          \
     using invoke_type =                                                        \
-        decltype(::nth::internal_trace::Evaluate(std::declval<L const &>())    \
-                     op ::nth::internal_trace::Evaluate(                       \
+        decltype(::nth::internal_debug::Evaluate(std::declval<L const &>())    \
+                     op ::nth::internal_debug::Evaluate(                       \
                          std::declval<R const &>()));                          \
   };                                                                           \
   template <typename L, typename R>                                            \
   constexpr auto operator op(L const &lhs, R const &rhs) requires(             \
-      ::nth::internal_trace::TracedImpl<L> or                                  \
-      ::nth::internal_trace::TracedImpl<R>) {                                  \
+      ::nth::internal_debug::TracedImpl<L> or                                  \
+      ::nth::internal_debug::TracedImpl<R>) {                                  \
     return Traced<Op, L, R>(lhs, rhs);                                         \
   }
 
@@ -49,22 +49,23 @@ NTH_INTERNAL_DEFINE_BINARY_OPERATOR(RSh, >>)
 NTH_INTERNAL_DEFINE_BINARY_OPERATOR(ArrowPtr, ->*)
 
 // Analogous to the expansion of the macros above, except that `,` cannot be
-// passed as a macro argument, so the body is implemented directly outside the macro.
+// passed as a macro argument, so the body is implemented directly outside the
+// macro.
 struct Comma {
   template <typename L, typename R>
   static constexpr decltype(auto) invoke(L const &lhs, R const &rhs) {
-    return (::nth::internal_trace::Evaluate(lhs),
-            ::nth::internal_trace::Evaluate(rhs));
+    return (::nth::internal_debug::Evaluate(lhs),
+            ::nth::internal_debug::Evaluate(rhs));
   }
   template <typename L, typename R>
   using invoke_type =
-      decltype((::nth::internal_trace::Evaluate(std::declval<L const &>()),
-                ::nth::internal_trace::Evaluate(std::declval<L const &>())));
+      decltype((::nth::internal_debug::Evaluate(std::declval<L const &>()),
+                ::nth::internal_debug::Evaluate(std::declval<L const &>())));
 };
 template <typename L, typename R>
-constexpr auto operator,(L const &lhs,
-                         R const &rhs) requires(::nth::internal_trace::TracedImpl<L> or
-                                                ::nth::internal_trace::TracedImpl<R>) {
+constexpr auto operator,(L const &lhs, R const &rhs) requires(
+    ::nth::internal_debug::TracedImpl<L> or
+    ::nth::internal_debug::TracedImpl<R>) {
   return Traced<Comma, L, R>(lhs, rhs);
 }
 
@@ -75,13 +76,13 @@ constexpr auto operator,(L const &lhs,
     static constexpr char name[] = "operator" #op;                             \
     template <typename T>                                                      \
     static constexpr decltype(auto) invoke(T const &t) {                       \
-      return op ::nth::internal_trace::Evaluate(t);                            \
+      return op ::nth::internal_debug::Evaluate(t);                            \
     }                                                                          \
     template <typename T>                                                      \
-    using invoke_type = decltype(op ::nth::internal_trace::Evaluate(           \
+    using invoke_type = decltype(op ::nth::internal_debug::Evaluate(           \
         std::declval<T const &>()));                                           \
   };                                                                           \
-  template <::nth::internal_trace::TracedImpl T>                                                   \
+  template <::nth::internal_debug::TracedImpl T>                               \
   constexpr auto operator op(T const &t) {                                     \
     return Traced<Op, T>(t);                                                   \
   }
@@ -95,6 +96,6 @@ NTH_INTERNAL_DEFINE_PREFIX_UNARY_OPERATOR(Ref, *)
 
 #undef NTH_INTERNAL_DEFINE_PREFIX_UNARY_OPERATOR
 
-}  // namespace nth::internal_trace
+}  // namespace nth::internal_debug
 
 #endif  // NTH_DEBUG_INTERNAL_TRACE_OPERATORS_H

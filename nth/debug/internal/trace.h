@@ -13,7 +13,7 @@
 #include "nth/meta/type.h"
 #include "nth/strings/interpolate.h"
 
-namespace nth::internal_trace {
+namespace nth::internal_debug {
 
 struct Spacer {
   int indentation, total;
@@ -76,11 +76,11 @@ struct Traced : TracedValue<typename Action::template invoke_type<Ts...>> {
 // instantiations are allowed to inherit from `TracedBase` so this concept
 // matches any "traced" type.
 template <typename T>
-concept TracedImpl = std::derived_from<T, internal_trace::TracedBase>;
+concept TracedImpl = std::derived_from<T, internal_debug::TracedBase>;
 
 template <typename T, typename U>
 concept TracedEvaluatingTo =
-    std::derived_from<T, nth::internal_trace::TracedValue<U>>;
+    std::derived_from<T, nth::internal_debug::TracedValue<U>>;
 
 template <nth::CompileTimeString S>
 struct Identity {
@@ -100,7 +100,7 @@ struct Identity {
 // to the passed in `value` unmodified.
 template <typename T>
 decltype(auto) constexpr Evaluate(NTH_ATTRIBUTE(lifetimebound) T const &value) {
-  if constexpr (nth::internal_trace::TracedImpl<T>) {
+  if constexpr (nth::internal_debug::TracedImpl<T>) {
     return (value.value_);
   } else {
     return value;
@@ -130,10 +130,10 @@ struct Responder {
 struct TracedTraversal {
   template <typename T>
   void operator()(T const &trace) {
-    if constexpr (nth::internal_trace::TracedImpl<T>) {
+    if constexpr (nth::internal_debug::TracedImpl<T>) {
       if constexpr (requires { T::action_type::name; } and
                     nth::type<typename T::action_type> ==
-                        nth::type<nth::internal_trace::Identity<
+                        nth::type<nth::internal_debug::Identity<
                             T::action_type::name>>) {
         std::string s(indentation, ' ');
         nth::string_printer p(s);
@@ -141,10 +141,10 @@ struct TracedTraversal {
         auto formatter = nth::config::default_formatter();
         if constexpr (T::action_type::name.empty()) {
           nth::Interpolate<"{} [traced value]\n">(
-              p, formatter, nth::internal_trace::Evaluate(trace));
+              p, formatter, nth::internal_debug::Evaluate(trace));
         } else {
           nth::Interpolate<"{} [traced value {}]\n">(
-              p, formatter, nth::internal_trace::Evaluate(trace),
+              p, formatter, nth::internal_debug::Evaluate(trace),
               std::quoted(T::action_type::name.data()));
         }
         std::cerr << s;
@@ -156,10 +156,10 @@ struct TracedTraversal {
         T::argument_types.reduce([&](auto... ts) {
           nth::Interpolate<"{} (= {})\n">(
               p, formatter,
-              nth::internal_trace::Spacer{.indentation = indentation,
+              nth::internal_debug::Spacer{.indentation = indentation,
                                           .total       = 40,
                                           .name        = T::action_type::name},
-              nth::internal_trace::Evaluate(trace));
+              nth::internal_debug::Evaluate(trace));
           std::cerr << s;
           indentation += 2;
           size_t i = 0;
@@ -200,7 +200,7 @@ struct Explain {
 struct TraceInjector {};
 template <typename T>
 constexpr decltype(auto) operator->*(TraceInjector, T const &value) {
-  if constexpr (nth::internal_trace::TracedImpl<T>) {
+  if constexpr (nth::internal_debug::TracedImpl<T>) {
     return value;
   } else {
     if constexpr (std::is_array_v<T>) {
@@ -212,7 +212,7 @@ constexpr decltype(auto) operator->*(TraceInjector, T const &value) {
 }
 template <typename T>
 constexpr decltype(auto) operator->*(T const &value, TraceInjector) {
-  if constexpr (nth::internal_trace::TracedImpl<T>) {
+  if constexpr (nth::internal_debug::TracedImpl<T>) {
     return value;
   } else {
     if constexpr (std::is_array_v<T>) {
@@ -223,14 +223,14 @@ constexpr decltype(auto) operator->*(T const &value, TraceInjector) {
   }
 }
 
-}  // namespace nth::internal_trace
+}  // namespace nth::internal_debug
 
 #define NTH_DEBUG_INTERNAL_TRACE_EXPECT(...)                                   \
   NTH_DEBUG_INTERNAL_TRACE_EXPECT_WITH_VERBOSITY(                              \
       (::nth::config::default_expectation_verbosity_requirement), __VA_ARGS__)
 
 #define NTH_DEBUG_INTERNAL_TRACE_EXPECT_WITH_VERBOSITY(verbosity, ...)         \
-  if (::nth::internal_trace::Responder<nth::internal_trace::Explain, [] {}>    \
+  if (::nth::internal_debug::Responder<nth::internal_debug::Explain, [] {}>    \
           nth_responder;                                                       \
       (not std::is_constant_evaluated() and                                    \
        not [&] {                                                               \
@@ -239,15 +239,15 @@ constexpr decltype(auto) operator->*(T const &value, TraceInjector) {
        }()) or                                                                 \
       nth_responder.set(                                                       \
           (#__VA_ARGS__),                                                      \
-          (::nth::internal_trace::TraceInjector{}                              \
-               ->*__VA_ARGS__->*::nth::internal_trace::TraceInjector{}))) {}
+          (::nth::internal_debug::TraceInjector{}                              \
+               ->*__VA_ARGS__->*::nth::internal_debug::TraceInjector{}))) {}
 
 #define NTH_DEBUG_INTERNAL_TRACE_ASSERT(...)                                   \
   NTH_DEBUG_INTERNAL_TRACE_ASSERT_WITH_VERBOSITY(                              \
       (::nth::config::default_assertion_verbosity_requirement), __VA_ARGS__)
 
 #define NTH_DEBUG_INTERNAL_TRACE_ASSERT_WITH_VERBOSITY(verbosity, ...)         \
-  if (::nth::internal_trace::Responder<nth::internal_trace::Explain,           \
+  if (::nth::internal_debug::Responder<nth::internal_debug::Explain,           \
                                        std::abort>                             \
           nth_responder;                                                       \
       (not std::is_constant_evaluated() and not([&] {                          \
@@ -256,7 +256,7 @@ constexpr decltype(auto) operator->*(T const &value, TraceInjector) {
       }())) or                                                                 \
       nth_responder.set(                                                       \
           (#__VA_ARGS__),                                                      \
-          (::nth::internal_trace::TraceInjector{}                              \
-               ->*__VA_ARGS__->*::nth::internal_trace::TraceInjector{}))) {}
+          (::nth::internal_debug::TraceInjector{}                              \
+               ->*__VA_ARGS__->*::nth::internal_debug::TraceInjector{}))) {}
 
 #endif  // NTH_DEBUG_INTERNAL_TRACE_H

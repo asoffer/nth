@@ -103,6 +103,27 @@ constexpr void InterpolateErased(Printer auto& p, Iter b, Iter e) requires(
   p.write(interpolation_string.substr(last_end, interpolation_string.size()));
 }
 
+template <int&..., typename Iter>
+void InterpolateErased(
+    std::string_view interpolation_string, Printer auto& p, Iter b,
+    Iter e) requires(std::convertible_to<decltype(*std::declval<Iter>()),
+                                         std::string_view>) {
+  // TODO: Do this as we go to avoid the need for an allocation.
+  auto replacements = internal_interpolate::Replacements(interpolation_string);
+
+  size_t last_end = 0;
+  for (auto [start, length] : replacements) {
+    p.write(interpolation_string.substr(last_end, start - last_end));
+    last_end = start + length;
+
+    // TODO: Can we make `NTH_ASSERT`?
+    if (b == e) [[unlikely]] { std::abort(); }
+
+    p.write(*b++);
+  }
+  p.write(interpolation_string.substr(last_end, interpolation_string.size()));
+}
+
 }  // namespace nth
 
 #define NthInternalInterpolationStringDataMember                               \
