@@ -18,6 +18,14 @@
   }                                                                            \
   static_assert(true, "require a semicolon")
 
+// NTH_REQUIRE_EXPANSION_TO_PREFIX_SUBEXPRESSION
+//
+// Expands the given expression argument in such a way that it can be used as a
+// prefix subexpression, but nowhere else.
+#define NTH_REQUIRE_EXPANSION_TO_PREFIX_SUBEXPRESSION(...)                     \
+  switch (0)                                                                   \
+  default: __VA_ARGS__
+
 // NTH_TYPE
 //
 // Given an integer index and a pack of types, expands to an expression

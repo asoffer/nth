@@ -28,6 +28,10 @@ struct InterpolationString {
   static constexpr size_t size() { return Length; }
   static constexpr size_t length() { return Length; }
 
+  constexpr operator std::string_view() const {
+    return NthInternalInterpolationStringDataMember;
+  }
+
   constexpr auto operator<=>(InterpolationString const&) const = default;
 
   // Returns the number of placeholders in this interpolation string.

@@ -3,7 +3,6 @@
 
 #include <array>
 #include <functional>
-#include <iostream>
 #include <string_view>
 #include <utility>
 
@@ -116,9 +115,31 @@ inline std::array<file_printer*, 1> RegisteredLoggers() {
   return {&stderr_printer};
 }
 
+struct TypeSink {
+  constexpr TypeSink() = default;
+  TypeSink(LogLineBase const&) {}
+  TypeSink(struct Ignorer const&) {}
+  TypeSink(TypeSink const&) = delete;
+  TypeSink(TypeSink&&)      = delete;
+
+  void operator=(TypeSink const&) = delete;
+  void operator=(TypeSink&&) {}
+};
+
+struct Ignorer {
+  constexpr Ignorer()     = default;
+  Ignorer(Ignorer const&) = delete;
+  Ignorer(Ignorer&&)      = delete;
+
+  void operator=(Ignorer const&) = delete;
+  void operator=(Ignorer&&) {}
+  TypeSink operator<<=(int) const { return TypeSink(); }
+};
+inline constexpr Ignorer ignorer;
+
 template <InterpolationString I>
-struct LogLine : private LogLineBase {
-  friend void operator<<=(
+struct LogLine : LogLineBase {
+  friend TypeSink operator<<=(
       LogLine const& l,
       NTH_ATTRIBUTE(lifetimebound)
           UnserializedLogEntry<I.placeholders()> const& entry) {
@@ -146,6 +167,8 @@ struct LogLine : private LogLineBase {
 
       logger->write("\n");
     }
+
+    return TypeSink();
   }
 };
 
@@ -157,17 +180,21 @@ struct LogLine : private LogLineBase {
       interpolation_string)
 
 #define NTH_DEBUG_INTERNAL_LOG_WITH_VERBOSITY(verbosity, interpolation_string) \
-  switch (0)                                                                   \
-  default:                                                                     \
-    ([&] {                                                                     \
-      [[maybe_unused]] constexpr auto& v = ::nth::debug_verbosity;             \
-      return not(verbosity)(::nth::source_location::current());                \
-    }())                                                                       \
-        ? (void)0                                                              \
-        : [&]() -> decltype(auto) {                                            \
-      static const ::nth::internal_log::LogLine<(interpolation_string)>        \
-          nth_log_line;                                                        \
-      return (nth_log_line);                                                   \
-    }()
+  NTH_REQUIRE_EXPANSION_TO_PREFIX_SUBEXPRESSION(                               \
+      ::nth::internal_log::TypeSink() = ([&] {                                 \
+        [[maybe_unused]] constexpr auto& v = ::nth::debug_verbosity;           \
+        return not(verbosity)(::nth::source_location::current());              \
+      }())                                                                     \
+                                            ? ::nth::internal_log::TypeSink{}  \
+                                            : [&]() -> decltype(auto) {        \
+        constexpr ::nth::InterpolationString is{(interpolation_string)};       \
+        static const ::nth::internal_log::LogLine<is> nth_log_line;            \
+        if constexpr (is.placeholders() == 0) {                                \
+          nth_log_line <<= {};                                                 \
+          return (::nth::internal_log::ignorer);                               \
+        } else {                                                               \
+          return (nth_log_line);                                               \
+        }                                                                      \
+      }())
 
 #endif  // NTH_DEBUG_INTERNAL_LOG_H
