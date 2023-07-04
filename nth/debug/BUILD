@@ -4,6 +4,7 @@ cc_library(
     name = "log",
     hdrs = ["log.h"],
     srcs = [
+        "internal/log.cc",
         "internal/log.h",
     ],
     deps = [
@@ -12,6 +13,7 @@ cc_library(
         "//nth/base:macros",
         "//nth/strings/format",
         "//nth/io:file_printer",
+        "//nth/io:string_printer",
     ],
 )
 
@@ -54,6 +56,7 @@ cc_test(
     name = "trace_test",
     srcs = ["trace_test.cc"],
     deps = [
+        ":log",
         ":trace",
     ],
 )

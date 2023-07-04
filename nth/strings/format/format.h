@@ -16,13 +16,13 @@ namespace internal_format {
 template <typename F, typename T>
 concept FormatterFor = requires(F& f) {
   {
-    f(std::declval<nth::MinimalPrinter&>(), std::declval<T const&>())
+    f(std::declval<MinimalPrinter&>(), std::declval<T const&>())
     } -> std::same_as<void>;
 };
 
 template <typename T>
 struct MinimalFormatterFor {
-  void operator()(nth::Printer auto&, std::same_as<T> auto const&) const;
+  void operator()(Printer auto&, std::same_as<T> auto const&) const;
 };
 
 }  // namespace internal_format
@@ -66,7 +66,7 @@ struct FormatString {
     return i;
   }
 
-  nth::CompileTimeString<Length> NthInternalFormatStringDataMember;
+  CompileTimeString<Length> NthInternalFormatStringDataMember;
 };
 
 template <size_t N>
@@ -74,9 +74,8 @@ FormatString(char const (&)[N]) -> FormatString<N - 1>;
 
 // Formats each of `ts...` with the `Printer p` according to the non-type
 // template parameter `Fmt`.
-template <nth::FormatString Fmt, int&..., typename... Ts>
-constexpr void Format(nth::Printer auto& p,
-                      nth::FormatterFor<Ts...> auto& formatter,
+template <FormatString Fmt, int&..., typename... Ts>
+constexpr void Format(Printer auto& p, FormatterFor<Ts...> auto& formatter,
                       Ts const&... ts) requires(sizeof...(Ts) ==
                                                 Fmt.placeholders()) {
   constexpr std::string_view format(Fmt.NthInternalFormatStringDataMember);
@@ -94,6 +93,34 @@ constexpr void Format(nth::Printer auto& p,
         formatter(p, ts);
       }(),
       ...);
+  p.write(format.substr(last_end, format.size()));
+}
+
+// Similar to `Format`, except that a range (in the form of a pair of iterators)
+// are used for the contents. Notably, runtime checks may be performed to
+// ensure that the number of formatting placeholders matches the number of
+// elements in the range. Partial output may (but is not guaranteed) to be
+// provided if the size of the range does not match the number of placeholders.
+// No formatter is required because the iterator pair must iterate over
+// `std::string_view`s; users should format individual entries ahead of time.
+template <FormatString Fmt, int&..., typename Iter>
+constexpr void InterpolateErased(Printer auto& p, Iter b, Iter e) requires(
+    std::convertible_to<decltype(*std::declval<Iter>()), std::string_view>) {
+  constexpr std::string_view format(Fmt.NthInternalFormatStringDataMember);
+  std::array<internal_format::PlaceholderRange, Fmt.placeholders()>
+      replacements;
+  internal_format::Replacements<Fmt>(replacements);
+
+  size_t last_end = 0;
+  for (auto [start, length] : replacements) {
+    p.write(format.substr(last_end, start - last_end));
+    last_end = start + length;
+
+    // TODO: Can we make `NTH_ASSERT`?
+    if (b == e) [[unlikely]] { std::abort(); }
+
+    p.write(*b++);
+  }
   p.write(format.substr(last_end, format.size()));
 }
 

@@ -1,4 +1,5 @@
 #include "nth/debug/trace.h"
+#include "nth/debug/log.h"
 
 namespace {
 
@@ -105,5 +106,5 @@ int main() {
     return 1;
   }
 
-  return 0;
+  return 1;
 }
