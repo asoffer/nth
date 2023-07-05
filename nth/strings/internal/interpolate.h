@@ -5,6 +5,7 @@
 #include <cstdlib>
 #include <optional>
 #include <string_view>
+#include <vector>
 
 namespace nth::internal_interpolate {
 

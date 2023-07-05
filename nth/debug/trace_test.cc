@@ -1,5 +1,4 @@
 #include "nth/debug/trace.h"
-#include "nth/debug/log.h"
 
 namespace {
 

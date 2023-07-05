@@ -5,6 +5,7 @@
 #include <memory>
 
 #include "nth/base/attributes.h"
+#include "nth/configuration/verbosity.h"
 #include "nth/debug/log/internal/voidifier.h"
 #include "nth/io/string_printer.h"
 

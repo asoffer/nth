@@ -1,5 +1,5 @@
-#ifndef NTH_DEBUG_LOG_STDERR_SINK_H
-#define NTH_DEBUG_LOG_STDERR_SINK_H
+#ifndef NTH_DEBUG_LOG_STDERR_LOG_SINK_H
+#define NTH_DEBUG_LOG_STDERR_LOG_SINK_H
 
 #include "nth/debug/log/entry.h"
 #include "nth/debug/log/line.h"
@@ -18,7 +18,8 @@ struct StdErrLogSink : LogSink {
         line.source_location().function_name(), line.source_location().line());
 
     nth::InterpolateErased(line.interpolation_string(), stderr_printer,
-                           log_entry.begin(), log_entry.end());
+                           log_entry.component_begin(),
+                           log_entry.component_end());
 
     stderr_printer.write("\n");
   }
@@ -27,4 +28,4 @@ inline StdErrLogSink stderr_log_sink;
 
 }  // namespace nth
 
-#endif  // NTH_DEBUG_LOG_STDERR_SINK_H
+#endif  // NTH_DEBUG_LOG_STDERR_LOG_SINK_H

@@ -2,23 +2,25 @@ package(default_visibility = ["//visibility:public"])
 
 cc_library(
     name = "entry",
-    visibility = ["//visibility:private"],
+    visibility = ["//nth/debug/log:__subpackages__"],
     hdrs = ["entry.h"],
-    deps = [],
+    srcs = ["entry.cc"],
+    deps = [
+        ":line",
+        ":sink",
+        "//nth/debug/log/internal:component_iterator",
+    ],
 )
 
 cc_library(
     name = "line",
-    visibility = ["//visibility:private"],
+    visibility = ["//nth/debug/log:__subpackages__"],
     hdrs = ["line.h"],
     srcs = ["line.cc"],
     deps = [
-        ":entry",
-        "//nth/base:attributes",
-        "//nth/configuration:verbosity",
-        "//nth/debug:source_location",
         "//nth/debug/log/internal:interpolation_arguments",
         "//nth/debug/log/internal:voidifier",
+        "//nth/debug:source_location",
     ],
 )
 
@@ -26,6 +28,9 @@ cc_library(
     name = "log",
     hdrs = ["log.h"],
     deps = [
+        ":entry",
+        ":line",
+        ":sink",
         "//nth/base:macros",
         "//nth/debug/log/internal:log",
         "//nth/debug:verbosity",
@@ -37,26 +42,35 @@ cc_test(
     srcs = ["log_test.cc"],
     deps = [
         ":log",
+        ":vector_log_sink",
     ],
 )
 
 cc_library(
     name = "sink",
+    visibility = ["//nth/debug/log:__subpackages__"],
     hdrs = ["sink.h"],
-    deps = [
-        ":entry",
-        ":line",
-    ],
+    deps = [],
 )
 
 cc_library(
-    name = "stderr_sink",
-    hdrs = ["stderr_sink.h"],
+    name = "stderr_log_sink",
+    hdrs = ["stderr_log_sink.h"],
     deps = [
         ":entry",
         ":line",
         ":sink",
         "//nth/io:file_printer",
         "//nth/strings:interpolate",
+    ],
+)
+
+cc_library(
+    name = "vector_log_sink",
+    hdrs = ["vector_log_sink.h"],
+    deps = [
+        ":entry",
+        ":line",
+        ":sink",
     ],
 )

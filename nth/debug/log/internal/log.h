@@ -6,15 +6,14 @@
 #include <string_view>
 #include <utility>
 
-#include "nth/base/attributes.h"
 #include "nth/base/macros.h"
 #include "nth/configuration/verbosity.h"
+#include "nth/debug/log/entry.h"
 #include "nth/debug/log/internal/interpolation_arguments.h"
+#include "nth/debug/log/internal/voidifier.h"
 #include "nth/debug/log/line.h"
-#include "nth/debug/log/sink.h"
-#include "nth/debug/log/stderr_sink.h"
 #include "nth/debug/source_location.h"
-#include "nth/io/string_printer.h"
+#include "nth/strings/interpolate.h"
 
 #define NTH_DEBUG_INTERNAL_LOG(interpolation_string)                           \
   NTH_DEBUG_LOG_INTERNAL_DEBUG_WITH_VERBOSITY(                                 \
