@@ -28,12 +28,21 @@ struct Identity {
   }
 };
 
+struct TracedTraversal;
+template <typename Action, typename... Ts>
+struct Traced;
+
+template <typename Action, typename... Ts>
+void Traverse(TracedTraversal &traversal, void const *self, size_t &pos);
+
 struct TraceVTable {
   std::string_view display_name;
   std::string_view function_name;
+  void (*traverse)(TracedTraversal &, void const *, size_t &);
+  size_t argument_count;
 };
 
-template <typename T, typename Action>
+template <typename T, typename Action, typename... Ts>
 constexpr TraceVTable TraceVTableFor{
     .display_name = []() -> std::string_view {
       if constexpr (requires { Action::name; } and
@@ -50,6 +59,8 @@ constexpr TraceVTable TraceVTableFor{
         return "";
       }
     }(),
+    .traverse = &Traverse<Action, Ts...>,
+    .argument_count = sizeof...(Ts),
 };
 
 // Base class from which all `Traced` objects inherit.
@@ -86,25 +97,33 @@ struct TracedValue : TracedBase {
 // remain valid for the lifetime of this object.
 template <typename Action, typename... Ts>
 struct Traced : TracedValue<typename Action::template invoke_type<Ts...>> {
-  using action_type = Action;
-  using type        = typename action_type::template invoke_type<Ts...>;
+  using type        = typename Action::template invoke_type<Ts...>;
   static constexpr auto argument_types = nth::type_sequence<Ts...>;
 
   constexpr Traced(NTH_ATTRIBUTE(lifetimebound) Ts const &...ts)
       : TracedValue<type>(
             [&](auto const &...vs) -> decltype(auto) {
-              return action_type::invoke(vs...);
+              return Action::invoke(vs...);
             },
             ts...),
         ptrs_{std::addressof(ts)...} {
-    this->vtable_ = &TraceVTableFor<type, action_type>;
+    this->vtable_ = &TraceVTableFor<type, Action, Ts...>;
   }
 
  private:
-  friend struct TracedTraversal;
+  template <typename, typename...>
+  friend void Traverse(TracedTraversal &, void const *, size_t &);
 
+  // TODO: Hide.
   void const *ptrs_[sizeof...(Ts)];
 };
+
+template <typename Action, typename... Ts>
+void Traverse(TracedTraversal &traversal, void const *self, size_t &pos) {
+  auto const &trace = *static_cast<Traced<Action, Ts...> const *>(self);
+  ((traversal(*static_cast<std::decay_t<Ts> const *>(trace.ptrs_[pos])), ++pos),
+   ...);
+}
 
 // A concept matching any type deriving from `TracedBase`. Only `TracedValue`
 // instantiations are allowed to inherit from `TracedBase` so this concept
@@ -127,6 +146,21 @@ decltype(auto) constexpr Evaluate(NTH_ATTRIBUTE(lifetimebound) T const &value) {
     return value;
   }
 }
+
+template <typename T>
+struct EraseImpl {
+  using type = T;
+};
+template <typename T>
+struct EraseImpl<TracedValue<T>> {
+  using type = TracedValue<T>;
+};
+template <typename Action, typename... Ts>
+struct EraseImpl<Traced<Action, Ts...>> {
+  using type = TracedValue<typename Traced<Action, Ts...>::type>;
+};
+template <typename T>
+using Erased = typename EraseImpl<T>::type;
 
 struct TracedTraversal {
   explicit TracedTraversal(bounded_string_printer &printer)
@@ -168,7 +202,7 @@ struct TracedTraversal {
             pos = len;
           }
         }
-        auto &[pos, len] = positions_.emplace_back(0, T::argument_types.size());
+        auto &[pos, len] = positions_.emplace_back(0, vtable.argument_count);
 
         formatter(printer_, vtable.function_name);
         size_t written = cap - printer_.capacity();
@@ -176,12 +210,7 @@ struct TracedTraversal {
         nth::Interpolate<"(= {})\n">(printer_, formatter,
                                      nth::internal_debug::Evaluate(trace));
 
-        T::argument_types.reduce([&](auto... ts) {
-          (((*this)(*static_cast<std::decay_t<::nth::type_t<ts>> const *>(
-                trace.ptrs_[pos])),
-            ++pos),
-           ...);
-        });
+        vtable.traverse(*this, std::addressof(trace), pos);
         positions_.pop_back();
 
       } else {

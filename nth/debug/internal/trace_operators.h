@@ -23,7 +23,9 @@ namespace nth::internal_debug {
   constexpr auto operator op(L const &lhs, R const &rhs) requires(             \
       ::nth::internal_debug::TracedImpl<L> or                                  \
       ::nth::internal_debug::TracedImpl<R>) {                                  \
-    return Traced<Op, L, R>(lhs, rhs);                                         \
+    return ::nth::internal_debug::Traced<Op, ::nth::internal_debug::Erased<L>, \
+                                         ::nth::internal_debug::Erased<R>>(    \
+        lhs, rhs);                                                             \
   }
 
 NTH_INTERNAL_DEFINE_BINARY_OPERATOR(Le, <=)
@@ -66,7 +68,9 @@ template <typename L, typename R>
 constexpr auto operator,(L const &lhs, R const &rhs) requires(
     ::nth::internal_debug::TracedImpl<L> or
     ::nth::internal_debug::TracedImpl<R>) {
-  return Traced<Comma, L, R>(lhs, rhs);
+  return ::nth::internal_debug::Traced<Comma, ::nth::internal_debug::Erased<L>,
+                                       ::nth::internal_debug::Erased<R>>(lhs,
+                                                                         rhs);
 }
 
 #undef NTH_INTERNAL_DEFINE_BINARY_OPERATOR
@@ -84,7 +88,8 @@ constexpr auto operator,(L const &lhs, R const &rhs) requires(
   };                                                                           \
   template <::nth::internal_debug::TracedImpl T>                               \
   constexpr auto operator op(T const &t) {                                     \
-    return Traced<Op, T>(t);                                                   \
+    return ::nth::internal_debug::Traced<Op,                                   \
+                                         ::nth::internal_debug::Erased<T>>(t); \
   }
 
 NTH_INTERNAL_DEFINE_PREFIX_UNARY_OPERATOR(Tilde, ~)

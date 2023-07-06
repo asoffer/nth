@@ -69,7 +69,7 @@ bool ComparisonExpectations() {
   NTH_ASSERT(t * 2 == 6) else { return false; }
   NTH_ASSERT(t * 2 + 1 == 7) else { return false; }
   NTH_ASSERT((1 + t) * 2 + 1 == 9) else { return false; }
-  NTH_ASSERT(9 == (2 + t) * 2 + 1) else { return false; }
+  NTH_ASSERT(9 == (1 + t) * 2 + 1) else { return false; }
   return true;
 }
 
