@@ -18,7 +18,7 @@ struct LogEntry {
 
   LogLineId id() const { return id_; }
 
- private:
+ // private:
   template <size_t>
   friend struct nth::internal_debug::LogLineWithArity;
 

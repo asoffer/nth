@@ -1,4 +1,5 @@
 #include "nth/debug/trace.h"
+#include "nth/debug/log/stderr_log_sink.h"
 
 namespace {
 
@@ -37,34 +38,25 @@ NTH_TRACE_DECLARE_API_TEMPLATE(S<T>, (triple)(add)(value));
 static_assert(not nth::Traced<int>);
 static_assert(nth::Traced<decltype(nth::Trace<"n">(3))>);
 
-static_assert([] {
-  // Comparison expectations
+bool ComparisonExpectations() {
   int n  = 3;
   auto t = nth::Trace<"n">(n);
+
+  // Comparison expectations
   NTH_EXPECT(t == 3) else { return false; }
   NTH_EXPECT(t <= 4) else { return false; }
   NTH_EXPECT(t < 4) else { return false; }
   NTH_EXPECT(t >= 2) else { return false; }
   NTH_EXPECT(t > 2) else { return false; }
   NTH_EXPECT(t != 2) else { return false; }
-  return true;
-}());
 
-static_assert([] {
   // More complex expression expectations
-  int n  = 3;
-  auto t = nth::Trace<"n">(n);
   NTH_EXPECT(t * 2 == 6) else { return false; }
   NTH_EXPECT(t * 2 + 1 == 7) else { return false; }
   NTH_EXPECT((1 + t) * 2 + 1 == 9) else { return false; }
   NTH_EXPECT(9 == (1 + t) * 2 + 1) else { return false; }
-  return true;
-}());
 
-static_assert([] {
   // Comparison assertions
-  int n  = 3;
-  auto t = nth::Trace<"n">(n);
   NTH_ASSERT(t == 3) else { return false; }
   NTH_ASSERT(t <= 4) else { return false; }
   NTH_ASSERT(t < 4) else { return false; }
@@ -72,21 +64,19 @@ static_assert([] {
   NTH_ASSERT(t > 2) else { return false; }
   NTH_ASSERT(t != 2) else { return false; }
   NTH_ASSERT((t << 2) == 12) else { return false; }
-  return true;
-}());
 
-static_assert([] {
   // More complex expression assertions
-  int n  = 3;
-  auto t = nth::Trace<"n">(n);
   NTH_ASSERT(t * 2 == 6) else { return false; }
   NTH_ASSERT(t * 2 + 1 == 7) else { return false; }
   NTH_ASSERT((1 + t) * 2 + 1 == 9) else { return false; }
   NTH_ASSERT(9 == (1 + t) * 2 + 1) else { return false; }
   return true;
-}());
+}
 
 int main() {
+  nth::RegisterLogSink(nth::stderr_log_sink);
+  if (not ComparisonExpectations()) { return 1; }
+
   // Declared API
   Thing thing{.n = 5};
   auto traced_thing = nth::Trace<"thing">(thing);

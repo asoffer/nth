@@ -43,6 +43,8 @@ struct bounded_string_printer {
     left_ -= to_write;
   }
 
+  size_t capacity() const { return left_; }
+
  private:
   std::string& s_;
   size_t left_;

@@ -36,6 +36,7 @@ cc_test(
     srcs = ["trace_test.cc"],
     deps = [
         ":trace",
+        "//nth/debug/log:stderr_log_sink",
     ],
 )
 

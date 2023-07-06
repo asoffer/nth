@@ -11,6 +11,7 @@ cc_library(
         "//nth/base:attributes",
         "//nth/base:macros",
         "//nth/configuration:verbosity",
+        "//nth/debug/log",
         "//nth/debug:source_location",
         "//nth/meta:type",
         "//nth/io:string_printer",
