@@ -15,8 +15,52 @@
 
 namespace nth::internal_debug {
 
+template <nth::CompileTimeString S>
+struct Identity {
+  static constexpr auto name = S;
+
+  template <typename T>
+  using invoke_type = T;
+
+  template <typename T>
+  static constexpr decltype(auto) invoke(T const &t) {
+    return t;
+  }
+};
+
+struct TraceVTable {
+  std::string_view display_name;
+  std::string_view function_name;
+};
+
+template <typename T, typename Action>
+constexpr TraceVTable TraceVTableFor{
+    .display_name = []() -> std::string_view {
+      if constexpr (requires { Action::name; } and
+                    nth::type<Action> == nth::type<Identity<Action::name>>) {
+        return Action::name;
+      } else {
+        return "";
+      }
+    }(),
+    .function_name = []() -> std::string_view {
+      if constexpr (nth::type<Action> != nth::type<Identity<Action::name>>) {
+        return Action::name;
+      } else {
+        return "";
+      }
+    }(),
+};
+
 // Base class from which all `Traced` objects inherit.
-struct TracedBase {};
+struct TracedBase {
+ protected:
+  friend TraceVTable const &VTable(TracedBase const &t);
+
+  TraceVTable const * vtable_;
+};
+
+inline TraceVTable const &VTable(TracedBase const &t) { return *t.vtable_; }
 
 // A wrapper around a value of type `T` that was computed via some tracing
 // mechanism.
@@ -28,7 +72,6 @@ struct TracedValue : TracedBase {
   // Constructs the traced value by invoking `f` with the arguments `ts...`.
   constexpr TracedValue(auto f, auto const &...ts) : value_(f(ts...)) {}
 
- private:
   // Friend function template abstracting over a `TracedValue<T>` and a `T`.
   template <typename U>
   friend constexpr decltype(auto) Evaluate(U const &value);
@@ -43,16 +86,19 @@ struct TracedValue : TracedBase {
 // remain valid for the lifetime of this object.
 template <typename Action, typename... Ts>
 struct Traced : TracedValue<typename Action::template invoke_type<Ts...>> {
-  using action_type                    = Action;
+  using action_type = Action;
+  using type        = typename action_type::template invoke_type<Ts...>;
   static constexpr auto argument_types = nth::type_sequence<Ts...>;
 
   constexpr Traced(NTH_ATTRIBUTE(lifetimebound) Ts const &...ts)
-      : TracedValue<typename action_type::template invoke_type<Ts...>>(
+      : TracedValue<type>(
             [&](auto const &...vs) -> decltype(auto) {
               return action_type::invoke(vs...);
             },
             ts...),
-        ptrs_{std::addressof(ts)...} {}
+        ptrs_{std::addressof(ts)...} {
+    this->vtable_ = &TraceVTableFor<type, action_type>;
+  }
 
  private:
   friend struct TracedTraversal;
@@ -69,19 +115,6 @@ concept TracedImpl = std::derived_from<T, internal_debug::TracedBase>;
 template <typename T, typename U>
 concept TracedEvaluatingTo =
     std::derived_from<T, nth::internal_debug::TracedValue<U>>;
-
-template <nth::CompileTimeString S>
-struct Identity {
-  static constexpr auto name = S;
-
-  template <typename T>
-  using invoke_type = T;
-
-  template <typename T>
-  static constexpr decltype(auto) invoke(T const &t) {
-    return t;
-  }
-};
 
 // Function template which, when `value` is a traced object extracts a constant
 // reference to the underlying value, and otherwise returns a constant reference
@@ -128,19 +161,8 @@ struct TracedTraversal {
     size_t cap     = printer_.capacity() + 3 * positions_.size();
     auto formatter = nth::config::default_formatter();
     if constexpr (nth::internal_debug::TracedImpl<T>) {
-      if constexpr (requires { T::action_type::name; } and
-                    nth::type<typename T::action_type> ==
-                        nth::type<nth::internal_debug::Identity<
-                            T::action_type::name>>) {
-        if constexpr (T::action_type::name.empty()) {
-          nth::Interpolate<"{} [traced value]\n">(
-              printer_, formatter, nth::internal_debug::Evaluate(trace));
-        } else {
-          nth::Interpolate<"{} [traced value {}]\n">(
-              printer_, formatter, nth::internal_debug::Evaluate(trace),
-              std::quoted(T::action_type::name.data()));
-        }
-      } else {
+      auto const & vtable = nth::internal_debug::VTable(trace);
+      if (not vtable.function_name.empty()) {
         if (not positions_.empty()) {
           if (auto &[pos, len] = positions_.back(); pos + 1 == len) {
             pos = len;
@@ -148,18 +170,29 @@ struct TracedTraversal {
         }
         auto &[pos, len] = positions_.emplace_back(0, T::argument_types.size());
 
-        formatter(printer_, T::action_type::name);
+        formatter(printer_, vtable.function_name);
         size_t written = cap - printer_.capacity();
         printer_.write(60 - written, ' ');
         nth::Interpolate<"(= {})\n">(printer_, formatter,
                                      nth::internal_debug::Evaluate(trace));
 
         T::argument_types.reduce([&](auto... ts) {
-          (((*this)(*static_cast<::nth::type_t<ts> const *>(trace.ptrs_[pos])),
+          (((*this)(*static_cast<std::decay_t<::nth::type_t<ts>> const *>(
+                trace.ptrs_[pos])),
             ++pos),
            ...);
         });
         positions_.pop_back();
+
+      } else {
+        if (vtable.display_name.empty()) {
+          nth::Interpolate<"{} [traced value]\n">(
+              printer_, formatter, nth::internal_debug::Evaluate(trace));
+        } else {
+          nth::Interpolate<"{} [traced value {}]\n">(
+              printer_, formatter, nth::internal_debug::Evaluate(trace),
+              std::quoted(vtable.display_name));
+        }
       }
     } else {
       nth::Interpolate<"{}\n">(printer_, formatter, trace);
