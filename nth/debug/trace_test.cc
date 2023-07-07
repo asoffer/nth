@@ -73,9 +73,20 @@ bool ComparisonExpectations() {
   return true;
 }
 
+
+bool ShortCircuiting() {
+  int n  = 3;
+  auto t = nth::Trace<"n">(n);
+
+  NTH_EXPECT(t == 0 or (3 / t) == 1) else { return false; }
+  NTH_EXPECT(t == 2 or t == 3) else { return false; }
+  return true;
+}
+
 int main() {
   nth::RegisterLogSink(nth::stderr_log_sink);
   if (not ComparisonExpectations()) { return 1; }
+  if (not ShortCircuiting()) { return 1; }
 
   // Declared API
   Thing thing{.n = 5};

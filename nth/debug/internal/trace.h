@@ -89,6 +89,29 @@ struct TracedValue : TracedBase {
 
   type value_;
 };
+template <>
+struct TracedValue<bool> : TracedBase {
+  using type = bool;
+
+  explicit operator bool() const ;
+
+ protected:
+  // Constructs the traced value by invoking `f` with the arguments `ts...`.
+  constexpr TracedValue(auto f, auto const &...ts) : value_(f(ts...)) {}
+
+  // Friend function template abstracting over a `TracedValue<T>` and a `T`.
+  template <typename U>
+  friend constexpr decltype(auto) Evaluate(U const &value);
+
+  bool value_;
+};
+
+inline thread_local std::vector<TracedValue<bool> const *> bool_value_stash;
+
+inline TracedValue<bool>::operator bool() const {
+  bool_value_stash.push_back(this);
+  return value_;
+}
 
 // `Traced` is the primary workhorse of this library. It takes an `Action`
 // template parameter indicating how the value is computed, and a collection of
@@ -255,9 +278,32 @@ struct Responder {
     return value_;
   }
 
+  bool set(char const *expression, std::same_as<bool> auto b) {
+    set_   = true;
+    value_ = b;
+    if (not value_) {
+      LogEntry log_entry(line_->id(), 1);
+
+      constexpr size_t bound = 1024;
+      bounded_string_printer printer(log_entry.data(), bound);
+
+      printer.write(expression);
+      log_entry.demarcate();
+
+      TracedTraversal traverser(printer);
+      for (auto const *bv : bool_value_stash) { traverser(*bv); }
+      log_entry.demarcate();
+
+      for (auto *sink : RegisteredLogSinks()) { sink->send(*line_, log_entry); }
+      bool_value_stash.clear();
+    }
+    return value_;
+  }
+
   constexpr void set_log_line(nth::LogLine const &line) { line_ = &line; }
 
-  constexpr ~Responder() {
+  ~Responder() {
+    bool_value_stash.clear();
     if (set_ and not value_) { PostFn(); }
   }
 
