@@ -359,7 +359,8 @@ constexpr decltype(auto) operator->*(T const &value, TraceInjector) {
                  .set((#__VA_ARGS__),                                          \
                       (::nth::internal_debug::TraceInjector{}                  \
                            ->*__VA_ARGS__                                      \
-                           ->*::nth::internal_debug::TraceInjector{}))) {}
+                           ->*::nth::internal_debug::TraceInjector{})))        \
+  static_assert(true)
 
 #define NTH_DEBUG_INTERNAL_TRACE_EXPECT(...)                                   \
   NTH_DEBUG_INTERNAL_RAW_TRACE(                                                \

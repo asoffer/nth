@@ -11,7 +11,7 @@ bool WritesToFile() {
 
   fp.write("Hello, world");
   fp.write(10, '!');
-  NTH_EXPECT(f.tell() == 22u) else { return false; }
+  NTH_EXPECT(f.tell() == 22u) NTH_ELSE { return false; }
 
   f.rewind();
 
@@ -19,11 +19,11 @@ bool WritesToFile() {
   std::span<char> span = f.read_into(buffer);
   NTH_EXPECT(std::string_view(span.data(), span.size()) ==
              "Hello, world!!!!!!!!!!")
-  else {
+  NTH_ELSE {
     return false;
   }
 
-  NTH_EXPECT(f.close()) else { return false; }
+  NTH_EXPECT(f.close()) NTH_ELSE { return false; }
   return true;
 }
 
@@ -32,7 +32,7 @@ bool WritesLargeAmountOfData() {
   nth::file_printer fp(f.get());
 
   fp.write(5000, '!');
-  NTH_EXPECT(f.tell() == 5000u) else { return false; }
+  NTH_EXPECT(f.tell() == 5000u) NTH_ELSE { return false; }
 
   f.rewind();
 
@@ -40,16 +40,14 @@ bool WritesLargeAmountOfData() {
   std::span<char> span = f.read_into(buffer);
   NTH_EXPECT(std::string_view(span.data(), span.size()) ==
              std::string(5000, '!'))
-  else {
-    return false;
-  }
+  NTH_ELSE { return false; }
 
-  NTH_EXPECT(f.close()) else { return false; }
+  NTH_EXPECT(f.close()) NTH_ELSE { return false; }
   return true;
 }
 
 int main() {
-  NTH_EXPECT(WritesToFile()) else { return 1; }
-  NTH_EXPECT(WritesLargeAmountOfData()) else { return 1; }
+  NTH_EXPECT(WritesToFile()) NTH_ELSE { return 1; }
+  NTH_EXPECT(WritesLargeAmountOfData()) NTH_ELSE { return 1; }
   return 0;
 }
