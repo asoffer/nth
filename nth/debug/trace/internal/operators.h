@@ -1,7 +1,7 @@
-#ifndef NTH_DEBUG_INTERNAL_TRACE_OPERATORS_H
-#define NTH_DEBUG_INTERNAL_TRACE_OPERATORS_H
+#ifndef NTH_DEBUG_TRACE_INTERNAL_OPERATORS_H
+#define NTH_DEBUG_TRACE_INTERNAL_OPERATORS_H
 
-#include "nth/debug/internal/trace.h"
+#include "nth/debug/trace/internal/trace.h"
 
 namespace nth::internal_debug {
 
@@ -103,4 +103,4 @@ NTH_INTERNAL_DEFINE_PREFIX_UNARY_OPERATOR(Ref, *)
 
 }  // namespace nth::internal_debug
 
-#endif  // NTH_DEBUG_INTERNAL_TRACE_OPERATORS_H
+#endif  // NTH_DEBUG_TRACE_INTERNAL_OPERATORS_H

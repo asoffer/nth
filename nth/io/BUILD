@@ -23,7 +23,7 @@ cc_library(
     hdrs = ["file.h"],
     srcs = ["file.cc"],
     deps = [
-        "//nth/debug:trace",
+        "//nth/debug/trace",
     ],
 )
 
@@ -40,7 +40,7 @@ cc_test(
     deps = [
         ":file",
         ":file_printer",
-        "//nth/debug:trace",
+        "//nth/debug/trace",
     ],
 )
 

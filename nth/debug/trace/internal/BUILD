@@ -4,8 +4,8 @@ cc_library(
     name = "trace",
     hdrs = [
         "trace.h",
-        "trace_declare_api.h",
-        "trace_operators.h",
+        "declare_api.h",
+        "operators.h",
     ],
     deps = [
         "//nth/base:attributes",

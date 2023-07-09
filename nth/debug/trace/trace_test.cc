@@ -1,4 +1,4 @@
-#include "nth/debug/trace.h"
+#include "nth/debug/trace/trace.h"
 
 #include <vector>
 

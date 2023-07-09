@@ -2,7 +2,7 @@
 
 #include <cstdio>
 
-#include "nth/debug/trace.h"
+#include "nth/debug/trace/trace.h"
 #include "nth/io/file.h"
 
 bool WritesToFile() {

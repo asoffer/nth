@@ -1,5 +1,5 @@
-#ifndef NTH_DEBUG_INTERNAL_TRACE_H
-#define NTH_DEBUG_INTERNAL_TRACE_H
+#ifndef NTH_DEBUG_TRACE_INTERNAL_TRACE_H
+#define NTH_DEBUG_TRACE_INTERNAL_TRACE_H
 
 #include <concepts>
 #include <deque>
@@ -413,4 +413,4 @@ constexpr decltype(auto) operator->*(T const &value, TraceInjector) {
 #define NTH_DEBUG_INTERNAL_TRACE_ASSERT_WITH_VERBOSITY(verbosity, ...)         \
   NTH_DEBUG_INTERNAL_RAW_TRACE("NTH_ASSERT", verbosity, std::abort, __VA_ARGS__)
 
-#endif  // NTH_DEBUG_INTERNAL_TRACE_H
+#endif  // NTH_DEBUG_TRACE_INTERNAL_TRACE_H

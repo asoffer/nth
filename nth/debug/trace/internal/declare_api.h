@@ -1,7 +1,7 @@
-#ifndef NTH_DEBUG_INTERNAL_TRACE_DECLARE_API_H
-#define NTH_DEBUG_INTERNAL_TRACE_DECLARE_API_H
+#ifndef NTH_DEBUG_TRACE_INTERNAL_DECLARE_API_H
+#define NTH_DEBUG_TRACE_INTERNAL_DECLARE_API_H
 
-#include "nth/debug/internal/trace.h"
+#include "nth/debug/trace/internal/trace.h"
 
 #define NTH_DEBUG_INTERNAL_BODY(memfn)                                         \
  private:                                                                      \
@@ -78,4 +78,4 @@ requires(DefineTrace<typename Action::template invoke_type<Ts...>>::defined)  //
     NTH_DEBUG_INTERNAL_END(NTH_DEBUG_INTERNAL_EXPAND_A member_function_names)  \
   }
 
-#endif  // NTH_DEBUG_INTERNAL_TRACE_DECLARE_API_H
+#endif  // NTH_DEBUG_TRACE_INTERNAL_DECLARE_API_H

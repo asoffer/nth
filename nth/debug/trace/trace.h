@@ -1,12 +1,12 @@
-#ifndef NTH_DEBUG_TRACE_H
-#define NTH_DEBUG_TRACE_H
+#ifndef NTH_DEBUG_TRACE_TRACE_H
+#define NTH_DEBUG_TRACE_TRACE_H
 
 #include "nth/base/attributes.h"
 #include "nth/base/macros.h"
 #include "nth/configuration/verbosity.h"
-#include "nth/debug/internal/trace.h"
-#include "nth/debug/internal/trace_declare_api.h"
-#include "nth/debug/internal/trace_operators.h"
+#include "nth/debug/trace/internal/declare_api.h"
+#include "nth/debug/trace/internal/operators.h"
+#include "nth/debug/trace/internal/trace.h"
 #include "nth/meta/compile_time_string.h"
 
 // `nth::Trace` is debugging library aimed at producing better runtime
