@@ -59,7 +59,7 @@ constexpr TraceVTable TraceVTableFor{
         return "";
       }
     }(),
-    .traverse = &Traverse<Action, Ts...>,
+    .traverse       = &Traverse<Action, Ts...>,
     .argument_count = sizeof...(Ts),
 };
 
@@ -68,7 +68,7 @@ struct TracedBase {
  protected:
   friend TraceVTable const &VTable(TracedBase const &t);
 
-  TraceVTable const * vtable_;
+  TraceVTable const *vtable_;
 };
 
 inline TraceVTable const &VTable(TracedBase const &t) { return *t.vtable_; }
@@ -79,9 +79,21 @@ template <typename T>
 struct TracedValue : TracedBase {
   using type = T;
 
+  template <typename I>
+  auto operator[](I const &index);
+
  protected:
   // Constructs the traced value by invoking `f` with the arguments `ts...`.
-  constexpr TracedValue(auto f, auto const &...ts) : value_(f(ts...)) {}
+  constexpr TracedValue(auto f,
+                        auto const &...ts) requires(not std::is_array_v<T>)
+      : value_(f(ts...)) {}
+  constexpr TracedValue(auto f,
+                        auto const &...ts) requires(std::is_array_v<T>) {
+    [&](auto const &a) {
+      size_t i = 0;
+      for (auto const &element : a) { value_[i++] = element; }
+    }(f(ts...));
+  }
 
   // Friend function template abstracting over a `TracedValue<T>` and a `T`.
   template <typename U>
@@ -89,11 +101,12 @@ struct TracedValue : TracedBase {
 
   type value_;
 };
+
 template <>
 struct TracedValue<bool> : TracedBase {
   using type = bool;
 
-  explicit operator bool() const ;
+  explicit operator bool() const;
 
  protected:
   // Constructs the traced value by invoking `f` with the arguments `ts...`.
@@ -120,7 +133,7 @@ inline TracedValue<bool>::operator bool() const {
 // remain valid for the lifetime of this object.
 template <typename Action, typename... Ts>
 struct Traced : TracedValue<typename Action::template invoke_type<Ts...>> {
-  using type        = typename Action::template invoke_type<Ts...>;
+  using type = typename Action::template invoke_type<Ts...>;
   static constexpr auto argument_types = nth::type_sequence<Ts...>;
 
   constexpr Traced(NTH_ATTRIBUTE(lifetimebound) Ts const &...ts)
@@ -185,6 +198,27 @@ struct EraseImpl<Traced<Action, Ts...>> {
 template <typename T>
 using Erased = typename EraseImpl<T>::type;
 
+struct Index {
+  static constexpr char name[] = "operator[]";
+  template <typename T, typename I>
+  static constexpr decltype(auto) invoke(T const &t, I const &index) {
+    return ::nth::internal_debug::Evaluate(
+        t)[::nth::internal_debug::Evaluate(index)];
+  }
+  template <typename T, typename I>
+  using invoke_type = decltype(::nth::internal_debug::Evaluate(
+      std::declval<T const &>())[::nth::internal_debug::Evaluate(
+      std::declval<I const &>())]);
+};
+
+template <typename T>
+template <typename I>
+auto TracedValue<T>::operator[](I const &index) {
+  return ::nth::internal_debug::Traced<
+      Index, ::nth::internal_debug::Erased<TracedValue<T>>,
+      ::nth::internal_debug::Erased<I>>(*this, index);
+}
+
 struct TracedTraversal {
   explicit TracedTraversal(bounded_string_printer &printer)
       : printer_(printer) {}
@@ -218,7 +252,7 @@ struct TracedTraversal {
     size_t cap     = printer_.capacity() + 3 * positions_.size();
     auto formatter = nth::config::default_formatter();
     if constexpr (nth::internal_debug::TracedImpl<T>) {
-      auto const & vtable = nth::internal_debug::VTable(trace);
+      auto const &vtable = nth::internal_debug::VTable(trace);
       if (not vtable.function_name.empty()) {
         if (not positions_.empty()) {
           if (auto &[pos, len] = positions_.back(); pos + 1 == len) {
@@ -238,8 +272,8 @@ struct TracedTraversal {
 
       } else {
         if (vtable.display_name.empty()) {
-          nth::Interpolate<"{} [traced value]\n">(
-              printer_, formatter, nth::internal_debug::Evaluate(trace));
+          nth::Interpolate<"{}\n">(printer_, formatter,
+                                   nth::internal_debug::Evaluate(trace));
         } else {
           nth::Interpolate<"{} [traced value {}]\n">(
               printer_, formatter, nth::internal_debug::Evaluate(trace),

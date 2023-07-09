@@ -109,25 +109,30 @@ TEST(UniversalPrint, Fallback) {
       "[Unprintable value of type nth::(anonymous namespace)::S: 11 00 00 00]");
 }
 
-TEST(UniversalPrint, Depth) {
+TEST(UniversalPrint, ArrayLike) {
+  int a[3] = {1, 2, 3};
   std::string s;
   string_printer p(s);
-  UniversalPrint(p, std::optional<std::optional<std::optional<int>>>(5));
-  EXPECT_EQ(s, "5");
+  UniversalPrint(p, a);
+  EXPECT_EQ(s, "{1, 2, 3}");
+
+  struct A {
+    struct iter {
+      int operator*() const { return value; }
+      iter& operator++() {
+        ++value;
+        return *this;
+      }
+      bool operator==(iter const&) const = default;
+      int value;
+    };
+    iter begin() const { return {3}; }
+    iter end() const { return {6}; }
+  };
 
   s.clear();
-  UniversalPrint(p, std::optional<int>(5), {.depth = 2, .fallback = "[...]"});
-  EXPECT_EQ(s, "5");
-
-  s.clear();
-  UniversalPrint(p, std::optional<std::optional<int>>(5),
-                 {.depth = 2, .fallback = "[...]"});
-  EXPECT_EQ(s, "[...]");
-
-  s.clear();
-  UniversalPrint(p, std::optional<std::optional<std::optional<int>>>(5),
-                 {.depth = 2, .fallback = "[...]"});
-  EXPECT_EQ(s, "[...]");
+  UniversalPrint(p, A{});
+  EXPECT_EQ(s, "{3, 4, 5}");
 }
 
 }  // namespace

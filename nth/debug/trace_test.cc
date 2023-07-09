@@ -1,5 +1,7 @@
 #include "nth/debug/trace.h"
 
+#include <vector>
+
 #include "nth/debug/log/stderr_log_sink.h"
 
 namespace {

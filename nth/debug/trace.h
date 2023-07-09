@@ -106,8 +106,8 @@ namespace nth {
 template <nth::CompileTimeString S, int &..., typename T>
 constexpr ::nth::internal_debug::Traced<::nth::internal_debug::Identity<S>, T>
 Trace(NTH_ATTRIBUTE(lifetimebound) T const &value) {
-  namespace nit = ::nth::internal_debug;
-  return nit::Traced<nit::Identity<S>, T>(value);
+  return ::nth::internal_debug::Traced<::nth::internal_debug::Identity<S>, T>(
+      value);
 }
 
 // A concept matching any traced type.
@@ -130,8 +130,9 @@ concept Traced = ::nth::internal_debug::TracedImpl<T>;
 // evaluates the it. If the wrapped expression evaluates to `true`, control flow
 // proceeds with no visible side-effects. If the expression evaluates to
 // `false`, a diagnostic is reported. If the macro is immediately succeeded by
-// an `NTH_NTH_ELSE` clause, the body of that `NTH_ELSE` clause is executed after which
-// execution is aborted. If no `NTH_ELSE` clause is present, execution is aborted.
+// an `NTH_NTH_ELSE` clause, the body of that `NTH_ELSE` clause is executed
+// after which execution is aborted. If no `NTH_ELSE` clause is present,
+// execution is aborted.
 #define NTH_ASSERT(...)                                                        \
   NTH_IF(NTH_IS_PARENTHESIZED(NTH_FIRST_ARGUMENT(__VA_ARGS__)),                \
          NTH_DEBUG_INTERNAL_TRACE_ASSERT_WITH_VERBOSITY,                       \
