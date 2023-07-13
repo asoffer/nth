@@ -6,6 +6,8 @@
 #include <cstddef>
 #include <utility>
 
+#include "nth/debug/trace/trace.h"
+
 namespace nth {
 
 namespace internal_interval {
@@ -52,11 +54,11 @@ struct Interval : internal_interval::LengthBase<T> {
   // Returns an rvalue-reference to the lower bound of the interval. Once the
   // referenced object is is modified the interval may be invalidated and is
   // only safe to be destroyed or assigned-to.
-  constexpr T && lower_bound() && { return std::move(lower_bound_); }
+  constexpr T&& lower_bound() && { return std::move(lower_bound_); }
   // Returns an rvalue-reference to the upper bound of the interval. Once the
   // referenced object is is modified the interval may be invalidated and is
   // only safe to be destroyed or assigned-to.
-  constexpr T && upper_bound() && { return std::move(upper_bound_); }
+  constexpr T&& upper_bound() && { return std::move(upper_bound_); }
 
   // Returns `true` if and only if the element `u` is at least as large as
   // `this->lower_bound()` and strictly less than `upper_bound()`.
@@ -77,20 +79,20 @@ struct Interval : internal_interval::LengthBase<T> {
   constexpr bool empty() const { return lower_bound() == upper_bound(); }
 
   template <size_t N>
-  requires(N == 0 or N == 1) constexpr T const& get() const& {
+  requires(N == 0 or N == 1) friend constexpr T const& get(Interval const& i) {
     if constexpr (N == 0) {
-      return lower_bound();
+      return i.lower_bound();
     } else {
-      return upper_bound();
+      return i.upper_bound();
     }
   }
 
   template <size_t N>
-  requires(N == 0 or N == 1) constexpr T&& get() && {
+  requires(N == 0 or N == 1) friend constexpr T&& get(Interval&& i) {
     if constexpr (N == 0) {
-      return std::move(*this).lower_bound();
+      return std::move(i).lower_bound();
     } else {
-      return std::move(*this).upper_bound();
+      return std::move(i).upper_bound();
     }
   }
 
@@ -114,6 +116,10 @@ requires(Subtractable<T>) struct LengthBase<T> {
 
 }  // namespace internal_interval
 }  // namespace nth
+
+template <typename T>
+NTH_TRACE_DECLARE_API_TEMPLATE(
+    nth::Interval<T>, (contains)(covers)(empty)(lower_bound)(upper_bound));
 
 namespace std {
 

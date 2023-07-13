@@ -3,6 +3,7 @@ package(default_visibility = ["//visibility:public"])
 cc_library(
     name = "trace",
     hdrs = ["trace.h"],
+    srcs = ["trace.cc"],
     deps = [
         "//nth/base:attributes",
         "//nth/base:macros",

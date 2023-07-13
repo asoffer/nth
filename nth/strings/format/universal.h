@@ -103,13 +103,17 @@ struct universal_formatter {
       p.write("}");
     } else if constexpr (nth::tuple_like<nth::type_t<type>>) {
       p.write("{");
+      constexpr size_t size = std::tuple_size_v<nth::type_t<type>>;
       std::apply(
           [&](auto &...elements) {
             std::string_view separator = "";
             ((p.write(std::exchange(separator, ", ")), operator()(p, elements)),
              ...);
           },
-          value);
+          [&]<size_t... Ns>(std::index_sequence<Ns...>) {
+            using ::std::get;
+            return std::tie(get<Ns>(value)...);
+          }(std::make_index_sequence<size>{}));
       p.write("}");
     } else if constexpr (requires {
                            {

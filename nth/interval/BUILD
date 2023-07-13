@@ -11,7 +11,7 @@ cc_test(
     srcs = ["interval_test.cc"],
     deps = [
         ":interval",
-        "@com_google_googletest//:gtest_main",
+        "//nth/test:main",
     ],
 )
 

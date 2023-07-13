@@ -22,7 +22,7 @@
   }())
 
 #define NTH_DEBUG_INTERNAL_LOG(interpolation_string)                           \
-  NTH_DEBUG_LOG_INTERNAL_DEBUG_WITH_VERBOSITY(                                 \
+  NTH_DEBUG_INTERNAL_LOG_WITH_VERBOSITY(                                       \
       (::nth::config::default_log_verbosity_requirement),                      \
       interpolation_string)
 

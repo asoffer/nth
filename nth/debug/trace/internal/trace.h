@@ -4,6 +4,7 @@
 #include <concepts>
 #include <deque>
 #include <memory>
+#include <vector>
 
 #include "nth/configuration/verbosity.h"
 #include "nth/debug/log/log.h"
@@ -12,6 +13,12 @@
 #include "nth/meta/sequence.h"
 #include "nth/meta/type.h"
 #include "nth/strings/interpolate.h"
+
+namespace nth {
+
+extern std::vector<void (*)()> expectation_failure_handlers;
+
+}  // namespace nth
 
 namespace nth::internal_debug {
 
@@ -150,14 +157,16 @@ struct Traced : TracedValue<typename Action::template invoke_type<Ts...>> {
   template <typename, typename...>
   friend void Traverse(TracedTraversal &, void const *, size_t &);
 
-  // TODO: Hide.
   void const *ptrs_[sizeof...(Ts)];
 };
 
 template <typename Action, typename... Ts>
 void Traverse(TracedTraversal &traversal, void const *self, size_t &pos) {
   auto const &trace = *static_cast<Traced<Action, Ts...> const *>(self);
-  ((traversal(*static_cast<std::decay_t<Ts> const *>(trace.ptrs_[pos])), ++pos),
+  ((traversal(
+        *static_cast<std::remove_const_t<std::remove_reference_t<Ts>> const *>(
+            trace.ptrs_[pos])),
+    ++pos),
    ...);
 }
 
@@ -295,6 +304,8 @@ struct Responder {
     set_   = true;
     value_ = Evaluate(b);
     if (not value_) {
+      for (auto f : expectation_failure_handlers) { f(); }
+
       LogEntry log_entry(line_->id(), 1);
 
       constexpr size_t bound = 1024;

@@ -2,34 +2,47 @@
 
 #include <string>
 
-#include "gtest/gtest.h"
+#include "nth/test/test.h"
 
 namespace nth {
 namespace {
 
-TEST(Interval, Construction) {
-  Interval n(3, 5);
-  EXPECT_EQ(n.lower_bound(), 3);
-  EXPECT_EQ(n.upper_bound(), 5);
+NTH_TEST("interval/construction/int") {
+  // , int low, int hi) {
+  int low = 3;
+  int hi  = 5;
+  Interval i(low, hi);
+  auto t = nth::Trace<"i">(i);
+  NTH_EXPECT(t.lower_bound() == low);
+  NTH_EXPECT(t.upper_bound() == hi);
 
-  auto [s, e] = n;
-  EXPECT_EQ(s, 3);
-  EXPECT_EQ(e, 5);
+  auto [s, e] = i;
+  NTH_EXPECT(s == low);
+  NTH_EXPECT(e == hi);
 }
 
-TEST(Interval, Length) {
-  Interval n(3, 5);
-  EXPECT_EQ(n.length(), 2);
+NTH_TEST("interval/length/int") {
+  // , int low, int hi) {
+  int low = 3;
+  int hi  = 5;
+  Interval i(low, hi);
+  NTH_EXPECT(i.length() == hi - low);
 }
 
-TEST(Interval, Contains) {
-  Interval<std::string> n("abc", "def");
-  EXPECT_FALSE(n.contains("aba"));
-  EXPECT_TRUE(n.contains("abc"));
-  EXPECT_TRUE(n.contains("abd"));
-  EXPECT_TRUE(n.contains("dbc"));
-  EXPECT_FALSE(n.contains("def"));
+NTH_TEST("interval/contains") {
+  Interval<std::string> i("abc", "def");
+  auto t = nth::Trace<"i">(i);
+  NTH_EXPECT(not t.contains("aba"));
+  NTH_EXPECT(t.contains("abc"));
+  NTH_EXPECT(t.contains("abd"));
+  NTH_EXPECT(t.contains("dbc"));
+  NTH_EXPECT(not t.contains("def"));
 }
+
+// NTH_INVOKE_TEST("interval/*/int") {
+//   co_yield std::pair(3, 5);
+//   co_yield std::pair(3, 3);
+// }
 
 }  // namespace
 }  // namespace nth
