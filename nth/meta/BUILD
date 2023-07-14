@@ -63,6 +63,26 @@ cc_test(
 )
 
 cc_library(
+    name = "stateful",
+    hdrs = ["stateful.h"],
+    visibility = [
+        "//nth/test:__subpackages__",
+    ],
+    deps = [
+        ":constant",
+        ":sequence",
+    ],
+)
+
+cc_test(
+    name = "stateful_test",
+    srcs = ["stateful_test.cc"],
+    deps = [
+        ":stateful",
+    ],
+)
+
+cc_library(
     name = "type",
     hdrs = ["type.h"],
     deps = [
