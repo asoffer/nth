@@ -100,8 +100,9 @@ struct Interval : internal_interval::LengthBase<T> {
   T lower_bound_, upper_bound_;
 };
 
-template <typename T>
-Interval(T&&, T&&) -> Interval<std::decay_t<T>>;
+template <typename L, typename H>
+requires(std::is_same_v<std::decay_t<L>, std::decay_t<H>>) Interval(L&&, H&&)
+->Interval<std::decay_t<L>>;
 
 namespace internal_interval {
 

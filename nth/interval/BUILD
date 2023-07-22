@@ -3,7 +3,9 @@ package(default_visibility = ["//visibility:public"])
 cc_library(
     name = "interval",
     hdrs = ["interval.h"],
-    deps = [],
+    deps = [
+      "//nth/debug/trace",
+    ],
 )
 
 cc_test(
@@ -28,6 +30,7 @@ cc_test(
     srcs = ["interval_set_test.cc"],
     deps = [
         ":interval_set",
-        "@com_google_googletest//:gtest_main",
+        "//nth/test:main",
+        "//nth/debug/trace:matcher",
     ],
 )

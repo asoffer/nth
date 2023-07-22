@@ -54,6 +54,8 @@ NTH_INTERNAL_DEFINE_BINARY_OPERATOR(ArrowPtr, ->*)
 // passed as a macro argument, so the body is implemented directly outside the
 // macro.
 struct Comma {
+  static constexpr char name[] = "operator,";
+
   template <typename L, typename R>
   static constexpr decltype(auto) invoke(L const &lhs, R const &rhs) {
     return (::nth::internal_debug::Evaluate(lhs),

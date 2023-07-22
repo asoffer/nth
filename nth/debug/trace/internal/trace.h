@@ -22,6 +22,8 @@ extern std::vector<void (*)()> expectation_failure_handlers;
 
 namespace nth::internal_debug {
 
+struct BoundExpectationMatcherBase {};
+
 template <nth::CompileTimeString S>
 struct Identity {
   static constexpr auto name = S;
@@ -371,9 +373,12 @@ constexpr decltype(auto) operator->*(TraceInjector, T const &value) {
     }
   }
 }
+
 template <typename T>
 constexpr decltype(auto) operator->*(T const &value, TraceInjector) {
-  if constexpr (nth::internal_debug::TracedImpl<T>) {
+  if constexpr (std::is_base_of_v<BoundExpectationMatcherBase, T>) {
+    return value;
+  } else if constexpr (nth::internal_debug::TracedImpl<T>) {
     return value;
   } else {
     if constexpr (std::is_array_v<T>) {

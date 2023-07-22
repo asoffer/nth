@@ -7,10 +7,12 @@
 namespace nth {
 namespace {
 
-NTH_TEST("interval/construction/int") {
-  // , int low, int hi) {
-  int low = 3;
-  int hi  = 5;
+NTH_INVOKE_TEST("interval/*") {
+  co_yield nth::TestArguments{3, 5};
+  co_yield nth::TestArguments{5.1, 6.1};
+}
+
+NTH_TEST("interval/construction", auto const &low, auto const &hi) {
   Interval i(low, hi);
   auto t = nth::Trace<"i">(i);
   NTH_EXPECT(t.lower_bound() == low);
@@ -21,10 +23,7 @@ NTH_TEST("interval/construction/int") {
   NTH_EXPECT(e == hi);
 }
 
-NTH_TEST("interval/length/int") {
-  // , int low, int hi) {
-  int low = 3;
-  int hi  = 5;
+NTH_TEST("interval/length", auto const &low, auto const &hi) {
   Interval i(low, hi);
   NTH_EXPECT(i.length() == hi - low);
 }
@@ -38,11 +37,6 @@ NTH_TEST("interval/contains") {
   NTH_EXPECT(t.contains("dbc"));
   NTH_EXPECT(not t.contains("def"));
 }
-
-// NTH_INVOKE_TEST("interval/*/int") {
-//   co_yield std::pair(3, 5);
-//   co_yield std::pair(3, 3);
-// }
 
 }  // namespace
 }  // namespace nth
