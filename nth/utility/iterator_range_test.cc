@@ -2,25 +2,25 @@
 
 #include <vector>
 
-#include "gtest/gtest.h"
+#include "nth/test/test.h"
 
 namespace nth {
 namespace {
 
-TEST(IteratorRange, Valid) {
+NTH_TEST("IteratorRange/Valid") {
   std::vector<int> v{1, 2, 3, 4};
   nth::iterator_range range(v.begin(), v.end());
   int total = 0;
   for (int n : range) { total += n; }
-  EXPECT_EQ(total, 10);
+  NTH_EXPECT(total == 10);
 }
 
-TEST(IteratorRange, Empty) {
+NTH_TEST("IteratorRange/Empty") {
   std::vector<int> v;
   nth::iterator_range range(v.begin(), v.end());
   int total = 0;
   for (int n : range) { total += n; }
-  EXPECT_EQ(total, 0);
+  NTH_EXPECT(total == 0);
 }
 
 struct iter {
@@ -35,12 +35,12 @@ struct iter {
   std::vector<int>::iterator it;
 };
 
-TEST(IteratorRange, CustomIterator) {
+NTH_TEST("IteratorRange/CustomIterator") {
   std::vector<int> v{1, 2, 3, 4};
   nth::iterator_range range(iter{.it = v.begin()}, iter{.it = v.end()});
   int total = 0;
   for (int n : range) { total += n; }
-  EXPECT_EQ(total, 20);
+  NTH_EXPECT(total == 20);
 }
 
 }  // namespace

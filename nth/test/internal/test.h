@@ -75,11 +75,11 @@ void RegisterInvocationsMatching(nth::Sequence auto seq) {
                                                                                \
    private:                                                                    \
     static nth::RegistrationToken const registration_token;                    \
-    [[maybe_unused]] static constexpr OdrUse<&registration_token>              \
+    [[maybe_unused]] static constexpr ::nth::OdrUse<&registration_token>       \
         RegisterTokenUse;                                                      \
   };                                                                           \
   inline nth::RegistrationToken const test_name::registration_token = [] {     \
-    RegisterTestInvocation(&test_name::InvokeTest);                            \
+    ::nth::RegisterTestInvocation(&test_name::InvokeTest);                     \
   };                                                                           \
   void test_name::InvokeTest()
 
@@ -91,7 +91,7 @@ void RegisterInvocationsMatching(nth::Sequence auto seq) {
                                                                                \
    private:                                                                    \
     static nth::RegistrationToken const registration_token;                    \
-    [[maybe_unused]] static constexpr OdrUse<&registration_token>              \
+    [[maybe_unused]] static constexpr ::nth::OdrUse<&registration_token>       \
         RegisterTokenUse;                                                      \
   };                                                                           \
   inline nth::RegistrationToken const test_name::registration_token = [] {     \
@@ -111,7 +111,7 @@ void RegisterInvocationsMatching(nth::Sequence auto seq) {
                                                                                \
    private:                                                                    \
     static nth::RegistrationToken const registration_token;                    \
-    [[maybe_unused]] static constexpr OdrUse<&registration_token>              \
+    [[maybe_unused]] static constexpr ::nth::OdrUse<&registration_token>       \
         RegisterTokenUse;                                                      \
   };                                                                           \
   inline nth::RegistrationToken const invocation_name::registration_token =    \

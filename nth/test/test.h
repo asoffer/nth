@@ -93,6 +93,11 @@ std::span<std::function<void()> const> RegisteredTests();
       NTH_CONCATENATE(NthInternalTestInvocationInitializer_, __LINE__),        \
       categorization)
 
+inline constexpr nth::ExpectationMatcher PointsTo(
+    "points-to", [](auto const *value, auto const &element) {
+      return value and nth::Matches(element, *value);
+    });
+
 inline constexpr nth::ExpectationMatcher ElementsAreSequentially(
     "elements-are (in order)", [](auto const &value, auto const &...elements) {
       using std::begin;
@@ -100,7 +105,8 @@ inline constexpr nth::ExpectationMatcher ElementsAreSequentially(
       auto &&v    = nth::internal_debug::Evaluate(value);
       auto &&iter = begin(v);
       auto &&e    = end(v);
-      return ((iter != e and *iter++ == elements) and ...) and iter == e;
+      return ((iter != e and nth::Matches(elements, *iter++)) and ...) and
+             iter == e;
     });
 
 inline constexpr auto operator or(

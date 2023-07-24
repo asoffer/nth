@@ -1,28 +1,26 @@
 #include "nth/utility/lazy.h"
 
-#include <string>
-
-#include "gtest/gtest.h"
+#include "nth/test/test.h"
 
 namespace nth {
 namespace {
 
-TEST(Lazy, DoesntEvaluateIfNotConverted) {
+NTH_TEST("lazy/doesn't-evaluate-if-not-converted") {
   int n = 0;
   static_cast<void>(lazy([&n] {
     ++n;
     return true;
   }));
-  EXPECT_EQ(n, 0);
+  NTH_EXPECT(n == 0);
 }
 
-TEST(Lazy, InvokesIfConverted) {
+NTH_TEST("lazy/invokes-if-converted") {
   int n = 0;
-  EXPECT_TRUE(static_cast<bool>(lazy([&n] {
+  NTH_EXPECT(static_cast<bool>(lazy([&n] {
     ++n;
     return true;
   })));
-  EXPECT_EQ(n, 1);
+  NTH_EXPECT(n == 1);
 }
 
 }  // namespace

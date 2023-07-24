@@ -1,7 +1,8 @@
 #include "nth/utility/no_destructor.h"
 
 #include <string>
-#include "gtest/gtest.h"
+
+#include "nth/test/test.h"
 
 namespace {
 
@@ -13,23 +14,23 @@ struct DtorCounter {
   int *count_;
 };
 
-TEST(NoDestructor, NotDestroyed) {
+NTH_TEST("NoDestructor/not-destroyed") {
   int dtor_count = 0;
   {
     nth::NoDestructor<DtorCounter> counter(&dtor_count);
-    EXPECT_EQ(dtor_count, 0);
+    NTH_EXPECT(dtor_count == 0);
   }
-  EXPECT_EQ(dtor_count, 0);
+  NTH_EXPECT(dtor_count == 0);
 }
 
-TEST(NoDestructor, Access) {
+NTH_TEST("NoDestructor/access") {
   nth::NoDestructor<std::string> s("abc");
   nth::NoDestructor<std::string> const cs("abc");
-  EXPECT_EQ(*s, "abc");
-  EXPECT_EQ(s->size(), 3);
+  NTH_EXPECT(*s == "abc");
+  NTH_EXPECT(s->size() == size_t{3});
 
-  EXPECT_EQ(*cs, "abc");
-  EXPECT_EQ(cs->size(), 3);
+  NTH_EXPECT(*cs == "abc");
+  NTH_EXPECT(cs->size() == size_t{3});
 
   struct T {
     explicit T(int n) : n(n) {}
@@ -40,8 +41,8 @@ TEST(NoDestructor, Access) {
 
   nth::NoDestructor<T> t(3);
   T moved = *std::move(t);
-  EXPECT_EQ(moved.n, 3);
-  EXPECT_EQ(t->n, 0);
+  NTH_EXPECT(moved.n == 3);
+  NTH_EXPECT(t->n == 0);
 }
 
 }  // namespace

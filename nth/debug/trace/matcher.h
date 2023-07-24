@@ -72,6 +72,15 @@ ExpectationMatcher<F>::operator()(Ts&&... values) const {
       *this, std::forward<Ts>(values)...);
 }
 
+template <typename F, typename... Ts>
+bool Matches(internal_debug::BoundExpectationMatcher<F, Ts...> const& matcher,
+             auto const& value) {
+  return matcher(value);
+}
+bool Matches(auto const& match_value, auto const& value) {
+  return match_value == value;
+}
+
 }  // namespace nth
 
 #endif  // NTH_DEBUG_TRACE_MATCHER_H

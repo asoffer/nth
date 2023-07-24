@@ -12,7 +12,7 @@ cc_test(
     deps = [
         ":buffer",
         "//nth/meta:type",
-        "@com_google_googletest//:gtest_main",
+        "//nth/test:main",
     ],
 )
 
@@ -29,7 +29,7 @@ cc_test(
     deps = [
         ":iterator_range",
         "//nth/meta:type",
-        "@com_google_googletest//:gtest_main",
+        "//nth/test:main",
     ],
 )
 
@@ -44,7 +44,7 @@ cc_test(
     srcs = ["lazy_test.cc"],
     deps = [
         ":lazy",
-        "@com_google_googletest//:gtest_main",
+        "//nth/test:main",
     ],
 )
 
@@ -61,7 +61,7 @@ cc_test(
     srcs = ["no_destructor_test.cc"],
     deps = [
         ":no_destructor",
-        "@com_google_googletest//:gtest_main",
+        "//nth/test:main",
     ],
 )
 
@@ -78,7 +78,7 @@ cc_test(
     srcs = ["projected_span_test.cc"],
     deps = [
         ":projected_span",
-        "@com_google_googletest//:gtest_main",
+        "//nth/test:main",
     ],
 )
 
@@ -96,26 +96,14 @@ cc_test(
     srcs = ["ptr_union_test.cc"],
     deps = [
         ":ptr_union",
-        "@com_google_googletest//:gtest_main",
+        "//nth/test:main",
     ],
 )
 
 cc_library(
     name = "registration",
     hdrs = ["registration.h"],
-    deps = [
-        ":no_destructor",
-        "//nth/base:macros",
-    ],
-)
-
-cc_test(
-    name = "registration_test",
-    srcs = ["registration_test.cc"],
-    deps = [
-        ":registration",
-        "@com_google_googletest//:gtest_main",
-    ],
+    deps = [],
 )
 
 cc_library(
@@ -131,7 +119,7 @@ cc_test(
     srcs = ["required_test.cc"],
     deps = [
         ":required",
-        "@com_google_googletest//:gtest_main",
+        "//nth/test:main",
     ],
 )
 
