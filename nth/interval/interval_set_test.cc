@@ -8,7 +8,8 @@ namespace nth {
 namespace {
 
 NTH_TEST("IntervalSet/default", auto type) {
-  IntervalSet<nth::type_t<type>> set;
+  IntervalSet<nth::type_t<type>> interval_set;
+  auto set = nth::Trace<"set">(interval_set);
   NTH_EXPECT(set.empty());
 }
 
@@ -20,14 +21,16 @@ NTH_INVOKE_TEST("IntervalSet/default") {
 
 NTH_TEST("IntervalSet/basic/construction/interval", auto const& low,
          auto const& hi) {
-  IntervalSet set(Interval(low, hi));
+  IntervalSet interval_set(Interval(low, hi));
+  auto set = nth::Trace<"set">(interval_set);
   NTH_EXPECT(not set.empty());
   NTH_EXPECT(set.length() == hi - low);
   NTH_EXPECT(set.intervals() >>= ElementsAreSequentially(Interval(low, hi)));
 }
 
 NTH_TEST("IntervalSet/basic/containment", auto const& low, auto const& hi) {
-  IntervalSet set(Interval(low, hi));
+  IntervalSet interval_set(Interval(low, hi));
+  auto set = nth::Trace<"set">(interval_set);
   NTH_EXPECT(not set.contains(low - 1));
   NTH_EXPECT(set.contains(low));
   NTH_EXPECT(set.contains(low + 1));

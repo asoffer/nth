@@ -1,10 +1,11 @@
 #ifndef NTH_TEST_INTERNAL_TEST_H
 #define NTH_TEST_INTERNAL_TEST_H
 
-#include <coroutine>
+#include <functional>
 #include <type_traits>
 
 #include "nth/meta/stateful.h"
+#include "nth/strings/glob.h"
 #include "nth/test/internal/arguments.h"
 #include "nth/test/internal/invocation.h"
 #include "nth/utility/registration.h"
@@ -29,26 +30,6 @@ void RegisterTestInvocation(std::function<void()> f);
 
 namespace internal_test {
 
-// TODO: Support ** and other more advanced glob features.
-inline constexpr bool GlobMatches(std::string_view glob,
-                                  std::string_view test) {
-  while (true) {
-    size_t glob_index = glob.find('/');
-    size_t test_index = test.find('/');
-
-    if (glob_index == std::string_view::npos or
-        test_index == std::string_view::npos) {
-      return glob == "*" or glob == test;
-    }
-    if (glob.substr(0, glob_index) != "*" and
-        glob.substr(0, glob_index) != test.substr(0, test_index)) {
-      return false;
-    }
-    glob = glob.substr(glob_index + 1);
-    test = test.substr(test_index + 1);
-  }
-}
-
 // Accepts an invocation type as a template argument and a sequence of all test
 // types seen so far during compilation. For each test, if the test's category
 // matches the invocation's glob, the invocation is instantiated for the test
@@ -57,9 +38,8 @@ template <typename TestInvocation>
 void RegisterTestsMatching(nth::Sequence auto seq) {
   seq.each([&](auto t) {
     using type = nth::type_t<t>;
-    if constexpr (nth::internal_test::GlobMatches(
-                      TestInvocation::categorization(),
-                      type::categorization())) {
+    if constexpr (nth::GlobMatches(TestInvocation::categorization(),
+                                   type::categorization())) {
       RegisterTestInvocation(
           [] { TestInvocation::template Invocation<type>(); });
     }
@@ -74,8 +54,8 @@ template <typename Test>
 void RegisterInvocationsMatching(nth::Sequence auto seq) {
   seq.each([&](auto t) {
     using type = nth::type_t<t>;
-    if constexpr (nth::internal_test::GlobMatches(type::categorization(),
-                                                  Test ::categorization())) {
+    if constexpr (nth::GlobMatches(type::categorization(),
+                                   Test::categorization())) {
       RegisterTestInvocation([] { type::template Invocation<Test>(); });
     }
   });

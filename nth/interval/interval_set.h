@@ -211,6 +211,10 @@ IntervalSet<T> Union(IntervalSet<T>&& lhs, IntervalSet<T>&& rhs) {
   return std::move(lhs) + std::move(rhs);
 }
 
+template <typename T>
+NTH_TRACE_DECLARE_API_TEMPLATE(nth::IntervalSet<T>,
+                               (contains)(covers)(empty)(length));
+
 }  // namespace nth
 
 #endif  // NTH_INTERVAL_INTERVAL_SET_H

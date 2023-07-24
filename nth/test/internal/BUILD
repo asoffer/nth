@@ -23,6 +23,7 @@ cc_library(
       ":arguments",
       ":invocation",
       "//nth/meta:stateful",
+      "//nth/strings:glob",
       "//nth/utility:registration",
     ],
 )

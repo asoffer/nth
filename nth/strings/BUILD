@@ -16,6 +16,21 @@ cc_test(
 )
 
 cc_library(
+    name = "glob",
+    hdrs = ["glob.h"],
+    srcs = ["internal/glob.h"],
+    deps = [],
+)
+
+cc_test(
+    name = "glob_test",
+    srcs = ["glob_test.cc"],
+    deps = [
+        ":glob",
+    ],
+)
+
+cc_library(
     name = "interpolate",
     hdrs = ["interpolate.h"],
     srcs = ["internal/interpolate.h"],
