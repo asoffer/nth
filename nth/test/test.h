@@ -1,6 +1,7 @@
 #ifndef NTH_TEST_TEST_H
 #define NTH_TEST_TEST_H
 
+#include <concepts>
 #include <coroutine>
 #include <functional>
 #include <span>

@@ -1,25 +1,25 @@
 #include "nth/strings/edit_distance.h"
 
-#include "gtest/gtest.h"
+#include "nth/test/test.h"
 
 namespace nth {
 
-TEST(LevenshteinDistance, EmptyStrings) {
-  EXPECT_EQ(LevenshteinDistance("", ""), 0);
-  EXPECT_EQ(LevenshteinDistance("abc", ""), 3);
-  EXPECT_EQ(LevenshteinDistance("", "xyz"), 3);
+NTH_TEST("LevenshteinDistance/empty-strings") {
+  NTH_EXPECT(LevenshteinDistance("", "") == size_t{0});
+  NTH_EXPECT(LevenshteinDistance("abc", "") == size_t{3});
+  NTH_EXPECT(LevenshteinDistance("", "xyz") == size_t{3});
 }
 
-TEST(LevenshteinDistance, Transposition) {
-  EXPECT_EQ(LevenshteinDistance("ab", "ba"), 2);
-  EXPECT_EQ(LevenshteinDistance("abcdef", "bacdef"), 2);
+NTH_TEST("LevenshteinDistance/transposition") {
+  NTH_EXPECT(LevenshteinDistance("ab", "ba") == size_t{2});
+  NTH_EXPECT(LevenshteinDistance("abcdef", "bacdef") == size_t{2});
 }
 
-TEST(LevenshteinDistance, DifferentLengths) {
-  EXPECT_EQ(LevenshteinDistance("dog", "fido"), 3);
-  EXPECT_EQ(LevenshteinDistance("fido", "dog"), 3);
-  EXPECT_EQ(LevenshteinDistance("dog", "doggo"), 2);
-  EXPECT_EQ(LevenshteinDistance("doggo", "dog"), 2);
+NTH_TEST("LevenshteinDistance/different-lengths") {
+  NTH_EXPECT(LevenshteinDistance("dog", "fido") == size_t{3});
+  NTH_EXPECT(LevenshteinDistance("fido", "dog") == size_t{3});
+  NTH_EXPECT(LevenshteinDistance("dog", "doggo") == size_t{2});
+  NTH_EXPECT(LevenshteinDistance("doggo", "dog") == size_t{2});
 }
 
 }  // namespace nth

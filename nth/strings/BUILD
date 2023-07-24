@@ -11,7 +11,7 @@ cc_test(
     srcs = ["edit_distance_test.cc"],
     deps = [
         ":edit_distance",
-        "@com_google_googletest//:gtest_main",
+        "//nth/test:main",
     ],
 )
 
@@ -49,7 +49,7 @@ cc_test(
         "//nth/io:string_printer",
         "//nth/strings/format:formatter",
         "//nth/strings/format:universal", # TODO: Cut this dep.
-        "@com_google_googletest//:gtest_main",
+        "//nth/test:main",
     ],
 )
 
@@ -71,7 +71,7 @@ cc_test(
     srcs = ["null_termination_test.cc"],
     deps = [
         ":null_termination",
-        "@com_google_googletest//:gtest_main",
+        "//nth/test:main",
     ],
 )
 
@@ -89,7 +89,7 @@ cc_test(
     srcs = ["text_test.cc"],
     deps = [
         ":text",
-        "@com_google_googletest//:gtest_main",
+        "//nth/test:main",
     ],
 )
 

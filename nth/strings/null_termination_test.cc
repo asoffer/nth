@@ -1,6 +1,6 @@
 #include "nth/strings/null_termination.h"
 
-#include "gtest/gtest.h"
+#include "nth/test/test.h"
 
 namespace nth {
 namespace {
@@ -15,42 +15,42 @@ static_assert(StringLike<std::string_view>);
 static_assert(StringLike<std::string &>);
 static_assert(StringLike<std::string const &>);
 
-TEST(InvokeOnNullTerminated, StringReusesData) {
+NTH_TEST("InvokeOnNullTerminated/string-reuses-data") {
   std::string s =
       "this is a string so long that it definitely cannot fit in the "
       "small-string-optimization buffer.";
   char const * p  = nullptr;
   InvokeOnNullTerminated([&](char const *s) { p = s; }, s);
-  EXPECT_EQ(p, s.c_str());
+  NTH_EXPECT(p == s.c_str());
 }
 
-TEST(InvokeOnNullTerminated, ArraysAreCheckedForNullTermination) {
+NTH_TEST("InvokeOnNullTerminated/arrays-are-checked-for-null-termination") {
   char s1[] = "some-string";
   char const *p = nullptr;
   InvokeOnNullTerminated([&](char const *s) { p = s; }, s1);
-  EXPECT_EQ(p, s1);
+  NTH_EXPECT(p == s1);
 
   char s2[3] ={'a', 'b', 'c'};
   std::string str;
   InvokeOnNullTerminated([&](char const *s) { str = p = s; }, s2);
-  EXPECT_NE(p, s2);
-  EXPECT_EQ(str, "abc");
+  NTH_EXPECT(p != s2);
+  NTH_EXPECT(str == "abc");
 }
 
-TEST(InvokeOnNullTerminated, StringViews) {
+NTH_TEST("InvokeOnNullTerminated/string-views") {
   std::string_view s = "some-string";
   char const *p = nullptr;
   std::string str;
-  InvokeOnNullTerminated([&](char const *s) { str = p = s; }, s);
-  EXPECT_NE(p, s.data());
-  EXPECT_EQ(str, "some-string");
+  InvokeOnNullTerminated([&](char const *s) { str = p = s; },s);
+  NTH_EXPECT(p != s.data());
+  NTH_EXPECT(str == "some-string");
 }
 
-TEST(InvokeOnNullTerminated, CharPtrsAreAssumedToBeNullTerminated) {
+NTH_TEST("InvokeOnNullTerminated/char-ptrs-are-assumed-to-be-null-terminated") {
   char s[] = "some-string";
   char const *p = nullptr;
   InvokeOnNullTerminated([&](char const *s) { p = s; }, s);
-  EXPECT_EQ(p, s);
+  NTH_EXPECT(p == s);
 }
 
 }  // namespace

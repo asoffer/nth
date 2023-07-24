@@ -1,28 +1,33 @@
 #include "nth/strings/interpolate.h"
 
-#include "gtest/gtest.h"
 #include "nth/io/string_printer.h"
 #include "nth/strings/format/formatter.h"
 #include "nth/strings/format/universal.h"
+#include "nth/test/test.h"
 
 namespace nth {
 namespace {
 
-TEST(InterpolationString, Construction) {
-  EXPECT_DEATH({ InterpolationString("{"); }, "");
-  EXPECT_DEATH({ InterpolationString("}"); }, "");
-  EXPECT_DEATH({ InterpolationString("{x}"); }, "");
-  EXPECT_DEATH({ InterpolationString("{{}"); }, "");
-  EXPECT_DEATH({ InterpolationString("{}{x"); }, "");
+#if 0
+TODO: Death tests are not yet supported.
+NTH_TEST("InterpolationString/construction") {
+  NTH_EXPECT([] { InterpolationString("{"); } >>= nth::AbortsExecution());
+  NTH_EXPECT([] { InterpolationString("{"); } >>= nth::AbortsExecution());
+  NTH_EXPECT([] { InterpolationString("}"); } >>= nth::AbortsExecution());
+  NTH_EXPECT([] { InterpolationString("{x}"); } >>= nth::AbortsExecution());
+  NTH_EXPECT([] { InterpolationString("{{}"); } >>= nth::AbortsExecution());
+  NTH_EXPECT([] { InterpolationString("{}{x"); } >>= nth::AbortsExecution());
   [[maybe_unused]] constexpr InterpolationString f1("{}");
   [[maybe_unused]] constexpr InterpolationString f2("{}{}");
 }
 
-TEST(InterpolationString, UTf8Construction) {
+NTH_TEST("InterpolationString/utf8-construction") {
   [[maybe_unused]] constexpr InterpolationString f1("\xc0\x80");
   [[maybe_unused]] constexpr InterpolationString f2("\xc0\x80{}");
-  EXPECT_DEATH({ InterpolationString("\xc0\x80}"); }, "");
+  NTH_EXPECT([] { InterpolationString("\xc0\x80}"); } >>=
+             nth::AbortsExecution());
 }
+#endif
 
 struct TrivialFormatter {
   void operator()(nth::Printer auto& p, std::string_view s) const {
@@ -30,31 +35,31 @@ struct TrivialFormatter {
   }
 };
 
-TEST(InterpolationString, Printer) {
+NTH_TEST("InterpolationString/printer") {
   std::string s;
   string_printer p(s);
   TrivialFormatter t;
   Interpolate<"abc{}def">(p, t, "xyz");
-  EXPECT_EQ(s, "abcxyzdef");
+  NTH_EXPECT(s == "abcxyzdef");
   s.clear();
 
   Interpolate<"abc{}def">(p, t, "12345");
-  EXPECT_EQ(s, "abc12345def");
+  NTH_EXPECT(s == "abc12345def");
   s.clear();
 
   Interpolate<"abc">(p, t);
-  EXPECT_EQ(s, "abc");
+  NTH_EXPECT(s == "abc");
   s.clear();
 
   Interpolate<"{}abc{}{}">(p, t, "1", "2", "3");
-  EXPECT_EQ(s, "1abc23");
+  NTH_EXPECT(s == "1abc23");
   s.clear();
 
   Interpolate<"{}años">(p, t, "cumple");
-  EXPECT_EQ(s, "cumpleaños");
+  NTH_EXPECT(s == "cumpleaños");
 }
 
-TEST(InterpolationString, UniversalFormatter) {
+NTH_TEST("InterpolationString/universal-formatter") {
   std::string s;
   string_printer p(s);
   universal_formatter f({
@@ -62,23 +67,23 @@ TEST(InterpolationString, UniversalFormatter) {
       .fallback = "...",
   });
   Interpolate<"abc{}def">(p, f, false);
-  EXPECT_EQ(s, "abcfalsedef");
+  NTH_EXPECT(s == "abcfalsedef");
   s.clear();
 
   Interpolate<"abc{}def">(p, f, true);
-  EXPECT_EQ(s, "abctruedef");
+  NTH_EXPECT(s == "abctruedef");
   s.clear();
 
   Interpolate<"abc">(p, f);
-  EXPECT_EQ(s, "abc");
+  NTH_EXPECT(s == "abc");
   s.clear();
 
   Interpolate<"{}abc{}{}">(p, f, 1, 2, 3);
-  EXPECT_EQ(s, "1abc23");
+  NTH_EXPECT(s == "1abc23");
   s.clear();
 
   Interpolate<"{}años">(p, f, "cumple");
-  EXPECT_EQ(s, "cumpleaños");
+  NTH_EXPECT(s == "cumpleaños");
 }
 
 }  // namespace
