@@ -25,26 +25,26 @@
 //             Other potential priorities such as debuggability or safety are
 //             considered less imporant.
 //
-// `harden`:    Indicates that the primary concern for the executable is runtime
-//              execution speed, but that we are willing to tolerate a small
-//              performance loss for particularly important safety features.
-//              Other priorities, such as executable size or debuggability are
-//              not considered priorities.
+// `harden`:   Indicates that the primary concern for the executable is runtime
+//             execution speed, but that we are willing to tolerate a small
+//             performance loss for particularly important safety features.
+//             Other priorities, such as executable size or debuggability are
+//             not considered priorities.
 //
-// `debug`:     Indicates that the primary concern for this executable is
-//              debuggability, and that other potential priorities (for example
-//              executable size, or runtime execution speed) are considered less
-//              important.
+// `debug`:    Indicates that the primary concern for this executable is
+//             debuggability, and that other potential priorities (for example
+//             executable size, or runtime execution speed) are considered less
+//             important.
 //
-// `fast`:      Indicates that the primary concern for this executable is
-//              compilation time, and that other priorities such as runtime
-//              execution speed, debuggability, or safety, may be sacrificed in
-//              order to compile the executable faster.
+// `fast`:     Indicates that the primary concern for this executable is
+//             compilation time, and that other priorities such as runtime
+//             execution speed, debuggability, or safety, may be sacrificed in
+//             order to compile the executable faster.
 //
 // A build mode may only be specified on the commandline by defining the
-// `NTH_BUILD_MODE` macro to one of these identifiers. If no build mode is
-// specified, the library will attempt to detect an appropriate mode, but
-// without any guarantees.
+// `NTH_COMMANDLINE_BUILD_MODE` macro to one of these identifiers. If no build
+// mode is specified, the library will attempt to detect an appropriate mode,
+// but without any guarantees.
 #define NTH_BUILD_MODE(mode) NTH_CONCATENATE(NTH_INTERNAL_BUILD_MODE_, mode)
 
 #if not defined(NTH_COMMANDLINE_BUILD_MODE)
