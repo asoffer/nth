@@ -2,57 +2,60 @@
 
 #include <string_view>
 
-#include "gtest/gtest.h"
-
 namespace nth {
 
-TEST(CompileTimeString, Construction) {
+static_assert([] {
   constexpr CompileTimeString s("abc");
-  EXPECT_EQ(s.size(), 3);
-  EXPECT_EQ(s.length(), 3);
-  EXPECT_EQ(s, std::string_view("abc"));
-}
+  static_assert(s.size() == 3);
+  static_assert(s.length() == 3);
+  static_assert(s == std::string_view("abc"));
+  return true;
+}());
 
 template <CompileTimeString S>
 struct Wrapper {
   static constexpr std::string_view view = S;
 };
 
-TEST(CompileTimeString, TemplateParameters) {
-  EXPECT_EQ(Wrapper<"abc">::view, "abc");
-}
+static_assert(Wrapper<"abc">::view == "abc");
 
-TEST(CompileTimeString, Substring) {
+static_assert([] {
   constexpr CompileTimeString s1("abcdef");
   constexpr CompileTimeString s2 = s1.substr<2, 3>();
-  EXPECT_EQ(s2, std::string_view("cde"));
+  static_assert(s2 == std::string_view("cde"));
   constexpr CompileTimeString s3 = s1.substr<3>();
-  EXPECT_EQ(s3, std::string_view("def"));
-}
+  static_assert(s3 == std::string_view("def"));
+  return true;
+}());
 
-TEST(CompileTimeString, SubstringEquality) {
+static_assert([] {
   constexpr CompileTimeString s("hello, hello");
   constexpr CompileTimeString a = s.substr<0, 5>();
   constexpr CompileTimeString b = s.substr<7>();
   constexpr CompileTimeString c = s.substr<8>();
-  EXPECT_EQ(a, b);
-  EXPECT_NE(a, c);
-}
+  static_assert(a == b);
+  static_assert(a != c);
+  return true;
+}());
 
-TEST(CompileTimeString, Concatenation) {
+static_assert([] {
   constexpr CompileTimeString a("hello, ");
   constexpr CompileTimeString b("world!");
-  EXPECT_EQ(a + b, CompileTimeString("hello, world!"));
-  EXPECT_EQ(a + (a.substr<1, 3>()), CompileTimeString("hello, ell"));
-}
+  static_assert(a + b == CompileTimeString("hello, world!"));
+  static_assert(a + (a.substr<1, 3>()) == CompileTimeString("hello, ell"));
+  return true;
+}());
 
-TEST(CompileTimeString, Empty) {
+static_assert([] {
   constexpr CompileTimeString a("hello, ");
   constexpr CompileTimeString b("");
   constexpr CompileTimeString c("\0");
-  EXPECT_FALSE(a.empty());
-  EXPECT_TRUE(b.empty());
-  EXPECT_FALSE(c.empty());
-}
+  static_assert(not a.empty());
+  static_assert(b.empty());
+  static_assert(not c.empty());
+  return true;
+}());
 
 }  // namespace nth
+
+int main() { return 0; }

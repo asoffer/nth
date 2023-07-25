@@ -1,112 +1,65 @@
 #include "nth/meta/concepts.h"
 
 #include <tuple>
-
-#include "gtest/gtest.h"
+#include <type_traits>
 
 namespace nth {
 namespace {
 
-TEST(Concept, AnyOf) {
-  {
-    constexpr bool b = any_of<int, int>;
-    EXPECT_TRUE(b);
-  }
-  {
-    constexpr bool b = any_of<int, bool>;
-    EXPECT_FALSE(b);
-  }
-  {
-    constexpr bool b = any_of<int>;
-    EXPECT_FALSE(b);
-  }
-  {
-    constexpr bool b = any_of<int, bool, int>;
-    EXPECT_TRUE(b);
-  }
-  {
-    constexpr bool b = any_of<int, int, int>;
-    EXPECT_TRUE(b);
-  }
-  {
-    constexpr bool b = any_of<int, bool, char>;
-    EXPECT_FALSE(b);
-  }
-}
+// any_of
+static_assert(any_of<int, int>);
+static_assert(not any_of<int, bool>);
+static_assert(not any_of<int>);
+static_assert(any_of<int, bool, int>);
+static_assert(any_of<int, int, int>);
+static_assert(not any_of<int, bool, char>);
 
-TEST(Concept, Enumeration) {
-  enum E {};
-  struct S {};
-  enum class C {};
-  constexpr bool e = enumeration<E>;
-  constexpr bool s = enumeration<S>;
-  constexpr bool c = enumeration<C>;
-  EXPECT_TRUE(e);
-  EXPECT_FALSE(s);
-  EXPECT_TRUE(c);
-}
+enum E {};
+struct S1 {};
+enum class C {};
+static_assert(enumeration<E>);
+static_assert(not enumeration<S1>);
+static_assert(enumeration<C>);
 
-TEST(Concept, NotAHasher) {
-  struct NotAHasher {};
-  constexpr bool i = hasher<NotAHasher, int>;
-  EXPECT_FALSE(i);
-}
+struct NotAHasher {};
+static_assert(not hasher<NotAHasher, int>);
 
-TEST(Concept, HashesIntNotPointer) {
-  struct HashesIntNotPointer {
-    size_t operator()(int);
-  };
-  constexpr bool i = hasher<HashesIntNotPointer, int>;
-  constexpr bool b = hasher<HashesIntNotPointer, bool>;
-  constexpr bool p = hasher<HashesIntNotPointer, int*>;
-  EXPECT_TRUE(i);
-  EXPECT_TRUE(b);  // Implicit conversion from `bool` to `int`.
-  EXPECT_FALSE(p);
-}
+struct HashesIntNotPointer {
+  size_t operator()(int);
+};
+static_assert(hasher<HashesIntNotPointer, int>);
+static_assert(hasher<HashesIntNotPointer, bool>,
+              "Implicit conversion from `bool` to `int`.");
+static_assert(not hasher<HashesIntNotPointer, int*>);
 
-TEST(Concept, BadReturnType) {
-  struct HashesBadReturn {
-    int* operator()(int);
-  };
-  constexpr bool i = hasher<HashesBadReturn, int>;
-  constexpr bool p = hasher<HashesBadReturn, int*>;
-  EXPECT_FALSE(i);
-  EXPECT_FALSE(p);
-}
+struct HashesBadReturn {
+  int* operator()(int);
+};
+static_assert(not hasher<HashesBadReturn, int>);
+static_assert(not hasher<HashesBadReturn, int*>);
 
-TEST(Concept, ConvertingReturnType) {
-  struct S {
-    operator size_t();
-  };
-  struct HashesConverting {
-    S operator()(int);
-  };
-  constexpr bool i = hasher<HashesConverting, int>;
-  EXPECT_TRUE(i);
-}
+struct S2 {
+  operator size_t();
+};
+struct HashesConverting {
+  S2 operator()(int);
+};
+static_assert(hasher<HashesConverting, int>);
 
 struct TemplateHasher {
   template <typename T>
   size_t operator()(T);
 };
 
-TEST(Concept, AcceptsTemplate) {
-  constexpr bool i = hasher<TemplateHasher, int>;
-  constexpr bool p = hasher<TemplateHasher, int*>;
-  EXPECT_TRUE(i);
-  EXPECT_TRUE(p);
-}
+// Accepts a template
+static_assert(hasher<TemplateHasher, int>);
+static_assert(hasher<TemplateHasher, int*>);
 
-TEST(Concept, DecaysTo) {
-  constexpr bool ref    = decays_to<int&, int>;
-  constexpr bool cvref  = decays_to<int const volatile&, int>;
-  constexpr bool fn_ptr = decays_to<void(), void (*)()>;
-  constexpr bool array  = decays_to<int[3], int*>;
-  EXPECT_TRUE(ref);
-  EXPECT_TRUE(cvref);
-  EXPECT_TRUE(fn_ptr);
-  EXPECT_TRUE(array);
-}
+// decays_to
+static_assert(decays_to<int&, int>);
+static_assert(decays_to<int const volatile&, int>);
+static_assert(decays_to<void(), void (*)()>);
+static_assert(decays_to<int[3], int*>);
 
 struct TupleLike {
   int a, b, c;
@@ -152,25 +105,14 @@ struct std::tuple_element<N, nth::DoesntSpecializeSize> {
 namespace nth {
 namespace {
 
-TEST(Concept, TupleProtocol) {
-  constexpr bool t0 = tuple_like<std::tuple<>>;
-  EXPECT_TRUE(t0);
-
-  constexpr bool t1 = tuple_like<std::tuple<int>>;
-  EXPECT_TRUE(t1);
-
-  constexpr bool t2 = tuple_like<std::tuple<int, bool>>;
-  EXPECT_TRUE(t2);
-
-  constexpr bool t = tuple_like<TupleLike>;
-  EXPECT_TRUE(t);
-
-  constexpr bool size = tuple_like<DoesntSpecializeSize>;
-  EXPECT_FALSE(size);
-
-  constexpr bool element = tuple_like<MissesOneElementSpecialization>;
-  EXPECT_FALSE(element);
-}
+static_assert(tuple_like<std::tuple<>>);
+static_assert(tuple_like<std::tuple<int>>);
+static_assert(tuple_like<std::tuple<int, bool>>);
+static_assert(tuple_like<TupleLike>);
+static_assert(not tuple_like<DoesntSpecializeSize>);
+static_assert(not tuple_like<MissesOneElementSpecialization>);
 
 }  // namespace
 }  // namespace nth
+
+int main() { return 0; }

@@ -11,7 +11,6 @@ cc_test(
     srcs = ["compile_time_string_test.cc"],
     deps = [
         ":compile_time_string",
-        "@com_google_googletest//:gtest_main",
     ],
 )
 
@@ -26,7 +25,6 @@ cc_test(
     srcs = ["concepts_test.cc"],
     deps = [
         ":concepts",
-        "@com_google_googletest//:gtest_main",
     ],
 )
 
@@ -58,7 +56,6 @@ cc_test(
     deps = [
         ":type",
         ":sequence",
-        "@com_google_googletest//:gtest_main",
     ],
 )
 
@@ -96,6 +93,5 @@ cc_test(
     srcs = ["type_test.cc"],
     deps = [
         ":type",
-        "@com_google_googletest//:gtest_main",
     ],
 )

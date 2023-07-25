@@ -1,174 +1,111 @@
 #include "nth/meta/sequence.h"
 
-#include "gmock/gmock.h"
-#include "gtest/gtest.h"
 #include "nth/meta/type.h"
 
 namespace {
 
-using ::testing::ElementsAre;
+static_assert(nth::sequence<>.size() == 0);
+static_assert(nth::sequence<3>.size() == 1);
+static_assert(nth::sequence<true, nth::type<int>, 0>.size() == 3);
+static_assert(nth::sequence<true, nth::type<int>, 0, 0, true>.size() == 5);
 
-TEST(Sequence, Size) {
-  constexpr size_t l0 = nth::sequence<>.size();
-  constexpr size_t l1 = nth::sequence<3>.size();
-  constexpr size_t l3 = nth::sequence<true, nth::type<int>, 0>.size();
-  constexpr size_t l5 = nth::sequence<true, nth::type<int>, 0, 0, true>.size();
-  EXPECT_EQ(l0, 0);
-  EXPECT_EQ(l1, 1);
-  EXPECT_EQ(l3, 3);
-  EXPECT_EQ(l5, 5);
-}
+static_assert(nth::sequence<>.empty());
+static_assert(not nth::sequence<3>.empty());
+static_assert(not nth::sequence<true, nth::type<int>, 0>.empty());
+static_assert(not nth::sequence<true, nth::type<int>, 0, 0, true>.empty());
 
-TEST(Sequence, Empty) {
-  constexpr bool e0 = nth::sequence<>.empty();
-  constexpr bool e1 = nth::sequence<3>.empty();
-  constexpr bool e3 = nth::sequence<true, nth::type<int>, 0>.empty();
-  constexpr bool e5 = nth::sequence<true, nth::type<int>, 0, 0, true>.empty();
-  EXPECT_TRUE(e0);
-  EXPECT_FALSE(e1);
-  EXPECT_FALSE(e3);
-  EXPECT_FALSE(e5);
-}
+static_assert(nth::sequence<>.transform<[](auto x) { return x; }>() ==
+              nth::sequence<>);
+static_assert(nth::sequence<>.transform<[](auto) { return 17; }>() ==
+              nth::sequence<>);
+static_assert(nth::sequence<1, 2, true>.transform<[](auto) { return 17; }>() ==
+              nth::sequence<17, 17, 17>);
+static_assert(
+    nth::sequence<1, 2, 3u>.transform<[](auto x) { return x * x; }>() ==
+    nth::sequence<1, 4, 9u>);
+static_assert(
+    nth::sequence<nth::type<int>, nth::type<bool>>.transform<[](nth::Type auto t) {
+      return nth::type<nth::type_t<t>*>;
+    }>() == nth::sequence<nth::type<int*>, nth::type<bool*>>);
 
-TEST(Sequence, Transform) {
-  EXPECT_EQ(nth::sequence<>.transform<[](auto x) { return x; }>(),
-            nth::sequence<>);
-  EXPECT_EQ(nth::sequence<>.transform<[](auto) { return 17; }>(),
-            nth::sequence<>);
-  EXPECT_EQ((nth::sequence<1, 2, true>.transform<[](auto) { return 17; }>()),
-            (nth::sequence<17, 17, 17>));
-  EXPECT_EQ((nth::sequence<1, 2, 3u>.transform<[](auto x) { return x * x; }>()),
-            (nth::sequence<1, 4, 9u>));
-  EXPECT_EQ(
-      (nth::sequence<nth::type<int>, nth::type<bool>>.transform<[](nth::Type auto t) {
-        return nth::type<nth::type_t<t>*>;
-      }>()),
-      (nth::sequence<nth::type<int*>, nth::type<bool*>>));
-}
+static_assert(nth::sequence<>.reduce([](auto... xs) {
+  return sizeof...(xs);
+}) == 0);
 
-TEST(Sequence, Reduce) {
-  constexpr size_t count0 =
-      nth::sequence<>.reduce([](auto... xs) { return sizeof...(xs); });
-  EXPECT_EQ(count0, 0);
-  constexpr size_t count3 = nth::sequence<3, true, 3>.reduce(
-      [](auto... xs) { return sizeof...(xs); });
-  EXPECT_EQ(count3, 3);
+static_assert(nth::sequence<3, true, 3>.reduce([](auto... xs) {
+  return sizeof...(xs);
+}) == 3);
 
-  constexpr size_t sum =
-      nth::sequence<1, 2, 3, 4>.reduce([](auto... xs) { return (xs + ...); });
-  EXPECT_EQ(sum, 10);
-}
+static_assert(nth::sequence<1, 2, 3, 4>.reduce([](auto... xs) {
+  return (xs + ...);
+}) == 10);
 
-TEST(Sequence, Contains) {
-  constexpr size_t contains0 = nth::sequence<>.contains<0>();
-  EXPECT_FALSE(contains0);
+static_assert(not nth::sequence<>.contains<0>());
+static_assert(nth::sequence<1, 2, 4, 8>.contains<1>());
+static_assert(not nth::sequence<1, 3, 5, 7>.contains<2>());
+static_assert(nth::sequence<9, 6, 3>.contains<3>());
+static_assert(nth::sequence<9, 6, 4>.contains<4>());
 
-  constexpr size_t contains1 = nth::sequence<1, 2, 4, 8>.contains<1>();
-  EXPECT_TRUE(contains1);
+static_assert(nth::sequence<1>.head() == 1);
+static_assert(nth::sequence<2, 3, 4>.head() == 2);
+static_assert(nth::sequence<1>.tail() == nth::sequence<>);
+static_assert(nth::sequence<2, 3, 4>.tail() == nth::sequence<3, 4>);
 
-  constexpr size_t contains2 = nth::sequence<1, 3, 5, 7>.contains<2>();
-  EXPECT_FALSE(contains2);
+static_assert(not nth::sequence<>.any<[](auto x) { return x % 2 == 0; }>());
+static_assert(not nth::sequence<1>.any<[](auto x) { return x % 2 == 0; }>());
+static_assert(not nth::sequence<1, 3>.any<[](auto x) { return x % 2 == 0; }>());
+static_assert(nth::sequence<2>.any<[](auto x) { return x % 2 == 0; }>());
+static_assert(nth::sequence<3, 4>.any<[](auto x) { return x % 2 == 0; }>());
+static_assert(nth::sequence<1, 2>.any<[](auto x) { return x % 2 == 0; }>());
+static_assert(nth::sequence<>.all<[](auto x) { return x % 2 == 0; }>());
+static_assert(not nth::sequence<1>.all<[](auto x) { return x % 2 == 0; }>());
+static_assert(not nth::sequence<1, 3>.all<[](auto x) { return x % 2 == 0; }>());
 
-  constexpr size_t contains3 = nth::sequence<9, 6, 3>.contains<3>();
-  EXPECT_TRUE(contains3);
+static_assert( nth::sequence<2>.all<[](auto x) { return x % 2 == 0; }>());
+static_assert( nth::sequence<2, 4>.all<[](auto x) { return x % 2 == 0; }>());
+static_assert(not  nth::sequence<1, 2>.all<[](auto x) { return x % 2 == 0; }>());
 
-  constexpr size_t contains4 = nth::sequence<9, 6, 4>.contains<4>();
-  EXPECT_TRUE(contains4);
-}
+static_assert(nth::sequence<>.unique() == nth::sequence<>);
+static_assert(nth::sequence<1>.unique() == nth::sequence<1>);
+static_assert(nth::sequence<1, 2, 3>.unique() == nth::sequence<1, 2, 3>);
+static_assert(nth::sequence<1, 2, 1, 3>.unique() == nth::sequence<2, 1, 3>);
 
-TEST(Sequence, Head) {
-  constexpr auto x = nth::sequence<1>.head();
-  EXPECT_EQ(x, 1);
+constexpr auto Even = [](int n) { return n % 2 == 0; };
+static_assert(nth::sequence<>.filter<Even>() == nth::sequence<>);
+static_assert(nth::sequence<1>.filter<Even>() == nth::sequence<>);
+static_assert(nth::sequence<1, 2>.filter<Even>() == nth::sequence<2>);
+static_assert(nth::sequence<1, 2, 3>.filter<Even>() == nth::sequence<2>);
+static_assert(nth::sequence<1, 2, 3, 1, 2, 3>.filter<Even>() ==
+              nth::sequence<2, 2>);
 
-  constexpr auto y = nth::sequence<2, 3, 4>.head();
-  EXPECT_EQ(y, 2);
+static_assert(nth::sequence<>.select<>() == nth::sequence<>);
+static_assert(nth::sequence<1>.select<>() == nth::sequence<>);
+static_assert(nth::sequence<1, 2>.select<1>() == nth::sequence<2>);
+static_assert(nth::sequence<1, 2, 3>.select<0, 2>() == nth::sequence<1, 3>);
+static_assert(nth::sequence<1, 2, 3, 1, 2, 3>.select<0, 4, 5, 1, 1, 0>() ==
+              nth::sequence<1, 2, 3, 2, 2, 1>);
 
-  constexpr auto a = nth::sequence<1>.tail();
-  EXPECT_EQ(a, nth::sequence<>);
+static_assert(nth::sequence<>.reverse() == nth::sequence<>);
+static_assert(nth::sequence<1>.reverse() == nth::sequence<1>);
+static_assert(nth::sequence<1, 2>.reverse() == nth::sequence<2, 1>);
+static_assert(nth::sequence<1, 2, 3>.reverse() == nth::sequence<3, 2, 1>);
+static_assert(nth::sequence<1, 2, 3, 1, 2, 3>.reverse() ==
+              nth::sequence<3, 2, 1, 3, 2, 1>);
 
-  constexpr auto b = nth::sequence<2, 3, 4>.tail();
-  constexpr auto c = nth::sequence<3, 4>;
-  EXPECT_EQ(b, c);
-}
+static_assert(nth::sequence<1>.to_array() == std::array{1});
+static_assert(nth::sequence<1, 2>.to_array() == std::array{1, 2});
+static_assert(nth::sequence<1, 2, 3>.to_array() == std::array{1, 2, 3});
+static_assert(nth::sequence<1, 2, 3, 1, 2, 3>.to_array() ==
+              std::array{1, 2, 3, 1, 2, 3});
 
-TEST(Sequence, Any) {
-  constexpr auto a = nth::sequence<>.any<[](auto x) { return x % 2 == 0; }>();
-  EXPECT_FALSE(a);
+static_assert(nth::sequence<1>.get<0>() == 1);
+static_assert(nth::sequence<1, 2>.get<0>() == 1);
+static_assert(nth::sequence<1, 2, 3>.get<1>() == 2);
+static_assert(nth::sequence<1, 2, 3, 1, 2, 3>.get<4>() == 2);
 
-  constexpr auto b = nth::sequence<1>.any<[](auto x) { return x % 2 == 0; }>();
-  EXPECT_FALSE(b);
+}  // namespace
 
-  constexpr auto c =
-      nth::sequence<1, 3>.any<[](auto x) { return x % 2 == 0; }>();
-  EXPECT_FALSE(c);
-
-  constexpr auto d = nth::sequence<2>.any<[](auto x) { return x % 2 == 0; }>();
-  EXPECT_TRUE(d);
-
-  constexpr auto e =
-      nth::sequence<2, 4>.any<[](auto x) { return x % 2 == 0; }>();
-  EXPECT_TRUE(e);
-
-  constexpr auto f =
-      nth::sequence<1, 2>.any<[](auto x) { return x % 2 == 0; }>();
-  EXPECT_TRUE(f);
-}
-
-TEST(Sequence, All) {
-  constexpr auto a = nth::sequence<>.all<[](auto x) { return x % 2 == 0; }>();
-  EXPECT_TRUE(a);
-
-  constexpr auto b = nth::sequence<1>.all<[](auto x) { return x % 2 == 0; }>();
-  EXPECT_FALSE(b);
-
-  constexpr auto c =
-      nth::sequence<1, 3>.all<[](auto x) { return x % 2 == 0; }>();
-  EXPECT_FALSE(c);
-
-  constexpr auto d = nth::sequence<2>.all<[](auto x) { return x % 2 == 0; }>();
-  EXPECT_TRUE(d);
-
-  constexpr auto e =
-      nth::sequence<2, 4>.all<[](auto x) { return x % 2 == 0; }>();
-  EXPECT_TRUE(e);
-
-  constexpr auto f =
-      nth::sequence<1, 2>.all<[](auto x) { return x % 2 == 0; }>();
-  EXPECT_FALSE(f);
-}
-
-TEST(Sequence, Unique) {
-  constexpr auto s0 = nth::sequence<>.unique();
-  EXPECT_EQ(s0, nth::sequence<>);
-
-  constexpr auto s1 = nth::sequence<1>;
-  EXPECT_EQ(s1, nth::sequence<1>);
-
-  constexpr auto s2 = nth::sequence<1, 2, 3>.unique();
-  EXPECT_EQ(s2, (nth::sequence<1, 2, 3>));
-
-  constexpr auto s3  = nth::sequence<1, 2, 1, 3>.unique();
-  constexpr auto seq = nth::sequence<2, 1, 3>;
-  EXPECT_EQ(s3, seq);
-}
-
-TEST(Sequence, Filter) {
-  constexpr auto s0 = nth::sequence<>;
-  constexpr auto s1 = nth::sequence<1>;
-  constexpr auto s2 = nth::sequence<1, 2>;
-  constexpr auto s3 = nth::sequence<1, 2, 3>;
-  constexpr auto s4 = nth::sequence<1, 2, 3, 1, 2, 3>;
-
-  constexpr auto Even = [](int n) { return n % 2 == 0; };
-  constexpr auto seq = nth::sequence<2,2>;
-  EXPECT_EQ(s0.filter<Even>(), nth::sequence<>);
-  EXPECT_EQ(s1.filter<Even>(), nth::sequence<>);
-  EXPECT_EQ(s2.filter<Even>(), nth::sequence<2>);
-  EXPECT_EQ(s3.filter<Even>(), nth::sequence<2>);
-  EXPECT_EQ(s4.filter<Even>(), seq);
-}
-
-TEST(Sequence, Each) {
+int main() {
   constexpr auto s0 = nth::sequence<>;
   constexpr auto s1 = nth::sequence<1>;
   constexpr auto s2 = nth::sequence<1, 2>;
@@ -177,68 +114,14 @@ TEST(Sequence, Each) {
 
   size_t i = 0;
   s0.each([&](int n) { i += n; });
-  EXPECT_EQ(i, 0);
+  if (i != 0) { return 1; }
   s1.each([&](int n) { i += n; });
-  EXPECT_EQ(i, 1);
+  if (i != 1) { return 1; }
   s2.each([&](int n) { i += n; });
-  EXPECT_EQ(i, 4);
+  if (i != 4) { return 1; }
   s3.each([&](int n) { i += n; });
-  EXPECT_EQ(i, 10);
+  if (i != 10) { return 1; }
   s4.each([&](int n) { i += n; });
-  EXPECT_EQ(i, 22);
+  if (i != 22) { return 1; }
+  return 0;
 }
-
-TEST(Sequence, Select) {
-  static constexpr auto a0 = nth::sequence<>.select<>();
-  static constexpr auto a1 = nth::sequence<1>.select<>();
-  static constexpr auto a2 = nth::sequence<1, 2>.select<1>();
-  static constexpr auto a3 = nth::sequence<1, 2, 3>.select<0, 2>();
-  static constexpr auto a4 =
-      nth::sequence<1, 2, 3, 1, 2, 3>.select<0, 4, 5, 1, 1, 0>();
-
-  EXPECT_EQ(a0, (nth::sequence<>));
-  EXPECT_EQ(a1, (nth::sequence<>));
-  EXPECT_EQ(a2, (nth::sequence<2>));
-  EXPECT_EQ(a3, (nth::sequence<1, 3>));
-  EXPECT_EQ(a4, (nth::sequence<1, 2, 3, 2, 2, 1>));
-}
-
-TEST(Sequence, Reverse) {
-  static constexpr auto a0 = nth::sequence<>.reverse();
-  static constexpr auto a1 = nth::sequence<1>.reverse();
-  static constexpr auto a2 = nth::sequence<1, 2>.reverse();
-  static constexpr auto a3 = nth::sequence<1, 2, 3>.reverse();
-  static constexpr auto a4 = nth::sequence<1, 2, 3, 1, 2, 3>.reverse();
-
-  EXPECT_EQ(a0, (nth::sequence<>));
-  EXPECT_EQ(a1, (nth::sequence<1>));
-  EXPECT_EQ(a2, (nth::sequence<2, 1>));
-  EXPECT_EQ(a3, (nth::sequence<3, 2, 1>));
-  EXPECT_EQ(a4, (nth::sequence<3, 2, 1, 3, 2, 1>));
-}
-
-TEST(Sequence, ToArray) {
-  constexpr auto a1 = nth::sequence<1>.to_array();
-  constexpr auto a2 = nth::sequence<1, 2>.to_array();
-  constexpr auto a3 = nth::sequence<1, 2, 3>.to_array();
-  constexpr auto a4 = nth::sequence<1, 2, 3, 1, 2, 3>.to_array();
-
-  EXPECT_THAT(a1, ElementsAre(1));
-  EXPECT_THAT(a2, ElementsAre(1, 2));
-  EXPECT_THAT(a3, ElementsAre(1, 2, 3));
-  EXPECT_THAT(a4, ElementsAre(1, 2, 3, 1, 2, 3));
-}
-
-TEST(Sequence, Get) {
-  constexpr auto a1 = nth::sequence<1>.get<0>();
-  constexpr auto a2 = nth::sequence<1, 2>.get<0>();
-  constexpr auto a3 = nth::sequence<1, 2, 3>.get<1>();
-  constexpr auto a4 = nth::sequence<1, 2, 3, 1, 2, 3>.get<4>();
-
-  EXPECT_EQ(a1, 1);
-  EXPECT_EQ(a2, 1);
-  EXPECT_EQ(a3, 2);
-  EXPECT_EQ(a4, 2);
-}
-
-}  // namespace

@@ -35,8 +35,3 @@ cc_test(
         ":macros"
     ],
 )
-
-cc_library(
-    name = "target",
-    hdrs = ["target.h"],
-)
