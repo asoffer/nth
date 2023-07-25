@@ -16,9 +16,9 @@
 // supplied, a user-configurable global default is provided. By default this
 // globally configured default is equivalent to `v.always`.
 //
-// The format string must be valid to pass to an `nth::FormatString` (see
-// "nth/strings/format.h" for details). Users must then use `operator<<=` to
-// pass the logging arguments which will bind to the format-string's
+// The format string must be valid to pass to an `nth::InterpolationString` (see
+// "nth/strings/interpolate.h" for details). Users must then use `operator<<=`
+// to pass the logging arguments which will bind to the format-string's
 // placeholders.
 //
 // For example,
