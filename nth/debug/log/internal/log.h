@@ -60,9 +60,7 @@
 
 #define NTH_DEBUG_INTERNAL_UNREACHABLE(interpolation_string)                   \
   NTH_DEBUG_INTERNAL_UNREACHABLE_WITH_VERBOSITY(                               \
-      (::nth::debug_verbosity.always),                                         \
-      "Program execution has reached a state believed to be unreachable. "     \
-      "This is a bug.\n" interpolation_string)
+      (::nth::debug_verbosity.always), interpolation_string)
 
 #define NTH_DEBUG_INTERNAL_UNREACHABLE_WITH_VERBOSITY(verbosity,               \
                                                       interpolation_string)    \
