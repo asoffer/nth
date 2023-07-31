@@ -76,6 +76,25 @@ bool ComparisonExpectations() {
   return true;
 }
 
+struct Uncopyable {
+  Uncopyable()                             = default;
+  Uncopyable(Uncopyable const&)            = delete;
+  Uncopyable(Uncopyable&&)                 = default;
+  Uncopyable& operator=(Uncopyable const&) = delete;
+  Uncopyable& operator=(Uncopyable&&)      = default;
+
+  friend bool operator==(Uncopyable const&, Uncopyable const&) { return true; }
+};
+
+bool MoveOnly() {
+  Uncopyable u;
+  auto t = nth::Trace<"u">(u);
+
+  NTH_EXPECT(t == t) NTH_ELSE { return false; }
+  NTH_ASSERT(t == t) NTH_ELSE { return false; }
+  return true;
+}
+
 bool ShortCircuiting() {
   int n  = 3;
   auto t = nth::Trace<"n">(n);
@@ -89,6 +108,7 @@ int main() {
   nth::RegisterLogSink(nth::stderr_log_sink);
   if (not ComparisonExpectations()) { return 1; }
   if (not ShortCircuiting()) { return 1; }
+  if (not MoveOnly()) { return 1; }
 
   // Declared API
   Thing thing{.n = 5};

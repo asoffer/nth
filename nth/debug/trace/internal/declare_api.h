@@ -23,7 +23,7 @@
   template <int &..., typename... NthTypes>                                    \
   auto memfn(NthTypes const &...ts) const {                                    \
     return nth::internal_debug::Traced<                                        \
-        Impl<#memfn>, typename std::decay_t<decltype(*this)>::type,            \
+        Impl<#memfn>, typename std::remove_cvref_t<decltype(*this)>::type,            \
         NthTypes...>(::nth::internal_debug::Evaluate(*this), ts...);           \
   }
 
@@ -35,14 +35,17 @@ struct DefineTrace {
 };
 
 template <typename Action, typename... Ts>
-requires(DefineTrace<typename Action::template invoke_type<Ts...>>::defined)  //
+requires(DefineTrace<std::remove_cvref_t<
+             typename Action::template invoke_type<Ts...>>>::defined)  //
     struct Traced<Action, Ts...>
-    : DefineTrace<typename Action::template invoke_type<Ts...>> {
+    : DefineTrace<
+          std::remove_cvref_t<typename Action::template invoke_type<Ts...>>> {
   using action_type                    = Action;
   static constexpr auto argument_types = nth::type_sequence<Ts...>;
 
   constexpr Traced(auto const &...ts)
-      : DefineTrace<typename action_type::template invoke_type<Ts...>>(
+      : DefineTrace<std::remove_cvref_t<
+            typename action_type::template invoke_type<Ts...>>>(
             [&] { return action_type::invoke(ts...); }),
         ptrs_{std::addressof(ts)...} {}
 

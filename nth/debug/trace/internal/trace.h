@@ -180,7 +180,7 @@ concept TracedImpl = std::derived_from<T, internal_debug::TracedBase>;
 
 template <typename T, typename U>
 concept TracedEvaluatingTo =
-    std::derived_from<T, nth::internal_debug::TracedValue<U>>;
+    TracedImpl<T> and std::is_same_v<U, std::remove_cvref_t<typename T::type>>;
 
 // Function template which, when `value` is a traced object extracts a constant
 // reference to the underlying value, and otherwise returns a constant reference
@@ -369,7 +369,7 @@ constexpr decltype(auto) operator->*(TraceInjector, T const &value) {
     if constexpr (std::is_array_v<T>) {
       return Traced<Identity<"">, decltype(value)>(value);
     } else {
-      return Traced<Identity<"">, T>(value);
+      return Traced<Identity<"">, T const &>(value);
     }
   }
 }
@@ -384,7 +384,7 @@ constexpr decltype(auto) operator->*(T const &value, TraceInjector) {
     if constexpr (std::is_array_v<T>) {
       return Traced<Identity<"">, decltype(value)>(value);
     } else {
-      return Traced<Identity<"">, T>(value);
+      return Traced<Identity<"">, T const &>(value);
     }
   }
 }
