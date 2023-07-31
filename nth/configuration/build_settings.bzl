@@ -11,6 +11,13 @@ _CONFIG_HEADER_TEMPLATE = """
 #endif  // NTH_CONFIGURATION_INTERNAL_{name}_GENERATED_H
 """
 
+def _extract_external(path):
+    if path.startswith("external/"):
+        pos = path.find("/", len("external/")) + 1
+        return path[pos:]
+    else:
+        return path
+
 
 def _nth_configuration_target_impl(ctx):
     target = getattr(ctx.attr._configuration[NthConfiguration], ctx.label.name)
@@ -20,7 +27,7 @@ def _nth_configuration_target_impl(ctx):
         content = _CONFIG_HEADER_TEMPLATE.format(
             name = ctx.attr.name,
             includes = '\n'.join([
-                '#include "{}"'.format(h.path) for h in
+                '#include "{}"'.format(_extract_external(h.path)) for h in
                 target[CcInfo].compilation_context.headers.to_list()
             ]),
         )
