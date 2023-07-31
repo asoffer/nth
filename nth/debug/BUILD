@@ -1,6 +1,19 @@
 package(default_visibility = ["//visibility:public"])
 
 cc_library(
+    name = "debug",
+    hdrs = [
+        "debug.h",
+    ],
+    deps = [
+        "//nth/debug:unimplemented",
+        "//nth/debug:unreachable",
+        "//nth/debug/log",
+        "//nth/debug/trace",
+    ],
+)
+
+cc_library(
     name = "source_location",
     hdrs = ["source_location.h"],
     deps = [
@@ -15,6 +28,7 @@ cc_test(
         ":source_location",
     ],
 )
+
 cc_library(
     name = "unimplemented",
     hdrs = [
