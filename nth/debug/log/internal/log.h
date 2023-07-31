@@ -54,7 +54,7 @@
   if constexpr (nth::build_mode == nth::build::optimize) {                     \
     nth::unreachable();                                                        \
   } else {                                                                     \
-    nth::abort();                                                              \
+    std::abort();                                                              \
   }                                                                            \
   static_assert(true)
 
