@@ -35,7 +35,8 @@ namespace nth {
          NTH_DEBUG_INTERNAL_UNREACHABLE_WITHOUT_LOGGING,                       \
          NTH_IF(NTH_IS_PARENTHESIZED(NTH_FIRST_ARGUMENT(__VA_ARGS__)),         \
                 NTH_DEBUG_INTERNAL_UNREACHABLE_WITH_VERBOSITY,                 \
-                NTH_DEBUG_INTERNAL_UNREACHABLE, __VA_ARGS__))
+                NTH_DEBUG_INTERNAL_UNREACHABLE))                               \
+  (__VA_ARGS__)
 
 }  // namespace nth
 

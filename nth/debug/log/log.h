@@ -35,7 +35,7 @@
 //
 #define NTH_LOG(...)                                                           \
   NTH_IF(NTH_IS_PARENTHESIZED(NTH_FIRST_ARGUMENT(__VA_ARGS__)),                \
-         NTH_DEBUG_INTERNAL_LOG_WITH_VERBOSITY, NTH_DEBUG_INTERNAL_LOG,        \
-         __VA_ARGS__)
+         NTH_DEBUG_INTERNAL_LOG_WITH_VERBOSITY, NTH_DEBUG_INTERNAL_LOG)        \
+  (__VA_ARGS__)
 
 #endif // NTH_DEBUG_LOG_LOG_H

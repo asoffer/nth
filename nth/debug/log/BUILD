@@ -43,6 +43,7 @@ cc_test(
     deps = [
         ":log",
         ":vector_log_sink",
+        "//nth/debug:unreachable",
     ],
 )
 

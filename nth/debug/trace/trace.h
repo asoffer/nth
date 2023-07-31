@@ -128,7 +128,8 @@ void RegisterExpectationFailure(void (*handler)());
 #define NTH_EXPECT(...)                                                        \
   NTH_IF(NTH_IS_PARENTHESIZED(NTH_FIRST_ARGUMENT(__VA_ARGS__)),                \
          NTH_DEBUG_INTERNAL_TRACE_EXPECT_WITH_VERBOSITY,                       \
-         NTH_DEBUG_INTERNAL_TRACE_EXPECT, __VA_ARGS__)
+         NTH_DEBUG_INTERNAL_TRACE_EXPECT)                                      \
+  (__VA_ARGS__)
 
 // The `NTH_ASSERT` macro injects tracing into the wrapped expression and
 // evaluates the it. If the wrapped expression evaluates to `true`, control flow
@@ -140,7 +141,8 @@ void RegisterExpectationFailure(void (*handler)());
 #define NTH_ASSERT(...)                                                        \
   NTH_IF(NTH_IS_PARENTHESIZED(NTH_FIRST_ARGUMENT(__VA_ARGS__)),                \
          NTH_DEBUG_INTERNAL_TRACE_ASSERT_WITH_VERBOSITY,                       \
-         NTH_DEBUG_INTERNAL_TRACE_ASSERT, __VA_ARGS__)
+         NTH_DEBUG_INTERNAL_TRACE_ASSERT)                                      \
+  (__VA_ARGS__)
 
 // The `NTH_ELSE` macro may follow an invocation of either `NTH_EXPECT` or
 // `NTH_ASSERT` to indicate that the following statement is to be executed if
