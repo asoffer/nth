@@ -57,16 +57,13 @@
 
 // NTH_IF
 //
-// Invokes either `t` or `f` on `__VA_ARGS__`. `condition` must expand to either
-// `true` or `false`. If `condition` expands to `true`, the macro expands to the
-// macro `t` invoked on `__VA_ARGS__`. Otherwise (if `condition` expands to
-// `false`), the macro expands to the macro `f` invoked on `__VA_ARGS__`.
-#define NTH_IF(condition, t, f, ...)                                           \
-  NTH_INTERNAL_IF(condition, t, f, __VA_ARGS__)
-#define NTH_INTERNAL_IF(condition, t, f, ...)                                  \
-  NTH_INTERNAL_BRANCH_##condition(t, f, __VA_ARGS__)
-#define NTH_INTERNAL_BRANCH_false(t, f, ...) f(__VA_ARGS__)
-#define NTH_INTERNAL_BRANCH_true(t, f, ...) t(__VA_ARGS__)
+// The argument bound to `condition` must expand to either `true` or `false`. If
+// it expands to `true`, then the entire macro expands to the argument bound to
+// `t`. Otherwise the entire macro expands to the argument bound to `f`.
+#define NTH_IF(condition, t, f) NTH_INTERNAL_IF(condition, t, f)
+#define NTH_INTERNAL_IF(condition, t, f) NTH_INTERNAL_BRANCH_##condition(t, f)
+#define NTH_INTERNAL_BRANCH_false(t, f) f
+#define NTH_INTERNAL_BRANCH_true(t, f) t
 
 // NTH_IS_EMPTY
 //
@@ -103,7 +100,8 @@
 // parentheses.
 #define NTH_IGNORE_PARENTHESES(argument)                                       \
   NTH_IF(NTH_IS_PARENTHESIZED(argument),                                       \
-         NTH_INTERNAL_IGNORE_PARENTHESES_REMOVE, NTH_IDENTITY, argument)
+         NTH_INTERNAL_IGNORE_PARENTHESES_REMOVE, NTH_IDENTITY)                 \
+  (argument)
 
 #define NTH_INTERNAL_IGNORE_PARENTHESES_REMOVE(p)                              \
   NTH_CONCATENATE(, NTH_IDENTITY p)

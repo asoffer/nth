@@ -6,6 +6,12 @@ cc_library(
     hdrs = ["verbosity.h"],
 )
 
+cc_library(
+    name = "debug",
+    copts = ["-ferror-limit=1"],
+    hdrs = ["debug.h"],
+)
+
 nth_configuration(
     name = "unconfigured"
 )

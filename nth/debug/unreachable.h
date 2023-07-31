@@ -1,9 +1,9 @@
 #ifndef NTH_DEBUG_UNREACHABLE_H
 #define NTH_DEBUG_UNREACHABLE_H
 
-#include "nth/base/platform.h"
 #include "nth/base/macros.h"
-#include "nth/debug/log/log.h"
+#include "nth/base/platform.h"
+#include "nth/debug/internal/unreachable.h"
 
 namespace nth {
 

@@ -21,8 +21,8 @@
     return not(verbosity)(::nth::source_location::current());                  \
   }())
 
-#define NTH_DEBUG_INTERNAL_ACT(verbosity, interpolation_string,                \
-                               disabled_action, enabled_voidifier)             \
+#define NTH_DEBUG_INTERNAL_LOG_AND_ACT(verbosity, interpolation_string,        \
+                                       disabled_action, enabled_voidifier)     \
   NTH_REQUIRE_EXPANSION_TO_PREFIX_SUBEXPRESSION(                               \
       NTH_DEBUG_INTERNAL_VERBOSITY_DISABLED(verbosity)                         \
           ? disabled_action                                                    \
@@ -47,30 +47,7 @@
       interpolation_string)
 
 #define NTH_DEBUG_INTERNAL_LOG_WITH_VERBOSITY(verbosity, interpolation_string) \
-  NTH_DEBUG_INTERNAL_ACT(verbosity, interpolation_string, (void)0,             \
-                         ::nth::internal_debug::Voidifier{})
-
-#define NTH_DEBUG_INTERNAL_UNREACHABLE_WITHOUT_LOGGING()                       \
-  if constexpr (nth::build_mode == nth::build::optimize) {                     \
-    nth::unreachable();                                                        \
-  } else {                                                                     \
-    std::abort();                                                              \
-  }                                                                            \
-  static_assert(true)
-
-#define NTH_DEBUG_INTERNAL_UNREACHABLE(interpolation_string)                   \
-  NTH_DEBUG_INTERNAL_UNREACHABLE_WITH_VERBOSITY(                               \
-      (::nth::debug_verbosity.always), interpolation_string)
-
-#define NTH_DEBUG_INTERNAL_UNREACHABLE_WITH_VERBOSITY(verbosity,               \
-                                                      interpolation_string)    \
-  if constexpr (nth::build_mode == nth::build::optimize) {                     \
-    nth::unreachable();                                                        \
-  } else                                                                       \
-    NTH_DEBUG_INTERNAL_ACT(                                                    \
-        verbosity,                                                             \
-        "Program execution has reached a state believed to be unreachable. "   \
-        "This is a bug.\n" interpolation_string,                               \
-        std::abort(), ::nth::internal_debug::InvokingVoidifier<std::abort>{})
+  NTH_DEBUG_INTERNAL_LOG_AND_ACT(verbosity, interpolation_string, (void)0,     \
+                                 ::nth::internal_debug::Voidifier{})
 
 #endif  // NTH_DEBUG_LOG_INTERNAL_DEBUG_H

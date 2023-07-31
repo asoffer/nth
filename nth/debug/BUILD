@@ -18,10 +18,22 @@ cc_test(
 
 cc_library(
     name = "unreachable",
-    hdrs = ["unreachable.h"],
+    hdrs = [
+        "unreachable.h",
+        "internal/unreachable.h",
+    ],
     deps = [
         "//nth/base:platform",
         "//nth/debug/log",
+    ],
+)
+
+cc_test(
+    name = "unreachable_test",
+    srcs = ["unreachable_test.cc"],
+    deps = [
+        ":unreachable",
+        "//nth/debug/log:vector_log_sink",
     ],
 )
 

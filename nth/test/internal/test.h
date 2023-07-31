@@ -65,8 +65,8 @@ void RegisterInvocationsMatching(nth::Sequence auto seq) {
 
 #define NTH_INTERNAL_TEST_IMPL(name, initializer, categorization, ...)         \
   NTH_IF(NTH_IS_EMPTY(__VA_ARGS__), NTH_INTERNAL_TEST_IMPL_,                   \
-         NTH_INTERNAL_TEST_PARAMETERIZED_IMPL_, name, initializer,             \
-         categorization, __VA_ARGS__)
+         NTH_INTERNAL_TEST_PARAMETERIZED_IMPL_)                                \
+  (name, initializer, categorization, __VA_ARGS__)
 
 #define NTH_INTERNAL_TEST_IMPL_(test_name, ignored_initializer, cat, ...)      \
   struct test_name {                                                           \
