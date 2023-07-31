@@ -15,6 +15,24 @@ cc_test(
         ":source_location",
     ],
 )
+cc_library(
+    name = "unimplemented",
+    hdrs = [
+        "unimplemented.h",
+        "internal/unimplemented.h",
+    ],
+    deps = [
+        "//nth/debug/log",
+    ],
+)
+
+cc_test(
+    name = "unimplemented_compiles_test",
+    srcs = ["unimplemented_compiles_test.cc"],
+    deps = [
+        ":unimplemented",
+    ],
+)
 
 cc_library(
     name = "unreachable",

@@ -6,5 +6,3 @@ int main() {
   if (false) { NTH_UNREACHABLE("{}") <<= {3}; }
   return 0;
 }
-
-
