@@ -17,6 +17,15 @@ cc_test(
 )
 
 cc_library(
+    name = "unreachable",
+    hdrs = ["unreachable.h"],
+    deps = [
+        "//nth/base:platform",
+        "//nth/debug/log",
+    ],
+)
+
+cc_library(
     name = "verbosity",
     hdrs = ["verbosity.h"],
     deps = [

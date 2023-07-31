@@ -59,7 +59,7 @@
 #define NTH_DEBUG_INTERNAL_UNREACHABLE_WITH_VERBOSITY(verbosity,               \
                                                       interpolation_string)    \
   if constexpr (nth::build_mode == nth::build::optimize) {                     \
-    __builtin_unreachable();                                                   \
+    nth::unreachable();                                                        \
   } else                                                                       \
     NTH_DEBUG_INTERNAL_ACT(                                                    \
         verbosity,                                                             \

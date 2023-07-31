@@ -35,3 +35,9 @@ cc_test(
         ":macros"
     ],
 )
+
+cc_library(
+    name = "platform",
+    hdrs = ["platform.h"],
+    deps = [],
+)
