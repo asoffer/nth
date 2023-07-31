@@ -44,6 +44,11 @@ struct InvokingVoidifier : Voidifier {
   ~InvokingVoidifier() { F(); }
 };
 
+template <auto F>
+struct NonReturningVoidifier : Voidifier {
+  [[noreturn]] ~NonReturningVoidifier() { F(); }
+};
+
 }  // namespace internal_debug
 }  // namespace nth
 

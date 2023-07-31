@@ -14,8 +14,12 @@
 #if defined(NTH_DEBUG_INTERNAL_TEST_UNREACHABLE)
 #define NTH_DEBUG_INTERNAL_UNREACHABLE_HANDLER                                 \
   NTH_DEBUG_INTERNAL_TEST_UNREACHABLE
+#define NTH_DEBUG_INTERNAL_UNREACHABLE_VOIDIFIER                               \
+  ::nth::internal_debug::InvokingVoidifier<NTH_DEBUG_INTERNAL_TEST_UNREACHABLE>
 #else
 #define NTH_DEBUG_INTERNAL_UNREACHABLE_HANDLER std::abort
+#define NTH_DEBUG_INTERNAL_UNREACHABLE_VOIDIFIER                               \
+  ::nth::internal_debug::NonReturning<NTH_DEBUG_INTERNAL_TEST_UNREACHABLE>
 #endif
 
 #define NTH_DEBUG_INTERNAL_UNREACHABLE_WITHOUT_LOGGING()                       \
@@ -40,7 +44,6 @@
         "Program execution has reached a state believed to be unreachable. "   \
         "This is a bug.\n" interpolation_string,                               \
         NTH_DEBUG_INTERNAL_UNREACHABLE_HANDLER(),                              \
-        ::nth::internal_debug::InvokingVoidifier<                              \
-            NTH_DEBUG_INTERNAL_UNREACHABLE_HANDLER>{})
+        NTH_DEBUG_INTERNAL_UNREACHABLE_VOIDIFIER{})
 
 #endif  // NTH_DEBUG_INTERNAL_UNREACHABLE_H
