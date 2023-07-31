@@ -39,6 +39,11 @@ struct Voidifier {
   }
 };
 
+template <auto F>
+struct InvokingVoidifier : Voidifier {
+  ~InvokingVoidifier() { F(); }
+};
+
 }  // namespace internal_debug
 }  // namespace nth
 

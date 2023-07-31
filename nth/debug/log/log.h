@@ -8,9 +8,9 @@
 #include "nth/debug/log/sink.h"
 #include "nth/debug/verbosity.h"
 
-// The `NTH_LOG` is a macro which allows one to log to a configurable logging
-// sink. The macro accepts either one argument, consisting of a format-string,
-// or two arguments, where the first argument is a parenthesized expression
+// `NTH_LOG` is a macro which allows one to log to a configurable logging sink.
+// The macro accepts either one argument, consisting of a format-string, or two
+// arguments, where the first argument is a parenthesized expression
 // representing the logging verbosity requirements (see nth/debug/verbosity.h),
 // and a second format-string argument. If no logging verbosity requirement is
 // supplied, a user-configurable global default is provided. By default this
