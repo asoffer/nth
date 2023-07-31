@@ -171,4 +171,16 @@ void RegisterExpectationFailure(void (*handler)());
 #define NTH_TRACE_DECLARE_API_TEMPLATE(type, member_function_names)            \
   NTH_DEBUG_INTERNAL_TRACE_DECLARE_API(type, member_function_names)
 
+// Similar to `NTH_ASSERT(expr != nullptr)`, an assertion will trigger if the
+// expression is null. However, if the expression is not null, the entire macro
+// will expand to an expression that evaluates equal (both in value and in value
+// category) to `expr`.
+#define NTH_ASSERT_NOT_NULL(expr)                                              \
+  ([](auto &&NthPtr) -> decltype(auto) {                                       \
+    if (NthPtr == nullptr) {                                                   \
+      NTH_LOG("{} is unexpectedly null.") <<= {#expr};                         \
+      ::std::abort();                                                          \
+    }                                                                          \
+    return static_cast<std::remove_reference_t<decltype(NthPtr)> &&>(NthPtr);  \
+  })(expr)
 #endif  // NTH_DEBUG_TRACE_H
