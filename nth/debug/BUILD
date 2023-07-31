@@ -29,6 +29,14 @@ cc_library(
 )
 
 cc_test(
+    name = "unreachable_compiles_test",
+    srcs = ["unreachable_compiles_test.cc"],
+    deps = [
+        ":unreachable",
+    ],
+)
+
+cc_test(
     name = "unreachable_test",
     srcs = ["unreachable_test.cc"],
     deps = [

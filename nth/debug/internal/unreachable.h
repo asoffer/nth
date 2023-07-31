@@ -15,11 +15,13 @@
 #define NTH_DEBUG_INTERNAL_UNREACHABLE_HANDLER                                 \
   NTH_DEBUG_INTERNAL_TEST_UNREACHABLE
 #define NTH_DEBUG_INTERNAL_UNREACHABLE_VOIDIFIER                               \
-  ::nth::internal_debug::InvokingVoidifier<NTH_DEBUG_INTERNAL_TEST_UNREACHABLE>
+  ::nth::internal_debug::InvokingVoidifier<                                    \
+      NTH_DEBUG_INTERNAL_UNREACHABLE_HANDLER>
 #else
 #define NTH_DEBUG_INTERNAL_UNREACHABLE_HANDLER std::abort
 #define NTH_DEBUG_INTERNAL_UNREACHABLE_VOIDIFIER                               \
-  ::nth::internal_debug::NonReturning<NTH_DEBUG_INTERNAL_TEST_UNREACHABLE>
+  ::nth::internal_debug::NonReturningVoidifier<                                \
+      NTH_DEBUG_INTERNAL_UNREACHABLE_HANDLER>
 #endif
 
 #define NTH_DEBUG_INTERNAL_UNREACHABLE_WITHOUT_LOGGING()                       \
