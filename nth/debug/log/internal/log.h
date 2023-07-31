@@ -50,6 +50,14 @@
   NTH_DEBUG_INTERNAL_ACT(verbosity, interpolation_string, (void)0,             \
                          ::nth::internal_debug::Voidifier{})
 
+#define NTH_DEBUG_INTERNAL_UNREACHABLE_WITHOUT_LOGGING()                       \
+  if constexpr (nth::build_mode == nth::build::optimize) {                     \
+    nth::unreachable();                                                        \
+  } else {                                                                     \
+    nth::abort();                                                              \
+  }                                                                            \
+  static_assert(true)
+
 #define NTH_DEBUG_INTERNAL_UNREACHABLE(interpolation_string)                   \
   NTH_DEBUG_INTERNAL_UNREACHABLE_WITH_VERBOSITY(                               \
       (::nth::debug_verbosity.always),                                         \

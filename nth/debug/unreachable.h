@@ -2,6 +2,7 @@
 #define NTH_DEBUG_UNREACHABLE_H
 
 #include "nth/base/platform.h"
+#include "nth/base/macros.h"
 #include "nth/debug/log/log.h"
 
 namespace nth {
@@ -24,14 +25,17 @@ namespace nth {
 // If `nth::build_mode == nth::build::optimize`, the behavior of a program is
 // undefined.
 //
-// For all other build modes, the program is guaranteed to log as if the macro
-// was actually `NTH_LOG` rather than `NTH_UNREACHABLE`, and then immediately
-// abort execution (with the sole caveat that when verbosity is not specified,
-// the chosen default verbosity is `always`).
+// For all other build modes, the program is guaranteed to abort execution.
+// If any argumenst are passed to the macro, they are interpretted as arguments
+// to `NTH_LOG`. Specifically, if a verbosity is provided, that logging
+// verbosity will be used. Otherwise, if no verbosity is provided, a default
+// verbosity of `always` will be used.
 #define NTH_UNREACHABLE(...)                                                   \
-  NTH_IF(NTH_IS_PARENTHESIZED(NTH_FIRST_ARGUMENT(__VA_ARGS__)),                \
-         NTH_DEBUG_INTERNAL_UNREACHABLE_WITH_VERBOSITY,                        \
-         NTH_DEBUG_INTERNAL_UNREACHABLE, __VA_ARGS__)
+  NTH_IF(NTH_IS_EMPTY(__VA_ARGS__),                                            \
+         NTH_DEBUG_INTERNAL_UNREACHABLE_WITHOUT_LOGGING,                       \
+         NTH_IF(NTH_IS_PARENTHESIZED(NTH_FIRST_ARGUMENT(__VA_ARGS__)),         \
+                NTH_DEBUG_INTERNAL_UNREACHABLE_WITH_VERBOSITY,                 \
+                NTH_DEBUG_INTERNAL_UNREACHABLE, __VA_ARGS__))
 
 }  // namespace nth
 
