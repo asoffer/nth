@@ -27,9 +27,9 @@ struct file_path {
     return p.has_value();
   }
 
-  // Returns a pointer to a nul-terminated character string representing the
-  // name of this file path.
-  char const *c_str() { return name_.c_str(); }
+  // Returns a reference to a `std::string const` which represents the file
+  // path.
+  std::string const &path() const { return name_; }
 
   friend void NthPrint(Printer auto &p, file_path const &path) {
     std::stringstream ss;
