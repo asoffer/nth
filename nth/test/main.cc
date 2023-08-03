@@ -12,10 +12,9 @@ int main() {
     // NTH_LOG("[TEST FAILED: {}]") <<= {current_test->categorization()};
     failures.fetch_add(1, std::memory_order::relaxed);
   });
-   for (auto f  : nth::RegisteredTests()) {
-     f();
-    // NTH_LOG("[TEST: {}]") <<= {test->categorization()};
-    // test->InvokeTest();
+  for (auto const &[name, f] : nth::RegisteredTests()) {
+    NTH_LOG("[TEST: {}]") <<= {name};
+    f();
   }
 
   return failures.load(std::memory_order::relaxed) == 0 ? 0 : 1;

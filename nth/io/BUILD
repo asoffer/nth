@@ -23,7 +23,27 @@ cc_library(
     hdrs = ["file.h"],
     srcs = ["file.cc"],
     deps = [
+        ":file_path",
         "//nth/debug/trace",
+    ],
+)
+
+cc_library(
+    name = "file_path",
+    hdrs = ["file_path.h"],
+    srcs = ["file_path.cc"],
+    deps = [
+        ":printer",
+        "//nth/debug",
+    ],
+)
+
+cc_test(
+    name = "file_path_test",
+    srcs = ["file_path_test.cc"],
+    deps = [
+        ":file_path",
+        "//nth/test:main",
     ],
 )
 

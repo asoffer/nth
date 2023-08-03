@@ -14,7 +14,7 @@
 
 namespace nth {
 
-std::span<std::function<void()> const> RegisteredTests();
+std::span<TestInvocation const> RegisteredTests();
 
 // `NTH_TEST` defines a (possibly parameterized) test which can be invoked and
 // whose expectations and assertions will be tracked. The first parameter to the

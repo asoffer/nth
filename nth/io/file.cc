@@ -33,4 +33,12 @@ file TemporaryFile() {
   return file(f);
 }
 
+std::optional<file> file::read_only(file_path const& path) {
+  if (std::FILE* ptr = std::fopen(path.name_.c_str(), "r")) {
+    return file(ptr);
+  } else {
+    return std::nullopt;
+  }
+}
+
 }  // namespace nth

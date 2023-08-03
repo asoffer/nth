@@ -12,6 +12,11 @@
 
 namespace nth {
 
+struct TestInvocation {
+  std::string_view categorization;
+  std::function<void()> invocation;
+};
+
 // The stateful compile-time sequence of types which will be appended to once
 // for each parameterized test encountered. Despite not being in an internal
 // namespace, this object is for internal use only and must not be used directly
@@ -26,7 +31,8 @@ NTH_DEFINE_MUTABLE_COMPILE_TIME_SEQUENCE(
     NthInternalParameterizedTestInvocationSequence);
 
 // Registers `f` as a test to be invoked.
-void RegisterTestInvocation(std::function<void()> f);
+void RegisterTestInvocation(std::string_view categorization,
+                            std::function<void()> f);
 
 namespace internal_test {
 
@@ -40,8 +46,9 @@ void RegisterTestsMatching(nth::Sequence auto seq) {
     using type = nth::type_t<t>;
     if constexpr (nth::GlobMatches(TestInvocation::categorization(),
                                    type::categorization())) {
-      RegisterTestInvocation(
-          [] { TestInvocation::template Invocation<type>(); });
+      RegisterTestInvocation(type::categorization(), [] {
+        TestInvocation::template Invocation<type>();
+      });
     }
   });
 }
@@ -56,7 +63,8 @@ void RegisterInvocationsMatching(nth::Sequence auto seq) {
     using type = nth::type_t<t>;
     if constexpr (nth::GlobMatches(type::categorization(),
                                    Test::categorization())) {
-      RegisterTestInvocation([] { type::template Invocation<Test>(); });
+      RegisterTestInvocation(Test::Categorization(),
+                             [] { type::template Invocation<Test>(); });
     }
   });
 }
@@ -79,7 +87,7 @@ void RegisterInvocationsMatching(nth::Sequence auto seq) {
         RegisterTokenUse;                                                      \
   };                                                                           \
   inline nth::RegistrationToken const test_name::registration_token = [] {     \
-    ::nth::RegisterTestInvocation(&test_name::InvokeTest);                     \
+    ::nth::RegisterTestInvocation(categorization(), &test_name::InvokeTest);   \
   };                                                                           \
   void test_name::InvokeTest()
 

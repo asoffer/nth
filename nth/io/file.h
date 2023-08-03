@@ -2,8 +2,11 @@
 #define NTH_IO_FILE_H
 
 #include <cstdio>
+#include <optional>
 #include <span>
 #include <utility>
+
+#include "nth/io/file_path.h"
 
 namespace nth {
 
@@ -26,6 +29,10 @@ struct file {
   // Destroys the file. The member function `close` must already have been
   // invoked on `*this`.
   ~file();
+
+  // Attempts to open the file as read-only, returns a valid `file` if opening
+  // succeeds. Otherwise returns `std::nullopt`.
+  static std::optional<file> read_only(file_path const& path);
 
   // Returns the file position indicator.
   size_t tell() const;

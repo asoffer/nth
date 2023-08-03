@@ -7,17 +7,18 @@ namespace nth {
 namespace {
 
 auto& TestInvocationRegsistry() {
-  static auto& invocations = *new std::vector<std::function<void()>>;
+  static auto& invocations = *new std::vector<TestInvocation>;
   return invocations;
 }
 
 }  // namespace
 
-void RegisterTestInvocation(std::function<void()> test) {
+void RegisterTestInvocation(std::string_view categorization,
+                            std::function<void()> test) {
   static std::vector<std::function<void()>> invocations;
-  TestInvocationRegsistry().push_back(std::move(test));
+  TestInvocationRegsistry().emplace_back(categorization, std::move(test));
 }
-std::span<std::function<void()> const> RegisteredTests() {
+std::span<TestInvocation> RegisteredTests() {
   return TestInvocationRegsistry();
 }
 
