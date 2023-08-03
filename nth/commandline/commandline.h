@@ -86,6 +86,13 @@ struct FlagValueSet {
   std::vector<Flag::Value> values_;
 };
 
+template <typename T, typename R>
+requires(requires(std::string_view s, T &t, R r) {
+  { NthCommandlineParse(s, t, r) } -> std::same_as<bool>;
+}) bool ParseCommandlineArgument(std::string_view s, T &t, R r) {
+  return NthCommandlineParse(s, t, r);
+}
+
 struct Executor {
  private:
   struct ParseErrorReporter {
@@ -114,7 +121,8 @@ struct Executor {
           return std::apply(
               [&, i = size_t{0}](auto &...ts) mutable -> exit_code {
                 std::array<bool, sizeof...(Ts)> parses = {
-                    NthCommandlineParse(arguments[i++], ts, reporter)...};
+                    nth::ParseCommandlineArgument(arguments[i++], ts,
+                                                  reporter)...};
                 if (std::all_of(parses.begin(), parses.end(),
                                 [](bool b) { return b; })) {
                   return f(std::move(flags), ts...);
@@ -136,7 +144,8 @@ struct Executor {
           return std::apply(
               [&, i = size_t{0}](auto &...ts) mutable -> exit_code {
                 std::array<bool, sizeof...(Ts)> parses = {
-                    NthCommandlineParse(arguments[i++], ts, reporter)...};
+                    nth::ParseCommandlineArgument(arguments[i++], ts,
+                                                  reporter)...};
                 if (std::all_of(parses.begin(), parses.end(),
                                 [](bool b) { return b; })) {
                   return f(std::move(flags), ts...,

@@ -1,6 +1,7 @@
 #include "nth/commandline/internal/parse.h"
 
 #include "nth/commandline/commandline.h"
+#include "nth/commandline/internal/rock_paper_scissors.h"
 #include "nth/test/test.h"
 
 nth::Usage const nth::program_usage = {.description = ""};
@@ -161,6 +162,9 @@ NTH_TEST("commandline/layered") {
   NTH_EXPECT(not state.ParseFlag(0, "-f="));
   NTH_EXPECT(not state.ParseFlag(0, "-f=x"));
   NTH_EXPECT(not state.ParseFlag(0, "-f=-f"));
+}
+
+NTH_TEST("parse-commandline-argument") {
 }
 
 }  // namespace

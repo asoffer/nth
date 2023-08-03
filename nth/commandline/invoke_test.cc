@@ -1,6 +1,7 @@
 #include "nth/commandline/internal/invoke.h"
 
 #include "nth/commandline/commandline.h"
+#include "nth/commandline/internal/rock_paper_scissors.h"
 #include "nth/test/test.h"
 
 nth::Usage const nth::program_usage = {.description = ""};
@@ -302,25 +303,6 @@ NTH_TEST("commandline/nested-flags") {
   NTH_EXPECT(InvokeCommandline(usage, arguments) == exit_code::success);
   NTH_EXPECT(calls ==
              std::vector<std::vector<std::string_view>>{{"arguments"}});
-}
-
-enum class Throw { Rock, Paper, Scissors };
-template <typename ParserErrorReporter>
-bool NthCommandlineParse(std::string_view s, Throw &t,
-                         ParserErrorReporter reporter) {
-  if (s == "rock") {
-    t = Throw::Rock;
-    return true;
-  } else if (s == "paper") {
-    t = Throw::Paper;
-    return true;
-  } else if (s == "scissors") {
-    t = Throw::Scissors;
-    return true;
-  } else {
-    reporter("Argument must be one of 'rock', 'paper', or 'scissors'.");
-    return false;
-  }
 }
 
 NTH_TEST("commandline/parsing") {
