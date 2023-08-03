@@ -63,7 +63,7 @@ void RegisterInvocationsMatching(nth::Sequence auto seq) {
     using type = nth::type_t<t>;
     if constexpr (nth::GlobMatches(type::categorization(),
                                    Test::categorization())) {
-      RegisterTestInvocation(Test::Categorization(),
+      RegisterTestInvocation(Test::categorization(),
                              [] { type::template Invocation<Test>(); });
     }
   });
