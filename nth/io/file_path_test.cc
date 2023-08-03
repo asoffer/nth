@@ -46,4 +46,8 @@ NTH_TEST("file_path/canonicalization") {
   NTH_EXPECT(file_path::try_construct("a//..") == std::nullopt);
 }
 
+NTH_TEST("file_path/c-string") {
+  NTH_EXPECT(file_path::try_construct("a/b/c")->c_str() ==
+             std::string_view("a/b/c"));
+}
 }  // namespace nth
