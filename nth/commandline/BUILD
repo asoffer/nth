@@ -5,6 +5,8 @@ cc_library(
     hdrs = ["commandline.h"],
     srcs = [
         "commandline.cc",
+        "internal/invoke.h",
+        "internal/invoke.cc",
         "internal/parse.h",
         "internal/parse.cc",
     ],
@@ -16,6 +18,15 @@ cc_library(
         "//nth/process:exit_code",
         "//nth/strings:text",
         "//nth/utility:required",
+    ],
+)
+
+cc_test(
+    name = "invoke_test",
+    srcs = ["invoke_test.cc"],
+    deps = [
+        ":commandline",
+        "//nth/test:main",
     ],
 )
 

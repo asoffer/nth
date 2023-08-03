@@ -9,7 +9,7 @@ namespace nth {
 
 struct exit_code {
   // Declarations of static constant members defining exist codes, such as
-  // `exit_code::success`, or `exit_code::generic_failure`. See the xmacro file
+  // `exit_code::success`, or `exit_code::generic_error`. See the xmacro file
   // for a complete list of declared exit codes.
 #define NTH_INTERNAL_XMACRO_EXIT_CODE(name, value) static exit_code const name;
 #include "nth/process/exit_code.xmacro.h"
@@ -25,6 +25,9 @@ struct exit_code {
 
   // Returns the numeric value associated with the given exit code.
   constexpr uint8_t code() const { return code_; }
+
+  friend bool operator==(exit_code, exit_code) = default;
+  friend bool operator!=(exit_code, exit_code) = default;
 
  private:
   constexpr exit_code(uint8_t n) : code_(n) {}

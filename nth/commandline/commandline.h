@@ -1,14 +1,18 @@
 #ifndef NTH_COMMANDLINE_COMMANDLINE_H
 #define NTH_COMMANDLINE_COMMANDLINE_H
 
+#include <algorithm>
+#include <functional>
 #include <optional>
 #include <span>
 #include <string>
 #include <string_view>
+#include <tuple>
 #include <utility>
 #include <vector>
 
 #include "nth/base/attributes.h"
+#include "nth/debug/log/log.h"
 #include "nth/io/printer.h"
 #include "nth/process/exit_code.h"
 #include "nth/strings/text.h"
@@ -82,9 +86,83 @@ struct FlagValueSet {
   std::vector<Flag::Value> values_;
 };
 
+struct Executor {
+ private:
+  struct ParseErrorReporter {
+    void operator()(std::string_view message) {
+      NTH_LOG((v.always), "{}") <<= {message};
+    }
+  };
+
+ public:
+  Executor() : exec_(nullptr) {}
+
+  template <typename... Ts>
+  Executor(exit_code (*f)(FlagValueSet, Ts...))
+      : exec_([f](FlagValueSet flags,
+                  std::span<std::string_view const> arguments) -> exit_code {
+          if (arguments.size() != sizeof...(Ts)) {
+            NTH_LOG(
+                "Expected exactly {} commandline arguments, but {} were "
+                "provided.") <<= {sizeof...(Ts), arguments.size()};
+            return exit_code::usage;
+          }
+
+          ParseErrorReporter reporter;
+
+          std::tuple<std::decay_t<Ts>...> ts;
+          return std::apply(
+              [&, i = size_t{0}](auto &...ts) mutable -> exit_code {
+                std::array<bool, sizeof...(Ts)> parses = {
+                    NthCommandlineParse(arguments[i++], ts, reporter)...};
+                if (std::all_of(parses.begin(), parses.end(),
+                                [](bool b) { return b; })) {
+                  return f(std::move(flags), ts...);
+                } else {
+                  return exit_code::usage;
+                }
+              },
+              ts);
+        }) {}
+
+  template <typename... Ts>
+  Executor(exit_code (*f)(FlagValueSet, Ts...,
+                          std::span<std::string_view const>))
+      : exec_([f](FlagValueSet flags,
+                  std::span<std::string_view const> arguments) -> exit_code {
+          ParseErrorReporter reporter;
+
+          std::tuple<std::decay_t<Ts>...> ts;
+          return std::apply(
+              [&, i = size_t{0}](auto &...ts) mutable -> exit_code {
+                std::array<bool, sizeof...(Ts)> parses = {
+                    NthCommandlineParse(arguments[i++], ts, reporter)...};
+                if (std::all_of(parses.begin(), parses.end(),
+                                [](bool b) { return b; })) {
+                  return f(std::move(flags), ts...,
+                           arguments.subspan(sizeof...(Ts)));
+                } else {
+                  return exit_code::usage;
+                }
+              },
+              ts);
+        }) {}
+
+  explicit operator bool() const { return static_cast<bool>(exec_); }
+
+  exit_code operator()(FlagValueSet flags,
+                       std::span<std::string_view const> arguments) {
+    return exec_(std::move(flags), arguments);
+  }
+
+ private:
+  std::function<exit_code(FlagValueSet, std::span<std::string_view const>)>
+      exec_;
+};
+
 struct Command {
   // The name of the command being executed
-  std::string name        = required;
+  std::string name = required;
 
   // A description of the command.
   std::string description = required;
@@ -99,8 +177,7 @@ struct Command {
 
   // The function to execute if this command is selected. If no function is
   // provided, then all subcommands must be executable.
-  exit_code (*execute)(FlagValueSet,
-                       std::span<std::string_view const>) = nullptr;
+  Executor execute;
 };
 
 struct Usage {
@@ -119,8 +196,7 @@ struct Usage {
 
   // The function to execute. If no function is provided, then all commands must
   // be executable.
-  exit_code (*execute)(FlagValueSet,
-                       std::span<std::string_view const>) = nullptr;
+  Executor execute;
 };
 
 // A command which displays information about how to use the program.

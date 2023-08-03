@@ -2,89 +2,14 @@
 
 #include <algorithm>
 
+#include "nth/commandline/internal/invoke.h"
 #include "nth/commandline/internal/parse.h"
 #include "nth/debug/debug.h"
-#include "nth/debug/log/log.h"
 #include "nth/io/file_printer.h"
 
 namespace nth {
 namespace internal_commandline {
 namespace {
-
-thread_local Usage const *current_usage;
-
-exit_code InvokeCommandline(
-    std::span<Command const> commands,
-    exit_code (*exec)(FlagValueSet, std::span<std::string_view const>),
-    std::vector<std::vector<Flag> const *> &valid_flags,
-    std::span<std::string_view const> arguments) {
-  FlagParsingState state(valid_flags);
-  std::vector<std::string_view> positional_arguments;
-
-  // A parsing error has already occurred.
-  bool ok = true;
-
-  size_t position = 0;
-  while (true) {
-    struct Incrementer {
-      Incrementer(size_t &p) : p_(p) {}
-      ~Incrementer() { ++p_; }
-
-     private:
-      size_t &p_;
-    } increment_position{position};
-
-    if (arguments.empty()) {
-      if (not exec) {
-        NTH_LOG((v.always), "No arguments provided.");
-        return exit_code::usage;
-      } else {
-        return exec(std::move(state).flags(), arguments);
-      }
-    }
-
-    if (arguments[0].empty()) {
-      arguments = arguments.subspan(1);
-      continue;
-    }
-
-    std::string_view argument = arguments[0];
-    if (argument[0] == '-') {
-      ok &= state.ParseFlag(position, argument);
-      arguments = arguments.subspan(1);
-      continue;
-    }
-
-    auto iter =
-        std::find_if(commands.begin(), commands.end(),
-                     [&](auto const &cmd) { return cmd.name == arguments[0]; });
-    if (iter == commands.end()) {
-      positional_arguments.push_back(argument);
-      arguments = arguments.subspan(1);
-      for (std::string_view argument : arguments) {
-        ++position;
-        if (argument[0] == '-') {
-          ok &= state.ParseFlag(position, argument);
-        } else {
-          positional_arguments.push_back(argument);
-        }
-      }
-
-      if (exec) {
-        if (not ok) { return exit_code::usage; }
-        return exec(std::move(state).flags(), arguments);
-      } else {
-        NTH_LOG((v.always), "Invalid command.");
-        return exit_code::usage;
-      }
-    }
-
-    commands  = iter->subcommands;
-    exec      = iter->execute;
-    arguments = arguments.subspan(1);
-    valid_flags.push_back(&iter->flags);
-  }
-}
 
 void WriteHelpMessage(Usage const &usage, nth::Printer auto &p) {
   p.write(usage.description);
@@ -124,6 +49,9 @@ struct FlagComparator {
 constexpr FlagComparator compare_flag_values;
 
 }  // namespace
+
+extern thread_local Usage const *current_usage;
+
 }  // namespace internal_commandline
 
 void FlagValueSet::insert(Flag::Value const &v) {
@@ -144,7 +72,7 @@ std::optional<std::string_view> FlagValueSet::get_impl(
 Command HelpCommand() {
   return {.name        = "help",
           .description = "Prints a program usage information to the terminal.",
-          .execute     = [](FlagValueSet, std::span<std::string_view const>) {
+          .execute     = +[](FlagValueSet, std::span<std::string_view const>) {
             internal_commandline::WriteHelpMessage(
                     *internal_commandline::current_usage, nth::stderr_printer);
             return exit_code::success;
@@ -152,12 +80,7 @@ Command HelpCommand() {
 }
 
 exit_code InvokeCommandline(std::span<std::string_view const> arguments) {
-  std::vector<std::vector<Flag> const *> valid_flags;
-  valid_flags.push_back(&program_usage.flags);
-  internal_commandline::current_usage = &program_usage;
-  return internal_commandline::InvokeCommandline(
-      program_usage.commands, program_usage.execute, valid_flags,
-      arguments.subspan(1));
+  return internal_commandline::InvokeCommandline(program_usage, arguments);
 }
 
 }  // namespace nth
