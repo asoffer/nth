@@ -18,8 +18,8 @@ struct FlagParsingState {
   bool ParseFlag(size_t position, std::string_view argument);
 
  private:
-  Flag::Name const *find(char c);
-  Flag::Name const *find(std::string_view name);
+  Flag const *find(char c);
+  Flag const *find(std::string_view name);
 
   bool parse(char short_flag);
   bool parse(size_t position, std::string_view argument);

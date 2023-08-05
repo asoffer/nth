@@ -39,11 +39,11 @@ void WriteHelpMessage(Usage const &usage, nth::Printer auto &p) {
 
 struct FlagComparator {
   bool operator()(Flag::Value const &lhs, std::string_view rhs) const {
-    return lhs.full_name() < rhs;
+    return lhs.flag().name.full_name() < rhs;
   }
 
   bool operator()(Flag::Value const &lhs, Flag::Value const &rhs) const {
-    return lhs.full_name() < rhs.full_name();
+    return lhs.flag().name.full_name() < rhs.flag().name.full_name();
   }
 }; 
 constexpr FlagComparator compare_flag_values;
@@ -60,13 +60,12 @@ void FlagValueSet::insert(Flag::Value const &v) {
   values_.insert(iter, v);
 }
 
-std::optional<std::string_view> FlagValueSet::get_impl(
-    std::string_view name) const {
+Flag::Value const *FlagValueSet::get_impl(std::string_view name) const {
   auto iter = std::lower_bound(values_.begin(), values_.end(), name,
                                internal_commandline::compare_flag_values);
-  NTH_ASSERT(iter != values_.end());
-  NTH_ASSERT(iter->full_name() == name);
-  return iter->value();
+  if (iter == values_.end()) { return nullptr; }
+  NTH_ASSERT(iter->flag().name.full_name() == name);
+  return &*iter;
 }
 
 Command HelpCommand() {

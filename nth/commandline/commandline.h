@@ -2,23 +2,31 @@
 #define NTH_COMMANDLINE_COMMANDLINE_H
 
 #include <algorithm>
+#include <any>
+#include <charconv>
 #include <functional>
 #include <optional>
 #include <span>
 #include <string>
 #include <string_view>
+#include <system_error>
 #include <tuple>
 #include <utility>
 #include <vector>
 
 #include "nth/base/attributes.h"
 #include "nth/debug/log/log.h"
+#include "nth/debug/trace/trace.h"
 #include "nth/io/printer.h"
+#include "nth/meta/type.h"
 #include "nth/process/exit_code.h"
 #include "nth/strings/text.h"
 #include "nth/utility/required.h"
 
 namespace nth {
+namespace internal_commandline {
+struct FlagParsingState;
+}  // namespace internal_commandline
 
 // Represents a flag passed on the commandline. A flag must have a "full name"
 // so that it can be speficied with two leading dashes. For example, if a flag's
@@ -54,21 +62,49 @@ struct Flag {
 
   // Represents the value bound to a flag.
   struct Value {
-    Value(NTH_ATTRIBUTE(lifetimebound) Name const &name)
-        : name_(&name), value_(std::nullopt) {}
-    Value(NTH_ATTRIBUTE(lifetimebound) Name const &name, std::string_view value)
-        : name_(&name), value_(value) {}
+    Value(NTH_ATTRIBUTE(lifetimebound) Flag const &flag) : flag_(&flag) {}
+    Value(NTH_ATTRIBUTE(lifetimebound) Flag const &flag, std::string_view value)
+        : flag_(&flag) {
+      flag_->type.store(value, value_);
+    }
 
-    std::string_view full_name() const { return name_->full_name(); }
-    std::optional<char> short_name() const { return name_->short_name(); }
-    std::optional<std::string_view> value() const { return value_; }
+    Flag const &flag() const { return *flag_; }
+
+    template <typename T>
+    T const *value() const {
+      return std::any_cast<T>(value_);
+    }
 
    private:
-    Flag::Name const *name_;
-    std::optional<std::string_view> value_;
+    friend struct FlagValueSet;
+
+    Flag const *flag_;
+    std::any value_;
+  };
+
+  struct Type {
+    Type(nth::Type auto t) requires(t != nth::type<void>);
+    Type(nth::Type auto t) requires(t == nth::type<void>);
+
+    bool store(std::string_view s, std::any &a) const {
+      if (type_ == nth::type<void>) {
+        NTH_LOG((v.always),
+                "Attempting to store a value in a flag that does not have a "
+                "value.");
+        return false;
+      }
+      return store_(s, a);
+    }
+
+   private:
+    friend struct FlagValueSet;
+    friend internal_commandline::FlagParsingState;
+    TypeId type_;
+    std::function<bool(std::string_view, std::any &)> store_;
   };
 
   Name name               = required;
+  Type type               = nth::type<void>;
   std::string description = required;
 };
 
@@ -76,13 +112,23 @@ struct Flag {
 struct FlagValueSet {
   void insert(Flag::Value const &v);
 
+  // Returns a pointer to an object of type `T` passed in with the flag whose
+  // full name is `name`, or a null pointer if the flag was not provided on the
+  // commandline. If the type `T` does not match the type specified for the
+  // flag, program execution will be aborted.
   template <typename T>
-  requires(std::is_same_v<T, std::string_view>) std::optional<T> get(
-      std::string_view name)
-  const { return get_impl(name); }
+  T const *get(std::string_view name) const {
+    auto *f = get_impl(name);
+    if (not f) { return nullptr; }
+    NTH_ASSERT((v.always),
+               f->flag().type.type_ == nth::type<std::remove_cvref_t<T>>);
+    return std::addressof(
+        std::any_cast<std::remove_cvref_t<T> const &>(f->value_));
+  }
 
  private:
-  std::optional<std::string_view> get_impl(std::string_view name) const;
+  Flag::Value const *get_impl(std::string_view name) const;
+
   std::vector<Flag::Value> values_;
 };
 
@@ -93,8 +139,42 @@ requires(requires(std::string_view s, T &t, R r) {
   return NthCommandlineParse(s, t, r);
 }
 
+template <typename R>
+bool NthCommandlineParse(std::string_view s, std::integral auto &n, R r) {
+  auto [ptr, ec] = std::from_chars(s.begin(), s.end(), n);
+  if (ptr != s.end()) {
+    r("Failed to parse entirety of flag.");
+    return false;
+  } else if (ec != std::errc{}) {
+    r("Failed to parse.");
+    return false;
+  }
+
+  return true;
+}
+
+bool NthCommandlineParse(std::string_view s, std::string &out, auto) {
+  out = s;
+  return true;
+}
+
+template <typename R>
+bool NthCommandlineParse(std::string_view s, bool &b, R r) {
+  if (s == "true") {
+    b = true;
+    return true;
+  } else if (s == "false") {
+    b = false;
+    return true;
+  } else {
+    r("Failed to parse bool.");
+    return false;
+  }
+}
+
 struct Executor {
  private:
+  friend Flag::Type;
   struct ParseErrorReporter {
     void operator()(std::string_view message) {
       NTH_LOG((v.always), "{}") <<= {message};
@@ -219,6 +299,21 @@ extern Usage const program_usage;
 // parsing succeeds, the corresponding `execute` functions is invoked and its
 // returned `exit_code` is returned. Otherwise `exit_code::usage` is returned.
 exit_code InvokeCommandline(std::span<std::string_view const> arguments);
+
+Flag::Type::Type(nth::Type auto t) requires(t != nth::type<void>)
+    : type_(t), store_([&](std::string_view s, std::any &a) {
+        nth::type_t<t> object;
+        Executor::ParseErrorReporter r;
+        if (nth::ParseCommandlineArgument(s, object, r)) {
+          a = std::move(object);
+          return true;
+        } else {
+          NTH_LOG((v.always), "Failed to parse flag with value \"{}\"") <<= {s};
+          return false;
+        }
+      }) {}
+
+Flag::Type::Type(nth::Type auto t) requires(t == nth::type<void>) : type_(t) {}
 
 }  // namespace nth
 

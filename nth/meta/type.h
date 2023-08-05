@@ -65,41 +65,41 @@ struct Type {
   }
 
   template <template <typename...> typename P>
-  constexpr static bool is_a() {
+  static constexpr bool is_a() {
     return IsAImpl<T, P>::value;
   }
 
   constexpr operator TypeId() const {
-    return TypeId(+[] { return std::string_view(name()); });
+    return TypeId(+[] { return std::string_view(Name); });
   }
 
-  constexpr static Type<std::decay_t<T>> decayed() { return {}; }
+  static constexpr Type<std::decay_t<T>> decayed() { return {}; }
 
-  constexpr static Type<std::remove_reference_t<T>> without_reference() {
+  static constexpr Type<std::remove_reference_t<T>> without_reference() {
     return {};
   }
 
-  constexpr static Type<std::remove_const_t<T>> without_const() { return {}; }
-  constexpr static Type<std::remove_volatile_t<T>> without_volatile() {
+  static constexpr Type<std::remove_const_t<T>> without_const() { return {}; }
+  static constexpr Type<std::remove_volatile_t<T>> without_volatile() {
     return {};
   }
 
-  constexpr static size_t size() { return sizeof(T); }
-  constexpr static size_t alignment() { return alignof(T); }
+  static constexpr size_t size() { return sizeof(T); }
+  static constexpr size_t alignment() { return alignof(T); }
 
-  constexpr static auto return_type() requires(std::is_function_v<T>) {
+  static constexpr auto return_type() requires(std::is_function_v<T>) {
     return internal_type::FunctionSignature<T>::return_type;
   };
 
-  constexpr static auto parameters() requires(std::is_function_v<T>) {
+  static constexpr auto parameters() requires(std::is_function_v<T>) {
     return internal_type::FunctionSignature<T>::parameters;
   };
 
-  constexpr static auto dependent(auto&& value) {
+  static constexpr auto dependent(auto&& value) {
     return std::forward<decltype(value)>(value);
   }
 
-  constexpr static auto name() {
+  static consteval auto name() {
     constexpr std::string_view indicator = "[T = ";
     constexpr CompileTimeString str(__PRETTY_FUNCTION__);
     constexpr size_t index =
@@ -115,6 +115,9 @@ struct Type {
   friend std::ostream& operator<<(std::ostream& os, Type) {
     return os << std::string_view(name());
   }
+
+  private:
+   static constexpr auto Name = Type::name();
 };
 
 template <typename T>

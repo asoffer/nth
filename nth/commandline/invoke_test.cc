@@ -22,24 +22,24 @@ NTH_TEST("commandline/no-flags-or-arguments") {
 
   std::vector<std::string_view> arguments;
 
-  count = 0;
+  count     = 0;
   arguments = {"program"};
   NTH_EXPECT(InvokeCommandline(usage, arguments) == exit_code::success);
   NTH_EXPECT(count == 1);
 
-  count = 0;
+  count     = 0;
   arguments = {"program", "more", "arguments"};
-  NTH_EXPECT(InvokeCommandline(usage, arguments) != exit_code::success);
+  NTH_EXPECT(InvokeCommandline(usage, arguments) == exit_code::usage);
   NTH_EXPECT(count == 0);
 
-  count = 0;
+  count     = 0;
   arguments = {"program", "-f", "--flags", "arguments"};
-  NTH_EXPECT(InvokeCommandline(usage, arguments) != exit_code::success);
+  NTH_EXPECT(InvokeCommandline(usage, arguments) == exit_code::usage);
   NTH_EXPECT(count == 0);
 
-  count = 0;
+  count     = 0;
   arguments = {"program", "-f", "--flags"};
-  NTH_EXPECT(InvokeCommandline(usage, arguments) != exit_code::success);
+  NTH_EXPECT(InvokeCommandline(usage, arguments) == exit_code::usage);
   NTH_EXPECT(count == 0);
 }
 
@@ -74,12 +74,12 @@ NTH_TEST("commandline/flags-without-arguments") {
 
   count     = 0;
   arguments = {"program", "more", "arguments"};
-  NTH_EXPECT(InvokeCommandline(usage, arguments) != exit_code::success);
+  NTH_EXPECT(InvokeCommandline(usage, arguments) == exit_code::usage);
   NTH_EXPECT(count == 0);
 
   count     = 0;
   arguments = {"program", "-f", "--flags", "arguments"};
-  NTH_EXPECT(InvokeCommandline(usage, arguments) != exit_code::success);
+  NTH_EXPECT(InvokeCommandline(usage, arguments) == exit_code::usage);
   NTH_EXPECT(count == 0);
 
   count     = 0;
@@ -393,6 +393,48 @@ NTH_TEST("commandline/parsing-multiple-arguments") {
   arguments = {"program", "throw", "rock", "paper"};
   NTH_EXPECT(InvokeCommandline(usage, arguments) == exit_code::success);
   NTH_EXPECT(throws == std::vector{std::pair{Throw::Rock, Throw::Paper}});
+}
+
+NTH_TEST("commandline/typed-flags") {
+  static std::vector<std::optional<int>> v;
+  nth::Usage usage{
+      .description = "description",
+      .flags =
+          {
+              {
+                  .name        = {"number", 'n'},
+                  .type        = nth::type<int>,
+                  .description = "",
+              },
+          },
+      .execute =
+          +[](FlagValueSet flags) {
+            auto* p = flags.get<int>("number");
+            if (p) {
+              v.push_back(*p);
+            } else {
+              v.push_back(std::nullopt);
+            }
+            return exit_code::success;
+          },
+  };
+
+  std::vector<std::string_view> arguments;
+
+  v.clear();
+  arguments = {"program", "--number=3"};
+  NTH_EXPECT(InvokeCommandline(usage, arguments) == exit_code::success);
+  NTH_EXPECT(v == std::vector<std::optional<int>>{3});
+
+  v.clear();
+  arguments = {"program", "--number"};
+  NTH_EXPECT(InvokeCommandline(usage, arguments) != exit_code::success);
+  NTH_EXPECT(v == std::vector<std::optional<int>>{});
+
+  v.clear();
+  arguments = {"program"};
+  NTH_EXPECT(InvokeCommandline(usage, arguments) == exit_code::success);
+  NTH_EXPECT(v == std::vector<std::optional<int>>{std::nullopt});
 }
 
 }  // namespace

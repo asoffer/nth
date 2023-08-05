@@ -4,29 +4,34 @@
 
 namespace nth::internal_commandline {
 
-Flag::Name const *FlagParsingState::find(char c) {
+Flag const *FlagParsingState::find(char c) {
   for (auto iter = valid_flags_.rbegin(); iter != valid_flags_.rend(); ++iter) {
     auto &v = **iter;
     for (Flag const &f : v) {
-      if (f.name.short_name() == c) { return &f.name; }
+      if (f.name.short_name() == c) { return &f; }
     }
   }
   return nullptr;
 }
 
-Flag::Name const *FlagParsingState::find(std::string_view name) {
+Flag const *FlagParsingState::find(std::string_view name) {
   for (auto iter = valid_flags_.rbegin(); iter != valid_flags_.rend(); ++iter) {
     auto &v = **iter;
     for (Flag const &f : v) {
-      if (f.name.full_name() == name) { return &f.name; }
+      if (f.name.full_name() == name) { return &f; }
     }
   }
   return nullptr;
 }
 
 bool FlagParsingState::parse(char short_flag) {
-  if (Flag::Name const *name = find(short_flag)) {
-    flags_.insert(Flag::Value(*name));
+  if (Flag const *flag = find(short_flag)) {
+    if (flag->type.type_ != nth::type<void>) {
+      NTH_LOG((v.always), "'-{}' accepts and argument of type '{}'.") <<=
+          {short_flag, flag->type.type_};
+      return false;
+    }
+    flags_.insert(Flag::Value(*flag));
     return true;
   } else {
     NTH_LOG((v.always), "'-{}' is not valid flag.") <<= {short_flag};
@@ -36,8 +41,14 @@ bool FlagParsingState::parse(char short_flag) {
 
 bool FlagParsingState::parse(size_t position, std::string_view argument) {
   if (size_t eq_pos = argument.find('='); eq_pos == std::string_view::npos) {
-    if (Flag::Name const *name = find(argument)) {
-      flags_.insert(Flag::Value(*name));
+    if (Flag const *flag = find(argument)) {
+      if (flag->type.type_ != nth::type<void>) {
+        NTH_LOG((v.always), "'--{}' accepts and argument of type '{}'.") <<=
+            {argument, flag->type.type_};
+
+        return false;
+      }
+      flags_.insert(Flag::Value(*flag));
     } else {
       NTH_LOG((v.always), "'--{}' is not valid flag name.") <<= {argument};
       return false;
@@ -52,8 +63,8 @@ bool FlagParsingState::parse(size_t position, std::string_view argument) {
     } else {
       std::string_view argument_name  = argument.substr(0, eq_pos);
       std::string_view argument_value = argument.substr(eq_pos + 1);
-      if (Flag::Name const *name = find(argument_name)) {
-        flags_.insert(Flag::Value(*name, argument_value));
+      if (Flag const *flag = find(argument_name)) {
+        flags_.insert(Flag::Value(*flag, argument_value));
       } else {
         NTH_LOG((v.always), "'--{}' is not valid flag name.") <<=
             {argument_name};
@@ -96,12 +107,12 @@ bool FlagParsingState::ParseFlag(size_t position, std::string_view argument) {
           return ok;
         } else {
           if (eq_pos == 2) {
-            if (auto const *arg = find(argument[1])) {
+            if (Flag const *arg = find(argument[1])) {
               NTH_LOG((v.always),
                       "Argument '{}' found at position {} is not valid. Short "
                       "arguments may not be assigned values. Use the full name "
                       "(--{}) if this is intended.") <<=
-                  {argument, position, arg->full_name()};
+                  {argument, position, arg->name.full_name()};
             } else {
               NTH_LOG((v.always),
                       "Argument '{}' found at position {} is not valid. Short "
