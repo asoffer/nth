@@ -437,5 +437,86 @@ NTH_TEST("commandline/typed-flags") {
   NTH_EXPECT(v == std::vector<std::optional<int>>{std::nullopt});
 }
 
+NTH_TEST("commandline/typed-flags-type-change") {
+  static std::vector<std::optional<int>> is;
+  static std::vector<std::optional<bool>> bs;
+  nth::Usage usage{
+      .description = "description",
+      .commands =
+          {
+              {
+                  .name        = "run",
+                  .description = "",
+                  .flags =
+                      {
+                          {
+                              .name        = {"value"},
+                              .type        = nth::type<bool>,
+                              .description = "",
+                          },
+                      },
+                  .execute =
+                      +[](FlagValueSet flags) {
+                        auto* p = flags.get<bool>("value");
+                        if (p) {
+                          bs.push_back(*p);
+                        } else {
+                          bs.push_back(std::nullopt);
+                        }
+                        return exit_code::success;
+                      },
+              },
+          },
+      .flags =
+          {
+              {
+                  .name        = {"value"},
+                  .type        = nth::type<int>,
+                  .description = "",
+              },
+          },
+      .execute =
+          +[](FlagValueSet flags) {
+            auto* p = flags.get<int>("value");
+            if (p) {
+              is.push_back(*p);
+            } else {
+              is.push_back(std::nullopt);
+            }
+            return exit_code::success;
+          },
+  };
+
+  std::vector<std::string_view> arguments;
+
+  is.clear();
+  bs.clear();
+  arguments = {"program", "--value=3"};
+  NTH_EXPECT(InvokeCommandline(usage, arguments) == exit_code::success);
+  NTH_EXPECT(is == std::vector<std::optional<int>>{3});
+  NTH_EXPECT(bs == std::vector<std::optional<bool>>{});
+
+  is.clear();
+  bs.clear();
+  arguments = {"program", "--value"};
+  NTH_EXPECT(InvokeCommandline(usage, arguments) != exit_code::success);
+  NTH_EXPECT(is == std::vector<std::optional<int>>{});
+  NTH_EXPECT(bs == std::vector<std::optional<bool>>{});
+
+  is.clear();
+  bs.clear();
+  arguments = {"program", "run", "--value=true"};
+  NTH_EXPECT(InvokeCommandline(usage, arguments) == exit_code::success);
+  NTH_EXPECT(is == std::vector<std::optional<int>>{});
+  NTH_EXPECT(bs == std::vector<std::optional<bool>>{true});
+
+  is.clear();
+  bs.clear();
+  arguments = {"program", "run", "--value"};
+  NTH_EXPECT(InvokeCommandline(usage, arguments) != exit_code::success);
+  NTH_EXPECT(is == std::vector<std::optional<int>>{});
+  NTH_EXPECT(bs == std::vector<std::optional<bool>>{});
+}
+
 }  // namespace
 }  // namespace nth::internal_commandline
