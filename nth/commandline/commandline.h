@@ -117,13 +117,20 @@ struct FlagValueSet {
   // commandline. If the type `T` does not match the type specified for the
   // flag, program execution will be aborted.
   template <typename T>
-  T const *get(std::string_view name) const {
+  T const *try_get(std::string_view name) const {
     auto *f = get_impl(name);
     if (not f) { return nullptr; }
     NTH_ASSERT((v.always),
                f->flag().type.type_ == nth::type<std::remove_cvref_t<T>>);
     return std::addressof(
         std::any_cast<std::remove_cvref_t<T> const &>(f->value_));
+  }
+
+  template <typename T>
+  T const &get(std::string_view name) const {
+    T const *ptr = try_get<T>(name);
+    NTH_ASSERT((v.always), ptr != nullptr);
+    return *ptr;
   }
 
  private:

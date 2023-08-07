@@ -409,7 +409,7 @@ NTH_TEST("commandline/typed-flags") {
           },
       .execute =
           +[](FlagValueSet flags) {
-            auto* p = flags.get<int>("number");
+            auto* p = flags.try_get<int>("number");
             if (p) {
               v.push_back(*p);
             } else {
@@ -457,7 +457,7 @@ NTH_TEST("commandline/typed-flags-type-change") {
                       },
                   .execute =
                       +[](FlagValueSet flags) {
-                        auto* p = flags.get<bool>("value");
+                        auto* p = flags.try_get<bool>("value");
                         if (p) {
                           bs.push_back(*p);
                         } else {
@@ -477,7 +477,7 @@ NTH_TEST("commandline/typed-flags-type-change") {
           },
       .execute =
           +[](FlagValueSet flags) {
-            auto* p = flags.get<int>("value");
+            auto* p = flags.try_get<int>("value");
             if (p) {
               is.push_back(*p);
             } else {
