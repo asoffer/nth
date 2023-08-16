@@ -10,6 +10,14 @@
 
 namespace nth {
 
+struct file;
+
+namespace internal_file {
+
+file MakeFile(std::FILE* f);
+
+}  // namespace internal_file
+
 // Represents a handle to a file on the underlying operating system.
 struct file {
   // Constructs a file object not associated with any underlying system file.
@@ -42,7 +50,7 @@ struct file {
 
   // Attempts to read up to `std::span(buffer).size()` bytes into `buffer`, and
   // returns a span which is a prefix of `buffer` consisting of the bytes read.
-  [[nodiscard]] auto read_into(auto& buffer) requires(
+  auto read_into(auto& buffer) requires(
       requires { std::span(buffer); } and
       std::is_trivially_copyable_v<
           typename decltype(std::span(buffer))::element_type>) {
@@ -60,6 +68,13 @@ struct file {
   // operation succeeded.
   [[nodiscard]] bool close();
 
+  // A handle to the file representing the standard output stream.
+  static file& out();
+  // A handle to the file representing the standard error stream.
+  static file& err();
+  // A handle to the file representing the standard input stream.
+  static file& in();
+
  private:
   template <typename T>
   [[nodiscard]] auto read_into_impl(std::span<T> buffer) {
@@ -69,6 +84,7 @@ struct file {
   }
 
   friend file TemporaryFile();
+  friend file internal_file::MakeFile(std::FILE* f);
 
   explicit file(std::FILE* f) : file_ptr_(f) {}
 

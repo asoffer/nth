@@ -25,6 +25,7 @@ cc_library(
     deps = [
         ":file_path",
         "//nth/debug/trace",
+        "//nth/utility:no_destructor",
     ],
 )
 

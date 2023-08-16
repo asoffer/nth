@@ -3,8 +3,24 @@
 #include <cstdio>
 
 #include "nth/debug/trace/trace.h"
+#include "nth/utility/no_destructor.h"
 
 namespace nth {
+namespace internal_file {
+namespace {
+
+static NoDestructor<file> std_out(MakeFile(stdout));
+static NoDestructor<file> std_err(MakeFile(stderr));
+static NoDestructor<file> std_in(MakeFile(stdin));
+
+}  // namespace
+
+file MakeFile(std::FILE* f) { return file(f); }
+
+}  // namespace internal_file
+
+file& file::out() { return *internal_file::std_out; }
+file& file::err() { return *internal_file::std_err; }
 
 size_t file::tell() const { return std::ftell(file_ptr_); }
 
