@@ -26,6 +26,15 @@ size_t file::tell() const { return std::ftell(file_ptr_); }
 
 void file::rewind() { std::rewind(file_ptr_); }
 
+size_t file::size() const {
+  std::fpos_t pos;
+  if (std::fgetpos(file_ptr_, &pos) != 0) {}
+  std::fseek(file_ptr_, 0, SEEK_END);
+  size_t result = tell();
+  if (std::fsetpos(file_ptr_, &pos) != 0) {}
+  return result;
+}
+
 bool file::close() {
   if (std::fclose(file_ptr_) == 0) {
     file_ptr_ = nullptr;

@@ -58,6 +58,9 @@ struct file {
     return read_into_impl(std::span<type>(buffer));
   }
 
+  // Returns the size of the file. Requires that the file has a meaningful size.
+  size_t size() const;
+
   // Returns the underlying `std::FILE*`.
   std::FILE* get() { return file_ptr_; }
 
