@@ -103,36 +103,12 @@ inline constexpr nth::ExpectationMatcher ElementsAreSequentially(
     "elements-are (in order)", [](auto const &value, auto const &...elements) {
       using std::begin;
       using std::end;
-      auto &&v    = nth::internal_debug::Evaluate(value);
+      auto &&v    = nth::EvaluateTraced(value);
       auto &&iter = begin(v);
       auto &&e    = end(v);
       return ((iter != e and nth::Matches(elements, *iter++)) and ...) and
              iter == e;
     });
-
-inline constexpr auto operator or(
-    std::derived_from<internal_debug::BoundExpectationMatcherBase> auto l,
-    std::derived_from<internal_debug::BoundExpectationMatcherBase> auto r) {
-  return nth::ExpectationMatcher(
-      "or", [](auto const &value, auto const &l, auto const &r) {
-        return l(value) or r(value);
-      })(l, r);
-}
-
-inline constexpr auto operator and(
-    std::derived_from<internal_debug::BoundExpectationMatcherBase> auto l,
-    std::derived_from<internal_debug::BoundExpectationMatcherBase> auto r) {
-  return nth::ExpectationMatcher(
-      "and", [](auto const &value, auto const &l, auto const &r) {
-        return l(value) and r(value);
-      })(l, r);
-}
-
-inline constexpr auto operator not(
-    std::derived_from<internal_debug::BoundExpectationMatcherBase> auto m) {
-  return nth::ExpectationMatcher(
-      "not", [](auto const &value, auto const &m) { return not m(value); })(m);
-}
 
 }  // namespace nth
 

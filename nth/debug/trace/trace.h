@@ -119,6 +119,11 @@ concept Traced = ::nth::internal_debug::TracedImpl<T>;
 // `NTH_EXPECT` macro evaluates to `false`. Handlers cannot be un-registered.
 void RegisterExpectationFailure(void (*handler)());
 
+// Returns the value represented by the traced object.
+constexpr decltype(auto) EvaluateTraced(auto const &value) {
+  return ::nth::internal_debug::Evaluate(value);
+}
+
 }  // namespace nth
 
 // The `NTH_EXPECT` macro injects tracing into the wrapped expression and
@@ -183,4 +188,5 @@ void RegisterExpectationFailure(void (*handler)());
     }                                                                          \
     return static_cast<std::remove_reference_t<decltype(NthPtr)> &&>(NthPtr);  \
   })(expr)
+
 #endif  // NTH_DEBUG_TRACE_H

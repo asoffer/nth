@@ -58,9 +58,18 @@ struct BoundExpectationMatcher : private ExpectationMatcher<F>,
 
 template <typename F, typename... Ts>
 auto operator>>=(nth::Traced auto const& value,
+                 ExpectationMatcher<F> const& m) {
+  return m()(value);
+}
+
+template <typename F, typename... Ts>
+auto operator>>=(nth::Traced auto const& value,
                  BoundExpectationMatcher<F, Ts...> const& m) {
   return m(value);
 }
+
+template <typename M>
+concept Matcher = std::derived_from<M, BoundExpectationMatcherBase>;
 
 }  // namespace internal_debug
 
@@ -77,8 +86,35 @@ bool Matches(internal_debug::BoundExpectationMatcher<F, Ts...> const& matcher,
              auto const& value) {
   return matcher(value);
 }
+
+template <typename F>
+bool Matches(ExpectationMatcher<F> const& matcher, auto const& value) {
+  return Matches(matcher(), value);
+}
+
 bool Matches(auto const& match_value, auto const& value) {
   return match_value == value;
+}
+
+inline constexpr auto operator or(internal_debug::Matcher auto l,
+                                  internal_debug::Matcher auto r) {
+  return nth::ExpectationMatcher(
+      "or", [](auto const& value, auto const& l, auto const& r) {
+        return l(value) or r(value);
+      })(l, r);
+}
+
+inline constexpr auto operator and(internal_debug::Matcher auto l,
+                                   internal_debug::Matcher auto r) {
+  return nth::ExpectationMatcher(
+      "and", [](auto const& value, auto const& l, auto const& r) {
+        return l(value) and r(value);
+      })(l, r);
+}
+
+inline constexpr auto operator not(internal_debug::Matcher auto m) {
+  return nth::ExpectationMatcher(
+      "not", [](auto const& value, auto const& m) { return not m(value); })(m);
 }
 
 }  // namespace nth

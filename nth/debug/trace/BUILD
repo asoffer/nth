@@ -8,6 +8,15 @@ cc_library(
     ],
 )
 
+cc_test(
+    name = "matcher_test",
+    srcs = ["matcher_test.cc"],
+    deps = [
+        ":matcher",
+        "//nth/debug/log:stderr_log_sink",
+    ],
+)
+
 cc_library(
     name = "trace",
     hdrs = ["trace.h"],
