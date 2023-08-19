@@ -89,7 +89,7 @@ bool Matches(internal_debug::BoundExpectationMatcher<F, Ts...> const& matcher,
 
 template <typename F>
 bool Matches(ExpectationMatcher<F> const& matcher, auto const& value) {
-  return Matches(matcher(), value);
+  return nth::Matches(matcher(), value);
 }
 
 bool Matches(auto const& match_value, auto const& value) {

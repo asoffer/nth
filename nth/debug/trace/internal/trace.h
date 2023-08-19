@@ -329,6 +329,8 @@ struct Responder {
     set_   = true;
     value_ = b;
     if (not value_) {
+      for (auto f : expectation_failure_handlers) { f(); }
+
       LogEntry log_entry(line_->id(), 1);
 
       constexpr size_t bound = 1024;
