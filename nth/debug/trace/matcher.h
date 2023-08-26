@@ -48,7 +48,9 @@ struct BoundExpectationMatcher : private ExpectationMatcher<F>,
                       arguments_);
   }
 
-  // private:
+ private:
+  friend struct ::nth::ExpectationMatcher<F>;
+
   template <typename... Us>
   constexpr BoundExpectationMatcher(ExpectationMatcher<F> e, Us&&... us)
       : ExpectationMatcher<F>(e), arguments_(std::forward<Us>(us)...) {}

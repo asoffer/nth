@@ -82,8 +82,8 @@ struct universal_formatter {
       (*this)(p, std::put_time(std::localtime(&t), "%F %T"), options_);
     } else if constexpr (type.template is_a<std::variant>()) {
       std::visit([&](auto const &value) { operator()(p, value); }, value);
-    } else if constexpr (requires { NthPrint(p, value); }) {
-      NthPrint(p, value);
+    } else if constexpr (requires { NthPrint(p, *this, value); }) {
+      NthPrint(p, *this, value);
     } else if constexpr (
         std::is_array_v<std::remove_reference_t<decltype(value)>> or
         requires {

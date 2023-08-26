@@ -20,7 +20,7 @@ struct ErasedInterpolationArgument {
           nth::config::default_formatter()(p, *reinterpret_cast<T const*>(t));
         }) {}
 
-  friend void NthPrint(bounded_string_printer& p,
+  friend void NthPrint(bounded_string_printer& p, auto&,
                        ErasedInterpolationArgument e) {
     e.log_(p, e.object_);
   }

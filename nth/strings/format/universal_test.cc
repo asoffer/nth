@@ -80,7 +80,7 @@ TEST(UniversalPrint, Optional) {
 }
 
 struct Thing {
-  friend void NthPrint(Printer auto& p, Thing) { p.write("thing"); }
+  friend void NthPrint(Printer auto& p, auto&, Thing) { p.write("thing"); }
 };
 TEST(UniversalPrint, NthPrint) {
   std::string s;
