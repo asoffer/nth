@@ -1,21 +1,18 @@
+#include <iostream>
 #include "nth/debug/trace/matcher.h"
 
 #include "nth/debug/log/stderr_log_sink.h"
 
-inline constexpr nth::ExpectationMatcher AlwaysTrue("always-true",
-                                                    [](auto const &) {
-                                                      return true;
-                                                    });
-inline constexpr nth::ExpectationMatcher AlwaysFalse("always-false",
-                                                     [](auto const &) {
-                                                       return false;
-                                                     });
+inline constexpr auto AlwaysTrue =
+    nth::ExpectationMatcher<"always-true">([](auto const &) { return true; });
+inline constexpr auto AlwaysFalse =
+    nth::ExpectationMatcher<"always-false">([](auto const &) { return false; });
 
-inline constexpr nth::ExpectationMatcher LessThan(
-    "less-than", [](auto const &value, auto const &x) { return value < x; });
+inline constexpr auto LessThan = nth::ExpectationMatcher<"less-than">(
+    [](auto const &value, auto const &x) { return value < x; });
 
-inline constexpr nth::ExpectationMatcher GreaterThan(
-    "greater-than", [](auto const &value, auto const &x) { return value > x; });
+inline constexpr auto GreaterThan = nth::ExpectationMatcher<"greater-than">(
+    [](auto const &value, auto const &x) { return value > x; });
 
 int main() {
   nth::RegisterLogSink(nth::stderr_log_sink);

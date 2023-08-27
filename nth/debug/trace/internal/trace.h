@@ -9,6 +9,7 @@
 #include "nth/configuration/verbosity.h"
 #include "nth/debug/log/log.h"
 #include "nth/debug/source_location.h"
+#include "nth/debug/trace/internal/matcher_formatter.h"
 #include "nth/io/string_printer.h"
 #include "nth/meta/sequence.h"
 #include "nth/meta/type.h"
@@ -21,6 +22,10 @@ extern std::vector<void (*)()> expectation_failure_handlers;
 }  // namespace nth
 
 namespace nth::internal_debug {
+
+template <typename, typename>
+struct MatcherWrap;
+struct MatcherWrapBase;
 
 struct BoundExpectationMatcherBase {};
 
@@ -38,6 +43,7 @@ struct Identity {
 };
 
 struct TracedTraversal;
+
 template <typename Action, typename... Ts>
 struct Traced;
 
@@ -302,6 +308,36 @@ struct TracedTraversal {
 
 template <std::invocable<> auto PostFn>
 struct Responder {
+  template <typename M, typename V>
+  bool set(char const *, internal_debug::MatcherWrap<M, V> const &w) {
+    set_ = true;
+    value_ = w;
+    if (not value_) {
+      for (auto f : expectation_failure_handlers) { f(); }
+
+      LogEntry log_entry(line_->id(), 1);
+
+      constexpr size_t bound = 1024;
+      bounded_string_printer printer(log_entry.data(), bound);
+
+      TracedTraversal t_traverser(printer);
+      t_traverser(w.v);
+      log_entry.demarcate();
+
+      printer.write("Matcher");
+      log_entry.demarcate();
+
+      auto formatter = nth::config::default_formatter();
+      MatcherFormatter<decltype(formatter)> matcher_formatter(formatter);
+      nth::Interpolate<"{}">(printer, matcher_formatter, w.m);
+      log_entry.demarcate();
+
+      for (auto *sink : RegisteredLogSinks()) { sink->send(*line_, log_entry); }
+    }
+
+    return value_;
+  }
+
   bool set(char const *expression, TracedEvaluatingTo<bool> auto const &b) {
     set_   = true;
     value_ = Evaluate(b);
@@ -313,7 +349,11 @@ struct Responder {
       constexpr size_t bound = 1024;
       bounded_string_printer printer(log_entry.data(), bound);
 
+      printer.write("    ");
       printer.write(expression);
+      log_entry.demarcate();
+
+      printer.write("Tree");
       log_entry.demarcate();
 
       TracedTraversal traverser(printer);
@@ -336,11 +376,15 @@ struct Responder {
       constexpr size_t bound = 1024;
       bounded_string_printer printer(log_entry.data(), bound);
 
+      printer.write("    ");
       printer.write(expression);
       log_entry.demarcate();
 
       TracedTraversal traverser(printer);
       for (auto const *bv : bool_value_stash) { traverser(*bv); }
+      log_entry.demarcate();
+
+      printer.write("Tree");
       log_entry.demarcate();
 
       for (auto *sink : RegisteredLogSinks()) { sink->send(*line_, log_entry); }
@@ -398,12 +442,12 @@ constexpr decltype(auto) operator->*(T const &value, TraceInjector) {
       NTH_DEBUG_INTERNAL_VERBOSITY_DISABLED(verbosity) or                      \
           [&](::nth::source_location NthSourceLocation)                        \
           -> decltype(auto) {                                                  \
-        static ::nth::internal_debug::LogLineWithArity<2> const NthLogLine(    \
+        static ::nth::internal_debug::LogLineWithArity<3> const NthLogLine(    \
             "\033[31;1m" name                                                  \
             " failed.\n"                                                       \
-            "  \033[37;1mExpression:\033[0m {}\n\n"                            \
-            "  \033[37;1mTree:\033[0m\n"                                       \
-            "{}",                                                              \
+            "  \033[37;1mExpression:\033[0m\n{}\n\n"                           \
+            "  \033[37;1m{}:\033[0m\n"                                         \
+            "{}\n",                                                            \
             NthSourceLocation);                                                \
         NthResponder.set_log_line(NthLogLine);                                 \
         return (NthResponder);                                                 \

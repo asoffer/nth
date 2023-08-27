@@ -8,12 +8,25 @@ cc_library(
         "operators.h",
     ],
     deps = [
+        ":matcher_formatter",
         "//nth/base:attributes",
         "//nth/base:macros",
         "//nth/configuration:verbosity",
         "//nth/debug/log",
         "//nth/debug:source_location",
         "//nth/meta:type",
+        "//nth/io:string_printer",
+        "//nth/strings:interpolate",
+    ],
+)
+
+cc_library(
+    name = "matcher_formatter",
+    hdrs = [
+        "matcher_formatter.h",
+    ],
+    deps = [
+        "//nth/configuration:verbosity",
         "//nth/io:string_printer",
         "//nth/strings:interpolate",
     ],

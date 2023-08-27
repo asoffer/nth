@@ -58,11 +58,12 @@ struct LogLine {
 
  protected:
   explicit LogLine(std::string_view interpolation_string,
-                   struct source_location location);
+                   struct source_location location, size_t arity);
 
   std::string_view interpolation_string_;
   struct source_location source_location_;
   size_t id_;
+  size_t arity_;
   LogLine const* next_ = nullptr;
 
   static std::atomic<LogLine const*> head_;
@@ -75,7 +76,7 @@ template <size_t PlaceholderCount>
 struct LogLineWithArity : LogLine {
   explicit LogLineWithArity(std::string_view interpolation_string,
                             struct source_location location)
-      : LogLine(interpolation_string, location) {}
+      : LogLine(interpolation_string, location, PlaceholderCount) {}
 
   Voidifier operator<<=(
       NTH_ATTRIBUTE(lifetimebound)

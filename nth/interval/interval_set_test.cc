@@ -86,6 +86,11 @@ NTH_TEST("IntervalSet/basic/insertion") {
   NTH_EXPECT(set.intervals() >>= ElementsAreSequentially(Interval(0, 70)));
 }
 
+NTH_INVOKE_TEST("IntervalSet/basic/construction/*") {
+  co_yield nth::TestArguments{3, 5};
+  co_yield nth::TestArguments{3.1, 5.1};
+}
+
 NTH_INVOKE_TEST("IntervalSet/basic/*") {
   co_yield nth::TestArguments{3, 5};
   co_yield nth::TestArguments{3.1, 5.1};
