@@ -5,6 +5,28 @@
 
 namespace nth::internal_test {
 
+template <typename T, typename Generator>
+struct Awaitable {
+  Awaitable(Generator &g) : generator_(g) {}
+
+  constexpr bool await_ready() const { return false; }
+
+  void await_resume() const {}
+
+  std::coroutine_handle<typename Generator::promise_type> await_suspend(
+      std::coroutine_handle<> h) {
+    generator_.set_invocable(
+        []<typename... Arguments>(Arguments &&...arguments) {
+          T::InvokeTest(std::forward<Arguments>(arguments)...);
+        });
+    generator_.set_parent(h);
+    return generator_.handle();
+  }
+
+ private:
+  Generator &generator_;
+};
+
 template <typename T>
 struct TestInvocation {
   struct promise_type {
@@ -25,6 +47,11 @@ struct TestInvocation {
         T::InvokeTest(std::forward<Ts>(args)...);
       });
       return {};
+    }
+
+    template <typename Generator>
+    auto await_transform(Generator &&generator) {
+      return Awaitable<T, std::remove_reference_t<Generator>>(generator);
     }
 
     TestInvocation get_return_object() { return {}; }

@@ -20,11 +20,32 @@ cc_test(
 )
 
 cc_library(
+    name = "fuzz",
+    testonly = True,
+    hdrs = ["fuzz.h"],
+    deps = [
+        ":generator",
+        "@com_google_absl//absl/random",
+    ],
+)
+
+
+cc_library(
+    name = "generator",
+    testonly = True,
+    hdrs = ["generator.h"],
+    deps = [
+        ":arguments",
+    ],
+)
+
+cc_library(
     name = "test",
     hdrs = ["test.h"],
     testonly = True,
     deps = [
       ":arguments",
+      ":fuzz",
       "//nth/base:macros",
       "//nth/debug/trace",
       "//nth/debug/trace:matcher",

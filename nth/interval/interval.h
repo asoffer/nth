@@ -31,7 +31,7 @@ struct Interval : internal_interval::LengthBase<T> {
   template <std::convertible_to<T> L, std::convertible_to<T> R>
   explicit constexpr Interval(L&& l, R&& r)
       : lower_bound_(std::forward<L>(l)), upper_bound_(std::forward<R>(r)) {
-    assert(lower_bound_ < upper_bound_);
+    NTH_ASSERT(lower_bound_ <= upper_bound_);
   }
   template <std::convertible_to<T> U>
   Interval(Interval<U> const& i) : Interval(i.lower_bound(), i.upper_bound()) {}

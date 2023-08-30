@@ -11,6 +11,7 @@
 #include "nth/debug/trace/trace.h"
 #include "nth/test/arguments.h"
 #include "nth/test/internal/test.h"
+#include "nth/test/fuzz.h"
 
 namespace nth {
 

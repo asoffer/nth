@@ -20,10 +20,6 @@ struct TestArguments : ::nth::internal_test::TestArgumentBase {
   explicit TestArguments(Ts &&...arguments)
       : argument_pointers_{std::addressof(arguments)...} {}
 
- private:
-  template <typename T>
-  friend struct nth::internal_test::TestInvocation;
-
   template <typename F>
   auto apply(F &&f) {
     return [&]<size_t... Ns>(std::index_sequence<Ns...>) {
@@ -34,6 +30,7 @@ struct TestArguments : ::nth::internal_test::TestArgumentBase {
     (std::make_index_sequence<sizeof...(Ts)>{});
   }
 
+ private:
   void const *argument_pointers_[sizeof...(Ts)];
 };
 
