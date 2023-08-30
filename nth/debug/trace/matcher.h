@@ -16,11 +16,9 @@ namespace internal_debug {
 template <CompileTimeString, typename, typename...>
 struct BoundExpectationMatcher;
 
-}  // namespace internal_debug
-
 template <CompileTimeString Name, typename F>
-struct ExpectationMatcherImpl {
-  explicit consteval ExpectationMatcherImpl(F f) : f_(std::move(f)) {}
+struct ParameterizedExpectationMatcher {
+  explicit consteval ParameterizedExpectationMatcher(F f) : f_(std::move(f)) {}
 
   constexpr std::string_view name() const { return this->name_; }
 
@@ -36,12 +34,11 @@ struct ExpectationMatcherImpl {
   F f_;
 };
 
-namespace internal_debug {
-
 template <CompileTimeString Name, typename F, typename... Ts>
-struct BoundExpectationMatcher : private ExpectationMatcherImpl<Name, F>,
-                                 public BoundExpectationMatcherBase {
-  using ExpectationMatcherImpl<Name, F>::name;
+struct BoundExpectationMatcher
+    : private ParameterizedExpectationMatcher<Name, F>,
+      public BoundExpectationMatcherBase {
+  using ParameterizedExpectationMatcher<Name, F>::name;
 
   auto operator()(auto const& value) const {
     return std::apply([&](auto const&... ts) { return this->f_(value, ts...); },
@@ -55,14 +52,16 @@ struct BoundExpectationMatcher : private ExpectationMatcherImpl<Name, F>,
   }
 
  private:
-  friend struct ::nth::ExpectationMatcherImpl<Name, F>;
+  friend struct ::nth::internal_debug::ParameterizedExpectationMatcher<Name, F>;
 
   template <typename Fmt>
   friend struct MatcherFormatter;
 
   template <typename... Us>
-  constexpr BoundExpectationMatcher(ExpectationMatcherImpl<Name, F> e, Us&&... us)
-      : ExpectationMatcherImpl<Name, F>(e), arguments_(std::forward<Us>(us)...) {}
+  constexpr BoundExpectationMatcher(ParameterizedExpectationMatcher<Name, F> e,
+                                    Us&&... us)
+      : ParameterizedExpectationMatcher<Name, F>(e),
+        arguments_(std::forward<Us>(us)...) {}
 
   std::string_view name_;
   std::tuple<Ts...> arguments_;
@@ -80,7 +79,7 @@ struct MatcherWrap : MatcherWrapBase {
 
 template <CompileTimeString Name, typename F, typename... Ts>
 auto operator>>=(nth::Traced auto const& value,
-                 ExpectationMatcherImpl<Name, F> const& m) {
+                 ParameterizedExpectationMatcher<Name, F> const& m) {
   return ::nth::internal_debug::MatcherWrap<decltype(m()), decltype(value)>{
       {}, m(), value};
 }
@@ -92,15 +91,45 @@ auto operator>>=(nth::Traced auto const& value,
       {}, m, value};
 }
 
+}  // namespace internal_debug
+
+template <CompileTimeString Name, int&..., typename F>
+consteval auto ExpectationMatcher(F&& f) {
+  return internal_debug::ParameterizedExpectationMatcher<Name, F>(
+      std::forward<F>(f));
+}
+
+namespace internal_debug {
+
 template <typename M>
 concept Matcher = std::derived_from<M, BoundExpectationMatcherBase>;
+
+inline constexpr auto operator or(Matcher auto l, Matcher auto r) {
+  return nth::ExpectationMatcher<"or">(
+      [](auto const& value, auto const& l, auto const& r) {
+        return l(value) or r(value);
+      })(l, r);
+}
+
+inline constexpr auto operator and(Matcher auto l, Matcher auto r) {
+  return nth::ExpectationMatcher<"and">(
+      [](auto const& value, auto const& l, auto const& r) {
+        return l(value) and r(value);
+      })(l, r);
+}
+
+inline constexpr auto operator not(Matcher auto m) {
+  return nth::ExpectationMatcher<"not">(
+      [](auto const& value, auto const& m) { return not m(value); })(m);
+}
 
 }  // namespace internal_debug
 
 template <CompileTimeString Name, typename F>
 template <typename... Ts>
 constexpr internal_debug::BoundExpectationMatcher<Name, F, Ts...>
-ExpectationMatcherImpl<Name, F>::operator()(Ts&&... values) const {
+internal_debug::ParameterizedExpectationMatcher<Name, F>::operator()(
+    Ts&&... values) const {
   return internal_debug::BoundExpectationMatcher<Name, F, Ts...>(
       *this, std::forward<Ts>(values)...);
 }
@@ -113,39 +142,14 @@ bool Matches(
 }
 
 template <int&..., CompileTimeString Name, typename F>
-bool Matches(ExpectationMatcherImpl<Name, F> const& matcher,
-             auto const& value) {
+bool Matches(
+    internal_debug::ParameterizedExpectationMatcher<Name, F> const& matcher,
+    auto const& value) {
   return nth::Matches(matcher(), value);
-}
-
-template <CompileTimeString Name, int&..., typename F>
-consteval auto ExpectationMatcher(F&& f) {
-  return ExpectationMatcherImpl<Name, F>(std::forward<F>(f));
 }
 
 bool Matches(auto const& match_value, auto const& value) {
   return match_value == value;
-}
-
-inline constexpr auto operator or(internal_debug::Matcher auto l,
-                                  internal_debug::Matcher auto r) {
-  return nth::ExpectationMatcher<"or">(
-      [](auto const& value, auto const& l, auto const& r) {
-        return l(value) or r(value);
-      })(l, r);
-}
-
-inline constexpr auto operator and(internal_debug::Matcher auto l,
-                                   internal_debug::Matcher auto r) {
-  return nth::ExpectationMatcher<"and">(
-      [](auto const& value, auto const& l, auto const& r) {
-        return l(value) and r(value);
-      })(l, r);
-}
-
-inline constexpr auto operator not(internal_debug::Matcher auto m) {
-  return nth::ExpectationMatcher<"not">(
-      [](auto const& value, auto const& m) { return not m(value); })(m);
 }
 
 }  // namespace nth

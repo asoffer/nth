@@ -435,6 +435,17 @@ constexpr decltype(auto) operator->*(T const &value, TraceInjector) {
   }
 }
 
+inline constexpr std::string_view NthExpectFailureLogLine =
+    "\033[31;1mNTH_EXPECT failed.\n"
+    "  \033[37;1mExpression:\033[0m\n{}\n\n"
+    "  \033[37;1m{}:\033[0m\n"
+    "{}\n";
+inline constexpr std::string_view NthAssertFailureLogLine =
+    "\033[31;1mNTH_ASSERT failed.\n"
+    "  \033[37;1mExpression:\033[0m\n{}\n\n"
+    "  \033[37;1m{}:\033[0m\n"
+    "{}\n";
+
 }  // namespace nth::internal_debug
 
 #define NTH_DEBUG_INTERNAL_RAW_TRACE(name, verbosity, action, ...)             \
@@ -443,12 +454,7 @@ constexpr decltype(auto) operator->*(T const &value, TraceInjector) {
           [&](::nth::source_location NthSourceLocation)                        \
           -> decltype(auto) {                                                  \
         static ::nth::internal_debug::LogLineWithArity<3> const NthLogLine(    \
-            "\033[31;1m" name                                                  \
-            " failed.\n"                                                       \
-            "  \033[37;1mExpression:\033[0m\n{}\n\n"                           \
-            "  \033[37;1m{}:\033[0m\n"                                         \
-            "{}\n",                                                            \
-            NthSourceLocation);                                                \
+            ::nth::internal_debug::name##FailureLogLine, NthSourceLocation);   \
         NthResponder.set_log_line(NthLogLine);                                 \
         return (NthResponder);                                                 \
       }(::nth::source_location::current())                                     \
@@ -460,19 +466,19 @@ constexpr decltype(auto) operator->*(T const &value, TraceInjector) {
 
 #define NTH_DEBUG_INTERNAL_TRACE_EXPECT(...)                                   \
   NTH_DEBUG_INTERNAL_RAW_TRACE(                                                \
-      "NTH_EXPECT", (::nth::config::default_assertion_verbosity_requirement),  \
+      NthExpect, (::nth::config::default_assertion_verbosity_requirement),    \
       [] {}, __VA_ARGS__)
 
 #define NTH_DEBUG_INTERNAL_TRACE_EXPECT_WITH_VERBOSITY(verbosity, ...)         \
   NTH_DEBUG_INTERNAL_RAW_TRACE(                                                \
-      "NTH_EXPECT", verbosity, [] {}, __VA_ARGS__)
+      NthExpect, verbosity, [] {}, __VA_ARGS__)
 
 #define NTH_DEBUG_INTERNAL_TRACE_ASSERT(...)                                   \
   NTH_DEBUG_INTERNAL_RAW_TRACE(                                                \
-      "NTH_ASSERT", (::nth::config::default_assertion_verbosity_requirement),  \
+      NthAssert, (::nth::config::default_assertion_verbosity_requirement),     \
       std::abort, __VA_ARGS__)
 
 #define NTH_DEBUG_INTERNAL_TRACE_ASSERT_WITH_VERBOSITY(verbosity, ...)         \
-  NTH_DEBUG_INTERNAL_RAW_TRACE("NTH_ASSERT", verbosity, std::abort, __VA_ARGS__)
+  NTH_DEBUG_INTERNAL_RAW_TRACE(NthAssert, verbosity, std::abort, __VA_ARGS__)
 
 #endif  // NTH_DEBUG_TRACE_INTERNAL_TRACE_H
