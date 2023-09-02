@@ -7,9 +7,14 @@
 namespace nth {
 namespace {
 
+using ::nth::test::Any;
+using ::nth::test::Argument;
+using ::nth::test::Fuzzy;
+
 NTH_INVOKE_TEST("interval/*") {
   co_yield nth::TestArguments{3, 5};
   co_yield nth::TestArguments{5.1, 6.1};
+  co_await Fuzzy(Any<int>(), AtLeast(Argument<int, 0>()));
 }
 
 NTH_TEST("interval/construction", auto const &low, auto const &hi) {
