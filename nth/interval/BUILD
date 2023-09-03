@@ -31,6 +31,6 @@ cc_test(
     deps = [
         ":interval_set",
         "//nth/test:main",
-        "//nth/debug/trace:matcher",
+        "//nth/debug/property",
     ],
 )

@@ -1,23 +1,6 @@
 package(default_visibility = ["//visibility:public"])
 
 cc_library(
-    name = "matcher",
-    hdrs = ["matcher.h"],
-    deps = [
-        ":trace",
-    ],
-)
-
-cc_test(
-    name = "matcher_test",
-    srcs = ["matcher_test.cc"],
-    deps = [
-        ":matcher",
-        "//nth/debug/log:stderr_log_sink",
-    ],
-)
-
-cc_library(
     name = "trace",
     hdrs = ["trace.h"],
     srcs = ["trace.cc"],

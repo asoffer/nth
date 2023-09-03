@@ -6,10 +6,11 @@
 #include <memory>
 #include <vector>
 
+#include "nth/debug/property/internal/concepts.h"
 #include "nth/configuration/verbosity.h"
 #include "nth/debug/log/log.h"
+#include "nth/debug/property/internal/property_formatter.h"
 #include "nth/debug/source_location.h"
-#include "nth/debug/trace/internal/matcher_formatter.h"
 #include "nth/io/string_printer.h"
 #include "nth/meta/sequence.h"
 #include "nth/meta/type.h"
@@ -24,10 +25,7 @@ extern std::vector<void (*)()> expectation_failure_handlers;
 namespace nth::internal_debug {
 
 template <typename, typename>
-struct MatcherWrap;
-struct MatcherWrapBase;
-
-struct BoundExpectationMatcherBase {};
+struct PropertyWrap;
 
 template <nth::CompileTimeString S>
 struct Identity {
@@ -309,8 +307,8 @@ struct TracedTraversal {
 template <std::invocable<> auto PostFn>
 struct Responder {
   template <typename M, typename V>
-  bool set(char const *, internal_debug::MatcherWrap<M, V> const &w) {
-    set_ = true;
+  bool set(char const *, internal_debug::PropertyWrap<M, V> const &w) {
+    set_   = true;
     value_ = w;
     if (not value_) {
       for (auto f : expectation_failure_handlers) { f(); }
@@ -324,11 +322,11 @@ struct Responder {
       t_traverser(w.v);
       log_entry.demarcate();
 
-      printer.write("Matcher");
+      printer.write("Property");
       log_entry.demarcate();
 
       auto formatter = nth::config::default_formatter();
-      MatcherFormatter<decltype(formatter)> matcher_formatter(formatter);
+      PropertyFormatter<decltype(formatter)> matcher_formatter(formatter);
       nth::Interpolate<"{}">(printer, matcher_formatter, w.m);
       log_entry.demarcate();
 
@@ -422,7 +420,7 @@ constexpr decltype(auto) operator->*(TraceInjector, T const &value) {
 
 template <typename T>
 constexpr decltype(auto) operator->*(T const &value, TraceInjector) {
-  if constexpr (std::is_base_of_v<BoundExpectationMatcherBase, T>) {
+  if constexpr (nth::internal_debug::PropertyType<T>) {
     return value;
   } else if constexpr (nth::internal_debug::TracedImpl<T>) {
     return value;

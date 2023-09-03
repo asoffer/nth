@@ -47,8 +47,8 @@ cc_library(
       ":arguments",
       ":fuzz",
       "//nth/base:macros",
+      "//nth/debug/property",
       "//nth/debug/trace",
-      "//nth/debug/trace:matcher",
       "//nth/test/internal:test",
     ],
 )
