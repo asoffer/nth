@@ -2,52 +2,40 @@
 
 #include <cstdio>
 
-#include "nth/debug/trace/trace.h"
 #include "nth/io/file.h"
+#include "nth/test/test.h"
 
-bool WritesToFile() {
+NTH_TEST("file-printer/writes-to-file") {
   nth::file f = nth::TemporaryFile();
   nth::file_printer fp(f.get());
 
   fp.write("Hello, world");
   fp.write(10, '!');
-  NTH_EXPECT(f.tell() == 22u) NTH_ELSE { return false; }
+  NTH_ASSERT(f.tell() == 22u);
 
   f.rewind();
 
   char buffer[22];
   std::span<char> span = f.read_into(buffer);
-  NTH_EXPECT(std::string_view(span.data(), span.size()) ==
-             "Hello, world!!!!!!!!!!")
-  NTH_ELSE {
-    return false;
-  }
+  NTH_ASSERT(std::string_view(span.data(), span.size()) ==
+             "Hello, world!!!!!!!!!!");
 
-  NTH_EXPECT(f.close()) NTH_ELSE { return false; }
-  return true;
+  NTH_ASSERT(f.close());
 }
 
-bool WritesLargeAmountOfData() {
+NTH_TEST("file-printer/writes-large-amount-of-data-to-file") {
   nth::file f = nth::TemporaryFile();
   nth::file_printer fp(f.get());
 
   fp.write(5000, '!');
-  NTH_EXPECT(f.tell() == 5000u) NTH_ELSE { return false; }
+  NTH_ASSERT(f.tell() == 5000u);
 
   f.rewind();
 
   char buffer[5000];
   std::span<char> span = f.read_into(buffer);
-  NTH_EXPECT(std::string_view(span.data(), span.size()) ==
-             std::string(5000, '!'))
-  NTH_ELSE { return false; }
+  NTH_ASSERT(std::string_view(span.data(), span.size()) ==
+             std::string(5000, '!'));
 
-  NTH_EXPECT(f.close()) NTH_ELSE { return false; }
-  return true;
-}
-
-int main() {
-  NTH_EXPECT(WritesToFile()) NTH_ELSE { return 1; }
-  NTH_EXPECT(WritesLargeAmountOfData()) NTH_ELSE { return 1; }
-  return 0;
+  NTH_ASSERT(f.close());
 }

@@ -44,7 +44,7 @@ static_assert(std::random_access_iterator<
 NTH_TEST("ProjectedSpan/ContainerConstruction") {
   std::array<int, 5> a{1, 2, 3, 4, 5};
   ProjectedSpan<int, [](int const& n) { return &n; }> span(a);
-  NTH_EXPECT(span.size() == size_t{5}) NTH_ELSE { return; }
+  NTH_ASSERT(span.size() == size_t{5});
   NTH_EXPECT(*span.front() == 1);
   NTH_EXPECT(*span.back() == 5);
   NTH_EXPECT(span >>=
@@ -53,7 +53,7 @@ NTH_TEST("ProjectedSpan/ContainerConstruction") {
 
   std::vector<int> v{5, 4, 3, 2, 1};
   span = v;
-  NTH_EXPECT(span.size() == size_t{5}) NTH_ELSE { return; }
+  NTH_ASSERT(span.size() == size_t{5});
   NTH_EXPECT(*span.front() == 5);
   NTH_EXPECT(*span.back() == 1);
   NTH_EXPECT(span >>=
@@ -64,7 +64,7 @@ NTH_TEST("ProjectedSpan/ContainerConstruction") {
 NTH_TEST("ProjectedSpan/IteratorPairConstruction") {
   std::array<int, 5> a{1, 2, 3, 4, 5};
   ProjectedSpan<int, [](int const& n) { return &n; }> span(a.begin(), a.end());
-  NTH_EXPECT(span.size() == size_t{5}) NTH_ELSE { return; }
+  NTH_ASSERT(span.size() == size_t{5});
   NTH_EXPECT(*span.front() == 1);
   NTH_EXPECT(*span.back() == 5);
   NTH_EXPECT(span >>=
@@ -76,13 +76,13 @@ NTH_TEST("ProjectedSpan/RemoveEnds") {
   std::array<int, 5> a{1, 2, 3, 4, 5};
   ProjectedSpan<int, [](int const& n) { return &n; }> span(a);
   span.remove_prefix(1);
-  NTH_EXPECT(span.size() == size_t{4}) NTH_ELSE { return; }
+  NTH_ASSERT(span.size() == size_t{4});
   NTH_EXPECT(*span.front() == 2);
   NTH_EXPECT(*span.back() == 5);
   NTH_EXPECT(span >>= ElementsAreSequentially(PointsTo(2), PointsTo(3),
                                               PointsTo(4), PointsTo(5)));
   span.remove_suffix(1);
-  NTH_EXPECT(span.size() == size_t{3}) NTH_ELSE { return; }
+  NTH_ASSERT(span.size() == size_t{3});
   NTH_EXPECT(*span.front() == 2);
   NTH_EXPECT(*span.back() == 4);
   NTH_EXPECT(span >>=

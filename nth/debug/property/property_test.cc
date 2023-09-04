@@ -12,9 +12,9 @@ int main() {
       [](auto const &) { return false; });
 
   nth::RegisterLogSink(nth::stderr_log_sink);
-  NTH_EXPECT(3 >>= not AlwaysFalse()) NTH_ELSE { return 1; }
-  NTH_EXPECT(3 >>= AlwaysTrue()) NTH_ELSE { return 1; }
-  NTH_EXPECT(3 >>= LessThan(5) and GreaterThan(2)) NTH_ELSE { return 1; }
-  NTH_EXPECT(3 >>= not(GreaterThan(5) or LessThan(2))) NTH_ELSE { return 1; }
+  NTH_ASSERT(3 >>= not AlwaysFalse());
+  NTH_ASSERT(3 >>= AlwaysTrue());
+  NTH_ASSERT(3 >>= LessThan(5) and GreaterThan(2));
+  NTH_ASSERT(3 >>= not(GreaterThan(5) or LessThan(2)));
   return 0;
 }

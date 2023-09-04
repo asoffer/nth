@@ -41,39 +41,38 @@ NTH_TRACE_DECLARE_API_TEMPLATE(S<T>, (triple)(add)(value));
 static_assert(not nth::Traced<int>);
 static_assert(nth::Traced<decltype(nth::Trace<"n">(3))>);
 
-bool ComparisonExpectations() {
+void ComparisonExpectations() {
   int n  = 3;
   auto t = nth::Trace<"n">(n);
 
   // Comparison expectations
-  NTH_EXPECT(t == 3) NTH_ELSE { return false; }
-  NTH_EXPECT(t <= 4) NTH_ELSE { return false; }
-  NTH_EXPECT(t < 4) NTH_ELSE { return false; }
-  NTH_EXPECT(t >= 2) NTH_ELSE { return false; }
-  NTH_EXPECT(t > 2) NTH_ELSE { return false; }
-  NTH_EXPECT(t != 2) NTH_ELSE { return false; }
+  NTH_EXPECT(t == 3);
+  NTH_EXPECT(t <= 4);
+  NTH_EXPECT(t < 4);
+  NTH_EXPECT(t >= 2);
+  NTH_EXPECT(t > 2);
+  NTH_EXPECT(t != 2);
 
   // More complex expression expectations
-  NTH_EXPECT(t * 2 == 6) NTH_ELSE { return false; }
-  NTH_EXPECT(t * 2 + 1 == 7) NTH_ELSE { return false; }
-  NTH_EXPECT((1 + t) * 2 + 1 == 9) NTH_ELSE { return false; }
-  NTH_EXPECT(9 == (1 + t) * 2 + 1) NTH_ELSE { return false; }
+  NTH_EXPECT(t * 2 == 6);
+  NTH_EXPECT(t * 2 + 1 == 7);
+  NTH_EXPECT((1 + t) * 2 + 1 == 9);
+  NTH_EXPECT(9 == (1 + t) * 2 + 1);
 
   // Comparison assertions
-  NTH_ASSERT(t == 3) NTH_ELSE { return false; }
-  NTH_ASSERT(t <= 4) NTH_ELSE { return false; }
-  NTH_ASSERT(t < 4) NTH_ELSE { return false; }
-  NTH_ASSERT(t >= 2) NTH_ELSE { return false; }
-  NTH_ASSERT(t > 2) NTH_ELSE { return false; }
-  NTH_ASSERT(t != 2) NTH_ELSE { return false; }
-  NTH_ASSERT((t << 2) == 12) NTH_ELSE { return false; }
+  NTH_ASSERT(t == 3);
+  NTH_ASSERT(t <= 4);
+  NTH_ASSERT(t < 4);
+  NTH_ASSERT(t >= 2);
+  NTH_ASSERT(t > 2);
+  NTH_ASSERT(t != 2);
+  NTH_ASSERT((t << 2) == 12);
 
   // More complex expression assertions
-  NTH_ASSERT(t * 2 == 6) NTH_ELSE { return false; }
-  NTH_ASSERT(t * 2 + 1 == 7) NTH_ELSE { return false; }
-  NTH_ASSERT((1 + t) * 2 + 1 == 9) NTH_ELSE { return false; }
-  NTH_ASSERT(9 == (1 + t) * 2 + 1) NTH_ELSE { return false; }
-  return true;
+  NTH_ASSERT(t * 2 == 6);
+  NTH_ASSERT(t * 2 + 1 == 7);
+  NTH_ASSERT((1 + t) * 2 + 1 == 9);
+  NTH_ASSERT(9 == (1 + t) * 2 + 1);
 }
 
 struct Uncopyable {
@@ -86,47 +85,48 @@ struct Uncopyable {
   friend bool operator==(Uncopyable const&, Uncopyable const&) { return true; }
 };
 
-bool MoveOnly() {
+void MoveOnly() {
   Uncopyable u;
   auto t = nth::Trace<"u">(u);
 
-  NTH_EXPECT(t == t) NTH_ELSE { return false; }
-  NTH_ASSERT(t == t) NTH_ELSE { return false; }
-  return true;
+  NTH_EXPECT(t == t);
+  NTH_ASSERT(t == t);
 }
 
-bool ShortCircuiting() {
+void ShortCircuiting() {
   int n  = 3;
   auto t = nth::Trace<"n">(n);
 
-  NTH_EXPECT(t == 0 or (3 / t) == 1) NTH_ELSE { return false; }
-  NTH_EXPECT(t == 2 or t == 3) NTH_ELSE { return false; }
-  return true;
+  NTH_EXPECT(t == 0 or (3 / t) == 1);
+  NTH_EXPECT(t == 2 or t == 3);
 }
 
 int main() {
+  static int failure_count = 0;
   nth::RegisterLogSink(nth::stderr_log_sink);
-  if (not ComparisonExpectations()) { return 1; }
-  if (not ShortCircuiting()) { return 1; }
-  if (not MoveOnly()) { return 1; }
+  nth::RegisterExpectationFailure([] { ++failure_count; });
+  ComparisonExpectations();
+  if (failure_count != 0) { return 1; }
+  ShortCircuiting();
+  if (failure_count != 0) { return 1; }
+  MoveOnly();
+  if (failure_count != 0) { return 1; }
 
   // Declared API
   Thing thing{.n = 5};
   auto traced_thing = nth::Trace<"thing">(thing);
-  NTH_EXPECT(traced_thing.triple() == 15) NTH_ELSE { return 1; }
-  NTH_EXPECT(traced_thing.value() == 5) NTH_ELSE { return 1; }
-  NTH_EXPECT(traced_thing.add(3).add(4).add(10) == Thing{.n = 22}) NTH_ELSE {
-    return 1;
-  }
+  NTH_EXPECT(traced_thing.triple() == 15);
+  NTH_EXPECT(traced_thing.value() == 5);
+  NTH_EXPECT(traced_thing.add(3).add(4).add(10) == Thing{.n = 22});
+  if (failure_count != 0) { return 1; }
 
   // Declared API template
   S<int> s{.n = 5};
   auto ts = nth::Trace<"s">(s);
-  NTH_EXPECT(ts.triple() == 15) NTH_ELSE { return 1; }
-  NTH_EXPECT(ts.value() == 5) NTH_ELSE { return 1; }
-  NTH_EXPECT((v.always), ts.add(3).add(4).add(10) == S<int>{.n = 22}) NTH_ELSE {
-    return 1;
-  }
+  NTH_EXPECT(ts.triple() == 15);
+  NTH_EXPECT(ts.value() == 5);
+  NTH_EXPECT((v.always), ts.add(3).add(4).add(10) == S<int>{.n = 22});
+  if (failure_count != 0) { return 1; }
 
   return 0;
 }

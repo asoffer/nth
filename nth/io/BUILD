@@ -61,7 +61,7 @@ cc_test(
     deps = [
         ":file",
         ":file_printer",
-        "//nth/debug/trace",
+        "//nth/test:main",
     ],
 )
 

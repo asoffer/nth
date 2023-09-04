@@ -31,20 +31,6 @@
 // NTH_ASSERT(4 == 3 * 3); // Error handler is invoked and execution is aborted.
 // ```
 //
-// Both macros expand to `if (<unspecified>) {}`, meaning that users may add an
-// `NTH_ELSE` clause following either `NTH_EXPECT` or `NTH_ASSERT`. In either
-// case, if the expression is evaluated and evaluates to false, the body of the
-// `NTH_ELSE` clause will be invoked. In the case of `NTH_ASSERT`, the program
-// will abort immediately following execution of the `NTH_ELSE` clause,
-// regardless of how control flow leaves the `NTH_ELSE` clause.
-//
-// For example:
-// ```
-// NTH_EXPECT(my_container.empty()) {
-//   std::cerr << "my_container has " << my_container.size() << " elements.";
-// }
-// ```
-//
 // On a best-effort basis, this macro attempts to peer into the contents of the
 // boolean expression so as to provide improved error messages regarding the
 // values of subexpressions. If, for example `NTH_ASSERT(a == b * c)` fails, the
@@ -129,8 +115,7 @@ constexpr decltype(auto) EvaluateTraced(auto const &value) {
 // The `NTH_EXPECT` macro injects tracing into the wrapped expression and
 // evaluates the it. If the wrapped expression evaluates to `true`, control flow
 // proceeds with no visible side-effects. If the expression evaluates to
-// `false`, a diagnostic is reported. If the macro is immediately succeeded by
-// an `NTH_ELSE` clause, the body of that `NTH_ELSE` clause is executed.
+// `false`, a diagnostic is reported.
 #define NTH_EXPECT(...)                                                        \
   NTH_IF(NTH_IS_PARENTHESIZED(NTH_FIRST_ARGUMENT(__VA_ARGS__)),                \
          NTH_DEBUG_INTERNAL_TRACE_EXPECT_WITH_VERBOSITY,                       \
@@ -140,22 +125,12 @@ constexpr decltype(auto) EvaluateTraced(auto const &value) {
 // The `NTH_ASSERT` macro injects tracing into the wrapped expression and
 // evaluates the it. If the wrapped expression evaluates to `true`, control flow
 // proceeds with no visible side-effects. If the expression evaluates to
-// `false`, a diagnostic is reported. If the macro is immediately succeeded by
-// an `NTH_NTH_ELSE` clause, the body of that `NTH_ELSE` clause is executed
-// after which execution is aborted. If no `NTH_ELSE` clause is present,
-// execution is aborted.
+// `false`, a diagnostic is reported.
 #define NTH_ASSERT(...)                                                        \
   NTH_IF(NTH_IS_PARENTHESIZED(NTH_FIRST_ARGUMENT(__VA_ARGS__)),                \
          NTH_DEBUG_INTERNAL_TRACE_ASSERT_WITH_VERBOSITY,                       \
          NTH_DEBUG_INTERNAL_TRACE_ASSERT)                                      \
   (__VA_ARGS__)
-
-// The `NTH_ELSE` macro may follow an invocation of either `NTH_EXPECT` or
-// `NTH_ASSERT` to indicate that the following statement is to be executed if
-// the expectation or assertion fails.
-#define NTH_ELSE                                                               \
-  ;                                                                            \
-  else
 
 // Declares the member functions of the type `type` which should be traceable.
 // The argument `member_function_names` must be a parenthesized list (i.e., of
