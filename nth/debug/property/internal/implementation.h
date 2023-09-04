@@ -10,12 +10,12 @@
 #include "nth/debug/property/internal/concepts.h"
 #include "nth/meta/compile_time_string.h"
 
-namespace nth {
+namespace nth::debug {
 
 template <CompileTimeString Name, typename F, typename... Ts>
 struct Property;
 
-namespace internal_debug {
+namespace internal_property {
 
 template <CompileTimeString Name, typename F>
 struct ParameterizedProperty {
@@ -37,15 +37,15 @@ struct ParameterizedProperty {
   F f_;
 };
 
-template <typename M, typename V>
+template <typename P, typename V>
 struct PropertyWrap {
-  operator auto() const { return m(v); }
+  operator auto() const { return property(value); }
 
-  std::add_lvalue_reference_t<std::add_const_t<M>> m;
-  std::add_lvalue_reference_t<std::add_const_t<V>> v;
+  std::add_lvalue_reference_t<std::add_const_t<P>> property;
+  std::add_lvalue_reference_t<std::add_const_t<V>> value;
 };
 
-}  // namespace internal_debug
-}  // namespace nth
+}  // namespace internal_property
+}  // namespace nth::debug
 
 #endif  // NTH_DEBUG_PROPERTY_INTERNAL_IMPLEMENTATION_H

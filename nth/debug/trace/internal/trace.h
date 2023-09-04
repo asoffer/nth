@@ -6,9 +6,9 @@
 #include <memory>
 #include <vector>
 
-#include "nth/debug/property/internal/concepts.h"
 #include "nth/configuration/verbosity.h"
 #include "nth/debug/log/log.h"
+#include "nth/debug/property/internal/concepts.h"
 #include "nth/debug/property/internal/property_formatter.h"
 #include "nth/debug/source_location.h"
 #include "nth/io/string_printer.h"
@@ -307,7 +307,8 @@ struct TracedTraversal {
 template <std::invocable<> auto PostFn>
 struct Responder {
   template <typename M, typename V>
-  bool set(char const *, internal_debug::PropertyWrap<M, V> const &w) {
+  bool set(char const *,
+           debug::internal_property::PropertyWrap<M, V> const &w) {
     set_   = true;
     value_ = w;
     if (not value_) {
@@ -319,15 +320,16 @@ struct Responder {
       bounded_string_printer printer(log_entry.data(), bound);
 
       TracedTraversal t_traverser(printer);
-      t_traverser(w.v);
+      t_traverser(w.value);
       log_entry.demarcate();
 
       printer.write("Property");
       log_entry.demarcate();
 
       auto formatter = nth::config::default_formatter();
-      PropertyFormatter<decltype(formatter)> matcher_formatter(formatter);
-      nth::Interpolate<"{}">(printer, matcher_formatter, w.m);
+      debug::internal_property::PropertyFormatter<decltype(formatter)>
+          matcher_formatter(formatter);
+      nth::Interpolate<"{}">(printer, matcher_formatter, w.property);
       log_entry.demarcate();
 
       for (auto *sink : RegisteredLogSinks()) { sink->send(*line_, log_entry); }
@@ -420,7 +422,7 @@ constexpr decltype(auto) operator->*(TraceInjector, T const &value) {
 
 template <typename T>
 constexpr decltype(auto) operator->*(T const &value, TraceInjector) {
-  if constexpr (nth::internal_debug::PropertyType<T>) {
+  if constexpr (nth::debug::internal_property::PropertyType<T>) {
     return value;
   } else if constexpr (nth::internal_debug::TracedImpl<T>) {
     return value;

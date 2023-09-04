@@ -10,7 +10,7 @@
 #include "nth/io/string_printer.h"
 #include "nth/strings/interpolate.h"
 
-namespace nth::internal_debug {
+namespace nth::debug::internal_property {
 
 template <typename F>
 struct PropertyFormatter {
@@ -69,6 +69,6 @@ struct PropertyFormatter {
   std::deque<std::pair<size_t, size_t>> positions_;
 };
 
-}  // namespace nth::internal_debug
+}  // namespace nth::debug::internal_property
 
 #endif  // NTH_DEBUG_PROPERTY_INTERNAL_PROPERTY_FORMATTER_H

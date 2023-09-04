@@ -8,6 +8,9 @@
 namespace nth {
 namespace {
 
+using ::nth::debug::ElementsAreSequentially;
+using ::nth::debug::PointsTo;
+
 template <typename T>
 concept HasConstIterator = requires {
   typename T::const_iterator;

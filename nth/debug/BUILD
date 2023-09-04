@@ -9,6 +9,7 @@ cc_library(
         "//nth/debug:unimplemented",
         "//nth/debug:unreachable",
         "//nth/debug/log",
+        "//nth/debug/property",
         "//nth/debug/trace",
     ],
 )

@@ -7,6 +7,8 @@
 namespace nth {
 namespace {
 
+using ::nth::debug::ElementsAreSequentially;
+
 NTH_TEST("IntervalSet/default", auto type) {
   IntervalSet<nth::type_t<type>> interval_set;
   auto set = nth::Trace<"set">(interval_set);

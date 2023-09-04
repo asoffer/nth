@@ -2,14 +2,14 @@
 
 #include "nth/debug/log/stderr_log_sink.h"
 
-inline constexpr auto AlwaysTrue =
-    nth::MakeProperty<"always-true">([](auto const &) { return true; });
-inline constexpr auto AlwaysFalse =
-    nth::MakeProperty<"always-false">([](auto const &) { return false; });
-
 int main() {
-  using ::nth::GreaterThan;
-  using ::nth::LessThan;
+  using ::nth::debug::GreaterThan;
+  using ::nth::debug::LessThan;
+
+  constexpr auto AlwaysTrue = nth::debug::MakeProperty<"always-true">(
+      [](auto const &) { return true; });
+  constexpr auto AlwaysFalse = nth::debug::MakeProperty<"always-false">(
+      [](auto const &) { return false; });
 
   nth::RegisterLogSink(nth::stderr_log_sink);
   NTH_EXPECT(3 >>= not AlwaysFalse()) NTH_ELSE { return 1; }
