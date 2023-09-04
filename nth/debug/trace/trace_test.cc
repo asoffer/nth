@@ -104,7 +104,10 @@ void ShortCircuiting() {
 int main() {
   static int failure_count = 0;
   nth::RegisterLogSink(nth::stderr_log_sink);
-  nth::RegisterExpectationFailure([] { ++failure_count; });
+  nth::RegisterExpectationResultHandler(
+      [](nth::debug::ExpectationResult const& result) {
+        if (not result.success()) { ++failure_count; }
+      });
   ComparisonExpectations();
   if (failure_count != 0) { return 1; }
   ShortCircuiting();
@@ -127,6 +130,5 @@ int main() {
   NTH_EXPECT(ts.value() == 5);
   NTH_EXPECT((v.always), ts.add(3).add(4).add(10) == S<int>{.n = 22});
   if (failure_count != 0) { return 1; }
-
   return 0;
 }

@@ -11,16 +11,18 @@
 #include "nth/debug/property/internal/concepts.h"
 #include "nth/debug/property/internal/property_formatter.h"
 #include "nth/debug/source_location.h"
+#include "nth/debug/trace/expectation_result.h"
 #include "nth/io/string_printer.h"
 #include "nth/meta/sequence.h"
 #include "nth/meta/type.h"
 #include "nth/strings/interpolate.h"
 
-namespace nth {
+namespace nth::debug::internal_trace {
 
-extern std::vector<void (*)()> expectation_failure_handlers;
+void RegisterExpectationResultHandler(
+    void (*handler)(ExpectationResult const &));
 
-}  // namespace nth
+}  // namespace nth::debug::internal_trace
 
 namespace nth::internal_debug {
 
@@ -304,16 +306,25 @@ struct TracedTraversal {
   std::deque<std::pair<size_t, size_t>> positions_;
 };
 
+struct ResponderBase {
+  void RecordExpectationResult(bool result);
+
+  constexpr void set_log_line(nth::LogLine const &line) { line_ = &line; }
+
+ protected:
+  bool value_ : 1;
+  bool set_ : 1             = false;
+  nth::LogLine const *line_ = nullptr;
+};
+
 template <std::invocable<> auto PostFn>
-struct Responder {
+struct Responder : ResponderBase {
   template <typename M, typename V>
   bool set(char const *,
            debug::internal_property::PropertyWrap<M, V> const &w) {
-    set_   = true;
-    value_ = w;
-    if (not value_) {
-      for (auto f : expectation_failure_handlers) { f(); }
+    RecordExpectationResult(w);
 
+    if (not value_) {
       LogEntry log_entry(line_->id(), 1);
 
       constexpr size_t bound = 1024;
@@ -339,11 +350,9 @@ struct Responder {
   }
 
   bool set(char const *expression, TracedEvaluatingTo<bool> auto const &b) {
-    set_   = true;
-    value_ = Evaluate(b);
-    if (not value_) {
-      for (auto f : expectation_failure_handlers) { f(); }
+    RecordExpectationResult(Evaluate(b));
 
+    if (not value_) {
       LogEntry log_entry(line_->id(), 1);
 
       constexpr size_t bound = 1024;
@@ -366,11 +375,9 @@ struct Responder {
   }
 
   bool set(char const *expression, std::same_as<bool> auto b) {
-    set_   = true;
-    value_ = b;
-    if (not value_) {
-      for (auto f : expectation_failure_handlers) { f(); }
+    RecordExpectationResult(b);
 
+    if (not value_) {
       LogEntry log_entry(line_->id(), 1);
 
       constexpr size_t bound = 1024;
@@ -393,17 +400,10 @@ struct Responder {
     return value_;
   }
 
-  constexpr void set_log_line(nth::LogLine const &line) { line_ = &line; }
-
   ~Responder() {
     bool_value_stash.clear();
     if (set_ and not value_) { PostFn(); }
   }
-
- private:
-  bool value_ : 1;
-  bool set_ : 1             = false;
-  nth::LogLine const *line_ = nullptr;
 };
 
 struct TraceInjector {};

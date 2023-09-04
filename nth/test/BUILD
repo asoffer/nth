@@ -61,5 +61,7 @@ cc_library(
       ":test",
       "//nth/debug/log",
       "//nth/debug/log:stderr_log_sink",
+      "//nth/utility:no_destructor",
+      "@com_google_absl//absl/synchronization",
     ],
 )

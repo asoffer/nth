@@ -1,14 +1,11 @@
-#include <vector>
+#include "nth/debug/trace/trace.h"
+#include "nth/debug/trace/internal/trace.h"
 
 namespace nth {
-// namespace {
 
-std::vector<void (*)()> expectation_failure_handlers;
-
-// }  // namespace
-
-void RegisterExpectationFailure(void (*handler)()) {
-  expectation_failure_handlers.push_back(handler);
+void RegisterExpectationResultHandler(
+    void (*handler)(debug::ExpectationResult const &)) {
+  nth::debug::internal_trace::RegisterExpectationResultHandler(handler);
 }
 
 }  // namespace nth

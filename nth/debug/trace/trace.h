@@ -101,9 +101,11 @@ Trace(NTH_ATTRIBUTE(lifetimebound) T const &value) {
 template <typename T>
 concept Traced = ::nth::internal_debug::TracedImpl<T>;
 
-// Registers `handler` to be executed any time an expectation inside an
-// `NTH_EXPECT` macro evaluates to `false`. Handlers cannot be un-registered.
-void RegisterExpectationFailure(void (*handler)());
+// Registers `handler` to be executed any time an `NTH_EXPECT` or `NTH_ASSERT`
+// macro is evaluated. The execution order of handlers is unspecified and may be
+// executed concurrently. Handlers cannot be un-registered.
+void RegisterExpectationResultHandler(
+    void (*handler)(debug::ExpectationResult const &));
 
 // Returns the value represented by the traced object.
 constexpr decltype(auto) EvaluateTraced(auto const &value) {
