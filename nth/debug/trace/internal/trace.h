@@ -4,6 +4,7 @@
 #include <concepts>
 #include <deque>
 #include <memory>
+#include <utility>
 #include <vector>
 
 #include "nth/configuration/verbosity.h"
@@ -21,6 +22,19 @@ namespace nth::debug::internal_trace {
 
 void RegisterExpectationResultHandler(
     void (*handler)(ExpectationResult const &));
+
+template <typename Fn>
+struct OnExit {
+  explicit constexpr OnExit(Fn &&f) : f_(std::forward<Fn>(f)) {}
+
+  ~OnExit() { std::move(f_)(); }
+
+ private:
+  Fn f_;
+};
+
+template <typename Fn>
+OnExit(Fn) -> OnExit<Fn>;
 
 }  // namespace nth::debug::internal_trace
 
@@ -455,26 +469,59 @@ constexpr decltype(auto) operator->*(T const &value, TraceInjector) {
                  .set((#__VA_ARGS__),                                          \
                       (::nth::internal_debug::TraceInjector{}                  \
                            ->*__VA_ARGS__                                      \
-                           ->*::nth::internal_debug::TraceInjector{}))) {      \
-  } else {                                                                     \
-  }                                                                            \
-  static_assert(true)
+                           ->*::nth::internal_debug::TraceInjector{})))
 
 #define NTH_DEBUG_INTERNAL_TRACE_EXPECT(...)                                   \
   NTH_DEBUG_INTERNAL_RAW_TRACE(                                                \
       "NTH_EXPECT", (::nth::config::default_assertion_verbosity_requirement),  \
-      [] {}, __VA_ARGS__)
+      [] {}, __VA_ARGS__) {}                                                   \
+  static_assert(true)
 
 #define NTH_DEBUG_INTERNAL_TRACE_EXPECT_WITH_VERBOSITY(verbosity, ...)         \
   NTH_DEBUG_INTERNAL_RAW_TRACE(                                                \
-      "NTH_EXPECT", verbosity, [] {}, __VA_ARGS__)
+      "NTH_EXPECT", verbosity, [] {}, __VA_ARGS__) {}                          \
+  static_assert(true)
 
 #define NTH_DEBUG_INTERNAL_TRACE_ASSERT(...)                                   \
   NTH_DEBUG_INTERNAL_RAW_TRACE(                                                \
       "NTH_ASSERT", (::nth::config::default_assertion_verbosity_requirement),  \
-      std::abort, __VA_ARGS__)
+      [] {}, __VA_ARGS__) {}                                                   \
+  else { return; }                                                             \
+  static_assert(true)
 
 #define NTH_DEBUG_INTERNAL_TRACE_ASSERT_WITH_VERBOSITY(verbosity, ...)         \
-  NTH_DEBUG_INTERNAL_RAW_TRACE("NTH_ASSERT", verbosity, std::abort, __VA_ARGS__)
+  NTH_DEBUG_INTERNAL_RAW_TRACE(                                                \
+      "NTH_ASSERT", verbosity, [] {}, __VA_ARGS__) {}                          \
+  else { return; }                                                             \
+  static_assert(true)
+
+#define NTH_DEBUG_INTERNAL_TRACE_REQUIRE(...)                                  \
+  NTH_DEBUG_INTERNAL_RAW_TRACE(                                                \
+      "NTH_REQUIRE", (::nth::config::default_assertion_verbosity_requirement), \
+      std::abort, __VA_ARGS__) {}                                              \
+  static_assert(true)
+
+#define NTH_DEBUG_INTERNAL_TRACE_REQUIRE_WITH_VERBOSITY(verbosity, ...)        \
+  NTH_DEBUG_INTERNAL_RAW_TRACE("NTH_REQUIRE", verbosity, std::abort,           \
+                               __VA_ARGS__) {}                                 \
+  static_assert(true)
+
+#define NTH_DEBUG_INTERNAL_TRACE_ENSURE(...)                                   \
+  ::nth::debug::internal_trace::OnExit NTH_CONCATENATE(NthInternalOnExit,      \
+                                                       __LINE__)([&] {         \
+    NTH_DEBUG_INTERNAL_RAW_TRACE(                                              \
+        "NTH_ENSURE",                                                          \
+        (::nth::config::default_assertion_verbosity_requirement), std::abort,  \
+        __VA_ARGS__) {}                                                        \
+  });                                                                          \
+  static_assert(true)
+
+#define NTH_DEBUG_INTERNAL_TRACE_ENSURE_WITH_VERBOSITY(verbosity, ...)         \
+  ::nth::debug::internal_trace::OnExit NTH_CONCATENATE(NthInternalOnExit,      \
+                                                       __LINE__)([&] {         \
+    NTH_DEBUG_INTERNAL_RAW_TRACE("NTH_ENSURE", verbosity, std::abort,          \
+                                 __VA_ARGS__) {}                               \
+  });                                                                          \
+  static_assert(true)
 
 #endif  // NTH_DEBUG_TRACE_INTERNAL_TRACE_H

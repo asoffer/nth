@@ -8,6 +8,7 @@
 
 #include "nth/base/macros.h"
 #include "nth/debug/property/property.h"
+#include "nth/debug/trace/testing.h"
 #include "nth/debug/trace/trace.h"
 #include "nth/test/arguments.h"
 #include "nth/test/fuzz.h"

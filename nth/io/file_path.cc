@@ -19,7 +19,7 @@ std::optional<file_path> file_path::try_construct(std::string_view name) {
         if (path.name_.empty()) { return std::nullopt; }
         path.name_.clear();
       } else {
-        NTH_ASSERT(rindex != size_t{0});
+        NTH_REQUIRE(rindex != size_t{0});
         path.name_.resize(rindex);
       }
 

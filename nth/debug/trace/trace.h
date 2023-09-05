@@ -7,31 +7,50 @@
 #include "nth/debug/trace/internal/declare_api.h"
 #include "nth/debug/trace/internal/operators.h"
 #include "nth/debug/trace/internal/trace.h"
+#include "nth/debug/verbosity.h"
 #include "nth/meta/compile_time_string.h"
 
 // `nth::Trace` is debugging library aimed at producing better runtime
 // assertions than the `assert` macro defined in the `<cassert>` standard
-// library header. At its core there are two primary macros macros which do the
-// heavy lifting: `NTH_ASSERT` and `NTH_EXPECT`. Either of these macros may be
-// passed a side-effect-free boolean expression. Depending on build
-// configuration, these expressions will be evaluated either zero or once (the
-// fact that they may not be evaluated is why the expression must be side-effect
-// free; build configuration must not affect the semantics). If evaluated, and
-// the expression evaluates to true, execution continues. Otherwise, if the
-// expression is evaluated and evaluates to false, some configurable error
-// handler will be triggered. In the case of `NTH_EXPECT`, this is all that
-// happens, and execution continues. In the case of `NTH_ASSERT`, execution will
-// be aborted immediately after the error handler is invoked.
+// library header. At its core there are four primary macros macros which do the
+// heavy lifting: `NTH_ASSERT`, `NTH_EXPECT`, `NTH_REQUIRE`, and `NTH_ENSURE`.
+// Any of these macros may be passed a side-effect-free boolean expression.
+// Depending on build configuration, these expressions will be evaluated either
+// zero or once (the fact that they may not be evaluated is why the expression
+// must be side-effect free; build configuration must not affect the semantics).
+//
+// The `NTH_ASSERT` and `NTH_EXPECT` macros may only be used in tests, whereas
+// `NTH_REQUIRE` and `NTH_ENSURE` may be used anywhere. The semantics of each
+// macro is defined precisely adjacent to its definition. At a high level,
+// `NTH_EXPECT` reports any results and continues test execution. `NTH_ASSERT`
+// reports any results and stops all further execution of that particular test
+// if the result is a failure. `NTH_REQUIRE` reports any results and, aborts
+// program execution if the result is a failure. `NTH_ENSURE` is equivalent to
+// `NTH_REQUIRE` except that it evaluates the condition when the function
+// returns.
 //
 // For example:
 // ```
-// NTH_EXPECT(1 == 0 + 1); // Ok, execution will continue.
-// NTH_ASSERT(2 == 1 + 1); // Ok, execution will continue.
-// NTH_EXPECT(3 == 2 * 2); // Error handler is invoked and execution continues.
-// NTH_ASSERT(4 == 3 * 3); // Error handler is invoked and execution is aborted.
+// void TrimLeadingSpaces(std::string_view &s) {
+//   NTH_REQUIRE(s.data() != nullptr);
+//   NTH_ENSURE(s.empty() or s[0] != ' ');
+//   while (not s.empty()) {
+//     if (s[0] != ' ') { return; }  // NTH_ENSURE invoked on this return.
+//     s.remove_prefix(1);
+//   }
+//
+//   // NTH_ENSURE invoked on this implicit return.
+// }
+//
+// // Within a test.
+// NTH_EXPECT(1 == 0 + 1); // Handler is invoked; test execution will continue.
+// NTH_ASSERT(2 == 1 + 1); // Handler is invoked; test execution will continue.
+// NTH_EXPECT(3 == 2 * 2); // Handler is invoked; test execution will continue.
+// NTH_ASSERT(4 == 3 * 3); // Handler is invoked; test execution will not
+//                         // continue.
 // ```
 //
-// On a best-effort basis, this macro attempts to peer into the contents of the
+// On a best-effort basis, these macros attempt to peer into the contents of the
 // boolean expression so as to provide improved error messages regarding the
 // values of subexpressions. If, for example `NTH_ASSERT(a == b * c)` fails, the
 // error message can helpfully tell you the values of `a`, `b`, and `c`.
@@ -114,24 +133,26 @@ constexpr decltype(auto) EvaluateTraced(auto const &value) {
 
 }  // namespace nth
 
-// The `NTH_EXPECT` macro injects tracing into the wrapped expression and
-// evaluates the it. If the wrapped expression evaluates to `true`, control flow
+// The `NTH_REQUIRE` macro injects tracing into the wrapped expression and
+// evaluates it. If the wrapped expression evaluates to `true`, control flow
 // proceeds with no visible side-effects. If the expression evaluates to
-// `false`, a diagnostic is reported.
-#define NTH_EXPECT(...)                                                        \
+// `false`, a diagnostic is reported and program execution is aborted. In either
+// case, all registered expectation handlers are notified of the result.
+#define NTH_REQUIRE(...)                                                       \
   NTH_IF(NTH_IS_PARENTHESIZED(NTH_FIRST_ARGUMENT(__VA_ARGS__)),                \
-         NTH_DEBUG_INTERNAL_TRACE_EXPECT_WITH_VERBOSITY,                       \
-         NTH_DEBUG_INTERNAL_TRACE_EXPECT)                                      \
+         NTH_DEBUG_INTERNAL_TRACE_REQUIRE_WITH_VERBOSITY,                      \
+         NTH_DEBUG_INTERNAL_TRACE_REQUIRE)                                     \
   (__VA_ARGS__)
 
-// The `NTH_ASSERT` macro injects tracing into the wrapped expression and
-// evaluates the it. If the wrapped expression evaluates to `true`, control flow
+// The `NTH_ENSURE` macro injects tracing into the wrapped expression and
+// evaluates it. If the wrapped expression evaluates to `true`, control flow
 // proceeds with no visible side-effects. If the expression evaluates to
-// `false`, a diagnostic is reported.
-#define NTH_ASSERT(...)                                                        \
+// `false`, a diagnostic is reported and program execution is aborted. In either
+// case, all registered expectation handlers are notified of the result.
+#define NTH_ENSURE(...)                                                        \
   NTH_IF(NTH_IS_PARENTHESIZED(NTH_FIRST_ARGUMENT(__VA_ARGS__)),                \
-         NTH_DEBUG_INTERNAL_TRACE_ASSERT_WITH_VERBOSITY,                       \
-         NTH_DEBUG_INTERNAL_TRACE_ASSERT)                                      \
+         NTH_DEBUG_INTERNAL_TRACE_ENSURE_WITH_VERBOSITY,                       \
+         NTH_DEBUG_INTERNAL_TRACE_ENSURE)                                      \
   (__VA_ARGS__)
 
 // Declares the member functions of the type `type` which should be traceable.

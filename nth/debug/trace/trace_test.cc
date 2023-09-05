@@ -3,6 +3,7 @@
 #include <vector>
 
 #include "nth/debug/log/stderr_log_sink.h"
+#include "nth/debug/trace/testing.h"
 
 namespace {
 
@@ -114,6 +115,14 @@ int main() {
   if (failure_count != 0) { return 1; }
   MoveOnly();
   if (failure_count != 0) { return 1; }
+
+  // Simple test for NTH_ENSURE and NTH_REQUIRE
+  {
+    int x = 0;
+    NTH_REQUIRE(x == 0);
+    NTH_ENSURE(x == 1);
+    ++x;
+  }
 
   // Declared API
   Thing thing{.n = 5};

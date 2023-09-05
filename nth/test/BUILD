@@ -49,6 +49,7 @@ cc_library(
       "//nth/base:macros",
       "//nth/debug/property",
       "//nth/debug/trace",
+      "//nth/debug/trace:testing",
       "//nth/test/internal:test",
     ],
 )

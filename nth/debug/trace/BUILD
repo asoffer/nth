@@ -11,6 +11,17 @@ cc_library(
 )
 
 cc_library(
+    name = "testing",
+    testonly = True,
+    hdrs = ["testing.h"],
+    deps = [
+        "//nth/debug:verbosity",
+        "//nth/base:macros",
+        "//nth/debug/trace/internal:trace",
+    ]
+)
+
+cc_library(
     name = "trace",
     hdrs = ["trace.h"],
     srcs = ["trace.cc"],
@@ -20,6 +31,7 @@ cc_library(
         "//nth/base:macros",
         "//nth/configuration:verbosity",
         "//nth/debug:source_location",
+        "//nth/debug:verbosity",
         "//nth/debug/trace/internal:trace",
         "//nth/meta:type",
         "//nth/io:string_printer",
@@ -31,6 +43,7 @@ cc_test(
     name = "trace_test",
     srcs = ["trace_test.cc"],
     deps = [
+        ":testing",
         ":trace",
         "//nth/debug/log:stderr_log_sink",
     ],
