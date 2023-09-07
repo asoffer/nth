@@ -17,7 +17,7 @@ cc_library(
     deps = [
         "//nth/debug:verbosity",
         "//nth/base:macros",
-        "//nth/debug/trace/internal:trace",
+        "//nth/debug/trace/internal:testing",
     ]
 )
 
@@ -26,25 +26,21 @@ cc_library(
     hdrs = ["trace.h"],
     srcs = ["trace.cc"],
     deps = [
-        ":expectation_result",
         "//nth/base:attributes",
         "//nth/base:macros",
-        "//nth/configuration:verbosity",
-        "//nth/debug:source_location",
-        "//nth/debug:verbosity",
+        "//nth/debug/trace/internal:implementation",
         "//nth/debug/trace/internal:trace",
-        "//nth/meta:type",
-        "//nth/io:string_printer",
-        "//nth/strings:interpolate",
+        "//nth/meta:compile_time_string",
     ],
 )
 
 cc_test(
     name = "trace_test",
     srcs = ["trace_test.cc"],
+    # We cannot directly test the aborting behavior.
+    copts = ["-DNTH_DEBUG_INTERNAL_NO_ABORT_FOR_TEST"],
     deps = [
         ":testing",
         ":trace",
-        "//nth/debug/log:stderr_log_sink",
     ],
 )

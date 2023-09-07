@@ -60,7 +60,7 @@ struct Property
 // To test that `my_vector` contains exactly two elements, the first of which is
 // greater than 5 and the second of which is less than three.
 template <CompileTimeString Name, typename F, typename... Ts>
-auto operator>>=(nth::Traced auto const& value,
+auto operator>>=(nth::debug::Traced auto const& value,
                  Property<Name, F, Ts...> const& property) {
   return ::nth::debug::internal_property::PropertyWrap<
       Property<Name, F, Ts...> const&, decltype(value)>{property, value};
@@ -120,7 +120,7 @@ inline constexpr auto ElementsAreSequentially =
         [](auto const& value, auto const&... elements) {
           using std::begin;
           using std::end;
-          auto&& v    = nth::EvaluateTraced(value);
+          auto&& v    = nth::debug::EvaluateTraced(value);
           auto&& iter = begin(v);
           auto&& e    = end(v);
           return ((iter != e and nth::debug::Matches(elements, *iter++)) and

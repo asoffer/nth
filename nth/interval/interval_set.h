@@ -95,7 +95,6 @@ struct IntervalSet {
   std::vector<Interval<T>> intervals_;
 };
 
-
 template <std::totally_ordered T>
 IntervalSet(T&&, T&&) -> IntervalSet<std::decay_t<T>>;
 
@@ -211,10 +210,10 @@ IntervalSet<T> Union(IntervalSet<T>&& lhs, IntervalSet<T>&& rhs) {
   return std::move(lhs) + std::move(rhs);
 }
 
+}  // namespace nth
+
 template <typename T>
 NTH_TRACE_DECLARE_API_TEMPLATE(nth::IntervalSet<T>,
                                (contains)(covers)(empty)(intervals)(length));
-
-}  // namespace nth
 
 #endif  // NTH_INTERVAL_INTERVAL_SET_H

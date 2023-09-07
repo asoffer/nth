@@ -2,7 +2,7 @@
 #define NTH_DEBUG_TRACE_TESTING_H
 
 #include "nth/base/macros.h"
-#include "nth/debug/trace/internal/trace.h"
+#include "nth/debug/trace/internal/testing.h"
 #include "nth/debug/verbosity.h"
 
 // The `NTH_EXPECT` macro injects tracing into the wrapped expression and

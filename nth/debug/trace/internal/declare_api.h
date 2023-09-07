@@ -1,7 +1,12 @@
 #ifndef NTH_DEBUG_TRACE_INTERNAL_DECLARE_API_H
 #define NTH_DEBUG_TRACE_INTERNAL_DECLARE_API_H
 
-#include "nth/debug/trace/internal/trace.h"
+#include <type_traits>
+#include <utility>
+
+#include "nth/base/macros.h"
+#include "nth/debug/trace/internal/implementation.h"
+#include "nth/meta/type.h"
 
 #define NTH_DEBUG_INTERNAL_BODY(memfn)                                         \
  private:                                                                      \
@@ -22,12 +27,12 @@
  public:                                                                       \
   template <int &..., typename... NthTypes>                                    \
   auto memfn(NthTypes const &...ts) const {                                    \
-    return nth::internal_debug::Traced<                                        \
-        Impl<#memfn>, typename std::remove_cvref_t<decltype(*this)>::type,            \
-        NthTypes...>(::nth::internal_debug::Evaluate(*this), ts...);           \
+    return ::nth::debug::internal_trace::Traced<                               \
+        Impl<#memfn>, typename std::remove_cvref_t<decltype(*this)>::type,     \
+        NthTypes...>(::nth::debug::internal_trace::Evaluate(*this), ts...);    \
   }
 
-namespace nth::internal_debug {
+namespace nth::debug::internal_trace {
 
 template <typename T>
 struct DefineTrace {
@@ -50,12 +55,10 @@ requires(DefineTrace<std::remove_cvref_t<
         ptrs_{std::addressof(ts)...} {}
 
  private:
-  friend struct TracedTraversal;
-
   void const *ptrs_[sizeof...(Ts)];
 };
 
-}  // namespace nth::internal_debug
+}  // namespace nth::debug::internal_trace
 
 #define NTH_DEBUG_INTERNAL_EXPAND_A(x)                                         \
   NTH_DEBUG_INTERNAL_BODY(x) NTH_DEBUG_INTERNAL_EXPAND_B
@@ -67,8 +70,8 @@ requires(DefineTrace<std::remove_cvref_t<
 #define NTH_DEBUG_INTERNAL_END_IMPL(...) __VA_ARGS__##_END
 
 #define NTH_DEBUG_INTERNAL_TRACE_DECLARE_API(t, member_function_names)         \
-  struct nth::internal_debug::DefineTrace<t>                                   \
-      : nth::internal_debug::TracedValue<t> {                                  \
+  struct ::nth::debug::internal_trace::DefineTrace<t>                          \
+      : ::nth::debug::internal_trace::TracedValue<t> {                         \
    private:                                                                    \
     template <nth::CompileTimeString>                                          \
     struct Impl;                                                               \
@@ -77,8 +80,9 @@ requires(DefineTrace<std::remove_cvref_t<
     using type                                     = t;                        \
     [[maybe_unused]] static constexpr bool defined = true;                     \
     constexpr DefineTrace(auto f)                                              \
-        : nth::internal_debug::TracedValue<type>(f) {}                         \
+        : ::nth::debug::internal_trace::TracedValue<type>(f) {}                \
     NTH_DEBUG_INTERNAL_END(NTH_DEBUG_INTERNAL_EXPAND_A member_function_names)  \
-  }
+  };                                                                           \
+  NTH_REQUIRE_EXPANSION_IN_GLOBAL_NAMESPACE
 
 #endif  // NTH_DEBUG_TRACE_INTERNAL_DECLARE_API_H

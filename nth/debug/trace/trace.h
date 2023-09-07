@@ -3,37 +3,39 @@
 
 #include "nth/base/attributes.h"
 #include "nth/base/macros.h"
-#include "nth/configuration/verbosity.h"
 #include "nth/debug/trace/internal/declare_api.h"
+#include "nth/debug/trace/internal/implementation.h"
 #include "nth/debug/trace/internal/operators.h"
 #include "nth/debug/trace/internal/trace.h"
-#include "nth/debug/verbosity.h"
 #include "nth/meta/compile_time_string.h"
 
-// `nth::Trace` is debugging library aimed at producing better runtime
+// The Trace Library is a debugging library aimed at producing better runtime
 // assertions than the `assert` macro defined in the `<cassert>` standard
-// library header. At its core there are four primary macros macros which do the
-// heavy lifting: `NTH_ASSERT`, `NTH_EXPECT`, `NTH_REQUIRE`, and `NTH_ENSURE`.
-// Any of these macros may be passed a side-effect-free boolean expression.
-// Depending on build configuration, these expressions will be evaluated either
-// zero or once (the fact that they may not be evaluated is why the expression
-// must be side-effect free; build configuration must not affect the semantics).
+// library header. The library has several core components: The `NTH_REQUIRE`
+// and `NTH_ENSURE` macros are used to make assertions about runtime values. One
+// may additionally include "nth/debug/testing.h" in tests to obtain the testing
+// facilities `NTH_EXPECT` and `NTH_ASSERT` (see that header for details).
 //
-// The `NTH_ASSERT` and `NTH_EXPECT` macros may only be used in tests, whereas
-// `NTH_REQUIRE` and `NTH_ENSURE` may be used anywhere. The semantics of each
-// macro is defined precisely adjacent to its definition. At a high level,
-// `NTH_EXPECT` reports any results and continues test execution. `NTH_ASSERT`
-// reports any results and stops all further execution of that particular test
-// if the result is a failure. `NTH_REQUIRE` reports any results and, aborts
-// program execution if the result is a failure. `NTH_ENSURE` is equivalent to
-// `NTH_REQUIRE` except that it evaluates the condition when the function
-// returns.
+// The library also provides a mechanism for tracing computations so that the
+// debugging facilities may provide an enhanced debugging experience.
 //
-// For example:
+// Debug assertions are not free, and in many build environments prohibitively
+// expensive to turn on for production code. This library provides several
+// mechanisms to give users fine-grained control over when assertions should be
+// evaulated and what the cost of evaluation is.
+//
+// Details descriptions may be found below, but roughly speaking,
+// `NTH_REQUIRE(<expression>)` asserts that `<expression>`, when contextually
+// converted to `bool`, evaluates to `true`. Similarly,
+// `NTH_ENSURE(<expression>)` provides the same assertion but at the *end* of
+// the scope. This allows users to express pre- and post-conditions, often as
+// the first few lines of a function.
+//
+// As an example,
 // ```
 // void TrimLeadingSpaces(std::string_view &s) {
-//   NTH_REQUIRE(s.data() != nullptr);
-//   NTH_ENSURE(s.empty() or s[0] != ' ');
+//   NTH_REQUIRE(s.data() != nullptr);     // Check happens immediately.
+//   NTH_ENSURE(s.empty() or s[0] != ' '); // No check happens here.
 //   while (not s.empty()) {
 //     if (s[0] != ' ') { return; }  // NTH_ENSURE invoked on this return.
 //     s.remove_prefix(1);
@@ -41,21 +43,14 @@
 //
 //   // NTH_ENSURE invoked on this implicit return.
 // }
-//
-// // Within a test.
-// NTH_EXPECT(1 == 0 + 1); // Handler is invoked; test execution will continue.
-// NTH_ASSERT(2 == 1 + 1); // Handler is invoked; test execution will continue.
-// NTH_EXPECT(3 == 2 * 2); // Handler is invoked; test execution will continue.
-// NTH_ASSERT(4 == 3 * 3); // Handler is invoked; test execution will not
-//                         // continue.
 // ```
 //
 // On a best-effort basis, these macros attempt to peer into the contents of the
 // boolean expression so as to provide improved error messages regarding the
-// values of subexpressions. If, for example `NTH_ASSERT(a == b * c)` fails, the
-// error message can helpfully tell you the values of `a`, `b`, and `c`.
+// values of subexpressions. If, for example `NTH_REQUIRE(a == b * c)` fails,
+// the error message can helpfully tell you the values of `a`, `b`, and `c`.
 // However, there are limitations depending on the structure of the expression.
-// For example, `NTH_ASSERT(a == b * c + d)` will be able to report the values
+// For example, `NTH_REQUIRE(a == b * c + d)` will be able to report the values
 // of `a`, `d`, and `b * c`, but it will not be able to decompose `b * c` into
 // the values of `b` and `c`. In order to improve debugging, users may wrap any
 // value in a call `nth::Trace`. This takes a compile-time string template
@@ -65,7 +60,7 @@
 //
 // There are several limitations to this tracing ability. First, free functions
 // and function templates cannot have traced values passed into them. Thus
-// `NTH_ASSERT(std::max(a, b) == a)` cannot provide improved tracing support by
+// `NTH_REQUIRE(std::max(a, b) == a)` cannot provide improved tracing support by
 // wrapping `b` in `nth::Trace`.
 //
 // Second, member functions can support tracing provided the object on which the
@@ -98,52 +93,23 @@
 //                                (operator[])(rfind)(size)(starts_with));
 // ```
 //
-namespace nth {
 
-// `nth::Trace` is a function template wrapping a `T const &`, where `T` must be
-// deduced. The wrapped object may be a temporary, however, a reference is
-// stored in the wrapper so the object must persist for the lifetime of the
-// return value. Compilers which support `NTH_ATTRIBUTE(lifetimebound)`
-// this requirement is enforced. This function template takes a compile-time
-// string as a template argument. This string may be used to indicate a name for
-// a traced value in diagnostics if the asserted/expected expression evaluates
-// to `false`.
-template <nth::CompileTimeString S, int &..., typename T>
-constexpr ::nth::internal_debug::Traced<::nth::internal_debug::Identity<S>,
-                                        T const &>
-Trace(NTH_ATTRIBUTE(lifetimebound) T const &value) {
-  return ::nth::internal_debug::Traced<::nth::internal_debug::Identity<S>,
-                                       T const &>(value);
-}
-
-// A concept matching any traced type.
-template <typename T>
-concept Traced = ::nth::internal_debug::TracedImpl<T>;
-
-// Registers `handler` to be executed any time an `NTH_EXPECT` or `NTH_ASSERT`
-// macro is evaluated. The execution order of handlers is unspecified and may be
-// executed concurrently. Handlers cannot be un-registered.
-void RegisterExpectationResultHandler(
-    void (*handler)(debug::ExpectationResult const &));
-
-// Returns the value represented by the traced object.
-constexpr decltype(auto) EvaluateTraced(auto const &value) {
-  return ::nth::internal_debug::Evaluate(value);
-}
-
-}  // namespace nth
-
-// The `NTH_REQUIRE` macro injects tracing into the wrapped expression and
-// evaluates it. If the wrapped expression evaluates to `true`, control flow
-// proceeds with no visible side-effects. If the expression evaluates to
-// `false`, a diagnostic is reported and program execution is aborted. In either
-// case, all registered expectation handlers are notified of the result.
+// `NTH_REQUIRE`:
+//
+// The `NTH_REQUIRE` macro injects tracing into the wrapped
+// expression and evaluates it. If the wrapped expression evaluates to `true`,
+// control flow proceeds with no visible side-effects. If the expression
+// evaluates to `false`, a diagnostic is reported and program execution is
+// aborted. In either case, all registered expectation handlers are notified of
+// the result.
 #define NTH_REQUIRE(...)                                                       \
   NTH_IF(NTH_IS_PARENTHESIZED(NTH_FIRST_ARGUMENT(__VA_ARGS__)),                \
          NTH_DEBUG_INTERNAL_TRACE_REQUIRE_WITH_VERBOSITY,                      \
          NTH_DEBUG_INTERNAL_TRACE_REQUIRE)                                     \
   (__VA_ARGS__)
 
+// `NTH_ENSURE`:
+//
 // The `NTH_ENSURE` macro injects tracing into the wrapped expression and
 // evaluates it. If the wrapped expression evaluates to `true`, control flow
 // proceeds with no visible side-effects. If the expression evaluates to
@@ -155,7 +121,9 @@ constexpr decltype(auto) EvaluateTraced(auto const &value) {
          NTH_DEBUG_INTERNAL_TRACE_ENSURE)                                      \
   (__VA_ARGS__)
 
-// Declares the member functions of the type `type` which should be traceable.
+// `NTH_TRACE_DECLARE_API` and `NTH_TRACE_DECLARE_API_TEMPLATE`:
+//
+// Declares the member functions of the type `type` which must be traceable.
 // The argument `member_function_names` must be a parenthesized list (i.e., of
 // the form "(a)(b)(c)") of member functions names. Special member functions are
 // not allowed, but operators are allowed. struct templates and struct template
@@ -174,17 +142,32 @@ constexpr decltype(auto) EvaluateTraced(auto const &value) {
 #define NTH_TRACE_DECLARE_API_TEMPLATE(type, member_function_names)            \
   NTH_DEBUG_INTERNAL_TRACE_DECLARE_API(type, member_function_names)
 
-// Similar to `NTH_ASSERT(expr != nullptr)`, an assertion will trigger if the
-// expression is null. However, if the expression is not null, the entire macro
-// will expand to an expression that evaluates equal (both in value and in value
-// category) to `expr`.
-#define NTH_ASSERT_NOT_NULL(expr)                                              \
-  ([](auto &&NthPtr) -> decltype(auto) {                                       \
-    if (NthPtr == nullptr) {                                                   \
-      NTH_LOG("{} is unexpectedly null.") <<= {#expr};                         \
-      ::std::abort();                                                          \
-    }                                                                          \
-    return static_cast<std::remove_reference_t<decltype(NthPtr)> &&>(NthPtr);  \
-  })(expr)
+namespace nth::debug {
+
+// `RegisterExpectationResultHandler`:
+//
+// Registers `handler` to be executed any time an expectation is evaluated (be
+// that `NTH_REQUIRE`, `NTH_ENSURE`, `NTH_EXPECT`, or `NTH_ASSERT`). The
+// execution order of handlers is unspecified and may be executed concurrently.
+// Handlers cannot be un-registered.
+void RegisterExpectationResultHandler(
+    void (*handler)(ExpectationResult const &));
+
+template <CompileTimeString S, int &..., typename T>
+constexpr internal_trace::Traced<internal_trace::Identity<S>, T const &> Trace(
+    NTH_ATTRIBUTE(lifetimebound) T const &value) {
+  return internal_trace::Traced<internal_trace::Identity<S>, T const &>(value);
+}
+
+// A concept matching any traced type.
+template <typename T>
+concept Traced = internal_trace::TracedImpl<T>;
+
+// Returns the value represented by the traced object.
+constexpr decltype(auto) EvaluateTraced(auto const &value) {
+  return internal_trace::Evaluate(value);
+}
+
+}  // namespace nth::debug
 
 #endif  // NTH_DEBUG_TRACE_H

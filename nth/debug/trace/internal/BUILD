@@ -1,14 +1,35 @@
 package(default_visibility = ["//nth/debug:__subpackages__"])
 
 cc_library(
+    name = "testing",
+    testonly = True,
+    hdrs = ["testing.h"],
+    deps = [
+        ":implementation",
+        "//nth/debug:verbosity",
+        "//nth/base:macros",
+    ],
+)
+
+cc_library(
     name = "trace",
+    hdrs = ["trace.h"],
+    deps = [
+        ":implementation",
+        "//nth/debug:verbosity",
+        "//nth/base:macros",
+    ],
+)
+
+cc_library(
+    name = "implementation",
     hdrs = [
-        "trace.h",
+        "implementation.h",
         "declare_api.h",
         "operators.h",
     ],
     srcs = [
-        "trace.cc",
+        "implementation.cc",
     ],
     deps = [
         "//nth/base:attributes",

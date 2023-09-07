@@ -9,6 +9,15 @@
   switch (0)                                                                   \
   default: __VA_ARGS__
 
+// NTH_REQUIRE_EXPANSION_IN_GLOBAL_NAMESPACE
+//
+// Expands to a statement that is invalid except within the global namespace.
+#define NTH_REQUIRE_EXPANSION_IN_GLOBAL_NAMESPACE                              \
+  struct NthRequireExpansionInGlobalNamespace;                                 \
+  static_assert(sizeof(NthRequireExpansionInGlobalNamespace));
+
+struct NthRequireExpansionInGlobalNamespace {};
+
 // NTH_STRINGIFY
 //
 // Expands to the first argument passed to the macro.
@@ -78,11 +87,11 @@
 // Expands to `true` if the argument is entirely enclosed in parentheses, and to
 // `false` otherwise.
 #define NTH_IS_PARENTHESIZED(x)                                                \
-  NTH_IS_EMPTY(NTH_SECOND_ARGUMENT(NTH_CONCATENATE(            \
-      NTH_INTERNAL_IS_PARENTHESIZED_INJECT_ARGUMENTS_,                         \
-      NTH_FIRST_ARGUMENT(NTH_CONCATENATE(                      \
-          NTH_INTERNAL_IS_PARENTHESIZED_PREFIXED_,                             \
-          NTH_INTERNAL_IS_PARENTHESIZED_REMOVE x)))))
+  NTH_IS_EMPTY(NTH_SECOND_ARGUMENT(                                            \
+      NTH_CONCATENATE(NTH_INTERNAL_IS_PARENTHESIZED_INJECT_ARGUMENTS_,         \
+                      NTH_FIRST_ARGUMENT(NTH_CONCATENATE(                      \
+                          NTH_INTERNAL_IS_PARENTHESIZED_PREFIXED_,             \
+                          NTH_INTERNAL_IS_PARENTHESIZED_REMOVE x)))))
 #define NTH_INTERNAL_IS_PARENTHESIZED_INJECT_ARGUMENTS_true _,
 #define NTH_INTERNAL_IS_PARENTHESIZED_INJECT_ARGUMENTS_false _, _
 

@@ -33,7 +33,7 @@ nth::NoDestructor<ExpectationResultHolder> results;
 
 int main() {
   nth::RegisterLogSink(nth::stderr_log_sink);
-  nth::RegisterExpectationResultHandler(
+  nth::debug::RegisterExpectationResultHandler(
       [](nth::debug::ExpectationResult const& result) {
         results->add(result);
       });
