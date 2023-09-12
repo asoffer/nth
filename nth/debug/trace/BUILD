@@ -11,17 +11,6 @@ cc_library(
 )
 
 cc_library(
-    name = "testing",
-    testonly = True,
-    hdrs = ["testing.h"],
-    deps = [
-        "//nth/debug:verbosity",
-        "//nth/base:macros",
-        "//nth/debug/trace/internal:testing",
-    ]
-)
-
-cc_library(
     name = "trace",
     hdrs = ["trace.h"],
     srcs = ["trace.cc"],
@@ -40,7 +29,6 @@ cc_test(
     # We cannot directly test the aborting behavior.
     copts = ["-DNTH_DEBUG_INTERNAL_NO_ABORT_FOR_TEST"],
     deps = [
-        ":testing",
         ":trace",
     ],
 )

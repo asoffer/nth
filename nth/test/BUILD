@@ -42,6 +42,7 @@ cc_library(
 cc_library(
     name = "test",
     hdrs = ["test.h"],
+    srcs = ["test.cc"],
     testonly = True,
     deps = [
       ":arguments",
@@ -49,7 +50,6 @@ cc_library(
       "//nth/base:macros",
       "//nth/debug/property",
       "//nth/debug/trace",
-      "//nth/debug/trace:testing",
       "//nth/test/internal:test",
     ],
 )
@@ -64,5 +64,13 @@ cc_library(
       "//nth/debug/log:stderr_log_sink",
       "//nth/utility:no_destructor",
       "@com_google_absl//absl/synchronization",
+    ],
+)
+
+cc_test(
+    name = "test_test",
+    srcs = ["test_test.cc"],
+    deps = [
+        ":test"
     ],
 )

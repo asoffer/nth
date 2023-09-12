@@ -3,7 +3,6 @@
 
 #include <algorithm>
 #include <concepts>
-#include <iostream>
 #include <span>
 #include <vector>
 

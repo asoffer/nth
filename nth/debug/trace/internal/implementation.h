@@ -517,7 +517,7 @@ constexpr decltype(auto) operator->*(T const &value, TraceInjector) {
           [&](::nth::source_location NthSourceLocation)                        \
           -> decltype(auto) {                                                  \
         static ::nth::internal_debug::LogLineWithArity<3> const NthLogLine(    \
-            ::nth::debug::internal_trace::log_line, NthSourceLocation);        \
+            log_line, NthSourceLocation);                                      \
         NthResponder.set_log_line(NthLogLine);                                 \
         return (NthResponder);                                                 \
       }(::nth::source_location::current())                                     \

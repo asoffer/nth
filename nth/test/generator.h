@@ -65,7 +65,7 @@ struct TestArgumentGenerator<Ts...>::promise_type {
   }
 
   std::suspend_never yield_value(
-      ::nth::internal_test::IsTestArguments auto &&arguments) {
+      ::nth::internal_test::IsTestArguments auto const& arguments) {
     arguments.apply(invocable_);
     return {};
   }

@@ -39,7 +39,7 @@ int main() {
       });
   int32_t tests  = 0;
   int32_t passed = 0;
-  for (auto const& [name, test] : nth::RegisteredTests()) {
+  for (auto const& [name, test] : nth::test::RegisteredTests()) {
     int before = results->failure_count();
     NTH_LOG("[TEST {}]") <<= {name};
     test();

@@ -17,6 +17,6 @@ cc_test(
     deps = [
         ":property",
         "//nth/debug/log:stderr_log_sink",
-        "//nth/debug/trace:testing",
+        "//nth/debug/trace",
     ],
 )

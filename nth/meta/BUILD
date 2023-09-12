@@ -68,6 +68,7 @@ cc_library(
     deps = [
         ":constant",
         ":sequence",
+        "//nth/base:macros",
     ],
 )
 

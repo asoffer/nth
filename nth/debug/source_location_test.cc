@@ -1,7 +1,5 @@
 #include "nth/debug/source_location.h"
 
-#include <iostream>
-
 namespace some_namespace {
 
 static_assert([] {

@@ -1,7 +1,6 @@
 #ifndef NTH_DEBUG_PROPERTY_INTERNAL_IMPLEMENTATION_H
 #define NTH_DEBUG_PROPERTY_INTERNAL_IMPLEMENTATION_H
 
-#include <iostream>
 #include <string_view>
 #include <tuple>
 #include <type_traits>

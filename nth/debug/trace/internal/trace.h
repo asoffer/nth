@@ -1,6 +1,9 @@
 #ifndef NTH_DEBUG_TRACE_INTERNAL_TRACE_H
 #define NTH_DEBUG_TRACE_INTERNAL_TRACE_H
 
+#include "nth/base/macros.h"
+#include "nth/debug/trace/internal/implementation.h"
+
 namespace nth::debug::internal_trace {
 
 inline constexpr char const RequireLogLine[] =
@@ -19,21 +22,21 @@ inline constexpr char const EnsureLogLine[] =
 
 #define NTH_DEBUG_INTERNAL_TRACE_REQUIRE(...)                                  \
   NTH_DEBUG_INTERNAL_RAW_TRACE(                                                \
-      RequireLogLine,                                                          \
+      ::nth::debug::internal_trace::RequireLogLine,                            \
       (::nth::config::default_assertion_verbosity_requirement),                \
       AbortingResponder, __VA_ARGS__) {}                                       \
   static_assert(true)
 
 #define NTH_DEBUG_INTERNAL_TRACE_REQUIRE_WITH_VERBOSITY(verbosity, ...)        \
-  NTH_DEBUG_INTERNAL_RAW_TRACE(RequireLogLine, verbosity, AbortingResponder,   \
-                               __VA_ARGS__) {}                                 \
+  NTH_DEBUG_INTERNAL_RAW_TRACE(::nth::debug::internal_trace::RequireLogLine,   \
+                               verbosity, AbortingResponder, __VA_ARGS__) {}   \
   static_assert(true)
 
 #define NTH_DEBUG_INTERNAL_TRACE_ENSURE(...)                                   \
   ::nth::debug::internal_trace::OnExit NTH_CONCATENATE(NthInternalOnExit,      \
                                                        __LINE__)([&] {         \
     NTH_DEBUG_INTERNAL_RAW_TRACE(                                              \
-        EnsureLogLine,                                                         \
+        ::nth::debug::internal_trace::EnsureLogLine,                           \
         (::nth::config::default_assertion_verbosity_requirement),              \
         AbortingResponder, __VA_ARGS__) {}                                     \
   });                                                                          \
@@ -42,8 +45,8 @@ inline constexpr char const EnsureLogLine[] =
 #define NTH_DEBUG_INTERNAL_TRACE_ENSURE_WITH_VERBOSITY(verbosity, ...)         \
   ::nth::debug::internal_trace::OnExit NTH_CONCATENATE(NthInternalOnExit,      \
                                                        __LINE__)([&] {         \
-    NTH_DEBUG_INTERNAL_RAW_TRACE(EnsureLogLine, verbosity, AbortingResponder,  \
-                                 __VA_ARGS__) {}                               \
+    NTH_DEBUG_INTERNAL_RAW_TRACE(::nth::debug::internal_trace::EnsureLogLine,  \
+                                 verbosity, AbortingResponder, __VA_ARGS__) {} \
   });                                                                          \
   static_assert(true)
 

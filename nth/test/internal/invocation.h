@@ -3,7 +3,7 @@
 
 #include <coroutine>
 
-namespace nth::internal_test {
+namespace nth::test::internal_invocation {
 
 template <typename T, typename Generator>
 struct Awaitable {
@@ -42,12 +42,14 @@ struct TestInvocation {
     }
 
     std::suspend_never yield_value(
-        ::nth::internal_test::IsTestArguments auto &&arguments) {
+        ::nth::internal_test::IsTestArguments auto arguments) {
       arguments.apply([]<typename... Ts>(Ts &&...args) {
         T::InvokeTest(std::forward<Ts>(args)...);
       });
       return {};
     }
+
+    std::suspend_never return_void() { return {}; }
 
     template <typename Generator>
     auto await_transform(Generator &&generator) {
@@ -58,6 +60,6 @@ struct TestInvocation {
   };
 };
 
-}  // namespace nth::internal_test
+}  // namespace nth::test::internal_invocation
 
 #endif  // NTH_TEST_INTERNAL_INVOCATION_H
