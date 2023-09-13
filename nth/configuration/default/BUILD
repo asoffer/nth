@@ -7,7 +7,7 @@ cc_library(
     name = "verbosity",
     hdrs = ["verbosity.h"],
     deps = [
-        "//nth/debug:verbosity",
+        "//nth/debug/internal:verbosity",
         "//nth/io:environment_variable",
         "//nth/strings/format:universal",
     ]

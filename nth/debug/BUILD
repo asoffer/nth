@@ -2,71 +2,71 @@ package(default_visibility = ["//visibility:public"])
 
 cc_library(
     name = "debug",
-    hdrs = [
-        "debug.h",
-    ],
+    hdrs = ["debug.h"],
     deps = [
-        "//nth/debug:unimplemented",
-        "//nth/debug:unreachable",
+        "//nth/debug/trace",
         "//nth/debug/log",
         "//nth/debug/property",
-        "//nth/debug/trace",
+        "//nth/debug:source_location",
+        "//nth/debug:unimplemented",
+        "//nth/debug:unreachable",
+    ],
+)
+
+cc_library(
+    name = "expectation_result",
+    hdrs = ["expectation_result.h"],
+    srcs = ["expectation_result.cc"],
+    deps = [
+        ":source_location",
+        "//nth/utility:no_destructor",
+        "@com_google_absl//absl/synchronization",
+    ],
+)
+
+cc_test(
+    name = "expectation_result_test",
+    srcs = ["expectation_result_test.cc"],
+    deps = [
+        ":expectation_result",
+        "//nth/debug/internal:raw_check",
     ],
 )
 
 cc_library(
     name = "source_location",
     hdrs = ["source_location.h"],
-    deps = [
-        "//nth/utility:unconstructible",
-    ],
+    deps = ["//nth/utility:unconstructible"],
 )
 
 cc_test(
     name = "source_location_test",
     srcs = ["source_location_test.cc"],
-    deps = [
-        ":source_location",
-    ],
+    deps = [":source_location"],
 )
 
 cc_library(
     name = "unimplemented",
-    hdrs = [
-        "unimplemented.h",
-        "internal/unimplemented.h",
-    ],
-    deps = [
-        "//nth/debug/log",
-    ],
+    hdrs = ["unimplemented.h"],
+    deps = ["//nth/debug/internal:unimplemented"],
 )
 
 cc_test(
     name = "unimplemented_compiles_test",
     srcs = ["unimplemented_compiles_test.cc"],
-    deps = [
-        ":unimplemented",
-    ],
+    deps = [":unimplemented"],
 )
 
 cc_library(
     name = "unreachable",
-    hdrs = [
-        "unreachable.h",
-        "internal/unreachable.h",
-    ],
-    deps = [
-        "//nth/base:platform",
-        "//nth/debug/log",
-    ],
+    hdrs = ["unreachable.h"],
+    deps = ["//nth/debug/internal:unreachable"],
 )
 
 cc_test(
     name = "unreachable_compiles_test",
     srcs = ["unreachable_compiles_test.cc"],
-    deps = [
-        ":unreachable",
-    ],
+    deps = [":unreachable"],
 )
 
 cc_test(
@@ -75,51 +75,5 @@ cc_test(
     deps = [
         ":unreachable",
         "//nth/debug/log:vector_log_sink",
-    ],
-)
-
-cc_library(
-    name = "verbosity",
-    hdrs = ["verbosity.h"],
-    deps = [
-        ":source_location",
-        "//nth/base:attributes",
-        "//nth/base:configuration",
-    ],
-)
-
-cc_test(
-    name = "verbosity_fast_test",
-    copts = ["-DNTH_COMMANDLINE_BUILD_MODE=fast"],
-    srcs = ["verbosity_test.cc"],
-    deps = [
-        ":verbosity",
-    ],
-)
-
-cc_test(
-    name = "verbosity_harden_test",
-    copts = ["-DNTH_COMMANDLINE_BUILD_MODE=harden"],
-    srcs = ["verbosity_test.cc"],
-    deps = [
-        ":verbosity",
-    ],
-)
-
-cc_test(
-    name = "verbosity_optimize_test",
-    copts = ["-DNTH_COMMANDLINE_BUILD_MODE=optimize"],
-    srcs = ["verbosity_test.cc"],
-    deps = [
-        ":verbosity",
-    ],
-)
-
-cc_test(
-    name = "verbosity_debug_test",
-    copts = ["-DNTH_COMMANDLINE_BUILD_MODE=debug"],
-    srcs = ["verbosity_test.cc"],
-    deps = [
-        ":verbosity",
     ],
 )

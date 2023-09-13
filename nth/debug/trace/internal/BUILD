@@ -30,7 +30,7 @@ cc_library(
         "//nth/debug/property/internal:concepts",
         "//nth/debug/property/internal:property_formatter",
         "//nth/debug:source_location",
-        "//nth/debug/trace:expectation_result",
+        "//nth/debug:expectation_result",
         "//nth/meta:type",
         "//nth/io:string_printer",
         "//nth/strings:interpolate",

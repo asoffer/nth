@@ -144,15 +144,6 @@
 
 namespace nth::debug {
 
-// `RegisterExpectationResultHandler`:
-//
-// Registers `handler` to be executed any time an expectation is evaluated (be
-// that `NTH_REQUIRE`, `NTH_ENSURE`, `NTH_EXPECT`, or `NTH_ASSERT`). The
-// execution order of handlers is unspecified and may be executed concurrently.
-// Handlers cannot be un-registered.
-void RegisterExpectationResultHandler(
-    void (*handler)(ExpectationResult const &));
-
 template <CompileTimeString S, int &..., typename T>
 constexpr internal_trace::Traced<internal_trace::Identity<S>, T const &> Trace(
     NTH_ATTRIBUTE(lifetimebound) T const &value) {

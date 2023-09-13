@@ -1,7 +1,7 @@
 #ifndef NTH_CONFIGURATION_DEFAULT_VERBOSITY_H
 #define NTH_CONFIGURATION_DEFAULT_VERBOSITY_H
 
-#include "nth/debug/verbosity.h"
+#include "nth/debug/internal/verbosity.h"
 #include "nth/io/environment_variable.h"
 #include "nth/strings/format/universal.h"
 

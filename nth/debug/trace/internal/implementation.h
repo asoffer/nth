@@ -12,7 +12,7 @@
 #include "nth/debug/property/internal/concepts.h"
 #include "nth/debug/property/internal/property_formatter.h"
 #include "nth/debug/source_location.h"
-#include "nth/debug/trace/expectation_result.h"
+#include "nth/debug/expectation_result.h"
 #include "nth/io/string_printer.h"
 #include "nth/meta/sequence.h"
 #include "nth/meta/type.h"

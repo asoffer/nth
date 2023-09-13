@@ -1,4 +1,4 @@
-#include "nth/debug/verbosity.h"
+#include "nth/debug/internal/verbosity.h"
 
 static_assert(nth::debug_verbosity.always(nth::source_location::current()));
 static_assert(nth::debug_verbosity.when(true)(nth::source_location::current()));

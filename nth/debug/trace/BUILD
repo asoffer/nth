@@ -1,19 +1,8 @@
 package(default_visibility = ["//visibility:public"])
 
 cc_library(
-    name = "expectation_result",
-    visibility = ["//nth/debug/trace:__subpackages__"],
-    hdrs = ["expectation_result.h"],
-    srcs = ["expectation_result.cc"],
-    deps = [
-        "//nth/debug:source_location",
-    ]
-)
-
-cc_library(
     name = "trace",
     hdrs = ["trace.h"],
-    srcs = ["trace.cc"],
     deps = [
         "//nth/base:attributes",
         "//nth/base:macros",
@@ -30,5 +19,6 @@ cc_test(
     copts = ["-DNTH_DEBUG_INTERNAL_NO_ABORT_FOR_TEST"],
     deps = [
         ":trace",
+        "//nth/debug/internal:raw_check",
     ],
 )
