@@ -9,7 +9,7 @@ A collection of libraries I find generally useful. More explanation to follow.
 building and testing. You will need a C++20-compliant compiler and a relatively
 recent copy of [Bazel](https://bazel.build/). Specifically,
 
-* Bazel version 6.2.1 or greater
+* Bazel version 6.3.2 or greater
 * Clang 16.0.0
 
 The `nth` libraries are intended to be used from your C++ code and always built
