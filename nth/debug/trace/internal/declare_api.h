@@ -69,7 +69,15 @@ requires(DefineTrace<std::remove_cvref_t<
 #define NTH_DEBUG_INTERNAL_END(...) NTH_DEBUG_INTERNAL_END_IMPL(__VA_ARGS__)
 #define NTH_DEBUG_INTERNAL_END_IMPL(...) __VA_ARGS__##_END
 
-#define NTH_DEBUG_INTERNAL_TRACE_DECLARE_API(t, member_function_names)         \
+#define NTH_DEBUG_INTERNAL_TRACE_DECLARE_API(type, member_function_names)      \
+  template <>                                                                  \
+  NTH_DEBUG_INTERNAL_TRACE_DECLARE_API_IMPL(type, member_function_names)
+
+#define NTH_DEBUG_INTERNAL_TRACE_DECLARE_API_TEMPLATE(type,                    \
+                                                      member_function_names)   \
+  NTH_DEBUG_INTERNAL_TRACE_DECLARE_API_IMPL(type, member_function_names)
+
+#define NTH_DEBUG_INTERNAL_TRACE_DECLARE_API_IMPL(t, member_function_names)    \
   struct ::nth::debug::internal_trace::DefineTrace<t>                          \
       : ::nth::debug::internal_trace::TracedValue<t> {                         \
    private:                                                                    \

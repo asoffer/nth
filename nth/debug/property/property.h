@@ -1,5 +1,5 @@
-#ifndef NTH_DEBUG_TRACE_PROPERTY_PROPERTY_H
-#define NTH_DEBUG_TRACE_PROPERTY_PROPERTY_H
+#ifndef NTH_DEBUG_PROPERTY_PROPERTY_H
+#define NTH_DEBUG_PROPERTY_PROPERTY_H
 
 #include <functional>
 #include <string_view>
@@ -9,7 +9,7 @@
 #include "nth/debug/property/internal/concepts.h"
 #include "nth/debug/property/internal/implementation.h"
 #include "nth/debug/property/internal/property_formatter.h"
-#include "nth/debug/trace/trace.h"
+#include "nth/debug/contracts/contracts.h"
 
 namespace nth::debug {
 
@@ -130,4 +130,4 @@ inline constexpr auto ElementsAreSequentially =
 
 }  // namespace nth::debug
 
-#endif  // NTH_DEBUG_TRACE_PROPERTY_PROPERTY_H
+#endif  // NTH_DEBUG_PROPERTY_PROPERTY_H

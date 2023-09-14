@@ -2,7 +2,7 @@
 
 #include <cstdio>
 
-#include "nth/debug/trace/trace.h"
+#include "nth/debug/contracts/contracts.h"
 #include "nth/utility/no_destructor.h"
 
 namespace nth {

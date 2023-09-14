@@ -1,50 +1,14 @@
-#ifndef NTH_DEBUG_TRACE_TRACE_H
-#define NTH_DEBUG_TRACE_TRACE_H
+#ifndef NTH_DEBUG_CONTRACTS_TRACING_H
+#define NTH_DEBUG_CONTRACTS_TRACING_H
 
 #include "nth/base/attributes.h"
 #include "nth/base/macros.h"
+#include "nth/debug/contracts/internal/trace_action.h"
 #include "nth/debug/trace/internal/declare_api.h"
 #include "nth/debug/trace/internal/implementation.h"
 #include "nth/debug/trace/internal/operators.h"
-#include "nth/debug/trace/internal/trace.h"
 #include "nth/meta/compile_time_string.h"
 
-// The Trace Library is a debugging library aimed at producing better runtime
-// assertions than the `assert` macro defined in the `<cassert>` standard
-// library header. The library has several core components: The `NTH_REQUIRE`
-// and `NTH_ENSURE` macros are used to make assertions about runtime values. One
-// may additionally include "nth/debug/testing.h" in tests to obtain the testing
-// facilities `NTH_EXPECT` and `NTH_ASSERT` (see that header for details).
-//
-// The library also provides a mechanism for tracing computations so that the
-// debugging facilities may provide an enhanced debugging experience.
-//
-// Debug assertions are not free, and in many build environments prohibitively
-// expensive to turn on for production code. This library provides several
-// mechanisms to give users fine-grained control over when assertions should be
-// evaulated and what the cost of evaluation is.
-//
-// Details descriptions may be found below, but roughly speaking,
-// `NTH_REQUIRE(<expression>)` asserts that `<expression>`, when contextually
-// converted to `bool`, evaluates to `true`. Similarly,
-// `NTH_ENSURE(<expression>)` provides the same assertion but at the *end* of
-// the scope. This allows users to express pre- and post-conditions, often as
-// the first few lines of a function.
-//
-// As an example,
-// ```
-// void TrimLeadingSpaces(std::string_view &s) {
-//   NTH_REQUIRE(s.data() != nullptr);     // Check happens immediately.
-//   NTH_ENSURE(s.empty() or s[0] != ' '); // No check happens here.
-//   while (not s.empty()) {
-//     if (s[0] != ' ') { return; }  // NTH_ENSURE invoked on this return.
-//     s.remove_prefix(1);
-//   }
-//
-//   // NTH_ENSURE invoked on this implicit return.
-// }
-// ```
-//
 // On a best-effort basis, these macros attempt to peer into the contents of the
 // boolean expression so as to provide improved error messages regarding the
 // values of subexpressions. If, for example `NTH_REQUIRE(a == b * c)` fails,
@@ -93,34 +57,6 @@
 //                                (operator[])(rfind)(size)(starts_with));
 // ```
 //
-
-// `NTH_REQUIRE`:
-//
-// The `NTH_REQUIRE` macro injects tracing into the wrapped
-// expression and evaluates it. If the wrapped expression evaluates to `true`,
-// control flow proceeds with no visible side-effects. If the expression
-// evaluates to `false`, a diagnostic is reported and program execution is
-// aborted. In either case, all registered expectation handlers are notified of
-// the result.
-#define NTH_REQUIRE(...)                                                       \
-  NTH_IF(NTH_IS_PARENTHESIZED(NTH_FIRST_ARGUMENT(__VA_ARGS__)),                \
-         NTH_DEBUG_INTERNAL_TRACE_REQUIRE_WITH_VERBOSITY,                      \
-         NTH_DEBUG_INTERNAL_TRACE_REQUIRE)                                     \
-  (__VA_ARGS__)
-
-// `NTH_ENSURE`:
-//
-// The `NTH_ENSURE` macro injects tracing into the wrapped expression and
-// evaluates it. If the wrapped expression evaluates to `true`, control flow
-// proceeds with no visible side-effects. If the expression evaluates to
-// `false`, a diagnostic is reported and program execution is aborted. In either
-// case, all registered expectation handlers are notified of the result.
-#define NTH_ENSURE(...)                                                        \
-  NTH_IF(NTH_IS_PARENTHESIZED(NTH_FIRST_ARGUMENT(__VA_ARGS__)),                \
-         NTH_DEBUG_INTERNAL_TRACE_ENSURE_WITH_VERBOSITY,                       \
-         NTH_DEBUG_INTERNAL_TRACE_ENSURE)                                      \
-  (__VA_ARGS__)
-
 // `NTH_TRACE_DECLARE_API` and `NTH_TRACE_DECLARE_API_TEMPLATE`:
 //
 // Declares the member functions of the type `type` which must be traceable.
@@ -136,18 +72,16 @@
 // ```
 //
 #define NTH_TRACE_DECLARE_API(type, member_function_names)                     \
-  template <>                                                                  \
   NTH_DEBUG_INTERNAL_TRACE_DECLARE_API(type, member_function_names)
-
 #define NTH_TRACE_DECLARE_API_TEMPLATE(type, member_function_names)            \
-  NTH_DEBUG_INTERNAL_TRACE_DECLARE_API(type, member_function_names)
+  NTH_DEBUG_INTERNAL_TRACE_DECLARE_API_TEMPLATE(type, member_function_names)
 
 namespace nth::debug {
 
 template <CompileTimeString S, int &..., typename T>
-constexpr internal_trace::Traced<internal_trace::Identity<S>, T const &> Trace(
-    NTH_ATTRIBUTE(lifetimebound) T const &value) {
-  return internal_trace::Traced<internal_trace::Identity<S>, T const &>(value);
+constexpr auto Trace(NTH_ATTRIBUTE(lifetimebound) T const &value) {
+  return internal_trace::Traced<internal_contracts::IdentityAction<S>,
+                                T const &>(value);
 }
 
 // A concept matching any traced type.
@@ -161,4 +95,4 @@ constexpr decltype(auto) EvaluateTraced(auto const &value) {
 
 }  // namespace nth::debug
 
-#endif  // NTH_DEBUG_TRACE_H
+#endif  // NTH_DEBUG_CONTRACTS_TRACING_H

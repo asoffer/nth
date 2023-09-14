@@ -1,7 +1,7 @@
 #include "nth/debug/property/property.h"
 
 #include "nth/debug/log/stderr_log_sink.h"
-#include "nth/debug/trace/trace.h"
+#include "nth/debug/contracts/contracts.h"
 
 int main() {
   using ::nth::debug::GreaterThan;

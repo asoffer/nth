@@ -7,23 +7,23 @@
 #include <span>
 
 #include "nth/base/macros.h"
+#include "nth/debug/contracts/contracts.h"
 #include "nth/debug/property/property.h"
 #include "nth/debug/trace/internal/implementation.h"
-#include "nth/debug/trace/trace.h"
 #include "nth/test/arguments.h"
 #include "nth/test/fuzz.h"
 #include "nth/test/internal/test.h"
 
-// This library is a testing library built on top of "//nth/debug/trace". While
-// "//nth/debug/trace" provides the `NTH_REQUIRE` and `NTH_ENSURE` macros to be
-// used in production code, this library provides several more macros with
-// similar syntax to be used in tests. Specifically, it provides `NTH_EXPECT`
-// which validates its argument and continues execution regardless of outcome.
-// It also provides `NTH_ASSERT` which validates its argument and does not
-// continue test execution in the event that the argument evaluates to `false`.
-// Tests can be defined with the `NTH_TEST` macro, may be parameterized, even
-// with templates arguments, and may be invoked via `NTH_INVOKE_TEST`. Details
-// can be found below.
+// This library is a testing library built on top of "//nth/debug/contracts".
+// While "//nth/debug/contracts" provides the `NTH_REQUIRE` and `NTH_ENSURE`
+// macros to be used in production code, this library provides several more
+// macros with similar syntax to be used in tests. Specifically, it provides
+// `NTH_EXPECT` which validates its argument and continues execution regardless
+// of outcome. It also provides `NTH_ASSERT` which validates its argument and
+// does not continue test execution in the event that the argument evaluates to
+// `false`. Tests can be defined with the `NTH_TEST` macro, may be
+// parameterized, even with templates arguments, and may be invoked via
+// `NTH_INVOKE_TEST`. Details can be found below.
 
 // `NTH_TEST`:
 //

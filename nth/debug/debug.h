@@ -15,13 +15,13 @@
 // This library provides a flexible `NTH_LOG` statement-macro for debug logging.
 #include "nth/debug/log/log.h"
 
-// Contracts ("//nth/debug:contracts"):
+// Contracts ("//nth/debug/contracts"):
 //
 // This library allows user code to define preconditions and postconditions on
 // their code and control how/when those conditions are validated.
-#include "nth/debug/trace/trace.h"
+#include "nth/debug/contracts/contracts.h"
 
-// Properties ("//nth/debug:property"):
+// Properties ("//nth/debug/property"):
 //
 // This library allows users to define their own properties to be used with both
 // test assertions and contracts.

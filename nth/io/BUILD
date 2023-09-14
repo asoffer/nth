@@ -24,7 +24,7 @@ cc_library(
     srcs = ["file.cc"],
     deps = [
         ":file_path",
-        "//nth/debug/trace",
+        "//nth/debug/contracts",
         "//nth/utility:no_destructor",
     ],
 )

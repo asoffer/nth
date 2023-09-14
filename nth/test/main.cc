@@ -1,6 +1,7 @@
 #include <cstdint>
 
 #include "absl/synchronization/mutex.h"
+#include "nth/debug/expectation_result.h"
 #include "nth/debug/log/log.h"
 #include "nth/debug/log/stderr_log_sink.h"
 #include "nth/test/test.h"

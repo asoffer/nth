@@ -1,9 +1,9 @@
-#include "nth/debug/trace/internal/implementation.h"
+#include "nth/debug/contracts/internal/responder.h"
 
 #include "absl/synchronization/mutex.h"
 #include "nth/debug/expectation_result.h"
 
-namespace nth::debug::internal_trace {
+namespace nth::debug::internal_contracts {
 
 void ResponderBase::RecordExpectationResult(bool result) {
   set_   = true;
@@ -42,8 +42,10 @@ bool ResponderBase::set_impl(char const *expression, bool b) {
 
     WriteExpression(printer, log_entry, expression);
 
-    TracedTraversal traverser(printer);
-    for (auto const *element : bool_value_stash) { traverser(*element); }
+    internal_trace::TracedTraversal traverser(printer);
+    for (auto const *element : internal_trace::bool_value_stash) {
+      traverser(*element);
+    }
     log_entry.demarcate();
 
     printer.write("Tree");
@@ -52,11 +54,11 @@ bool ResponderBase::set_impl(char const *expression, bool b) {
     for (auto *sink : nth::internal_debug::RegisteredLogSinks()) {
       sink->send(*line_, log_entry);
     }
-    bool_value_stash.clear();
+    internal_trace::bool_value_stash.clear();
   }
   return value_;
 }
 
-ResponderBase::~ResponderBase() { bool_value_stash.clear(); }
+ResponderBase::~ResponderBase() { internal_trace::bool_value_stash.clear(); }
 
-}  // namespace nth::debug::internal_trace
+}  // namespace nth::debug::internal_contracts

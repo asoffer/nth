@@ -7,7 +7,7 @@ cc_library(
         "//nth/debug/property/internal:concepts",
         "//nth/debug/property/internal:implementation",
         "//nth/debug/property/internal:property_formatter",
-        "//nth/debug/trace",
+        "//nth/debug/contracts",
     ],
 )
 
@@ -17,6 +17,6 @@ cc_test(
     deps = [
         ":property",
         "//nth/debug/log:stderr_log_sink",
-        "//nth/debug/trace",
+        "//nth/debug/contracts",
     ],
 )

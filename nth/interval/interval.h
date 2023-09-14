@@ -6,7 +6,7 @@
 #include <cstddef>
 #include <utility>
 
-#include "nth/debug/trace/trace.h"
+#include "nth/debug/debug.h"
 
 namespace nth {
 

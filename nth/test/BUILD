@@ -49,7 +49,7 @@ cc_library(
       ":fuzz",
       "//nth/base:macros",
       "//nth/debug/property",
-      "//nth/debug/trace",
+      "//nth/debug/contracts",
       "//nth/test/internal:test",
     ],
 )

@@ -4,7 +4,7 @@ cc_library(
     name = "interval",
     hdrs = ["interval.h"],
     deps = [
-      "//nth/debug/trace",
+      "//nth/debug",
     ],
 )
 

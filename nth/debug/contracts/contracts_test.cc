@@ -1,23 +1,24 @@
-#include "nth/debug/trace/trace.h"
+#include "nth/debug/contracts/contracts.h"
 
 #include <vector>
 
+#include "nth/debug/expectation_result.h"
 #include "nth/debug/internal/raw_check.h"
 
 #define NTH_DEBUG_INTERNAL_VALIDATE_NO_ABORT(...)                              \
   do {                                                                         \
-    nth::debug::internal_trace::AbortingResponder::abort_count = 0;            \
+    nth::debug::internal_contracts::AbortingResponder::abort_count = 0;        \
     { __VA_ARGS__; }                                                           \
-    if (nth::debug::internal_trace::AbortingResponder::abort_count != 0) {     \
+    if (nth::debug::internal_contracts::AbortingResponder::abort_count != 0) { \
       std::abort();                                                            \
     }                                                                          \
   } while (false)
 
 #define NTH_DEBUG_INTERNAL_VALIDATE_ABORTS(...)                                \
   do {                                                                         \
-    nth::debug::internal_trace::AbortingResponder::abort_count = 0;            \
+    nth::debug::internal_contracts::AbortingResponder::abort_count = 0;        \
     { __VA_ARGS__; }                                                           \
-    if (nth::debug::internal_trace::AbortingResponder::abort_count != 1) {     \
+    if (nth::debug::internal_contracts::AbortingResponder::abort_count != 1) { \
       std::abort();                                                            \
     }                                                                          \
   } while (false)
@@ -95,7 +96,6 @@ void EnsureOnlyAbortsOnFalse() {
 
 void EnsureEvaluatesAtEndOfScope() {
   ResetCounts();
-  nth::debug::internal_trace::AbortingResponder::abort_count = 0;
   NTH_DEBUG_INTERNAL_VALIDATE_NO_ABORT({
     bool b = false;
     NTH_ENSURE(b);

@@ -15,8 +15,7 @@
 #include <vector>
 
 #include "nth/base/attributes.h"
-#include "nth/debug/log/log.h"
-#include "nth/debug/trace/trace.h"
+#include "nth/debug/debug.h"
 #include "nth/io/printer.h"
 #include "nth/meta/type.h"
 #include "nth/process/exit_code.h"

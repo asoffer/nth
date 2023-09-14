@@ -4,7 +4,7 @@ cc_library(
     name = "debug",
     hdrs = ["debug.h"],
     deps = [
-        "//nth/debug/trace",
+        "//nth/debug/contracts",
         "//nth/debug/log",
         "//nth/debug/property",
         "//nth/debug:source_location",
@@ -36,37 +36,49 @@ cc_test(
 cc_library(
     name = "source_location",
     hdrs = ["source_location.h"],
-    deps = ["//nth/utility:unconstructible"],
+    deps = [
+        "//nth/utility:unconstructible",
+    ],
 )
 
 cc_test(
     name = "source_location_test",
     srcs = ["source_location_test.cc"],
-    deps = [":source_location"],
+    deps = [
+        ":source_location",
+    ],
 )
 
 cc_library(
     name = "unimplemented",
     hdrs = ["unimplemented.h"],
-    deps = ["//nth/debug/internal:unimplemented"],
+    deps = [
+        "//nth/debug/internal:unimplemented",
+    ],
 )
 
 cc_test(
     name = "unimplemented_compiles_test",
     srcs = ["unimplemented_compiles_test.cc"],
-    deps = [":unimplemented"],
+    deps = [
+        ":unimplemented",
+    ],
 )
 
 cc_library(
     name = "unreachable",
     hdrs = ["unreachable.h"],
-    deps = ["//nth/debug/internal:unreachable"],
+    deps = [
+        "//nth/debug/internal:unreachable",
+    ],
 )
 
 cc_test(
     name = "unreachable_compiles_test",
     srcs = ["unreachable_compiles_test.cc"],
-    deps = [":unreachable"],
+    deps = [
+        ":unreachable",
+    ],
 )
 
 cc_test(
