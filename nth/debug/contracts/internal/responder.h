@@ -41,7 +41,9 @@ struct AbortingResponder : ResponderBase {
       constexpr size_t bound = 1024;
       bounded_string_printer printer(log_entry.data(), bound);
 
-      internal_trace::TraverseTraced(printer, w.value);
+      std::vector<internal_trace::TraversalAction> stack;
+      internal_trace::VTable(w.value).traverse(std::addressof(w.value), stack);
+      internal_trace::TraverseTraced(printer, std::move(stack));
       log_entry.demarcate();
 
       printer.write("Property");
@@ -74,7 +76,9 @@ struct AbortingResponder : ResponderBase {
       printer.write("Tree");
       log_entry.demarcate();
 
-      internal_trace::TraverseTraced(printer, b);
+      std::vector<internal_trace::TraversalAction> stack;
+      internal_trace::VTable(b).traverse(std::addressof(b), stack);
+      internal_trace::TraverseTraced(printer, std::move(stack));
       log_entry.demarcate();
 
       Send(log_entry);
@@ -118,7 +122,9 @@ struct NoOpResponder : ResponderBase {
       constexpr size_t bound = 1024;
       bounded_string_printer printer(log_entry.data(), bound);
 
-      internal_trace::TraverseTraced(printer, w.value);
+      std::vector<internal_trace::TraversalAction> stack;
+      internal_trace::VTable(w.value).traverse(std::addressof(w.value), stack);
+      internal_trace::TraverseTraced(printer, std::move(stack));
       log_entry.demarcate();
 
       printer.write("Property");
@@ -151,7 +157,9 @@ struct NoOpResponder : ResponderBase {
       printer.write("Tree");
       log_entry.demarcate();
 
-      internal_trace::TraverseTraced(printer, b);
+      std::vector<internal_trace::TraversalAction> stack;
+      internal_trace::VTable(b).traverse(std::addressof(b), stack);
+      internal_trace::TraverseTraced(printer, std::move(stack));
       log_entry.demarcate();
 
       Send(log_entry);

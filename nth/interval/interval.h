@@ -96,6 +96,14 @@ struct Interval : internal_interval::LengthBase<T> {
     }
   }
 
+  friend void NthPrint(auto& p, auto& f, Interval const& i) {
+    p.write("[");
+    f(p, i.lower_bound_);
+    p.write(", ");
+    f(p, i.upper_bound_);
+    p.write(")");
+  }
+
  private:
   T lower_bound_, upper_bound_;
 };

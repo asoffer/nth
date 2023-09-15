@@ -51,6 +51,9 @@ struct TraversalAction {
   uintptr_t data_;
 };
 
+void TraverseTraced(bounded_string_printer &printer,
+                    std::vector<TraversalAction> &&stack);
+
 }  // namespace nth::debug::internal_trace
 
 #endif  // NTH_DEBUG_TRACE_INTERNAL_TRAVERSAL_ACTION_H

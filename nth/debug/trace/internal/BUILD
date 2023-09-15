@@ -100,6 +100,7 @@ cc_library(
 cc_library(
     name = "traversal_action",
     hdrs = ["traversal_action.h"],
+    srcs = ["traversal_action.cc"],
     deps = [
         ":formatter",
         "//nth/io:string_printer",

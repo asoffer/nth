@@ -85,6 +85,15 @@ struct IntervalSet {
   // invoked on this `IntervalSet`.
   std::span<Interval<T> const> intervals() const { return intervals_; }
 
+  friend void NthPrint(auto& p, auto& f, IntervalSet const& is) {
+    std::string_view separator = "{";
+    for (auto const& i : is.intervals_) {
+      p.write(std::exchange(separator, ", "));
+      f(p, i);
+    }
+    p.write("}");
+  }
+
  private:
   using iterator = typename std::vector<Interval<T>>::iterator;
 
