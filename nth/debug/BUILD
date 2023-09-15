@@ -4,12 +4,13 @@ cc_library(
     name = "debug",
     hdrs = ["debug.h"],
     deps = [
+        ":source_location",
+        ":unimplemented",
+        ":unreachable",
         "//nth/debug/contracts",
         "//nth/debug/log",
         "//nth/debug/property",
-        "//nth/debug:source_location",
-        "//nth/debug:unimplemented",
-        "//nth/debug:unreachable",
+        "//nth/debug/trace",
     ],
 )
 

@@ -4,7 +4,7 @@
 #include "nth/base/macros.h"
 #include "nth/debug/contracts/internal/on_exit.h"
 #include "nth/debug/contracts/internal/responder.h"
-#include "nth/debug/contracts/internal/trace_injector.h"
+#include "nth/debug/trace/internal/injector.h"
 
 namespace nth::debug::internal_contracts {
 

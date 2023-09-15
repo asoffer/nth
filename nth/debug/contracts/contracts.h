@@ -2,7 +2,7 @@
 #define NTH_DEBUG_CONTRACTS_CONTRACTS_H
 
 #include "nth/debug/contracts/internal/contracts.h"
-#include "nth/debug/contracts/tracing.h"
+#include "nth/debug/trace/trace.h"
 
 // The "//nth/debug/contracts" library is aimed at producing runtime assertions
 // that improve upon the `assert` macro defined in the `<cassert>` standard
@@ -31,11 +31,26 @@
 // }
 // ```
 //
+// One may also test properties, defined in the "//nth/debug/properties"
+// library, using `operator>>=`. For example:
+//
+// ```
+// std::vector<int> my_vector = {10, -2};
+// NTH_REQUIRE(my_vector >>= ElementsAreInOrder(GreaterThan(5), LessThan(3)));
+// ```
+//
 // Debug assertions are not free, and in many build environments prohibitively
 // expensive to turn on for production code. This library provides several
 // mechanisms to give users fine-grained control over when assertions should be
 // evaulated and what the cost of evaluation is, using the same verbosity hooks
 // as other libraries provided in "//nth/debug".
+//
+// On a best-effort basis, these macros attempt to peer into the contents of the
+// boolean expression so as to provide improved error messages regarding the
+// values of subexpressions. If, for example `NTH_REQUIRE(a == b * c)` fails,
+// the error message can helpfully tell you the values of `a`, `b`, and `c`. We
+// call this functionality "expression tracing". More documentation can be found
+// in "nth/debug/trace/trace.h"
 //
 // These macros also play nicely with the "//nth/test" library, reporting test
 // failures if they are triggered inside a test (though using "//nth/test" is
@@ -45,7 +60,7 @@
 // that it provides a mechanism for tracing computations so that the debugging
 // facilities may provide an enhanced debugging experience. For details on how
 // this works and how it can be utilized, read the documentation in
-// "nth/contracts/tracing.h"
+// "nth/debug/trace/trace.h"
 //
 // `NTH_REQUIRE`:
 //

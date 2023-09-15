@@ -1,7 +1,13 @@
-#ifndef NTH_DEBUG_TRACE_INTERNAL_OPERATORS_H
-#define NTH_DEBUG_TRACE_INTERNAL_OPERATORS_H
+#ifndef NTH_DEBUG_TRACE_INTERNAL_TRACE_H
+#define NTH_DEBUG_TRACE_INTERNAL_TRACE_H
 
+#include <type_traits>
+#include <utility>
+
+#include "nth/base/macros.h"
+#include "nth/debug/trace/internal/api.h"
 #include "nth/debug/trace/internal/implementation.h"
+#include "nth/meta/type.h"
 
 namespace nth::debug::internal_trace {
 
@@ -24,7 +30,7 @@ namespace nth::debug::internal_trace {
   constexpr auto operator op(L const &lhs, R const &rhs) requires(             \
       ::nth::debug::internal_trace::TracedImpl<L> or                           \
       ::nth::debug::internal_trace::TracedImpl<R>) {                           \
-    return ::nth::debug::internal_trace::Traced<                               \
+    return ::nth::debug::internal_trace::TracedExpr<                           \
         Op, ::nth::debug::internal_trace::Erased<L>,                           \
         ::nth::debug::internal_trace::Erased<R>>(lhs, rhs);                    \
   }
@@ -71,7 +77,7 @@ template <typename L, typename R>
 constexpr auto operator,(L const &lhs, R const &rhs) requires(
     ::nth::debug::internal_trace::TracedImpl<L> or
     ::nth::debug::internal_trace::TracedImpl<R>) {
-  return ::nth::debug::internal_trace::Traced<
+  return ::nth::debug::internal_trace::TracedExpr<
       Comma, ::nth::debug::internal_trace::Erased<L>,
       ::nth::debug::internal_trace::Erased<R>>(lhs, rhs);
 }
@@ -91,7 +97,7 @@ constexpr auto operator,(L const &lhs, R const &rhs) requires(
   };                                                                           \
   template <::nth::debug::internal_trace::TracedImpl T>                        \
   constexpr auto operator op(T const &t) {                                     \
-    return ::nth::debug::internal_trace::Traced<                               \
+    return ::nth::debug::internal_trace::TracedExpr<                           \
         Op, ::nth::debug::internal_trace::Erased<T>>(t);                       \
   }
 
@@ -106,4 +112,4 @@ NTH_INTERNAL_DEFINE_PREFIX_UNARY_OPERATOR(Ref, *)
 
 }  // namespace nth::debug::internal_trace
 
-#endif  // NTH_DEBUG_TRACE_INTERNAL_OPERATORS_H
+#endif  // NTH_DEBUG_TRACE_INTERNAL_TRACE_H

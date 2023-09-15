@@ -9,7 +9,7 @@
 #include "nth/debug/property/internal/concepts.h"
 #include "nth/debug/property/internal/implementation.h"
 #include "nth/debug/property/internal/property_formatter.h"
-#include "nth/debug/contracts/contracts.h"
+#include "nth/debug/trace/trace.h"
 
 namespace nth::debug {
 
@@ -60,8 +60,7 @@ struct Property
 // To test that `my_vector` contains exactly two elements, the first of which is
 // greater than 5 and the second of which is less than three.
 template <CompileTimeString Name, typename F, typename... Ts>
-auto operator>>=(nth::debug::Traced auto const& value,
-                 Property<Name, F, Ts...> const& property) {
+auto operator>>=(auto const& value, Property<Name, F, Ts...> const& property) {
   return ::nth::debug::internal_property::PropertyWrap<
       Property<Name, F, Ts...> const&, decltype(value)>{property, value};
 }

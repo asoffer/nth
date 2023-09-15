@@ -1,12 +1,14 @@
-#ifndef NTH_DEBUG_CONTRACTS_INTERNAL_TRACE_ACTION_H
-#define NTH_DEBUG_CONTRACTS_INTERNAL_TRACE_ACTION_H
+#ifndef NTH_DEBUG_TRACE_INTERNAL_ACTION_H
+#define NTH_DEBUG_TRACE_INTERNAL_ACTION_H
 
 #include "nth/meta/compile_time_string.h"
 
-namespace nth::debug::internal_contracts {
+namespace nth::debug::internal_trace {
 
 template <nth::CompileTimeString S>
 struct IdentityAction {
+  using NthInternalDebugIdentityAction = void;
+
   static constexpr auto name = S;
 
   template <typename T>
@@ -18,6 +20,6 @@ struct IdentityAction {
   }
 };
 
-}  // namespace nth::debug::internal_contracts
+}  // namespace nth::debug::internal_trace
 
-#endif  // NTH_DEBUG_CONTRACTS_INTERNAL_TRACE_ACTION_H
+#endif  // NTH_DEBUG_TRACE_INTERNAL_ACTION_H

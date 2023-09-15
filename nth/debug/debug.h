@@ -27,6 +27,14 @@
 // test assertions and contracts.
 #include "nth/debug/property/property.h"
 
+// Expression Tracing ("//nth/debug/trace"):
+//
+// Expression tracing is a mechanism that, with minimal or no explicit
+// annotation in the code, tracks expression evaluation. This library is
+// primarily tool used to provide good error messages as part of the contracts
+// library.
+#include "nth/debug/trace/trace.h"
+
 // Source Location ("//nth/debug:source_location"):
 //
 // This library provides a mechanism for accessing source location information
@@ -53,7 +61,7 @@
 // the requested behavior should happen under which circumstances. Each library
 // documents precisely how verbosity affects its behavior.
 //
-// As an example, 
+// As an example,
 //
 // ```
 // NTH_LOG((v.always), "Log this line no matter what!");

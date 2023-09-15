@@ -4,7 +4,7 @@ cc_library(
     name = "contracts",
     hdrs = ["contracts.h"],
     deps = [
-        ":tracing",
+        "//nth/debug/trace",
         "//nth/debug/contracts/internal:contracts"
     ],
 )
@@ -20,15 +20,3 @@ cc_test(
         "//nth/debug/internal:raw_check",
     ],
 )
-
-cc_library(
-    name = "tracing",
-    hdrs = ["tracing.h"],
-    deps = [
-        "//nth/base:attributes",
-        "//nth/base:macros",
-        "//nth/debug/trace/internal:implementation",
-        "//nth/meta:compile_time_string",
-    ],
-)
-

@@ -9,8 +9,8 @@ cc_library(
     deps = [
         ":on_exit",
         ":responder",
-        ":trace_injector",
         "//nth/base:macros",
+        "//nth/debug/trace/internal:injector",
     ],
 )
 
@@ -31,21 +31,5 @@ cc_library(
         "//nth/debug:expectation_result",
         "//nth/debug/trace/internal:implementation",
         "@com_google_absl//absl/synchronization",
-    ],
-)
-
-cc_library(
-    name = "trace_injector",
-    hdrs = ["trace_injector.h"],
-    deps = [
-        "//nth/debug/trace/internal:implementation",
-    ],
-)
-
-cc_library(
-    name = "trace_action",
-    hdrs = ["trace_action.h"],
-    deps = [
-        "//nth/meta:compile_time_string",
     ],
 )
