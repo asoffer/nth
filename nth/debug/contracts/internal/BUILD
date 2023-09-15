@@ -29,6 +29,8 @@ cc_library(
     deps = [
         "//nth/debug/log",
         "//nth/debug:expectation_result",
+        "//nth/debug/property/internal:concepts",
+        "//nth/debug/property/internal:property_formatter",
         "//nth/debug/trace/internal:implementation",
         "@com_google_absl//absl/synchronization",
     ],

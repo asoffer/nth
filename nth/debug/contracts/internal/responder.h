@@ -5,6 +5,8 @@
 #include <cstdlib>
 
 #include "nth/debug/log/log.h"
+#include "nth/debug/property/internal/concepts.h"
+#include "nth/debug/property/internal/property_formatter.h"
 #include "nth/debug/trace/internal/implementation.h"
 
 namespace nth::debug::internal_contracts {
@@ -39,8 +41,7 @@ struct AbortingResponder : ResponderBase {
       constexpr size_t bound = 1024;
       bounded_string_printer printer(log_entry.data(), bound);
 
-      internal_trace::TracedTraversal traverser(printer);
-      traverser(w.value);
+      internal_trace::TraverseTraced(printer, w.value);
       log_entry.demarcate();
 
       printer.write("Property");
@@ -73,8 +74,7 @@ struct AbortingResponder : ResponderBase {
       printer.write("Tree");
       log_entry.demarcate();
 
-      internal_trace::TracedTraversal traverser(printer);
-      traverser(b);
+      internal_trace::TraverseTraced(printer, b);
       log_entry.demarcate();
 
       Send(log_entry);
@@ -118,8 +118,7 @@ struct NoOpResponder : ResponderBase {
       constexpr size_t bound = 1024;
       bounded_string_printer printer(log_entry.data(), bound);
 
-      internal_trace::TracedTraversal traverser(printer);
-      traverser(w.value);
+      internal_trace::TraverseTraced(printer, w.value);
       log_entry.demarcate();
 
       printer.write("Property");
@@ -152,8 +151,7 @@ struct NoOpResponder : ResponderBase {
       printer.write("Tree");
       log_entry.demarcate();
 
-      internal_trace::TracedTraversal traverser(printer);
-      traverser(b);
+      internal_trace::TraverseTraced(printer, b);
       log_entry.demarcate();
 
       Send(log_entry);

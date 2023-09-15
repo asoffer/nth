@@ -42,9 +42,8 @@ bool ResponderBase::set_impl(char const *expression, bool b) {
 
     WriteExpression(printer, log_entry, expression);
 
-    internal_trace::TracedTraversal traverser(printer);
     for (auto const *element : internal_trace::bool_value_stash) {
-      traverser(*element);
+      internal_trace::TraverseTraced(printer, *element);
     }
     log_entry.demarcate();
 

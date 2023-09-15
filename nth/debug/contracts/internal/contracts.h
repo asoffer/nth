@@ -66,9 +66,9 @@ inline constexpr char const EnsureLogLine[] =
                 ::nth::debug::internal_contracts::EnsureLogLine,               \
                 NthInternalourceLocation);                                     \
         NthInternalResponder.set_log_line(NthInternalLogLine);                 \
-        if (NthInternalResponder.set(                                          \
-                (#__VA_ARGS__),                                                \
-                NTH_DEBUG_INTERNAL_TRACE_INJECTED_EXPR(__VA_ARGS__))) {}       \
+        NthInternalResponder.set(                                              \
+            (#__VA_ARGS__),                                                    \
+            NTH_DEBUG_INTERNAL_TRACE_INJECTED_EXPR(__VA_ARGS__));              \
       },                                                                       \
       nth::source_location::current());                                        \
   static_assert(true)

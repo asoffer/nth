@@ -51,9 +51,9 @@ cc_library(
         ":concepts",
         ":formatter",
         ":traced_expr_base",
+        ":traced_value",
+        ":traversal_action",
         "//nth/base:attributes",
-        "//nth/debug/property/internal:concepts",
-        "//nth/debug/property/internal:property_formatter",
         "//nth/debug:expectation_result",
         "//nth/meta:type",
         "//nth/io:string_printer",
@@ -84,6 +84,24 @@ cc_library(
     name = "traced_expr_base",
     hdrs = ["traced_expr_base.h"],
     deps = [
+        ":traversal_action",
+    ],
+)
+
+cc_library(
+    name = "traced_value",
+    hdrs = ["traced_value.h"],
+    deps = [
+        ":traced_expr_base",
+        "//nth/base:attributes",
+    ],
+)
+
+cc_library(
+    name = "traversal_action",
+    hdrs = ["traversal_action.h"],
+    deps = [
         ":formatter",
+        "//nth/io:string_printer",
     ],
 )
