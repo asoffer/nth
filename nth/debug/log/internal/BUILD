@@ -13,7 +13,7 @@ cc_library(
     deps = [
         ":voidifier",
         "//nth/base:attributes",
-        "//nth/configuration:verbosity",
+        "//nth/configuration:log",
         "//nth/io:string_printer",
     ],
 )

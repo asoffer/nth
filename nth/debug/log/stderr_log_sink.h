@@ -1,6 +1,7 @@
 #ifndef NTH_DEBUG_LOG_STDERR_LOG_SINK_H
 #define NTH_DEBUG_LOG_STDERR_LOG_SINK_H
 
+#include "nth/configuration/log.h"
 #include "nth/debug/log/entry.h"
 #include "nth/debug/log/line.h"
 #include "nth/debug/log/sink.h"
@@ -11,7 +12,7 @@ namespace nth {
 
 struct StdErrLogSink : LogSink {
   void send(LogLine const& line, LogEntry const& log_entry) override {
-    auto formatter = nth::config::default_formatter();
+    auto formatter = nth::config::log_formatter();
 
     nth::Interpolate<"\x1b[0;34m{} {}:{}]\x1b[0m ">(
         stderr_printer, formatter, line.source_location().file_name(),

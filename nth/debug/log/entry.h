@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 
+#include "nth/configuration/log.h"
 #include "nth/debug/log/internal/component_iterator.h"
 #include "nth/debug/log/line.h"
 #include "nth/debug/log/sink.h"
@@ -18,7 +19,7 @@ struct LogEntry {
 
   LogLineId id() const { return id_; }
 
- // private:
+  // private:
   template <size_t>
   friend struct nth::internal_debug::LogLineWithArity;
 
@@ -42,10 +43,10 @@ Voidifier LogLineWithArity<PlaceholderCount>::operator<<=(
         InterpolationArguments<PlaceholderCount> const& entry) const {
   LogEntry log_entry(id(), PlaceholderCount);
 
-  constexpr size_t bound = 1024;
-  bounded_string_printer printer(log_entry.data(), bound);
+  bounded_string_printer printer(log_entry.data(),
+                                 nth::config::log_print_bound);
 
-  auto formatter = nth::config::default_formatter();
+  auto formatter = nth::config::log_formatter();
   std::apply(
       [&](auto... entries) {
         ((formatter(printer, entries), log_entry.demarcate()), ...);

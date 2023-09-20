@@ -76,7 +76,7 @@ struct AbortingResponder : ResponderBase {
       printer.write("Property");
       log_entry.demarcate();
 
-      auto formatter = nth::config::default_formatter();
+      auto formatter = nth::config::trace_formatter();
       debug::internal_property::PropertyFormatter<decltype(formatter)>
           matcher_formatter(formatter);
       nth::Interpolate<"{}">(printer, matcher_formatter, w.property);
@@ -161,7 +161,7 @@ struct NoOpResponder : ResponderBase {
       printer.write("Property");
       log_entry.demarcate();
 
-      auto formatter = nth::config::default_formatter();
+      auto formatter = nth::config::trace_formatter();
       debug::internal_property::PropertyFormatter<decltype(formatter)>
           matcher_formatter(formatter);
       nth::Interpolate<"{}">(printer, matcher_formatter, w.property);

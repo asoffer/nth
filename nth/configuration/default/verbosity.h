@@ -3,7 +3,6 @@
 
 #include "nth/debug/internal/verbosity.h"
 #include "nth/io/environment_variable.h"
-#include "nth/strings/format/universal.h"
 
 namespace nth::config {
 namespace internal_default_verbosity {
@@ -20,10 +19,6 @@ inline decltype(auto) HardenedOrTest() {
 }
 
 }  // namespace internal_default_verbosity
-
-constexpr universal_formatter default_formatter() {
-  return universal_formatter({.depth = 4, .fallback = "..."});
-}
 
 inline const auto& default_log_verbosity_requirement = debug_verbosity.always;
 

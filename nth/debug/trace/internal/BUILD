@@ -41,16 +41,6 @@ cc_library(
         "//nth/base:attributes",
         "//nth/debug:expectation_result",
         "//nth/meta:type",
-        "//nth/utility:no_destructor",
-        "@com_google_absl//absl/synchronization",
-    ],
-)
-
-cc_library(
-    name = "report",
-    hdrs = ["report.h"],
-    deps = [
-        ":traced_expr_base",
     ],
 )
 

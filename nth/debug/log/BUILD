@@ -8,6 +8,7 @@ cc_library(
     deps = [
         ":line",
         ":sink",
+        "//nth/configuration:log",
         "//nth/debug/log/internal:component_iterator",
     ],
 )
@@ -61,6 +62,7 @@ cc_library(
         ":entry",
         ":line",
         ":sink",
+        "//nth/configuration:log",
         "//nth/io:file_printer",
         "//nth/strings:interpolate",
     ],
