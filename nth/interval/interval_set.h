@@ -86,6 +86,10 @@ struct IntervalSet {
   std::span<Interval<T> const> intervals() const { return intervals_; }
 
   friend void NthPrint(auto& p, auto& f, IntervalSet const& is) {
+    if (is.empty()) {
+      p.write("{}");
+      return;
+    }
     std::string_view separator = "{";
     for (auto const& i : is.intervals_) {
       p.write(std::exchange(separator, ", "));

@@ -46,7 +46,8 @@ bool ResponderBase::set_impl(char const *expression, bool b) {
     for (auto const *element : internal_trace::bool_value_stash) {
       stack.clear();
       internal_trace::VTable(*element).traverse(element, stack);
-      internal_trace::TraverseTraced(printer, std::move(stack));
+      TraversalPrinterContext context(printer);
+      context.Traverse(std::move(stack));
     }
     log_entry.demarcate();
 

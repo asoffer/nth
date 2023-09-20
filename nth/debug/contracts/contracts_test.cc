@@ -67,9 +67,6 @@ NTH_TRACE_DECLARE_API(Thing, (triple)(add)(value));
 template <typename T>
 NTH_TRACE_DECLARE_API_TEMPLATE(S<T>, (triple)(add)(value));
 
-static_assert(not nth::debug::Traced<int>);
-static_assert(nth::debug::Traced<decltype(nth::debug::Trace<"n">(3))>);
-
 static int success_count = 0;
 static int failure_count = 0;
 

@@ -4,7 +4,7 @@
 #include <type_traits>
 
 #include "nth/debug/property/internal/concepts.h"
-#include "nth/debug/trace/internal/action.h"
+#include "nth/debug/trace/internal/actions.h"
 #include "nth/debug/trace/internal/implementation.h"
 
 #define NTH_DEBUG_INTERNAL_TRACE_INJECTED_EXPR(...)                            \

@@ -7,15 +7,12 @@
 #include <vector>
 
 #include "nth/base/attributes.h"
-#include "nth/debug/trace/internal/action.h"
-#include "nth/debug/trace/internal/concepts.h"
-#include "nth/debug/trace/internal/formatter.h"
+#include "nth/debug/trace/internal/actions.h"
 #include "nth/debug/trace/internal/traced_expr_base.h"
 #include "nth/debug/trace/internal/traced_value.h"
 #include "nth/debug/trace/internal/traversal_action.h"
 #include "nth/io/string_printer.h"
 #include "nth/meta/type.h"
-#include "nth/strings/interpolate.h"
 
 namespace nth::debug::internal_trace {
 
@@ -30,16 +27,14 @@ constexpr VTable TraceVTableFor{
 inline VTable const &VTable(TracedExprBase const &t) { return *t.vtable_; }
 
 template <typename T>
-void Expansion(void const *ptr, formatter &, bounded_string_printer &,
-               std::vector<TraversalAction> &stack) {
+void Expansion(void const *ptr, std::vector<TraversalAction> &stack) {
   if constexpr (nth::debug::internal_trace::TracedImpl<T>) {
     auto &ref = *static_cast<T const *>(ptr);
     VTable(ref).traverse(std::addressof(ref), stack);
   } else {
     stack.push_back(TraversalAction::Self(
-        [](void const *ptr, formatter &f, bounded_string_printer &p,
-           std::vector<TraversalAction> &) {
-          f(p, *static_cast<T const *>(ptr));
+        [](void const *ptr, TraversalContext &context) {
+          context.write(*static_cast<T const *>(ptr));
         },
         ptr));
   }
@@ -56,8 +51,17 @@ struct TracedExpr : TracedValue<typename Action::template invoke_type<Ts...>> {
   using type                     = typename Action::template invoke_type<Ts...>;
   static constexpr auto argument_types = nth::type_sequence<Ts...>;
 
-  template <typename I>
-  auto operator[](I const &index);
+#if defined(__cpp_multidimensional_subscript)
+#define NTH_DEBUG_INTERNAL_MAYBE_VARIADIC ...
+#else  // defined(__cpp_multidimensional_subscript)
+#define NTH_DEBUG_INTERNAL_MAYBE_VARIADIC
+#endif  // defined(__cpp_multidimensional_subscript)
+
+  template <typename NTH_DEBUG_INTERNAL_MAYBE_VARIADIC I>
+  auto operator[](I const &NTH_DEBUG_INTERNAL_MAYBE_VARIADIC index);
+
+  template <typename... Arguments>
+  auto operator()(Arguments const &...arguments);
 
   constexpr TracedExpr(NTH_ATTRIBUTE(lifetimebound) Ts const &...ts)
       : TracedValue<type>(
@@ -76,9 +80,8 @@ struct TracedExpr : TracedValue<typename Action::template invoke_type<Ts...>> {
                   }) {
       using T = nth::type_t<nth::type_sequence<Ts...>.template get<0>()>;
       stack.push_back(TraversalAction::Self(
-          [](void const *ptr, formatter &f, bounded_string_printer &p,
-             std::vector<TraversalAction> &) {
-            f(p, *static_cast<std::remove_cvref_t<T> const *>(ptr));
+          [](void const *ptr, TraversalContext &context) {
+            context.write(*static_cast<std::remove_cvref_t<T> const *>(ptr));
           },
           ptrs_[0]));
     } else if constexpr (sizeof...(Ts) == 1) {
@@ -89,8 +92,9 @@ struct TracedExpr : TracedValue<typename Action::template invoke_type<Ts...>> {
       stack.push_back(TraversalAction::Last());
       stack.push_back(TraversalAction::Enter());
       stack.push_back(TraversalAction::Self(
-          [](void const *, formatter &, bounded_string_printer &printer,
-             std::vector<TraversalAction> &) { printer.write(Action::name); },
+          [](void const *, TraversalContext &context) {
+            context.Self(Action::name);
+          },
           this));
     } else {
       stack.push_back(TraversalAction::Exit());
@@ -106,8 +110,9 @@ struct TracedExpr : TracedValue<typename Action::template invoke_type<Ts...>> {
       std::swap(stack[last_pos], stack[last_pos + 1]);
       stack.push_back(TraversalAction::Enter());
       stack.push_back(TraversalAction::Self(
-          [](void const *, formatter &, bounded_string_printer &printer,
-             std::vector<TraversalAction> &) { printer.write(Action::name); },
+          [](void const *, TraversalContext &context) {
+            context.Self(Action::name);
+          },
           this));
     }
   }
@@ -138,26 +143,27 @@ struct EraseImpl<TracedExpr<Action, Ts...>> {
 template <typename T>
 using Erased = typename EraseImpl<T>::type;
 
-struct Index {
-  static constexpr char name[] = "operator[]";
-  template <typename T, typename I>
-  static constexpr decltype(auto) invoke(T const &t, I const &index) {
-    return ::nth::debug::internal_trace::Evaluate(
-        t)[::nth::debug::internal_trace::Evaluate(index)];
-  }
-  template <typename T, typename I>
-  using invoke_type = decltype(::nth::debug::internal_trace::Evaluate(
-      std::declval<T const &>())[::nth::debug::internal_trace::Evaluate(
-      std::declval<I const &>())]);
-};
-
 template <typename Action, typename... Ts>
-template <typename I>
-auto TracedExpr<Action, Ts...>::operator[](I const &index) {
+template <typename NTH_DEBUG_INTERNAL_MAYBE_VARIADIC I>
+auto TracedExpr<Action, Ts...>::operator[](
+    I const &NTH_DEBUG_INTERNAL_MAYBE_VARIADIC index) {
   return TracedExpr<Index,
                     ::nth::debug::internal_trace::Erased<
                         TracedValue<TracedExpr<Action, Ts...>>>,
-                    ::nth::debug::internal_trace::Erased<I>>(*this, index);
+                    ::nth::debug::internal_trace::Erased<I>>(
+      *this, index NTH_DEBUG_INTERNAL_MAYBE_VARIADIC);
+}
+
+#undef NTH_DEBUG_INTERNAL_MAYBE_VARIADIC
+
+template <typename Action, typename... Ts>
+template <typename... Arguments>
+auto TracedExpr<Action, Ts...>::operator()(Arguments const &...arguments) {
+  return TracedExpr<Invoke,
+                    ::nth::debug::internal_trace::Erased<
+                        TracedValue<TracedExpr<Action, Ts...>>>,
+                    ::nth::debug::internal_trace::Erased<Arguments>...>(
+      *this, arguments...);
 }
 
 }  // namespace nth::debug::internal_trace

@@ -5,7 +5,6 @@
 #include <string_view>
 #include <type_traits>
 
-#include "nth/debug/trace/internal/concepts.h"
 #include "nth/debug/trace/internal/implementation.h"
 
 namespace nth::debug::internal_trace {
@@ -22,10 +21,10 @@ template <typename T>
 struct Api;
 
 template <typename Action, typename... Ts>
-requires(
-    Traceable<Api<
-        std::remove_cvref_t<typename Action::template invoke_type<Ts...>>>>)  //
-    struct TracedExpr<Action, Ts...>
+requires(requires {
+  typename Api<std::remove_cvref_t<typename Action::template invoke_type<
+      Ts...>>>::NthInternalIsDebugTraceable;
+}) struct TracedExpr<Action, Ts...>
     : Api<std::remove_cvref_t<typename Action::template invoke_type<Ts...>>> {
   using action_type                    = Action;
   static constexpr auto argument_types = nth::type_sequence<Ts...>;

@@ -3,6 +3,8 @@
 
 #include <concepts>
 #include <cstdlib>
+#include <string_view>
+#include <vector>
 
 #include "nth/debug/log/log.h"
 #include "nth/debug/property/internal/concepts.h"
@@ -10,6 +12,31 @@
 #include "nth/debug/trace/internal/implementation.h"
 
 namespace nth::debug::internal_contracts {
+
+struct TraversalPrinterContext : internal_trace::TraversalContext {
+  explicit TraversalPrinterContext(bounded_string_printer &printer)
+      : internal_trace::TraversalContext(printer) {}
+
+  void Enter() override {
+    if (not chunks.empty()) {
+      chunks.back() = (chunks.back() == "\u2570\u2500 " ? "   " : "\u2502  ");
+    }
+    chunks.push_back("\u251c\u2500 ");
+  }
+
+  void Last() override { chunks.back() = "\u2570\u2500 "; }
+  void Exit() override { chunks.pop_back(); }
+
+  void Self(std::string_view s) override { printer().write(s); }
+
+  void SelfBeforeAction() override {
+    printer().write("    ");
+    for (std::string_view chunk : chunks) { printer().write(chunk); }
+  }
+  void SelfAfterAction() override { printer().write("\n"); }
+
+  std::vector<std::string_view> chunks;
+};
 
 struct ResponderBase {
   void RecordExpectationResult(bool result);
@@ -43,7 +70,8 @@ struct AbortingResponder : ResponderBase {
 
       std::vector<internal_trace::TraversalAction> stack;
       internal_trace::VTable(w.value).traverse(std::addressof(w.value), stack);
-      internal_trace::TraverseTraced(printer, std::move(stack));
+      TraversalPrinterContext context(printer);
+      context.Traverse(std::move(stack));
       log_entry.demarcate();
 
       printer.write("Property");
@@ -61,8 +89,10 @@ struct AbortingResponder : ResponderBase {
     return value_;
   }
 
-  bool set(char const *expression,
-           internal_trace::TracedEvaluatingTo<bool> auto const &b) {
+  template <typename B>
+  bool set(char const *expression, B const &b) requires(
+      internal_trace::TracedImpl<B>
+          and std::is_same_v<bool, std::remove_cvref_t<typename B::type>>) {
     RecordExpectationResult(Evaluate(b));
 
     if (not value_) {
@@ -78,7 +108,8 @@ struct AbortingResponder : ResponderBase {
 
       std::vector<internal_trace::TraversalAction> stack;
       internal_trace::VTable(b).traverse(std::addressof(b), stack);
-      internal_trace::TraverseTraced(printer, std::move(stack));
+      TraversalPrinterContext context(printer);
+      context.Traverse(std::move(stack));
       log_entry.demarcate();
 
       Send(log_entry);
@@ -124,7 +155,8 @@ struct NoOpResponder : ResponderBase {
 
       std::vector<internal_trace::TraversalAction> stack;
       internal_trace::VTable(w.value).traverse(std::addressof(w.value), stack);
-      internal_trace::TraverseTraced(printer, std::move(stack));
+      TraversalPrinterContext context(printer);
+      context.Traverse(std::move(stack));
       log_entry.demarcate();
 
       printer.write("Property");
@@ -142,8 +174,10 @@ struct NoOpResponder : ResponderBase {
     return value_;
   }
 
-  bool set(char const *expression,
-           internal_trace::TracedEvaluatingTo<bool> auto const &b) {
+  template <typename B>
+  bool set(char const *expression, B const &b) requires(
+      internal_trace::TracedImpl<B>
+          and std::is_same_v<bool, std::remove_cvref_t<typename B::type>>) {
     RecordExpectationResult(Evaluate(b));
 
     if (not value_) {
@@ -159,7 +193,8 @@ struct NoOpResponder : ResponderBase {
 
       std::vector<internal_trace::TraversalAction> stack;
       internal_trace::VTable(b).traverse(std::addressof(b), stack);
-      internal_trace::TraverseTraced(printer, std::move(stack));
+      TraversalPrinterContext context(printer);
+      context.Traverse(std::move(stack));
       log_entry.demarcate();
 
       Send(log_entry);

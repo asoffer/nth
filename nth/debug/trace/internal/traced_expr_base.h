@@ -24,10 +24,6 @@ template <typename T>
 concept TracedImpl =
     std::derived_from<T, nth::debug::internal_trace::TracedExprBase>;
 
-template <typename T, typename U>
-concept TracedEvaluatingTo =
-    TracedImpl<T> and std::is_same_v<U, std::remove_cvref_t<typename T::type>>;
-
 }  // namespace nth::debug::internal_trace
 
 #endif  // NTH_DEBUG_TRACE_INTERNAL_TRACED_EXPR_BASE_H

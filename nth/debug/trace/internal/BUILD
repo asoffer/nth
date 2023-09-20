@@ -4,9 +4,10 @@ package(default_visibility = [
 ])
 
 cc_library(
-    name = "action",
-    hdrs = ["action.h"],
+    name = "actions",
+    hdrs = ["actions.h"],
     deps = [
+        ":traced_value",
         "//nth/meta:compile_time_string",
     ],
 )
@@ -15,22 +16,7 @@ cc_library(
     name = "api",
     hdrs = ["api.h"],
     deps = [
-        ":concepts",
-    ],
-)
-
-cc_library(
-    name = "concepts",
-    hdrs = ["concepts.h"],
-    deps = [
-        "//nth/meta:compile_time_string",
-    ],
-)
-cc_library(
-    name = "formatter",
-    hdrs = ["formatter.h"],
-    deps = [
-        "//nth/strings/format:universal",
+        ":implementation",
     ],
 )
 
@@ -38,7 +24,7 @@ cc_library(
     name = "injector",
     hdrs = ["injector.h"],
     deps = [
-        ":action",
+        ":actions",
         ":implementation",
     ],
 )
@@ -47,17 +33,13 @@ cc_library(
     name = "implementation",
     hdrs = ["implementation.h"],
     deps = [
-        ":action",
-        ":concepts",
-        ":formatter",
+        ":actions",
         ":traced_expr_base",
         ":traced_value",
         ":traversal_action",
         "//nth/base:attributes",
         "//nth/debug:expectation_result",
         "//nth/meta:type",
-        "//nth/io:string_printer",
-        "//nth/strings:interpolate",
         "//nth/utility:no_destructor",
         "@com_google_absl//absl/synchronization",
     ],
@@ -75,6 +57,7 @@ cc_library(
     name = "trace",
     hdrs = ["trace.h"],
     deps = [
+        ":actions",
         ":api",
         ":implementation",
     ],
@@ -94,6 +77,7 @@ cc_library(
     deps = [
         ":traced_expr_base",
         "//nth/base:attributes",
+        "//nth/io:string_printer",
     ],
 )
 
@@ -102,7 +86,7 @@ cc_library(
     hdrs = ["traversal_action.h"],
     srcs = ["traversal_action.cc"],
     deps = [
-        ":formatter",
+        "//nth/strings/format:universal",
         "//nth/io:string_printer",
     ],
 )
