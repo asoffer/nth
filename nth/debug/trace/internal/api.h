@@ -6,16 +6,9 @@
 #include <type_traits>
 
 #include "nth/debug/trace/internal/implementation.h"
+#include "nth/hash/fnv1a.h"
 
 namespace nth::debug::internal_trace {
-
-// TODO: Extract into it's own library.
-constexpr uint64_t Fnv1a(std::string_view s) {
-  uint64_t hash        = 14695981039346656037u;
-  constexpr uint64_t p = 1099511628211;
-  for (char c : s) { hash = (hash * p) ^ static_cast<uint64_t>(c); }
-  return hash;
-}
 
 template <typename T>
 struct Api;

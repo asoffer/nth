@@ -17,6 +17,7 @@ cc_library(
     hdrs = ["api.h"],
     deps = [
         ":implementation",
+        "//nth/hash:fnv1a",
     ],
 )
 
