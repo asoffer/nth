@@ -6,6 +6,7 @@
 #include <string_view>
 #include <vector>
 
+#include "nth/configuration/trace.h"
 #include "nth/debug/log/log.h"
 #include "nth/debug/property/internal/concepts.h"
 #include "nth/debug/property/internal/property_formatter.h"
@@ -26,8 +27,6 @@ struct TraversalPrinterContext : internal_trace::TraversalContext {
 
   void Last() override { chunks.back() = "\u2570\u2500 "; }
   void Exit() override { chunks.pop_back(); }
-
-  void Self(std::string_view s) override { printer().write(s); }
 
   void SelfBeforeAction() override {
     printer().write("    ");
@@ -65,8 +64,8 @@ struct AbortingResponder : ResponderBase {
     if (not value_) {
       LogEntry log_entry(line_->id(), 1);
 
-      constexpr size_t bound = 1024;
-      bounded_string_printer printer(log_entry.data(), bound);
+      bounded_string_printer printer(log_entry.data(),
+                                     nth::config::trace_print_bound);
 
       std::vector<internal_trace::TraversalAction> stack;
       internal_trace::VTable(w.value).traverse(std::addressof(w.value), stack);
@@ -98,8 +97,8 @@ struct AbortingResponder : ResponderBase {
     if (not value_) {
       LogEntry log_entry(line_->id(), 1);
 
-      constexpr size_t bound = 1024;
-      bounded_string_printer printer(log_entry.data(), bound);
+      bounded_string_printer printer(log_entry.data(),
+                                     nth::config::trace_print_bound);
 
       WriteExpression(printer, log_entry, expression);
 
@@ -150,8 +149,8 @@ struct NoOpResponder : ResponderBase {
     if (not value_) {
       LogEntry log_entry(line_->id(), 1);
 
-      constexpr size_t bound = 1024;
-      bounded_string_printer printer(log_entry.data(), bound);
+      bounded_string_printer printer(log_entry.data(),
+                                     nth::config::trace_print_bound);
 
       std::vector<internal_trace::TraversalAction> stack;
       internal_trace::VTable(w.value).traverse(std::addressof(w.value), stack);
@@ -183,8 +182,8 @@ struct NoOpResponder : ResponderBase {
     if (not value_) {
       LogEntry log_entry(line_->id(), 1);
 
-      constexpr size_t bound = 1024;
-      bounded_string_printer printer(log_entry.data(), bound);
+      bounded_string_printer printer(log_entry.data(),
+                                     nth::config::trace_print_bound);
 
       WriteExpression(printer, log_entry, expression);
 

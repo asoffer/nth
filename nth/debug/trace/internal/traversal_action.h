@@ -5,8 +5,8 @@
 #include <string_view>
 #include <vector>
 
+#include "nth/configuration/trace.h"
 #include "nth/io/string_printer.h"
-#include "nth/strings/format/universal.h"
 
 namespace nth::debug::internal_trace {
 
@@ -67,12 +67,6 @@ struct TraversalAction {
   uintptr_t data_;
 };
 
-struct debug_formatter : private nth::universal_formatter {
-  debug_formatter()
-      : nth::universal_formatter({.depth = 3, .fallback = "..."}) {}
-  using nth::universal_formatter::operator();
-};
-
 struct TraversalContext {
   explicit TraversalContext(bounded_string_printer &printer)
       : printer_(printer) {}
@@ -81,7 +75,6 @@ struct TraversalContext {
   virtual void Last()                 = 0;
   virtual void Exit()                 = 0;
   virtual void SelfBeforeAction()     = 0;
-  virtual void Self(std::string_view) = 0;
   virtual void SelfAfterAction()      = 0;
 
   void Traverse(std::vector<TraversalAction> &&stack);
@@ -93,7 +86,7 @@ struct TraversalContext {
 
  private:
   bounded_string_printer &printer_;
-  debug_formatter formatter_;
+  nth::config::trace_formatter formatter_;
 };
 
 }  // namespace nth::debug::internal_trace

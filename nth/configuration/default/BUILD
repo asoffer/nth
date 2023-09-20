@@ -13,7 +13,16 @@ cc_library(
     ]
 )
 
+cc_library(
+    name = "trace",
+    hdrs = ["trace.h"],
+    deps = [
+        "//nth/strings/format:universal",
+    ]
+)
+
 nth_configuration(
     name = "default",
     verbosity = ":verbosity",
+    trace = ":trace",
 )

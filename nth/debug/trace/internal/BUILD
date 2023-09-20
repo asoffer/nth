@@ -86,7 +86,7 @@ cc_library(
     hdrs = ["traversal_action.h"],
     srcs = ["traversal_action.cc"],
     deps = [
-        "//nth/strings/format:universal",
+        "//nth/configuration:trace",
         "//nth/io:string_printer",
     ],
 )

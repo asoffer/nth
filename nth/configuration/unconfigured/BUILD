@@ -7,9 +7,9 @@ cc_library(
 )
 
 cc_library(
-    name = "debug",
+    name = "trace",
     copts = ["-ferror-limit=1"],
-    hdrs = ["debug.h"],
+    hdrs = ["trace.h"],
 )
 
 nth_configuration(

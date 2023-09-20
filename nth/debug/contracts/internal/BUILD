@@ -27,6 +27,7 @@ cc_library(
     hdrs = ["responder.h"],
     srcs = ["responder.cc"],
     deps = [
+        "//nth/configuration:trace",
         "//nth/debug/log",
         "//nth/debug:expectation_result",
         "//nth/debug/property/internal:concepts",

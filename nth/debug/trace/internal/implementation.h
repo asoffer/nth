@@ -93,7 +93,7 @@ struct TracedExpr : TracedValue<typename Action::template invoke_type<Ts...>> {
       stack.push_back(TraversalAction::Enter());
       stack.push_back(TraversalAction::Self(
           [](void const *, TraversalContext &context) {
-            context.Self(Action::name);
+            context.write(Action::name);
           },
           this));
     } else {
@@ -111,7 +111,7 @@ struct TracedExpr : TracedValue<typename Action::template invoke_type<Ts...>> {
       stack.push_back(TraversalAction::Enter());
       stack.push_back(TraversalAction::Self(
           [](void const *, TraversalContext &context) {
-            context.Self(Action::name);
+            context.write(Action::name);
           },
           this));
     }
