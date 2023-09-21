@@ -6,6 +6,8 @@ cc_library(
     name = "log",
     hdrs = ["log.h"],
     deps = [
+        "//nth/debug/log:line_metadata",
+        "//nth/strings:interpolate",
         "//nth/strings/format:universal",
     ]
 )

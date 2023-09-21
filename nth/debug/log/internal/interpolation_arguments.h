@@ -53,6 +53,12 @@ struct InterpolationArgumentIgnorer {
   InterpolationArgumentIgnorer(InterpolationArgumentIgnorer const&) = delete;
   InterpolationArgumentIgnorer(InterpolationArgumentIgnorer&&)      = delete;
 
+  template <typename Sink>
+  InterpolationArgumentIgnorer& configure(Sink&,
+                                          typename Sink::options const&) {
+    return *this;
+  }
+
   void operator=(InterpolationArgumentIgnorer const&) = delete;
   void operator=(InterpolationArgumentIgnorer&&) {}
   friend Voidifier operator<<=(InterpolationArgumentIgnorer const&, int) {

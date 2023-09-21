@@ -27,8 +27,7 @@ NTH_DEFINE_MUTABLE_COMPILE_TIME_SEQUENCE(
     NthInternalParameterizedTestInvocationSequence);
 
 #define NTH_DEBUG_INTERNAL_TRACE_EXPECT(...)                                   \
-  NTH_DEBUG_INTERNAL_TRACE_EXPECT_WITH_VERBOSITY(                              \
-      (::nth::config::default_assertion_verbosity_requirement), __VA_ARGS__)
+  NTH_DEBUG_INTERNAL_TRACE_EXPECT_WITH_VERBOSITY((v.always), __VA_ARGS__)
 
 #define NTH_DEBUG_INTERNAL_TRACE_EXPECT_WITH_VERBOSITY(verbosity, ...)         \
   NTH_DEBUG_INTERNAL_CONTRACT_CHECK(::nth::test::internal_test::ExpectLogLine, \
@@ -36,8 +35,7 @@ NTH_DEFINE_MUTABLE_COMPILE_TIME_SEQUENCE(
   static_assert(true)
 
 #define NTH_DEBUG_INTERNAL_TRACE_ASSERT(...)                                   \
-  NTH_DEBUG_INTERNAL_TRACE_ASSERT_WITH_VERBOSITY(                              \
-      (::nth::config::default_assertion_verbosity_requirement), __VA_ARGS__)
+  NTH_DEBUG_INTERNAL_TRACE_ASSERT_WITH_VERBOSITY((v.always), __VA_ARGS__)
 
 #define NTH_DEBUG_INTERNAL_TRACE_ASSERT_WITH_VERBOSITY(verbosity, ...)         \
   NTH_DEBUG_INTERNAL_CONTRACT_CHECK(::nth::test::internal_test::AssertLogLine, \

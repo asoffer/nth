@@ -32,20 +32,24 @@ int AlwaysLog() {
 
   NTH_INTERNAL_TEST_ASSERT(log.size() == 4);
 
-  NTH_INTERNAL_TEST_ASSERT(log[0].id().line().source_location().line() == 100);
+  NTH_INTERNAL_TEST_ASSERT(
+      log[0].id().line().metadata().source_location().line() == 100);
   NTH_INTERNAL_TEST_ASSERT(
       ComponentCount(log[0].component_begin(), log[0].component_end()) == 0);
 
-  NTH_INTERNAL_TEST_ASSERT(log[1].id().line().source_location().line() == 200);
+  NTH_INTERNAL_TEST_ASSERT(
+      log[1].id().line().metadata().source_location().line() == 200);
   NTH_INTERNAL_TEST_ASSERT(
       ComponentCount(log[1].component_begin(), log[1].component_end()) == 0);
 
-  NTH_INTERNAL_TEST_ASSERT(log[2].id().line().source_location().line() == 300);
+  NTH_INTERNAL_TEST_ASSERT(
+      log[2].id().line().metadata().source_location().line() == 300);
   NTH_INTERNAL_TEST_ASSERT(
       ComponentCount(log[2].component_begin(), log[2].component_end()) == 1);
   NTH_INTERNAL_TEST_ASSERT(*log[2].component_begin() == "3");
 
-  NTH_INTERNAL_TEST_ASSERT(log[3].id().line().source_location().line() == 400);
+  NTH_INTERNAL_TEST_ASSERT(
+      log[3].id().line().metadata().source_location().line() == 400);
   NTH_INTERNAL_TEST_ASSERT(
       ComponentCount(log[3].component_begin(), log[3].component_end()) == 2);
   auto iter = log[3].component_begin();

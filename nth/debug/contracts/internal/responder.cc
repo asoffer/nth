@@ -9,9 +9,10 @@ void ResponderBase::RecordExpectationResult(bool result) {
   set_   = true;
   value_ = result;
 
-  auto expectation_result =
-      value_ ? debug::ExpectationResult::Success(line_->source_location())
-             : debug::ExpectationResult::Failure(line_->source_location());
+  auto expectation_result = value_ ? debug::ExpectationResult::Success(
+                                         line_->metadata().source_location())
+                                   : debug::ExpectationResult::Failure(
+                                         line_->metadata().source_location());
   for (auto handler : RegisteredExpectationResultHandlers()) {
     handler(expectation_result);
   }

@@ -22,9 +22,6 @@ inline decltype(auto) HardenedOrTest() {
 
 inline const auto& default_log_verbosity_requirement = debug_verbosity.always;
 
-inline const auto& default_expectation_verbosity_requirement =
-    internal_default_verbosity::HardenedOrTest();
-
 inline const auto& default_assertion_verbosity_requirement =
     internal_default_verbosity::HardenedOrTest();
 

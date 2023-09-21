@@ -31,7 +31,7 @@
             [&]<::nth::InterpolationString NthInterpolationString>(            \
                 ::nth::source_location NthSourceLocation =                     \
                     ::nth::source_location::current()) -> decltype(auto) {     \
-        static const ::nth::internal_debug::LogLineWithArity<                  \
+        static ::nth::internal_debug::LogLineWithArity<                        \
             NthInterpolationString.placeholders()>                             \
             NthLogLine(NthInterpolationString, NthSourceLocation);             \
         if constexpr (NthInterpolationString.placeholders() == 0) {            \
