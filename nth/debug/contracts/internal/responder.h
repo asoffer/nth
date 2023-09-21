@@ -60,7 +60,9 @@ void MakeTraversal(P const &property,
                    std::vector<internal_trace::TraversalAction> &stack) {
   stack.push_back(internal_trace::TraversalAction::Exit());
   size_t last_pos = stack.size();
-  stack.push_back(internal_trace::TraversalAction::Last());
+  if (property.argument_count() > 0) {
+    stack.push_back(internal_trace::TraversalAction::Last());
+  }
   property.on_each_argument_reversed([&](auto const &arg) {
     using type = std::remove_cvref_t<decltype(arg)>;
     if constexpr (internal_property::PropertyType<type>) {
@@ -75,7 +77,9 @@ void MakeTraversal(P const &property,
           &arg));
     }
   });
-  std::swap(stack[last_pos], stack[last_pos + 1]);
+  if (property.argument_count() > 0) {
+    std::swap(stack[last_pos], stack[last_pos + 1]);
+  }
   stack.push_back(internal_trace::TraversalAction::Enter());
   stack.push_back(internal_trace::TraversalAction::Self(
       [](void const *ptr, internal_trace::TraversalContext &context) {

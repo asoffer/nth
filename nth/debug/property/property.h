@@ -29,6 +29,7 @@ struct Property
   using internal_property::ParameterizedProperty<Name, F>::name;
 
   auto const& arguments() const { return arguments_; }
+  size_t argument_count() const { return sizeof...(Ts); }
 
   auto operator()(auto const& value) const {
     return std::apply(
