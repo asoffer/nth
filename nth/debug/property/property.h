@@ -8,7 +8,6 @@
 
 #include "nth/debug/property/internal/concepts.h"
 #include "nth/debug/property/internal/implementation.h"
-#include "nth/debug/property/internal/property_formatter.h"
 #include "nth/debug/trace/trace.h"
 
 namespace nth::debug {
@@ -37,11 +36,15 @@ struct Property
         arguments_);
   }
 
-  template <typename Fmt>
-  friend void NthPrint(auto& p,
-                       internal_property::PropertyFormatterType auto& f,
-                       Property const& m) {
-    f(p, m);
+  template <typename Fn>
+  constexpr auto on_each_argument_reversed(Fn&& f) const
+      requires((std::invocable<Fn, Ts> and ...)) {
+    std::apply(
+        [&](auto const&... args) {
+          [[maybe_unused]] int dummy;
+          static_cast<void>((dummy = ... = (static_cast<void>(f(args)), 0)));
+        },
+        arguments_);
   }
 
  private:

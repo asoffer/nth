@@ -15,14 +15,3 @@ cc_library(
       "//nth/meta:compile_time_string",
     ],
 )
-
-cc_library(
-    name = "property_formatter",
-    hdrs = ["property_formatter.h"],
-    deps = [
-        ":implementation",
-        "//nth/configuration:verbosity",
-        "//nth/io:string_printer",
-        "//nth/strings:interpolate",
-    ],
-)

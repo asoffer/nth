@@ -6,7 +6,6 @@ cc_library(
     deps = [
         "//nth/debug/property/internal:concepts",
         "//nth/debug/property/internal:implementation",
-        "//nth/debug/property/internal:property_formatter",
         "//nth/debug/contracts",
     ],
 )

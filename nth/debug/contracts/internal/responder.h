@@ -9,7 +9,7 @@
 #include "nth/configuration/trace.h"
 #include "nth/debug/log/log.h"
 #include "nth/debug/property/internal/concepts.h"
-#include "nth/debug/property/internal/property_formatter.h"
+#include "nth/debug/property/internal/implementation.h"
 #include "nth/debug/trace/internal/implementation.h"
 
 namespace nth::debug::internal_contracts {
@@ -36,6 +36,53 @@ struct TraversalPrinterContext : internal_trace::TraversalContext {
 
   std::vector<std::string_view> chunks;
 };
+
+template <typename P>
+void MakeTraversal(P const &property,
+                   std::vector<internal_trace::TraversalAction> &stack);
+
+template <typename T>
+void Expansion(void const *ptr,
+               std::vector<internal_trace::TraversalAction> &stack) {
+  if constexpr (internal_property::PropertyType<T>) {
+    MakeTraversal(*static_cast<T const *>(ptr), stack);
+  } else {
+    stack.push_back(internal_trace::TraversalAction::Self(
+        [](void const *ptr, internal_trace::TraversalContext &context) {
+          context.write(*static_cast<T const *>(ptr));
+        },
+        ptr));
+  }
+}
+
+template <typename P>
+void MakeTraversal(P const &property,
+                   std::vector<internal_trace::TraversalAction> &stack) {
+  stack.push_back(internal_trace::TraversalAction::Exit());
+  size_t last_pos = stack.size();
+  stack.push_back(internal_trace::TraversalAction::Last());
+  property.on_each_argument_reversed([&](auto const &arg) {
+    using type = std::remove_cvref_t<decltype(arg)>;
+    if constexpr (internal_property::PropertyType<type>) {
+      stack.push_back(internal_trace::TraversalAction::Expand(
+          Expansion<type>,
+          static_cast<std::remove_cvref_t<type> const *>(&arg)));
+    } else {
+      stack.push_back(internal_trace::TraversalAction::Self(
+          [](void const *ptr, internal_trace::TraversalContext &context) {
+            context.write(*static_cast<type const *>(ptr));
+          },
+          &arg));
+    }
+  });
+  std::swap(stack[last_pos], stack[last_pos + 1]);
+  stack.push_back(internal_trace::TraversalAction::Enter());
+  stack.push_back(internal_trace::TraversalAction::Self(
+      [](void const *ptr, internal_trace::TraversalContext &context) {
+        context.write(static_cast<P const *>(ptr)->name());
+      },
+      &property));
+}
 
 struct ResponderBase {
   void RecordExpectationResult(bool result);
@@ -67,20 +114,27 @@ struct AbortingResponder : ResponderBase {
       bounded_string_printer printer(log_entry.data(),
                                      nth::config::trace_print_bound);
 
-      std::vector<internal_trace::TraversalAction> stack;
-      internal_trace::VTable(w.value).traverse(std::addressof(w.value), stack);
-      TraversalPrinterContext context(printer);
-      context.Traverse(std::move(stack));
-      log_entry.demarcate();
+      {
+        std::vector<internal_trace::TraversalAction> stack;
+        internal_trace::VTable(w.value).traverse(std::addressof(w.value),
+                                                 stack);
+        TraversalPrinterContext context(printer);
+        context.Traverse(std::move(stack));
+        log_entry.demarcate();
+      }
 
-      printer.write("Property");
-      log_entry.demarcate();
+      {
+        printer.write("Property");
+        log_entry.demarcate();
+      }
 
-      auto formatter = nth::config::trace_formatter();
-      debug::internal_property::PropertyFormatter<decltype(formatter)>
-          matcher_formatter(formatter);
-      nth::Interpolate<"{}">(printer, matcher_formatter, w.property);
-      log_entry.demarcate();
+      {
+        std::vector<internal_trace::TraversalAction> stack;
+        MakeTraversal(w.property, stack);
+        TraversalPrinterContext context(printer);
+        context.Traverse(std::move(stack));
+        log_entry.demarcate();
+      }
 
       Send(log_entry);
     }
@@ -152,20 +206,27 @@ struct NoOpResponder : ResponderBase {
       bounded_string_printer printer(log_entry.data(),
                                      nth::config::trace_print_bound);
 
-      std::vector<internal_trace::TraversalAction> stack;
-      internal_trace::VTable(w.value).traverse(std::addressof(w.value), stack);
-      TraversalPrinterContext context(printer);
-      context.Traverse(std::move(stack));
-      log_entry.demarcate();
+      {
+        std::vector<internal_trace::TraversalAction> stack;
+        internal_trace::VTable(w.value).traverse(std::addressof(w.value),
+                                                 stack);
+        TraversalPrinterContext context(printer);
+        context.Traverse(std::move(stack));
+        log_entry.demarcate();
+      }
 
-      printer.write("Property");
-      log_entry.demarcate();
+      {
+        printer.write("Property");
+        log_entry.demarcate();
+      }
 
-      auto formatter = nth::config::trace_formatter();
-      debug::internal_property::PropertyFormatter<decltype(formatter)>
-          matcher_formatter(formatter);
-      nth::Interpolate<"{}">(printer, matcher_formatter, w.property);
-      log_entry.demarcate();
+      {
+        std::vector<internal_trace::TraversalAction> stack;
+        MakeTraversal(w.property, stack);
+        TraversalPrinterContext context(printer);
+        context.Traverse(std::move(stack));
+        log_entry.demarcate();
+      }
 
       Send(log_entry);
     }

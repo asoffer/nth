@@ -31,7 +31,7 @@ cc_library(
         "//nth/debug/log",
         "//nth/debug:expectation_result",
         "//nth/debug/property/internal:concepts",
-        "//nth/debug/property/internal:property_formatter",
+        "//nth/debug/property/internal:implementation",
         "//nth/debug/trace/internal:implementation",
         "@com_google_absl//absl/synchronization",
     ],
