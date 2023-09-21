@@ -19,10 +19,20 @@ namespace nth {
 //   }
 // };
 //
-// int x = GetTheNumber();       // Ok. `x` is 5.
-// int x = GetTheNumber({}, 7);  // Compilation error.
+// int x = MyType::GetTheNumber();       // Ok. `x` is 5.
+// int x = MyType::GetTheNumber({}, 7);  // Compilation error.
 // ```
 //
+// While as a general rule, we believe it is preferrable to implement this
+// behavior as an overload set where `GetTheNumber()` is public and
+// `GetTheNumber(int)` is private to `MyType`, there are situatinos where this
+// is infeasible. In particular, if the storage allocated by the needs to live
+// at least as long as the return value, a default parameter is the only
+// mechanism by which function authors can allocate storage in the caller. Even
+// this is frought, as the storage will be temporary, but there are times where
+// this technique is valuable. Such uses should likely also use
+// `NTH_ATTRIBUTE(lifetimebound)` to ensure callers do not reference the storage
+// after destruction.
 template <typename T>
 struct unconstructible_except_by {
  private:

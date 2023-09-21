@@ -6,7 +6,6 @@
 #include <utility>
 
 #include "nth/test/internal/arguments.h"
-#include "nth/test/internal/invocation.h"
 
 namespace nth {
 
@@ -15,17 +14,24 @@ namespace nth {
 // single argument, there is no need to wrap that argument in `TestArguments`.
 // Test arguments only need to be wrapped when there are multiple arguments to
 // indicate that they should be expanded into the test parameters.
+//
+// Test arguments are not copyable, movable, or mutable. The only supported use
+// of them is to construct them as the operand to a `co_yield` expression
+// directly.
 template <typename... Ts>
-struct TestArguments : ::nth::internal_test::TestArgumentBase {
-  explicit TestArguments(Ts &&...arguments)
+struct TestArguments {
+  using NthInternalIsTestArguments = void;
+
+  TestArguments(TestArguments const &)            = delete;
+  TestArguments(TestArguments &&)                 = delete;
+  TestArguments &operator=(TestArguments const &) = delete;
+  TestArguments &operator=(TestArguments &&)      = delete;
+
+  explicit TestArguments(Ts const &...arguments)
       : argument_pointers_{std::addressof(arguments)...} {}
 
- private:
-  template <typename T>
-  friend struct nth::internal_test::TestInvocation;
-
   template <typename F>
-  auto apply(F &&f) {
+  auto apply(F &&f) const {
     return [&]<size_t... Ns>(std::index_sequence<Ns...>) {
       std::forward<F>(f)(
           std::forward<Ts>(*static_cast<std::remove_reference_t<Ts> *>(
@@ -34,6 +40,7 @@ struct TestArguments : ::nth::internal_test::TestArgumentBase {
     (std::make_index_sequence<sizeof...(Ts)>{});
   }
 
+ private:
   void const *argument_pointers_[sizeof...(Ts)];
 };
 

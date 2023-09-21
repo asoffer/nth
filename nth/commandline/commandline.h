@@ -15,8 +15,7 @@
 #include <vector>
 
 #include "nth/base/attributes.h"
-#include "nth/debug/log/log.h"
-#include "nth/debug/trace/trace.h"
+#include "nth/debug/debug.h"
 #include "nth/io/printer.h"
 #include "nth/meta/type.h"
 #include "nth/process/exit_code.h"
@@ -120,8 +119,8 @@ struct FlagValueSet {
   T const *try_get(std::string_view name) const {
     auto *f = get_impl(name);
     if (not f) { return nullptr; }
-    NTH_ASSERT((v.always),
-               f->flag().type.type_ == nth::type<std::remove_cvref_t<T>>);
+    NTH_REQUIRE((v.always),
+                f->flag().type.type_ == nth::type<std::remove_cvref_t<T>>);
     return std::addressof(
         std::any_cast<std::remove_cvref_t<T> const &>(f->value_));
   }
@@ -129,7 +128,7 @@ struct FlagValueSet {
   template <typename T>
   T const &get(std::string_view name) const {
     T const *ptr = try_get<T>(name);
-    NTH_ASSERT((v.always), ptr != nullptr);
+    NTH_REQUIRE((v.always), ptr != nullptr);
     return *ptr;
   }
 

@@ -4,18 +4,14 @@
 #include <functional>
 #include <type_traits>
 
+#include "nth/base/macros.h"
+#include "nth/debug/internal/verbosity.h"
+#include "nth/debug/trace/internal/implementation.h"
 #include "nth/meta/stateful.h"
 #include "nth/strings/glob.h"
 #include "nth/test/internal/arguments.h"
 #include "nth/test/internal/invocation.h"
 #include "nth/utility/registration.h"
-
-namespace nth {
-
-struct TestInvocation {
-  std::string_view categorization;
-  std::function<void()> invocation;
-};
 
 // The stateful compile-time sequence of types which will be appended to once
 // for each parameterized test encountered. Despite not being in an internal
@@ -30,24 +26,53 @@ NTH_DEFINE_MUTABLE_COMPILE_TIME_SEQUENCE(NthInternalParameterizedTestSequence);
 NTH_DEFINE_MUTABLE_COMPILE_TIME_SEQUENCE(
     NthInternalParameterizedTestInvocationSequence);
 
-// Registers `f` as a test to be invoked.
+#define NTH_DEBUG_INTERNAL_TRACE_EXPECT(...)                                   \
+  NTH_DEBUG_INTERNAL_TRACE_EXPECT_WITH_VERBOSITY((v.always), __VA_ARGS__)
+
+#define NTH_DEBUG_INTERNAL_TRACE_EXPECT_WITH_VERBOSITY(verbosity, ...)         \
+  NTH_DEBUG_INTERNAL_CONTRACT_CHECK(::nth::test::internal_test::ExpectLogLine, \
+                                    verbosity, NoOpResponder, __VA_ARGS__) {}  \
+  static_assert(true)
+
+#define NTH_DEBUG_INTERNAL_TRACE_ASSERT(...)                                   \
+  NTH_DEBUG_INTERNAL_TRACE_ASSERT_WITH_VERBOSITY((v.always), __VA_ARGS__)
+
+#define NTH_DEBUG_INTERNAL_TRACE_ASSERT_WITH_VERBOSITY(verbosity, ...)         \
+  NTH_DEBUG_INTERNAL_CONTRACT_CHECK(::nth::test::internal_test::AssertLogLine, \
+                                    verbosity, NoOpResponder, __VA_ARGS__) {}  \
+  else { return; }                                                             \
+  static_assert(true)
+
+namespace nth::test {
+
 void RegisterTestInvocation(std::string_view categorization,
                             std::function<void()> f);
 
 namespace internal_test {
 
+inline constexpr char const ExpectLogLine[] =
+    "\033[31;1mNTH_EXPECT failed.\n"
+    "  \033[37;1mExpression:\033[0m\n{}\n\n"
+    "  \033[37;1m{}:\033[0m\n"
+    "{}\n";
+inline constexpr char const AssertLogLine[] =
+    "\033[31;1mNTH_ASSERT failed.\n"
+    "  \033[37;1mExpression:\033[0m\n{}\n\n"
+    "  \033[37;1m{}:\033[0m\n"
+    "{}\n";
+
 // Accepts an invocation type as a template argument and a sequence of all test
 // types seen so far during compilation. For each test, if the test's category
 // matches the invocation's glob, the invocation is instantiated for the test
 // and registered.
-template <typename TestInvocation>
+template <typename TestInvocationType>
 void RegisterTestsMatching(nth::Sequence auto seq) {
   seq.each([&](auto t) {
     using type = nth::type_t<t>;
-    if constexpr (nth::GlobMatches(TestInvocation::categorization(),
+    if constexpr (nth::GlobMatches(TestInvocationType::categorization(),
                                    type::categorization())) {
       RegisterTestInvocation(type::categorization(), [] {
-        TestInvocation::template Invocation<type>();
+        TestInvocationType::template Invocation<type>();
       });
     }
   });
@@ -87,7 +112,8 @@ void RegisterInvocationsMatching(nth::Sequence auto seq) {
         RegisterTokenUse;                                                      \
   };                                                                           \
   inline nth::RegistrationToken const test_name::registration_token = [] {     \
-    ::nth::RegisterTestInvocation(categorization(), &test_name::InvokeTest);   \
+    ::nth::test::RegisterTestInvocation(categorization(),                      \
+                                        &test_name::InvokeTest);               \
   };                                                                           \
   void test_name::InvokeTest()
 
@@ -103,10 +129,9 @@ void RegisterInvocationsMatching(nth::Sequence auto seq) {
         RegisterTokenUse;                                                      \
   };                                                                           \
   inline nth::RegistrationToken const test_name::registration_token = [] {     \
-    ::nth::internal_test::RegisterInvocationsMatching<test_name>(              \
-        *::nth::NthInternalParameterizedTestInvocationSequence);               \
-    ::nth::NthInternalParameterizedTestSequence                                \
-        .append<nth::type<test_name>>();                                       \
+    ::nth::test::internal_test::RegisterInvocationsMatching<test_name>(        \
+        *::NthInternalParameterizedTestInvocationSequence);                    \
+    ::NthInternalParameterizedTestSequence.append<nth::type<test_name>>();     \
   };                                                                           \
   void test_name::InvokeTest(__VA_ARGS__)
 
@@ -115,7 +140,7 @@ void RegisterInvocationsMatching(nth::Sequence auto seq) {
     static constexpr std::string_view categorization() { return cat; }         \
                                                                                \
     template <typename T>                                                      \
-    static ::nth::internal_test::TestInvocation<T> Invocation();               \
+    static ::nth::test::internal_invocation::TestInvocation<T> Invocation();   \
                                                                                \
    private:                                                                    \
     static nth::RegistrationToken const registration_token;                    \
@@ -124,14 +149,15 @@ void RegisterInvocationsMatching(nth::Sequence auto seq) {
   };                                                                           \
   inline nth::RegistrationToken const invocation_name::registration_token =    \
       [] {                                                                     \
-        ::nth::NthInternalParameterizedTestInvocationSequence                  \
+        ::NthInternalParameterizedTestInvocationSequence                       \
             .append<nth::type<invocation_name>.decayed()>();                   \
-        ::nth::internal_test::RegisterTestsMatching<invocation_name>(          \
-            *::nth::NthInternalParameterizedTestSequence);                     \
+        ::nth::test::internal_test::RegisterTestsMatching<invocation_name>(    \
+            *::NthInternalParameterizedTestSequence);                          \
       };                                                                       \
   template <typename T>                                                        \
-  ::nth::internal_test::TestInvocation<T> invocation_name::Invocation()
+  ::nth::test::internal_invocation::TestInvocation<T>                          \
+  invocation_name::Invocation()
 
-}  // namespace nth
+}  // namespace nth::test
 
 #endif  // NTH_TEST_INTERNAL_TEST_H

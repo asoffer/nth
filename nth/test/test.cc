@@ -1,9 +1,9 @@
-#include "nth/test/internal/test.h"
+#include "nth/test/test.h"
 
 #include <span>
 #include <vector>
 
-namespace nth {
+namespace nth::test {
 namespace {
 
 auto& TestInvocationRegsistry() {
@@ -15,11 +15,11 @@ auto& TestInvocationRegsistry() {
 
 void RegisterTestInvocation(std::string_view categorization,
                             std::function<void()> test) {
-  static std::vector<std::function<void()>> invocations;
   TestInvocationRegsistry().emplace_back(categorization, std::move(test));
 }
-std::span<TestInvocation> RegisteredTests() {
+
+std::span<TestInvocation const> RegisteredTests() {
   return TestInvocationRegsistry();
 }
 
-}  // namespace nth
+}  // namespace nth::test

@@ -17,11 +17,12 @@ cc_library(
 cc_library(
     name = "test",
     hdrs = ["test.h"],
-    srcs = ["test.cc"],
     testonly = True,
     deps = [
       ":arguments",
       ":invocation",
+      "//nth/base:macros",
+      "//nth/debug/trace/internal:implementation",
       "//nth/meta:stateful",
       "//nth/strings:glob",
       "//nth/utility:registration",

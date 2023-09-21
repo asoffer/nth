@@ -1,7 +1,6 @@
 #ifndef NTH_STRINGS_INTERNAL_GLOB_H
 #define NTH_STRINGS_INTERNAL_GLOB_H
 
-#include <iostream>
 #include <cstdlib>
 #include <string_view>
 

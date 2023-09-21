@@ -6,7 +6,7 @@
 #include <cstddef>
 #include <utility>
 
-#include "nth/debug/trace/trace.h"
+#include "nth/debug/debug.h"
 
 namespace nth {
 
@@ -31,7 +31,7 @@ struct Interval : internal_interval::LengthBase<T> {
   template <std::convertible_to<T> L, std::convertible_to<T> R>
   explicit constexpr Interval(L&& l, R&& r)
       : lower_bound_(std::forward<L>(l)), upper_bound_(std::forward<R>(r)) {
-    assert(lower_bound_ < upper_bound_);
+    NTH_REQUIRE(lower_bound_ <= upper_bound_);
   }
   template <std::convertible_to<T> U>
   Interval(Interval<U> const& i) : Interval(i.lower_bound(), i.upper_bound()) {}
@@ -94,6 +94,14 @@ struct Interval : internal_interval::LengthBase<T> {
     } else {
       return std::move(i).upper_bound();
     }
+  }
+
+  friend void NthPrint(auto& p, auto& f, Interval const& i) {
+    p.write("[");
+    f(p, i.lower_bound_);
+    p.write(", ");
+    f(p, i.upper_bound_);
+    p.write(")");
   }
 
  private:

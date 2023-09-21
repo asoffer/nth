@@ -1,5 +1,5 @@
 # All fields named in the `NthConfiguration` provider defined below.
-NTH_CONFIGURATION_PROVIDER_FIELDS = ["verbosity"]
+NTH_CONFIGURATION_PROVIDER_FIELDS = ["log", "trace", "verbosity"]
 
 # `NthConfiguration` is a provider aggregating all global configuration options
 # for the `nth` library.

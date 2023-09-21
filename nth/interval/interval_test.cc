@@ -7,14 +7,19 @@
 namespace nth {
 namespace {
 
+using ::nth::test::Any;
+using ::nth::test::Argument;
+using ::nth::test::Fuzzy;
+
 NTH_INVOKE_TEST("interval/*") {
   co_yield nth::TestArguments{3, 5};
   co_yield nth::TestArguments{5.1, 6.1};
+  co_await Fuzzy(Any<int>(), AtLeast(Argument<int, 0>()));
 }
 
 NTH_TEST("interval/construction", auto const &low, auto const &hi) {
   Interval i(low, hi);
-  auto t = nth::Trace<"i">(i);
+  auto t = nth::debug::Trace<"i">(i);
   NTH_EXPECT(t.lower_bound() == low);
   NTH_EXPECT(t.upper_bound() == hi);
 
@@ -30,7 +35,7 @@ NTH_TEST("interval/length", auto const &low, auto const &hi) {
 
 NTH_TEST("interval/contains") {
   Interval<std::string> i("abc", "def");
-  auto t = nth::Trace<"i">(i);
+  auto t = nth::debug::Trace<"i">(i);
   NTH_EXPECT(not t.contains("aba"));
   NTH_EXPECT(t.contains("abc"));
   NTH_EXPECT(t.contains("abd"));

@@ -12,13 +12,7 @@ namespace nth {
 // to `NTH_LOG`. Specifically, if a verbosity is provided, that logging
 // verbosity will be used. Otherwise, if no verbosity is provided, a default
 // verbosity of `always` will be used.
-#define NTH_UNIMPLEMENTED(...)                                                 \
-  NTH_IF(NTH_IS_EMPTY(__VA_ARGS__),                                            \
-         NTH_DEBUG_INTERNAL_UNIMPLEMENTED_WITHOUT_LOGGING,                     \
-         NTH_IF(NTH_IS_PARENTHESIZED(NTH_FIRST_ARGUMENT(__VA_ARGS__)),         \
-                NTH_DEBUG_INTERNAL_UNIMPLEMENTED_WITH_VERBOSITY,               \
-                NTH_DEBUG_INTERNAL_UNIMPLEMENTED))                             \
-  (__VA_ARGS__)
+#define NTH_UNIMPLEMENTED(...) NTH_DEBUG_INTERNAL_UNIMPLEMENTED(__VA_ARGS__)
 
 }  // namespace nth
 

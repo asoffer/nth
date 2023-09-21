@@ -1,9 +1,6 @@
 #ifndef NTH_DEBUG_VERBOSITY_H
 #define NTH_DEBUG_VERBOSITY_H
 
-#include <iostream>
-#include <string_view>
-
 #include "nth/base/attributes.h"
 #include "nth/base/configuration.h"
 #include "nth/debug/source_location.h"

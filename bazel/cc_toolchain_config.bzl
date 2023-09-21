@@ -106,12 +106,13 @@ def _impl(ctx):
             "-ldl",
             "-lm",
             "-lstdc++",
-        ]),
+        ] + {
+            "macosx": ["-framework", "CoreFoundation"],
+        }.get(ctx.attr.os, [])),
         mode_dependent_flags({
             "dbg": ["-g", "-O0"],
             "opt": ["-O2"],
         }),
-
     ]
 
     return cc_common.create_cc_toolchain_config_info(

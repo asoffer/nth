@@ -5,7 +5,7 @@
 #include <memory>
 
 #include "nth/base/attributes.h"
-#include "nth/configuration/verbosity.h"
+#include "nth/configuration/log.h"
 #include "nth/debug/log/internal/voidifier.h"
 #include "nth/io/string_printer.h"
 
@@ -17,7 +17,7 @@ struct ErasedInterpolationArgument {
   ErasedInterpolationArgument(NTH_ATTRIBUTE(lifetimebound) T const& t)
       : object_(std::addressof(t)),
         log_([](bounded_string_printer& p, void const* t) {
-          nth::config::default_formatter()(p, *reinterpret_cast<T const*>(t));
+          nth::config::log_formatter()(p, *reinterpret_cast<T const*>(t));
         }) {}
 
   friend void NthPrint(bounded_string_printer& p, auto&,
@@ -52,6 +52,12 @@ struct InterpolationArgumentIgnorer {
   constexpr InterpolationArgumentIgnorer()                          = default;
   InterpolationArgumentIgnorer(InterpolationArgumentIgnorer const&) = delete;
   InterpolationArgumentIgnorer(InterpolationArgumentIgnorer&&)      = delete;
+
+  template <typename Sink>
+  InterpolationArgumentIgnorer& configure(Sink&,
+                                          typename Sink::options const&) {
+    return *this;
+  }
 
   void operator=(InterpolationArgumentIgnorer const&) = delete;
   void operator=(InterpolationArgumentIgnorer&&) {}

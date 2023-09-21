@@ -4,6 +4,7 @@
 #include <concepts>
 #include <type_traits>
 
+#include "nth/base/macros.h"
 #include "nth/meta/constant.h"
 #include "nth/meta/sequence.h"
 
@@ -76,6 +77,7 @@ struct MutableSequence : MutableSequenceBase {
 // Stateful metaprogramming is highly dangerous and should be avoided if at all
 // possible.
 #define NTH_DEFINE_MUTABLE_COMPILE_TIME_SEQUENCE(name)                         \
+  NTH_REQUIRE_EXPANSION_IN_GLOBAL_NAMESPACE                                    \
   nth::internal_stateful::MutableSequence<[] {}> name;                         \
   template struct nth::internal_stateful::setter<0, nth::sequence<>,           \
                                                  decltype(name)>;              \

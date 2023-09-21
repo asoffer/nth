@@ -8,7 +8,16 @@ cc_library(
     deps = [
         ":line",
         ":sink",
+        "//nth/configuration:log",
         "//nth/debug/log/internal:component_iterator",
+    ],
+)
+
+cc_library(
+    name = "line_metadata",
+    hdrs = ["line_metadata.h"],
+    deps = [
+        "//nth/debug:source_location",
     ],
 )
 
@@ -18,6 +27,7 @@ cc_library(
     hdrs = ["line.h"],
     srcs = ["line.cc"],
     deps = [
+        ":line_metadata",
         "//nth/debug/log/internal:interpolation_arguments",
         "//nth/debug/log/internal:voidifier",
         "//nth/debug:source_location",
@@ -33,7 +43,7 @@ cc_library(
         ":sink",
         "//nth/base:macros",
         "//nth/debug/log/internal:log",
-        "//nth/debug:verbosity",
+        "//nth/debug/internal:verbosity",
     ],
 )
 
@@ -61,8 +71,8 @@ cc_library(
         ":entry",
         ":line",
         ":sink",
+        "//nth/configuration:log",
         "//nth/io:file_printer",
-        "//nth/strings:interpolate",
     ],
 )
 

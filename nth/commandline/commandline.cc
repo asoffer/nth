@@ -64,7 +64,7 @@ Flag::Value const *FlagValueSet::get_impl(std::string_view name) const {
   auto iter = std::lower_bound(values_.begin(), values_.end(), name,
                                internal_commandline::compare_flag_values);
   if (iter == values_.end()) { return nullptr; }
-  NTH_ASSERT(iter->flag().name.full_name() == name);
+  NTH_REQUIRE(iter->flag().name.full_name() == name);
   return &*iter;
 }
 

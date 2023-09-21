@@ -8,7 +8,7 @@ std::atomic<LogLine const*> LogLine::head_{&LogLine::stub_};
 LogLine::LogLine(std::string_view interpolation_string,
                  struct source_location location, size_t arity)
     : interpolation_string_(interpolation_string),
-      source_location_(location),
+      metadata_(location),
       arity_(arity) {
   LogLine const* head = nullptr;
   do {

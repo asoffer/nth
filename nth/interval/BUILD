@@ -4,7 +4,7 @@ cc_library(
     name = "interval",
     hdrs = ["interval.h"],
     deps = [
-      "//nth/debug/trace",
+      "//nth/debug",
     ],
 )
 
@@ -31,6 +31,6 @@ cc_test(
     deps = [
         ":interval_set",
         "//nth/test:main",
-        "//nth/debug/trace:matcher",
+        "//nth/debug/property",
     ],
 )

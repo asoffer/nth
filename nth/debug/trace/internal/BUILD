@@ -1,33 +1,83 @@
-package(default_visibility = ["//nth/debug:__subpackages__"])
+package(default_visibility = [
+    "//nth/debug:__subpackages__",
+    "//nth/test:__subpackages__",
+])
 
 cc_library(
-    name = "trace",
-    hdrs = [
-        "trace.h",
-        "declare_api.h",
-        "operators.h",
-    ],
+    name = "actions",
+    hdrs = ["actions.h"],
     deps = [
-        ":matcher_formatter",
-        "//nth/base:attributes",
-        "//nth/base:macros",
-        "//nth/configuration:verbosity",
-        "//nth/debug/log",
-        "//nth/debug:source_location",
-        "//nth/meta:type",
-        "//nth/io:string_printer",
-        "//nth/strings:interpolate",
+        ":traced_value",
+        "//nth/meta:compile_time_string",
     ],
 )
 
 cc_library(
-    name = "matcher_formatter",
-    hdrs = [
-        "matcher_formatter.h",
-    ],
+    name = "api",
+    hdrs = ["api.h"],
     deps = [
-        "//nth/configuration:verbosity",
+        ":implementation",
+        "//nth/hash:fnv1a",
+    ],
+)
+
+cc_library(
+    name = "injector",
+    hdrs = ["injector.h"],
+    deps = [
+        ":actions",
+        ":implementation",
+    ],
+)
+
+cc_library(
+    name = "implementation",
+    hdrs = ["implementation.h"],
+    deps = [
+        ":actions",
+        ":traced_expr_base",
+        ":traced_value",
+        ":traversal_action",
+        "//nth/base:attributes",
+        "//nth/debug:expectation_result",
+        "//nth/meta:type",
+    ],
+)
+
+cc_library(
+    name = "trace",
+    hdrs = ["trace.h"],
+    deps = [
+        ":actions",
+        ":api",
+        ":implementation",
+    ],
+)
+
+cc_library(
+    name = "traced_expr_base",
+    hdrs = ["traced_expr_base.h"],
+    deps = [
+        ":traversal_action",
+    ],
+)
+
+cc_library(
+    name = "traced_value",
+    hdrs = ["traced_value.h"],
+    deps = [
+        ":traced_expr_base",
+        "//nth/base:attributes",
         "//nth/io:string_printer",
-        "//nth/strings:interpolate",
+    ],
+)
+
+cc_library(
+    name = "traversal_action",
+    hdrs = ["traversal_action.h"],
+    srcs = ["traversal_action.cc"],
+    deps = [
+        "//nth/configuration:trace",
+        "//nth/io:string_printer",
     ],
 )

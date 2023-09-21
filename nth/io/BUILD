@@ -24,7 +24,7 @@ cc_library(
     srcs = ["file.cc"],
     deps = [
         ":file_path",
-        "//nth/debug/trace",
+        "//nth/debug/contracts",
         "//nth/utility:no_destructor",
     ],
 )
@@ -61,7 +61,7 @@ cc_test(
     deps = [
         ":file",
         ":file_printer",
-        "//nth/debug/trace",
+        "//nth/test:main",
     ],
 )
 

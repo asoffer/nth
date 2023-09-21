@@ -42,11 +42,9 @@ struct LogLineId {
 
 // Represents a particular invocation of a log message.
 struct LogLine {
-
-  // The location in source at which the log occurs.
-  struct source_location source_location() const {
-    return source_location_;
-  }
+  // Returns metadata pertaining about where and when the debug-log line
+  // occurred.
+  LogLineMetadata metadata() const { return metadata_; }
 
   // The interpolation string to which log arguments are passed.
   std::string_view interpolation_string() const {
@@ -58,10 +56,10 @@ struct LogLine {
 
  protected:
   explicit LogLine(std::string_view interpolation_string,
-                   struct source_location location, size_t arity);
+                   source_location location, size_t arity);
 
   std::string_view interpolation_string_;
-  struct source_location source_location_;
+  LogLineMetadata metadata_;
   size_t id_;
   size_t arity_;
   LogLine const* next_ = nullptr;
@@ -72,11 +70,31 @@ struct LogLine {
 
 namespace internal_debug {
 
+struct SinkOptionsResetter {
+  ~SinkOptionsResetter() { fn_(sink_); }
+
+  void set_sink(void* sink) { sink_ = sink; }
+  void set_fn(void (*fn)(void*)) { fn_ = fn; }
+
+ private:
+  void* sink_;
+  void (*fn_)(void*);
+};
+
 template <size_t PlaceholderCount>
 struct LogLineWithArity : LogLine {
   explicit LogLineWithArity(std::string_view interpolation_string,
-                            struct source_location location)
+                            source_location location)
       : LogLine(interpolation_string, location, PlaceholderCount) {}
+
+  template <typename Sink>
+  LogLineWithArity& configure(Sink& sink, typename Sink::options const& options,
+                              SinkOptionsResetter&& r = {}) {
+    sink.set_options(options);
+    r.set_sink(&sink);
+    r.set_fn([](void* s) { static_cast<Sink*>(s)->set_options({}); });
+    return *this;
+  }
 
   Voidifier operator<<=(
       NTH_ATTRIBUTE(lifetimebound)
