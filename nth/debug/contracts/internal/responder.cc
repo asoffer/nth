@@ -1,6 +1,7 @@
 #include "nth/debug/contracts/internal/responder.h"
 
 #include "absl/synchronization/mutex.h"
+#include "nth/configuration/trace.h"
 #include "nth/debug/expectation_result.h"
 
 namespace nth::debug::internal_contracts {
@@ -38,8 +39,8 @@ bool ResponderBase::set_impl(char const *expression, bool b) {
   if (not value_) {
     LogEntry log_entry(line_->id(), 1);
 
-    constexpr size_t bound = 1024;
-    bounded_string_printer printer(log_entry.data(), bound);
+    bounded_string_printer printer(log_entry.data(),
+                                   nth::config::trace_print_bound);
 
     WriteExpression(printer, log_entry, expression);
 
