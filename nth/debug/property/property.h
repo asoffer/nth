@@ -48,7 +48,6 @@ struct Property
   }
 
  private:
-  std::string_view name_;
   std::tuple<Ts...> arguments_;
 };
 
@@ -82,7 +81,8 @@ bool Matches(auto const& match_value, auto const& value) {
 // Constructs a `Property` from the given invocable `f`.
 template <CompileTimeString Name, int&..., typename F>
 consteval auto MakeProperty(F&& f) {
-  return internal_property::ParameterizedProperty<Name, F>(std::forward<F>(f));
+  return internal_property::ParameterizedProperty<Name, std::remove_cvref_t<F>>(
+      std::forward<F>(f));
 }
 
 inline constexpr auto operator or(internal_property::PropertyType auto l,

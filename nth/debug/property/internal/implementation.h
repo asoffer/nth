@@ -24,7 +24,8 @@ struct ParameterizedProperty {
 
   template <typename... Ts>
   constexpr auto operator()(Ts&&... values) const {
-    return Property<Name, F, Ts...>(*this, std::forward<Ts>(values)...);
+    return Property<Name, F, std::remove_cvref_t<Ts>...>(
+        *this, std::forward<Ts>(values)...);
   }
 
   auto invoke(auto const& value, auto const&... arguments) const {
