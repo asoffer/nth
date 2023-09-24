@@ -25,25 +25,25 @@ struct LengthBase {};
 // Represents the half-open interval consisting of values greater than or equal
 // to the lower bound and less than the upper bound.
 template <std::totally_ordered T>
-struct Interval : internal_interval::LengthBase<T> {
+struct interval : internal_interval::LengthBase<T> {
   using value_type = T;
 
   template <std::convertible_to<T> L, std::convertible_to<T> R>
-  explicit constexpr Interval(L&& l, R&& r)
+  explicit constexpr interval(L&& l, R&& r)
       : lower_bound_(std::forward<L>(l)), upper_bound_(std::forward<R>(r)) {
     NTH_REQUIRE(lower_bound_ <= upper_bound_);
   }
   template <std::convertible_to<T> U>
-  Interval(Interval<U> const& i) : Interval(i.lower_bound(), i.upper_bound()) {}
+  interval(interval<U> const& i) : interval(i.lower_bound(), i.upper_bound()) {}
 
   template <std::totally_ordered_with<T> U>
-  friend bool operator==(Interval const& lhs, Interval<U> const& rhs) {
+  friend bool operator==(interval const& lhs, interval<U> const& rhs) {
     return lhs.lower_bound() == rhs.lower_bound() and
            lhs.upper_bound() == rhs.upper_bound();
   }
 
   template <std::totally_ordered_with<T> U>
-  friend bool operator!=(Interval const& lhs, Interval<U> const& rhs) {
+  friend bool operator!=(interval const& lhs, interval<U> const& rhs) {
     return not !(lhs == rhs);
   }
 
@@ -70,7 +70,7 @@ struct Interval : internal_interval::LengthBase<T> {
   // Returns `true` if and only if every element `x` for which `i.contains(x)`
   // is true, `this->contains(x)` is also true.
   template <std::totally_ordered_with<T> U>
-  constexpr bool covers(Interval<U> const& i) const {
+  constexpr bool covers(interval<U> const& i) const {
     return lower_bound() <= i.lower_bound() and
            i.upper_bound() <= upper_bound();
   }
@@ -79,7 +79,7 @@ struct Interval : internal_interval::LengthBase<T> {
   constexpr bool empty() const { return lower_bound() == upper_bound(); }
 
   template <size_t N>
-  requires(N == 0 or N == 1) friend constexpr T const& get(Interval const& i) {
+  requires(N == 0 or N == 1) friend constexpr T const& get(interval const& i) {
     if constexpr (N == 0) {
       return i.lower_bound();
     } else {
@@ -88,7 +88,7 @@ struct Interval : internal_interval::LengthBase<T> {
   }
 
   template <size_t N>
-  requires(N == 0 or N == 1) friend constexpr T&& get(Interval&& i) {
+  requires(N == 0 or N == 1) friend constexpr T&& get(interval&& i) {
     if constexpr (N == 0) {
       return std::move(i).lower_bound();
     } else {
@@ -96,7 +96,7 @@ struct Interval : internal_interval::LengthBase<T> {
     }
   }
 
-  friend void NthPrint(auto& p, auto& f, Interval const& i) {
+  friend void NthPrint(auto& p, auto& f, interval const& i) {
     p.write("[");
     f(p, i.lower_bound_);
     p.write(", ");
@@ -109,8 +109,8 @@ struct Interval : internal_interval::LengthBase<T> {
 };
 
 template <typename L, typename H>
-requires(std::is_same_v<std::decay_t<L>, std::decay_t<H>>) Interval(L&&, H&&)
-->Interval<std::decay_t<L>>;
+requires(std::is_same_v<std::decay_t<L>, std::decay_t<H>>) interval(L&&, H&&)
+->interval<std::decay_t<L>>;
 
 namespace internal_interval {
 
@@ -118,7 +118,7 @@ template <typename T>
 requires(Subtractable<T>) struct LengthBase<T> {
   using length_type = decltype(std::declval<T>() - std::declval<T>());
   length_type length() const {
-    auto& [lower_bound, upper_bound] = static_cast<Interval<T> const&>(*this);
+    auto& [lower_bound, upper_bound] = static_cast<interval<T> const&>(*this);
     return upper_bound - lower_bound;
   }
 };
@@ -128,15 +128,15 @@ requires(Subtractable<T>) struct LengthBase<T> {
 
 template <typename T>
 NTH_TRACE_DECLARE_API_TEMPLATE(
-    nth::Interval<T>, (contains)(covers)(empty)(lower_bound)(upper_bound));
+    nth::interval<T>, (contains)(covers)(empty)(lower_bound)(upper_bound));
 
 namespace std {
 
 template <typename T>
-struct tuple_size<::nth::Interval<T>> : std::integral_constant<size_t, 2> {};
+struct tuple_size<::nth::interval<T>> : std::integral_constant<size_t, 2> {};
 
 template <size_t N, typename T>
-requires(N == 0 or N == 1) struct tuple_element<N, ::nth::Interval<T>> {
+requires(N == 0 or N == 1) struct tuple_element<N, ::nth::interval<T>> {
   using type = T;
 };
 

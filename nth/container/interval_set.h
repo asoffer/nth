@@ -13,18 +13,18 @@ namespace nth {
 // Represents the half-open interval consisting of values greater than or equal
 // to the lower bound and less than the upper bound.
 template <std::totally_ordered T>
-struct IntervalSet {
-  using interval_type = Interval<T>;
+struct interval_set {
+  using interval_type = interval<T>;
   using value_type    = T;
 
-  explicit constexpr IntervalSet() = default;
+  explicit constexpr interval_set() = default;
 
   template <std::convertible_to<T> U>
-  explicit constexpr IntervalSet(Interval<U> const& interval)
+  explicit constexpr interval_set(interval<U> const& interval)
       : intervals_(interval) {}
 
   template <std::convertible_to<T> U>
-  explicit constexpr IntervalSet(Interval<U>&& interval) {
+  explicit constexpr interval_set(interval<U>&& interval) {
     intervals_.push_back(std::move(interval));
   }
 
@@ -39,53 +39,54 @@ struct IntervalSet {
   // Returns `true` if and only if the interval `i` is completely covered by
   // some interval in the set.
   template <std::totally_ordered_with<T> U>
-  constexpr bool covers(Interval<U> const& i) const;
+  constexpr bool covers(interval<U> const& i) const;
 
   // Returns `true` if and only if every interval in `is` is completely covered
   // by some interval in the set.
   template <std::totally_ordered_with<T> U>
-  constexpr bool covers(IntervalSet<U> const& is) const;
+  constexpr bool covers(interval_set<U> const& is) const;
 
   // Returns the sum total length of all intervals contained in this interval
   // set.
   constexpr auto length() const
       requires(requires(interval_type const& i) { i.length(); }) {
-    decltype(std::declval<Interval<T> const&>().length()) result = {};
+    decltype(std::declval<interval<T> const&>().length()) result = {};
     for (auto const& i : intervals_) { result += i.length(); }
     return result;
   }
 
   template <std::totally_ordered_with<T> U>
-  void insert(Interval<U> const& i) {
+  void insert(interval<U> const& i) {
     insert_hint(intervals_.begin(), i);
   }
 
   template <std::totally_ordered_with<T> U>
-  IntervalSet& operator+=(IntervalSet<U> const& rhs);
+  interval_set& operator+=(interval_set<U> const& rhs);
 
-  friend IntervalSet operator+(IntervalSet const& lhs, IntervalSet const& rhs) {
-    IntervalSet copy(lhs);
+  friend interval_set operator+(interval_set const& lhs,
+                                interval_set const& rhs) {
+    interval_set copy(lhs);
     return copy += rhs;
   }
 
-  friend IntervalSet operator+(IntervalSet&& lhs, IntervalSet const& rhs) {
+  friend interval_set operator+(interval_set&& lhs, interval_set const& rhs) {
     return std::move(lhs += rhs);
   }
 
-  friend IntervalSet operator+(IntervalSet const& lhs, IntervalSet&& rhs) {
+  friend interval_set operator+(interval_set const& lhs, interval_set&& rhs) {
     return std::move(rhs += lhs);
   }
 
-  friend IntervalSet operator+(IntervalSet&& lhs, IntervalSet&& rhs) {
+  friend interval_set operator+(interval_set&& lhs, interval_set&& rhs) {
     return std::move(lhs += rhs);
   }
 
   // Returns a view into the intervals present in the interval set in increasing
   // order. The view is valid until the next non-const member function is
-  // invoked on this `IntervalSet`.
-  std::span<Interval<T> const> intervals() const { return intervals_; }
+  // invoked on this `interval_set`.
+  std::span<interval<T> const> intervals() const { return intervals_; }
 
-  friend void NthPrint(auto& p, auto& f, IntervalSet const& is) {
+  friend void NthPrint(auto& p, auto& f, interval_set const& is) {
     if (is.empty()) {
       p.write("{}");
       return;
@@ -99,37 +100,37 @@ struct IntervalSet {
   }
 
  private:
-  using iterator = typename std::vector<Interval<T>>::iterator;
+  using iterator = typename std::vector<interval<T>>::iterator;
 
   template <std::totally_ordered_with<T> U>
-  iterator insert_hint(iterator iter, Interval<U> const& i);
+  iterator insert_hint(iterator iter, interval<U> const& i);
 
-  std::vector<Interval<T>> intervals_;
+  std::vector<interval<T>> intervals_;
 };
 
 template <std::totally_ordered T>
-IntervalSet(T&&, T&&) -> IntervalSet<std::decay_t<T>>;
+interval_set(T&&, T&&) -> interval_set<std::decay_t<T>>;
 
 template <std::totally_ordered T>
-IntervalSet(Interval<T> const&) -> IntervalSet<T>;
+interval_set(interval<T> const&) -> interval_set<T>;
 
 // Implementations below.
 
 template <std::totally_ordered T>
 template <std::totally_ordered_with<T> U>
-constexpr bool IntervalSet<T>::contains(U const& u) const {
+constexpr bool interval_set<T>::contains(U const& u) const {
   auto iter = std::partition_point(
       intervals_.begin(), intervals_.end(),
-      [&](Interval<T> const& interval) { return interval.lower_bound() <= u; });
+      [&](interval<T> const& interval) { return interval.lower_bound() <= u; });
   if (iter == intervals_.begin()) { return false; }
   return u < std::prev(iter)->upper_bound();
 }
 
 template <std::totally_ordered T>
 template <std::totally_ordered_with<T> U>
-constexpr bool IntervalSet<T>::covers(Interval<U> const& i) const {
+constexpr bool interval_set<T>::covers(interval<U> const& i) const {
   auto iter = std::partition_point(
-      intervals_.begin(), intervals_.end(), [&](Interval<T> const& interval) {
+      intervals_.begin(), intervals_.end(), [&](interval<T> const& interval) {
         return interval.lower_bound() <= i.lower_bound();
       });
   if (iter == intervals_.begin()) { return false; }
@@ -138,11 +139,11 @@ constexpr bool IntervalSet<T>::covers(Interval<U> const& i) const {
 
 template <std::totally_ordered T>
 template <std::totally_ordered_with<T> U>
-constexpr bool IntervalSet<T>::covers(IntervalSet<U> const& is) const {
+constexpr bool interval_set<T>::covers(interval_set<U> const& is) const {
   auto iter = intervals_.begin();
   for (auto const& i : is.intervals()) {
     auto new_iter = std::lower_bound(
-        iter, intervals_.end(), [&](Interval<T> const& interval) {
+        iter, intervals_.end(), [&](interval<T> const& interval) {
           return interval.lower_bound() < i.lower_bound();
         });
     if (iter == new_iter) { return false; }
@@ -154,10 +155,10 @@ constexpr bool IntervalSet<T>::covers(IntervalSet<U> const& is) const {
 
 template <std::totally_ordered T>
 template <std::totally_ordered_with<T> U>
-typename IntervalSet<T>::iterator IntervalSet<T>::insert_hint(
-    iterator iter, Interval<U> const& i) {
+typename interval_set<T>::iterator interval_set<T>::insert_hint(
+    iterator iter, interval<U> const& i) {
   auto lower_iter = std::partition_point(
-      iter, intervals_.end(), [&](Interval<T> const& interval) {
+      iter, intervals_.end(), [&](interval<T> const& interval) {
         return interval.upper_bound() < i.lower_bound();
       });
 
@@ -167,13 +168,13 @@ typename IntervalSet<T>::iterator IntervalSet<T>::insert_hint(
   }
 
   auto upper_iter = std::partition_point(
-      lower_iter, intervals_.end(), [&](Interval<T> const& interval) {
+      lower_iter, intervals_.end(), [&](interval<T> const& interval) {
         return interval.lower_bound() <= i.upper_bound();
       });
 
   if (upper_iter == lower_iter) {
     if (upper_iter->lower_bound() == i.upper_bound()) {
-      *upper_iter = Interval(i.lower_bound(), upper_iter->upper_bound());
+      *upper_iter = interval(i.lower_bound(), upper_iter->upper_bound());
       return upper_iter;
     } else {
       return intervals_.insert(lower_iter, i);
@@ -184,7 +185,7 @@ typename IntervalSet<T>::iterator IntervalSet<T>::insert_hint(
 
   auto l      = std::min(lower_iter->lower_bound(), i.lower_bound());
   auto u      = std::max(upper_iter->upper_bound(), i.upper_bound());
-  *lower_iter = Interval(l, u);
+  *lower_iter = interval(l, u);
   if (lower_iter != upper_iter) {
     intervals_.erase(std::next(lower_iter), std::next(upper_iter));
   }
@@ -193,7 +194,7 @@ typename IntervalSet<T>::iterator IntervalSet<T>::insert_hint(
 
 template <std::totally_ordered T>
 template <std::totally_ordered_with<T> U>
-IntervalSet<T>& IntervalSet<T>::operator+=(IntervalSet<U> const& rhs) {
+interval_set<T>& interval_set<T>::operator+=(interval_set<U> const& rhs) {
   auto start_iter = intervals_.begin();
   for (auto iter = rhs.intervals_.begin(); iter != rhs.intervals_.end();
        ++iter) {
@@ -203,29 +204,29 @@ IntervalSet<T>& IntervalSet<T>::operator+=(IntervalSet<U> const& rhs) {
 }
 
 template <std::totally_ordered T>
-IntervalSet<T> Union(IntervalSet<T> const& lhs, IntervalSet<T> const& rhs) {
+interval_set<T> Union(interval_set<T> const& lhs, interval_set<T> const& rhs) {
   return lhs + rhs;
 }
 
 template <std::totally_ordered T>
-IntervalSet<T> Union(IntervalSet<T> const& lhs, IntervalSet<T>&& rhs) {
+interval_set<T> Union(interval_set<T> const& lhs, interval_set<T>&& rhs) {
   return lhs + std::move(rhs);
 }
 
 template <std::totally_ordered T>
-IntervalSet<T> Union(IntervalSet<T>&& lhs, IntervalSet<T> const& rhs) {
+interval_set<T> Union(interval_set<T>&& lhs, interval_set<T> const& rhs) {
   return std::move(lhs) + rhs;
 }
 
 template <std::totally_ordered T>
-IntervalSet<T> Union(IntervalSet<T>&& lhs, IntervalSet<T>&& rhs) {
+interval_set<T> Union(interval_set<T>&& lhs, interval_set<T>&& rhs) {
   return std::move(lhs) + std::move(rhs);
 }
 
 }  // namespace nth
 
 template <typename T>
-NTH_TRACE_DECLARE_API_TEMPLATE(nth::IntervalSet<T>,
+NTH_TRACE_DECLARE_API_TEMPLATE(nth::interval_set<T>,
                                (contains)(covers)(empty)(intervals)(length));
 
 #endif  // NTH_CONTAINER_INTERVAL_SET_H
