@@ -54,10 +54,7 @@ struct ExpectationResultHandlerRange {
     friend ExpectationResultHandlerRange;
     friend ExpectationResultHandlerRange RegisteredExpectationResultHandlers();
 
-    explicit const_iterator(
-        uintptr_t const* ptr =
-            reinterpret_cast<uintptr_t const*>(6 * sizeof(uintptr_t)))
-        : ptr_(ptr) {}
+    explicit const_iterator(uintptr_t const* ptr = nullptr) : ptr_(ptr) {}
     uintptr_t const* ptr_;
   };
   const_iterator begin() const { return begin_; }

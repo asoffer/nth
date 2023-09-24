@@ -15,12 +15,12 @@ struct TraversalContext;
 // Represents an action to take when traversing a traced object.
 struct TraversalAction {
   using expand_type = void (*)(void const *, std::vector<TraversalAction> &);
+  using action_type = void (*)(void const *, TraversalContext &);
 
   // Represents an action indicating processing `ptr` by applying `act`.
-  static TraversalAction Self(void (*act)(void const *, TraversalContext &),
-                              void const *ptr) {
-    return TraversalAction(reinterpret_cast<void (*)()>(act),
-                           reinterpret_cast<uintptr_t>(ptr));
+  static TraversalAction Self(action_type act, void const *ptr) {
+    std::fprintf(stderr, "[%p]\n", const_cast<void *>(ptr));
+    return TraversalAction(act, reinterpret_cast<uintptr_t>(ptr));
   }
 
   // Represents an action indicating entering a subtree.
@@ -42,7 +42,7 @@ struct TraversalAction {
   static TraversalAction Exit() { return TraversalAction(nullptr, 4); }
 
   bool enter() const { return data_ == 0; }
-  bool expand() const { return (data_ & uintptr_t{1}) != 0; }
+  bool expand() const { return is_expand_; }
   bool last() const { return data_ == 2; }
   bool exit() const { return data_ == 4; }
 
@@ -51,20 +51,22 @@ struct TraversalAction {
   }
 
   void act(TraversalContext &context) const {
-    reinterpret_cast<void (*)(void const *, TraversalContext &)>(act_)(
-        reinterpret_cast<void const *>(data_ & ~uintptr_t{1}), context);
+    act_(reinterpret_cast<void const *>(data_ & ~uintptr_t{1}), context);
   }
 
  private:
   explicit TraversalAction(expand_type expand, void const *ptr)
-      : expand_(expand), data_(reinterpret_cast<uintptr_t>(ptr) + 1) {}
-  explicit TraversalAction(void (*act)(), uintptr_t data)
-      : act_(act), data_(data) {}
+      : expand_(expand), data_(reinterpret_cast<uintptr_t>(ptr)), is_expand_(true) {}
+  explicit TraversalAction(action_type act, uintptr_t data)
+      : act_(act), data_(data), is_expand_(false) {}
+  // TODO: There's wasted space here. Find a spare bit to encode whether you
+  // mean `act` or `expand`.
   union {
-    void (*act_)();
+    action_type act_;
     expand_type expand_;
   };
   uintptr_t data_;
+  bool is_expand_;
 };
 
 struct TraversalContext {

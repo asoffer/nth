@@ -76,7 +76,8 @@ ExpectationResultHandlerRange::const_iterator &
 ExpectationResultHandlerRange::const_iterator::operator++() {
   --ptr_;
   if ((reinterpret_cast<uintptr_t>(ptr_) % alignof(HandlerNode)) == 0) {
-    ptr_ = AsNodePtr(ptr_)->data_[0] + 6;
+    ptr_ = AsNodePtr(ptr_)->data_[0];
+    if (ptr_) { ptr_ += 6; }
   }
   return *this;
 }
@@ -104,7 +105,7 @@ ExpectationResultHandlerRange RegisteredExpectationResultHandlers() {
     absl::MutexLock lock(&ExpectationResultHandlers().mutex);
     HandlerNode const *node = ExpectationResultHandlers().head;
     if (node->count() == 0) {
-      ptr = reinterpret_cast<uintptr_t const *>(6 * sizeof(uintptr_t));
+      ptr = nullptr;
     } else {
       ptr = reinterpret_cast<uintptr_t const *>(&node->data_[0]) + node->count();
     }
