@@ -19,7 +19,6 @@ struct TraversalAction {
 
   // Represents an action indicating processing `ptr` by applying `act`.
   static TraversalAction Self(action_type act, void const *ptr) {
-    std::fprintf(stderr, "[%p]\n", const_cast<void *>(ptr));
     return TraversalAction(act, reinterpret_cast<uintptr_t>(ptr));
   }
 
