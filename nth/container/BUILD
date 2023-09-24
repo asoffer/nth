@@ -5,6 +5,7 @@ cc_library(
     hdrs = ["flyweight_map.h"],
     deps = [
         "//nth/container/internal:index",
+        "//nth/debug",
         "//nth/meta:concepts",
         "@com_google_absl//absl/container:flat_hash_set"
     ],
@@ -24,6 +25,7 @@ cc_library(
     hdrs = ["flyweight_set.h"],
     deps = [
         "//nth/container/internal:index",
+        "//nth/debug",
         "//nth/meta:concepts",
         "@com_google_absl//absl/container:flat_hash_set"
     ],

@@ -8,6 +8,7 @@
 
 #include "absl/container/flat_hash_set.h"
 #include "nth/container/internal/index.h"
+#include "nth/debug/debug.h"
 #include "nth/meta/concepts.h"
 
 namespace nth {
@@ -90,13 +91,25 @@ struct flyweight_set {
 
   // Returns a reference to the first inserted object. Behavior is undefiend if
   // the container is empty.
-  const_reference front() const { return values_.front(); }
-  reference front() { return values_.front(); }
+  const_reference front() const {
+    NTH_REQUIRE((v.harden), not empty());
+    return values_.front();
+  }
+  reference front() {
+    NTH_REQUIRE((v.harden), not empty());
+    return values_.front();
+  }
 
   // Returns a reference to the most recently inserted object. Behavior is
   // undefined if the container is empty.
-  const_reference back() const { return values_.back(); }
-  reference back() { return values_.back(); }
+  const_reference back() const {
+    NTH_REQUIRE((v.harden), not empty());
+    return values_.back();
+  }
+  reference back() {
+    NTH_REQUIRE((v.harden), not empty());
+    return values_.back();
+  }
 
   // Attempts to insert an element into the container of value `v`.  If an
   // equivalent element already exists, no item is inserted. A pair is returned
@@ -151,7 +164,10 @@ struct flyweight_set {
 
   // Returns a reference to the element indexed by `n` if one exists. Behavior
   // is undefined if no such element exists.
-  value_type const& from_index(size_t n) const { return values_[n]; }
+  value_type const& from_index(size_t n) const {
+    NTH_REQUIRE((v.harden), n < size());
+    return values_[n];
+  }
 
   // Returns a value for which `index(v) == end_index()` is false for every `v`
   // in the container. The value returned by `end_index()` is not dependent of
