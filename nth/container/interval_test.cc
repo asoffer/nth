@@ -1,4 +1,4 @@
-#include "nth/interval/interval.h"
+#include "nth/container/interval.h"
 
 #include <string>
 

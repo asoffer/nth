@@ -1,12 +1,12 @@
-#ifndef NTH_INTERVAL_INTERVAL_SET_H
-#define NTH_INTERVAL_INTERVAL_SET_H
+#ifndef NTH_CONTAINER_INTERVAL_SET_H
+#define NTH_CONTAINER_INTERVAL_SET_H
 
 #include <algorithm>
 #include <concepts>
 #include <span>
 #include <vector>
 
-#include "nth/interval/interval.h"
+#include "nth/container/interval.h"
 
 namespace nth {
 
@@ -228,4 +228,4 @@ template <typename T>
 NTH_TRACE_DECLARE_API_TEMPLATE(nth::IntervalSet<T>,
                                (contains)(covers)(empty)(intervals)(length));
 
-#endif  // NTH_INTERVAL_INTERVAL_SET_H
+#endif  // NTH_CONTAINER_INTERVAL_SET_H

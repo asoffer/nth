@@ -1,4 +1,4 @@
-#include "nth/interval/interval_set.h"
+#include "nth/container/interval_set.h"
 
 #include <string>
 

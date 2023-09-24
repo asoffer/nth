@@ -1,5 +1,5 @@
-#ifndef NTH_INTERVAL_INTERVAL_H
-#define NTH_INTERVAL_INTERVAL_H
+#ifndef NTH_CONTAINER_INTERVAL_H
+#define NTH_CONTAINER_INTERVAL_H
 
 #include <cassert>
 #include <concepts>
@@ -142,4 +142,4 @@ requires(N == 0 or N == 1) struct tuple_element<N, ::nth::Interval<T>> {
 
 }  // namespace std
 
-#endif  // NTH_INTERVAL_INTERVAL_H
+#endif  // NTH_CONTAINER_INTERVAL_H
