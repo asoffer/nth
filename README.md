@@ -13,7 +13,7 @@ recent copy of [Bazel](https://bazel.build/). Specifically,
 * Clang 16.0.0
 
 The `nth` libraries are intended to be used from your C++ code and always built
-from source. For this reason, we does not provide any installation or setup
+from source. For this reason, we do not provide any installation or setup
 process. If you would like to download and play around with the examples, they
 can be built via these commands:
 
