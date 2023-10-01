@@ -49,5 +49,24 @@
                 "Weak symbols are not supported in this build configuration.")
 #endif
 
+// NTH_ATTRIBUTE(tailcall)
+// Defines an attribute indicating that the annotated return
+// statement must be tail-call optimized. Use of this attribute is intended for
+// situations where tail-call optimization is a requirement for correctness,
+// rather than an optimization. As such, no fallback implementation is supported
+// if the compiler does not support it.
+#if defined(__clang__)
+#define NTH_BASE_ATTRIBUTES_INTERNAL_SUPPORTS_tailcall true
+#define NTH_BASE_ATTRIBUTES_INTERNAL_tailcall [[clang::musttail]]
+#elif defined(__GNUC__)
+#define NTH_BASE_ATTRIBUTES_INTERNAL_SUPPORTS_tailcall true
+#define NTH_BASE_ATTRIBUTES_INTERNAL_tailcall __attribute__((musttail))
+#else
+#define NTH_BASE_ATTRIBUTES_INTERNAL_SUPPORTS_tailcall false
+#define NTH_BASE_ATTRIBUTES_INTERNAL_tailcall                                  \
+  static_assert(                                                               \
+      false,                                                                   \
+      "This compiler does not support guaranteed tail-call optimization");
+#endif
 
 #endif  // NTH_BASE_ATTRIBUTES_H

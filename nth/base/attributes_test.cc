@@ -18,6 +18,11 @@ static_assert(Equal(STRINGIFY(NTH_SUPPORTS_ATTRIBUTE(lifetimebound)), "true") or
 static_assert(NTH_SUPPORTS_ATTRIBUTE(lifetimebound) !=
               Equal(STRINGIFY(NTH_ATTRIBUTE(lifetimebound)), ""));
 
+static_assert(Equal(STRINGIFY(NTH_SUPPORTS_ATTRIBUTE(tailcall)), "true") or
+              Equal(STRINGIFY(NTH_SUPPORTS_ATTRIBUTE(tailcall)), "false"));
+static_assert(NTH_SUPPORTS_ATTRIBUTE(tailcall) !=
+              Equal(STRINGIFY(NTH_ATTRIBUTE(tailcall)), ""));
+
 }  // namespace
 }  // namespace nth
 
