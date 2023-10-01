@@ -25,7 +25,7 @@ inline constexpr char const EnsureLogLine[] =
 }  // namespace nth::debug::internal_contracts
 
 #define NTH_DEBUG_INTERNAL_CONTRACT_CHECK(log_line, verbosity, responder_type, \
-                                          ...)                                 \
+                                          action_prefix, ...)                  \
   if (::nth::debug::internal_contracts::responder_type NthInternalResponder;   \
       NTH_DEBUG_INTERNAL_VERBOSITY_DISABLED(verbosity) or                      \
           [&](::nth::source_location NthInternalourceLocation)                 \
@@ -36,13 +36,17 @@ inline constexpr char const EnsureLogLine[] =
         return (NthInternalResponder);                                         \
       }(::nth::source_location::current())                                     \
                  .set((#__VA_ARGS__),                                          \
-                      NTH_DEBUG_INTERNAL_TRACE_INJECTED_EXPR(__VA_ARGS__)))
+                      NTH_DEBUG_INTERNAL_TRACE_INJECTED_EXPR(__VA_ARGS__))) {  \
+  } else                                                                       \
+    switch (0)                                                                 \
+    default:                                                                   \
+      action_prefix(void)::nth::debug::internal_contracts::Logger(             \
+          ::nth::source_location::current())
 
 #define NTH_DEBUG_INTERNAL_REQUIRE_WITH_VERBOSITY(verbosity, ...)              \
   NTH_DEBUG_INTERNAL_CONTRACT_CHECK(                                           \
       ::nth::debug::internal_contracts::RequireLogLine, verbosity,             \
-      AbortingResponder, __VA_ARGS__) {}                                       \
-  static_assert(true)
+      AbortingResponder, , __VA_ARGS__)
 
 #define NTH_DEBUG_INTERNAL_REQUIRE_WITHOUT_VERBOSITY(...)                      \
   NTH_DEBUG_INTERNAL_REQUIRE_WITH_VERBOSITY(                                   \
@@ -71,7 +75,9 @@ inline constexpr char const EnsureLogLine[] =
             NTH_DEBUG_INTERNAL_TRACE_INJECTED_EXPR(__VA_ARGS__));              \
       },                                                                       \
       nth::source_location::current());                                        \
-  static_assert(true)
+  switch (0)                                                                   \
+  default:                                                                     \
+    (void)NTH_CONCATENATE(NthInternalOnExit, __LINE__)
 
 #define NTH_DEBUG_INTERNAL_ENSURE_WITHOUT_VERBOSITY(...)                       \
   NTH_DEBUG_INTERNAL_ENSURE_WITH_VERBOSITY(                                    \

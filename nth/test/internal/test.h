@@ -31,17 +31,15 @@ NTH_DEFINE_MUTABLE_COMPILE_TIME_SEQUENCE(
 
 #define NTH_DEBUG_INTERNAL_TRACE_EXPECT_WITH_VERBOSITY(verbosity, ...)         \
   NTH_DEBUG_INTERNAL_CONTRACT_CHECK(::nth::test::internal_test::ExpectLogLine, \
-                                    verbosity, NoOpResponder, __VA_ARGS__) {}  \
-  static_assert(true)
+                                    verbosity, NoOpResponder, , __VA_ARGS__)
 
 #define NTH_DEBUG_INTERNAL_TRACE_ASSERT(...)                                   \
   NTH_DEBUG_INTERNAL_TRACE_ASSERT_WITH_VERBOSITY((v.always), __VA_ARGS__)
 
 #define NTH_DEBUG_INTERNAL_TRACE_ASSERT_WITH_VERBOSITY(verbosity, ...)         \
   NTH_DEBUG_INTERNAL_CONTRACT_CHECK(::nth::test::internal_test::AssertLogLine, \
-                                    verbosity, NoOpResponder, __VA_ARGS__) {}  \
-  else { return; }                                                             \
-  static_assert(true)
+                                    verbosity, NoOpResponder, return,          \
+                                    __VA_ARGS__)
 
 namespace nth::test {
 

@@ -18,7 +18,9 @@ cc_library(
     name = "on_exit",
     hdrs = ["on_exit.h"],
     deps = [
+        "//nth/debug/log",
         "//nth/debug:source_location",
+        "//nth/strings:interpolate",
     ],
 )
 
