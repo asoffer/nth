@@ -31,7 +31,7 @@ struct file_path {
   // path.
   std::string const &path() const { return name_; }
 
-  friend void NthPrint(Printer auto &p, file_path const &path) {
+  friend void NthPrint(Printer auto &p, auto &, file_path const &path) {
     std::stringstream ss;
     ss << std::quoted(path.name_);
     p.write(ss.str());
