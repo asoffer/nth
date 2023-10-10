@@ -69,11 +69,13 @@ requires(requires {
 
 #define NTH_DEBUG_INTERNAL_TRACE_DECLARE_API(type, member_function_names)      \
   template <>                                                                  \
-  NTH_DEBUG_INTERNAL_TRACE_DECLARE_API_IMPL(type, member_function_names)
+  NTH_DEBUG_INTERNAL_TRACE_DECLARE_API_IMPL(NTH_IGNORE_PARENTHESES(type),      \
+                                            member_function_names)
 
 #define NTH_DEBUG_INTERNAL_TRACE_DECLARE_API_TEMPLATE(type,                    \
                                                       member_function_names)   \
-  NTH_DEBUG_INTERNAL_TRACE_DECLARE_API_IMPL(type, member_function_names)
+  NTH_DEBUG_INTERNAL_TRACE_DECLARE_API_IMPL(NTH_IGNORE_PARENTHESES(type),      \
+                                            member_function_names)
 
 #define NTH_DEBUG_INTERNAL_TRACE_DECLARE_API_IMPL(t, member_function_names)    \
   struct ::nth::debug::internal_trace::Api<t>                                  \

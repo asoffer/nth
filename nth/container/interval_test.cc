@@ -43,5 +43,14 @@ NTH_TEST("interval/contains") {
   NTH_EXPECT(not t.contains("def"));
 }
 
+NTH_TEST("interval/set-bounds") {
+  interval<std::string> i("abc", "def");
+  i.set_upper_bound("xyz");
+  i.set_lower_bound("ghi");
+  NTH_EXPECT(i.upper_bound() == "xyz");
+  NTH_EXPECT(i.lower_bound() == "ghi");
+  NTH_EXPECT(not i.contains("abc"));
+}
+
 }  // namespace
 }  // namespace nth

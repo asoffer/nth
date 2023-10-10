@@ -52,6 +52,23 @@ struct TracedValue<bool> : TracedExprBase {
   bool value_;
 };
 
+template <>
+struct TracedValue<bool const &> : TracedExprBase {
+  using type = bool const &;
+
+  explicit operator bool() const;
+
+ protected:
+  // Constructs the traced value by invoking `f` with the arguments `ts...`.
+  constexpr TracedValue(auto f, auto const &...ts) : value_(f(ts...)) {}
+
+  // Friend function template abstracting over a `TracedValue<T>` and a `T`.
+  template <typename U>
+  friend constexpr decltype(auto) Evaluate(U const &value);
+
+  bool const &value_;
+};
+
 inline thread_local std::vector<TracedValue<bool> const *> bool_value_stash;
 
 inline TracedValue<bool>::operator bool() const {

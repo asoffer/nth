@@ -62,6 +62,7 @@ cc_library(
     hdrs = ["interval_set.h"],
     deps = [
         ":interval",
+        "//nth/debug",
     ],
 )
 
@@ -70,6 +71,27 @@ cc_test(
     srcs = ["interval_set_test.cc"],
     deps = [
         ":interval_set",
+        "//nth/test:main",
+        "//nth/debug/property",
+    ],
+)
+
+cc_library(
+    name = "interval_map",
+    hdrs = ["interval_map.h"],
+    deps = [
+        ":interval",
+        ":interval_set",
+        "//nth/debug",
+        "@com_google_absl//absl/container:btree"
+    ],
+)
+
+cc_test(
+    name = "interval_map_test",
+    srcs = ["interval_map_test.cc"],
+    deps = [
+        ":interval_map",
         "//nth/test:main",
         "//nth/debug/property",
     ],

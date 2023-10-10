@@ -19,7 +19,9 @@ cc_test(
 cc_library(
     name = "iterator_range",
     hdrs = ["iterator_range.h"],
-    deps = [],
+    deps = [
+        "//nth/debug",
+    ],
 )
 
 

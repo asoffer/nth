@@ -4,6 +4,8 @@
 #include <type_traits>
 #include <utility>
 
+#include "nth/debug/debug.h"
+
 namespace nth {
 namespace internal_iterator_range {
 
@@ -26,6 +28,8 @@ struct iterator_range : private internal_iterator_range::Base<B, 0>,
   using value_type     = std::decay_t<decltype(*std::declval<B>())>;
   using const_iterator = B;
 
+  iterator_range() = default;
+
   iterator_range(B b, E e)
       : internal_iterator_range::Base<B, 0>(std::move(b)),
         internal_iterator_range::Base<E, 1>(std::move(e)) {}
@@ -46,5 +50,9 @@ template <typename B, typename E>
 iterator_range(B, E) -> iterator_range<B, E>;
 
 }  // namespace nth
+
+template <typename B, typename E>
+NTH_TRACE_DECLARE_API_TEMPLATE((nth::iterator_range<B, E>),
+                               (begin)(empty)(end));
 
 #endif  // NTH_UTILITY_ITERATOR_RANGE_H

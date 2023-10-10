@@ -7,11 +7,13 @@
 #include <vector>
 
 #include "nth/container/interval.h"
+#include "nth/debug/debug.h"
 
 namespace nth {
 
-// Represents the half-open interval consisting of values greater than or equal
-// to the lower bound and less than the upper bound.
+// Represents a set of elements of type `T` by storing the half-open interval
+// consisting of values greater than or equal to the lower bound and less than
+// the upper bound.
 template <std::totally_ordered T>
 struct interval_set {
   using interval_type = interval<T>;
@@ -50,7 +52,7 @@ struct interval_set {
   // set.
   constexpr auto length() const
       requires(requires(interval_type const& i) { i.length(); }) {
-    decltype(std::declval<interval<T> const&>().length()) result = {};
+    decltype(std::declval<interval_type const&>().length()) result = {};
     for (auto const& i : intervals_) { result += i.length(); }
     return result;
   }
@@ -84,7 +86,7 @@ struct interval_set {
   // Returns a view into the intervals present in the interval set in increasing
   // order. The view is valid until the next non-const member function is
   // invoked on this `interval_set`.
-  std::span<interval<T> const> intervals() const { return intervals_; }
+  std::span<interval_type const> intervals() const { return intervals_; }
 
   friend void NthPrint(auto& p, auto& f, interval_set const& is) {
     if (is.empty()) {
@@ -100,12 +102,12 @@ struct interval_set {
   }
 
  private:
-  using iterator = typename std::vector<interval<T>>::iterator;
+  using iterator = typename std::vector<interval_type>::iterator;
 
   template <std::totally_ordered_with<T> U>
   iterator insert_hint(iterator iter, interval<U> const& i);
 
-  std::vector<interval<T>> intervals_;
+  std::vector<interval_type> intervals_;
 };
 
 template <std::totally_ordered T>
@@ -119,9 +121,10 @@ interval_set(interval<T> const&) -> interval_set<T>;
 template <std::totally_ordered T>
 template <std::totally_ordered_with<T> U>
 constexpr bool interval_set<T>::contains(U const& u) const {
-  auto iter = std::partition_point(
-      intervals_.begin(), intervals_.end(),
-      [&](interval<T> const& interval) { return interval.lower_bound() <= u; });
+  auto iter = std::partition_point(intervals_.begin(), intervals_.end(),
+                                   [&](interval_type const& interval) {
+                                     return interval.lower_bound() <= u;
+                                   });
   if (iter == intervals_.begin()) { return false; }
   return u < std::prev(iter)->upper_bound();
 }
@@ -130,7 +133,7 @@ template <std::totally_ordered T>
 template <std::totally_ordered_with<T> U>
 constexpr bool interval_set<T>::covers(interval<U> const& i) const {
   auto iter = std::partition_point(
-      intervals_.begin(), intervals_.end(), [&](interval<T> const& interval) {
+      intervals_.begin(), intervals_.end(), [&](interval_type const& interval) {
         return interval.lower_bound() <= i.lower_bound();
       });
   if (iter == intervals_.begin()) { return false; }
@@ -143,7 +146,7 @@ constexpr bool interval_set<T>::covers(interval_set<U> const& is) const {
   auto iter = intervals_.begin();
   for (auto const& i : is.intervals()) {
     auto new_iter = std::lower_bound(
-        iter, intervals_.end(), [&](interval<T> const& interval) {
+        iter, intervals_.end(), [&](interval_type const& interval) {
           return interval.lower_bound() < i.lower_bound();
         });
     if (iter == new_iter) { return false; }
@@ -158,7 +161,7 @@ template <std::totally_ordered_with<T> U>
 typename interval_set<T>::iterator interval_set<T>::insert_hint(
     iterator iter, interval<U> const& i) {
   auto lower_iter = std::partition_point(
-      iter, intervals_.end(), [&](interval<T> const& interval) {
+      iter, intervals_.end(), [&](interval_type const& interval) {
         return interval.upper_bound() < i.lower_bound();
       });
 
@@ -168,7 +171,7 @@ typename interval_set<T>::iterator interval_set<T>::insert_hint(
   }
 
   auto upper_iter = std::partition_point(
-      lower_iter, intervals_.end(), [&](interval<T> const& interval) {
+      lower_iter, intervals_.end(), [&](interval_type const& interval) {
         return interval.lower_bound() <= i.upper_bound();
       });
 

@@ -28,48 +28,65 @@ template <std::totally_ordered T>
 struct interval : internal_interval::LengthBase<T> {
   using value_type = T;
 
-  template <std::convertible_to<T> L, std::convertible_to<T> R>
+  template <std::convertible_to<value_type> L,
+            std::convertible_to<value_type> R>
   explicit constexpr interval(L&& l, R&& r)
       : lower_bound_(std::forward<L>(l)), upper_bound_(std::forward<R>(r)) {
     NTH_REQUIRE(lower_bound_ <= upper_bound_);
   }
-  template <std::convertible_to<T> U>
+  template <std::convertible_to<value_type> U>
   interval(interval<U> const& i) : interval(i.lower_bound(), i.upper_bound()) {}
 
-  template <std::totally_ordered_with<T> U>
+  template <std::totally_ordered_with<value_type> U>
   friend bool operator==(interval const& lhs, interval<U> const& rhs) {
     return lhs.lower_bound() == rhs.lower_bound() and
            lhs.upper_bound() == rhs.upper_bound();
   }
 
-  template <std::totally_ordered_with<T> U>
+  template <std::totally_ordered_with<value_type> U>
   friend bool operator!=(interval const& lhs, interval<U> const& rhs) {
     return not !(lhs == rhs);
   }
 
   // Returns a reference to the lower bound of the interval.
-  constexpr T const& lower_bound() const& { return lower_bound_; }
+  constexpr value_type const& lower_bound() const& { return lower_bound_; }
   // Returns a reference to the upper bound of the interval.
-  constexpr T const& upper_bound() const& { return upper_bound_; }
+  constexpr value_type const& upper_bound() const& { return upper_bound_; }
   // Returns an rvalue-reference to the lower bound of the interval. Once the
   // referenced object is is modified the interval may be invalidated and is
   // only safe to be destroyed or assigned-to.
-  constexpr T&& lower_bound() && { return std::move(lower_bound_); }
+  constexpr value_type&& lower_bound() && { return std::move(lower_bound_); }
   // Returns an rvalue-reference to the upper bound of the interval. Once the
   // referenced object is is modified the interval may be invalidated and is
   // only safe to be destroyed or assigned-to.
-  constexpr T&& upper_bound() && { return std::move(upper_bound_); }
+  constexpr value_type&& upper_bound() && { return std::move(upper_bound_); }
+
+  // Sets the lower bound to the specified `value`. Behavior is undefined if
+  // `value` does not compare less-than or equal to `upper_bound()`.
+  template <std::totally_ordered_with<value_type> U>
+  constexpr void set_lower_bound(U&& value) {
+    NTH_REQUIRE(value <= upper_bound_);
+    lower_bound_ = std::forward<U>(value);
+  }
+
+  // Sets the upper bound to the specified `value`. Behavior is undefined if
+  // `value` does not compare greater-than or equal to `lower_bound()`.
+  template <std::totally_ordered_with<value_type> U>
+  constexpr void set_upper_bound(U&& value) {
+    NTH_REQUIRE(lower_bound_ <= value);
+    upper_bound_ = std::forward<U>(value);
+  }
 
   // Returns `true` if and only if the element `u` is at least as large as
   // `this->lower_bound()` and strictly less than `upper_bound()`.
-  template <std::totally_ordered_with<T> U>
+  template <std::totally_ordered_with<value_type> U>
   constexpr bool contains(U const& u) const {
     return lower_bound() <= u and u < upper_bound();
   }
 
   // Returns `true` if and only if every element `x` for which `i.contains(x)`
   // is true, `this->contains(x)` is also true.
-  template <std::totally_ordered_with<T> U>
+  template <std::totally_ordered_with<value_type> U>
   constexpr bool covers(interval<U> const& i) const {
     return lower_bound() <= i.lower_bound() and
            i.upper_bound() <= upper_bound();
@@ -79,7 +96,8 @@ struct interval : internal_interval::LengthBase<T> {
   constexpr bool empty() const { return lower_bound() == upper_bound(); }
 
   template <size_t N>
-  requires(N == 0 or N == 1) friend constexpr T const& get(interval const& i) {
+  requires(N == 0 or
+           N == 1) friend constexpr value_type const& get(interval const& i) {
     if constexpr (N == 0) {
       return i.lower_bound();
     } else {
@@ -88,7 +106,7 @@ struct interval : internal_interval::LengthBase<T> {
   }
 
   template <size_t N>
-  requires(N == 0 or N == 1) friend constexpr T&& get(interval&& i) {
+  requires(N == 0 or N == 1) friend constexpr value_type&& get(interval&& i) {
     if constexpr (N == 0) {
       return std::move(i).lower_bound();
     } else {
@@ -105,7 +123,7 @@ struct interval : internal_interval::LengthBase<T> {
   }
 
  private:
-  T lower_bound_, upper_bound_;
+  value_type lower_bound_, upper_bound_;
 };
 
 template <typename L, typename H>
