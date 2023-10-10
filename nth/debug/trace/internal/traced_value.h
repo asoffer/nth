@@ -35,8 +35,10 @@ struct TracedValue : TracedExprBase {
   type value_;
 };
 
+struct TracedBoolish : TracedExprBase {};
+
 template <>
-struct TracedValue<bool> : TracedExprBase {
+struct TracedValue<bool> : TracedBoolish {
   using type = bool;
 
   explicit operator bool() const;
@@ -53,7 +55,7 @@ struct TracedValue<bool> : TracedExprBase {
 };
 
 template <>
-struct TracedValue<bool const &> : TracedExprBase {
+struct TracedValue<bool const &> : TracedBoolish {
   using type = bool const &;
 
   explicit operator bool() const;
@@ -69,9 +71,14 @@ struct TracedValue<bool const &> : TracedExprBase {
   bool const &value_;
 };
 
-inline thread_local std::vector<TracedValue<bool> const *> bool_value_stash;
+inline thread_local std::vector<TracedBoolish const *> bool_value_stash;
 
 inline TracedValue<bool>::operator bool() const {
+  bool_value_stash.push_back(this);
+  return value_;
+}
+
+inline TracedValue<bool const &>::operator bool() const {
   bool_value_stash.push_back(this);
   return value_;
 }
