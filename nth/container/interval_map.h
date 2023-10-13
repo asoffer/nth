@@ -211,7 +211,7 @@ void interval_map<K, M>::insert_or_assign(::nth::interval<T> const& i, V&& v) {
     auto end_iter =
         FirstStartingAfter(start_iter, intervals_.end(), i.upper_bound());
     auto iter = intervals_.erase(start_iter, end_iter);
-    if (iter->second == v) {
+    if (iter != intervals_.end() and iter->second == v) {
       auto handle = intervals_.extract(iter);
       handle.key().set_lower_bound(i.lower_bound());
       inserted_iter = intervals_.insert(std::move(handle)).position;
