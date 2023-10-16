@@ -109,7 +109,7 @@ NTH_TEST("interval_map/covers") {
   NTH_EXPECT(not map.covers(i));
 }
 
-NTH_TEST("interval_map/contains") {
+NTH_TEST("interval_map/at") {
   interval_map<int, std::string> map;
   map.insert_or_assign(interval(3, 5), "a");
   map.insert_or_assign(interval(20, 23), "b");
