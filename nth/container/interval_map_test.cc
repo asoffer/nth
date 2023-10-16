@@ -109,5 +109,16 @@ NTH_TEST("interval_map/covers") {
   NTH_EXPECT(not map.covers(i));
 }
 
+NTH_TEST("interval_map/contains") {
+  interval_map<int, std::string> map;
+  map.insert_or_assign(interval(3, 5), "a");
+  map.insert_or_assign(interval(20, 23), "b");
+  NTH_EXPECT(map.at(3) == "a");
+  NTH_EXPECT(map.at(4) == "a");
+  NTH_EXPECT(map.at(20) == "b");
+  NTH_EXPECT(map.at(21) == "b");
+  NTH_EXPECT(map.at(22) == "b");
+}
+
 }  // namespace
 }  // namespace nth
