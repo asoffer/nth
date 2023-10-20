@@ -70,6 +70,14 @@ NTH_TEST("interval_map/insert_or_assign") {
   NTH_EXPECT(map.mapped_intervals() >>= ElementsAreSequentially(
                  std::pair<nth::interval<int> const, std::string>(
                      nth::interval(3, 22), "hi")));
+
+  map.insert_or_assign(interval(24, 30), "there");
+  map.insert_or_assign(interval(2, 24), "hello");
+  NTH_EXPECT(map.mapped_intervals() >>= ElementsAreSequentially(
+                 std::pair<nth::interval<int> const, std::string>(
+                     nth::interval(2, 24), "hello"),
+                 std::pair<nth::interval<int> const, std::string>(
+                     nth::interval(24, 30), "there")));
 }
 
 NTH_TEST("interval_map/contains") {

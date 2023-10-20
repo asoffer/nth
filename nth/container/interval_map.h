@@ -116,6 +116,13 @@ struct interval_map {
       return entry.first.lower_bound() <= k;
     });
   }
+  static iterator FirstStartingNotBefore(iterator b, iterator e,
+                                         key_type const& k) {
+    return std::partition_point(b, e, [&](value_type const& entry) {
+      return entry.first.lower_bound() < k;
+    });
+  }
+
   static const_iterator RangeContaining(const_iterator b, const_iterator e,
                                         key_type const& k) {
     auto iter = std::partition_point(b, e, [&](value_type const& entry) {
@@ -209,7 +216,7 @@ void interval_map<K, M>::insert_or_assign(::nth::interval<T> const& i, V&& v) {
     }
   } else {
     auto end_iter =
-        FirstStartingAfter(start_iter, intervals_.end(), i.upper_bound());
+        FirstStartingNotBefore(start_iter, intervals_.end(), i.upper_bound());
     auto iter = intervals_.erase(start_iter, end_iter);
     if (iter != intervals_.end() and iter->second == v) {
       auto handle = intervals_.extract(iter);
