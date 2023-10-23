@@ -128,5 +128,19 @@ NTH_TEST("interval_map/at") {
   NTH_EXPECT(map.at(22) == "b");
 }
 
+
+NTH_TEST("interval_map/mapped_range") {
+  interval_map<int, std::string> map;
+  map.insert_or_assign(interval(3, 5), "a");
+  map.insert_or_assign(interval(6, 7), "b");
+  NTH_EXPECT(map.mapped_range(2) == nullptr);
+  NTH_EXPECT(map.mapped_range(3) != nullptr);
+  NTH_EXPECT(map.mapped_range(4) != nullptr);
+  NTH_EXPECT(map.mapped_range(5) == nullptr);
+  NTH_EXPECT(map.mapped_range(6) != nullptr);
+  NTH_EXPECT(map.mapped_range(7) == nullptr);
+  NTH_EXPECT(map.mapped_range(8) == nullptr);
+}
+
 }  // namespace
 }  // namespace nth
