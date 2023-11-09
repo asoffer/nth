@@ -1,6 +1,8 @@
 #ifndef NTH_DEBUG_TRACE_EXPECTATION_RESULT_H
 #define NTH_DEBUG_TRACE_EXPECTATION_RESULT_H
 
+#include <cstdint>
+
 #include "nth/debug/source_location.h"
 
 namespace nth::debug {
