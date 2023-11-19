@@ -50,6 +50,11 @@ static_assert(nth::sequence<1>.head() == 1);
 static_assert(nth::sequence<2, 3, 4>.head() == 2);
 static_assert(nth::sequence<1>.tail() == nth::sequence<>);
 static_assert(nth::sequence<2, 3, 4>.tail() == nth::sequence<3, 4>);
+static_assert(nth::sequence<1>.drop<1>() == nth::sequence<>);
+static_assert(nth::sequence<2, 3, 4>.drop<1>() == nth::sequence<3, 4>);
+static_assert(nth::sequence<1>.drop<0>() == nth::sequence<1>);
+static_assert(nth::sequence<2, 3, 4>.drop<0>() == nth::sequence<2, 3, 4>);
+static_assert(nth::sequence<2, 3, 4>.drop<2>() == nth::sequence<4>);
 
 static_assert(not nth::sequence<>.any<[](auto x) { return x % 2 == 0; }>());
 static_assert(not nth::sequence<1>.any<[](auto x) { return x % 2 == 0; }>());
@@ -61,9 +66,9 @@ static_assert(nth::sequence<>.all<[](auto x) { return x % 2 == 0; }>());
 static_assert(not nth::sequence<1>.all<[](auto x) { return x % 2 == 0; }>());
 static_assert(not nth::sequence<1, 3>.all<[](auto x) { return x % 2 == 0; }>());
 
-static_assert( nth::sequence<2>.all<[](auto x) { return x % 2 == 0; }>());
-static_assert( nth::sequence<2, 4>.all<[](auto x) { return x % 2 == 0; }>());
-static_assert(not  nth::sequence<1, 2>.all<[](auto x) { return x % 2 == 0; }>());
+static_assert(nth::sequence<2>.all<[](auto x) { return x % 2 == 0; }>());
+static_assert(nth::sequence<2, 4>.all<[](auto x) { return x % 2 == 0; }>());
+static_assert(not nth::sequence<1, 2>.all<[](auto x) { return x % 2 == 0; }>());
 
 static_assert(nth::sequence<>.unique() == nth::sequence<>);
 static_assert(nth::sequence<1>.unique() == nth::sequence<1>);
