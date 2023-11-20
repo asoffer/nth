@@ -108,6 +108,15 @@ static_assert(nth::sequence<1, 2>.get<0>() == 1);
 static_assert(nth::sequence<1, 2, 3>.get<1>() == 2);
 static_assert(nth::sequence<1, 2, 3, 1, 2, 3>.get<4>() == 2);
 
+static_assert(nth::sequence<>.chunk<1>() == nth::sequence<>);
+static_assert(nth::sequence<>.chunk<2>() == nth::sequence<>);
+static_assert(nth::sequence<0, 1, 2, 3>.chunk<2>() ==
+              nth::sequence<nth::sequence<0, 1>, nth::sequence<2, 3>>);
+static_assert(nth::sequence<0, 1, 2, 3, 4, 5>.chunk<2>() ==
+              nth::sequence<nth::sequence<0, 1>, nth::sequence<2, 3>,
+                            nth::sequence<4, 5>>);
+static_assert(nth::sequence<0, 1, 2, 3, 4, 5>.chunk<3>() ==
+              nth::sequence<nth::sequence<0, 1, 2>, nth::sequence<3, 4, 5>>);
 }  // namespace
 
 int main() {

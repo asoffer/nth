@@ -79,6 +79,18 @@ struct Sequence {
             Sequence<>());
   }
 
+  template <size_t N>
+  static constexpr auto chunk() requires(size() % N == 0) {
+    if constexpr (empty()) {
+      return Sequence<>{};
+    } else {
+      return []<size_t... Ns>(std::integer_sequence<size_t, Ns...>) {
+        return Sequence<select<Ns...>()>{} + drop<N>().template chunk<N>();
+      }
+      (std::make_index_sequence<N>{});
+    }
+  }
+
   static constexpr auto unique() {
     if constexpr (empty()) {
       return Sequence<>{};
