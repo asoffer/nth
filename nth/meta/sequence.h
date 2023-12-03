@@ -79,6 +79,18 @@ struct Sequence {
             Sequence<>());
   }
 
+  template <size_t N>
+  static constexpr auto chunk() requires(size() % N == 0) {
+    if constexpr (empty()) {
+      return Sequence<>{};
+    } else {
+      return []<size_t... Ns>(std::integer_sequence<size_t, Ns...>) {
+        return Sequence<select<Ns...>()>{} + drop<N>().template chunk<N>();
+      }
+      (std::make_index_sequence<N>{});
+    }
+  }
+
   static constexpr auto unique() {
     if constexpr (empty()) {
       return Sequence<>{};
@@ -100,6 +112,19 @@ struct Sequence {
   static constexpr auto tail() requires(sizeof...(Vs) > 0) {
     using split_type = SplitFirst<Vs...>;
     return typename split_type::template tail<Sequence>{};
+  }
+
+  template <size_t N = 1>
+  [[nodiscard]] static constexpr auto drop() requires(sizeof...(Vs) >= N) {
+    if constexpr (N == 1) {
+      using split_type = SplitFirst<Vs...>;
+      return typename split_type::template tail<Sequence>{};
+    } else {
+      return []<size_t... Ns>(std::integer_sequence<size_t, Ns...>) {
+        return select<(N + Ns)...>();
+      }
+      (std::make_index_sequence<sizeof...(Vs) - N>{});
+    }
   }
 
   template <size_t... Ns>
@@ -207,8 +232,7 @@ template <auto... Vs>
 inline constexpr internal_meta::Sequence<Vs...> sequence;
 
 template <unsigned N>
-static constexpr auto index_sequence =
-    internal_meta::IndexSequence<N>::value;
+static constexpr auto index_sequence = internal_meta::IndexSequence<N>::value;
 
 }  // namespace nth
 

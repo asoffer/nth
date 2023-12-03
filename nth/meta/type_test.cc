@@ -30,6 +30,15 @@ static_assert(nth::type<int(bool)>.decayed() == nth::type<int (*)(bool)>);
 static_assert(nth::type<int(bool (&)[3])>.decayed() ==
               nth::type<int (*)(bool (&)[3])>);
 
+// cast
+static_assert(nth::type<int>.cast(true) == 1);
+struct A {};
+struct B {
+  constexpr B(A) : value(17) {}
+  int value;
+};
+static_assert(nth::type<B>.cast(A{}).value == 17);
+
 // type_t
 static_assert(nth::type<nth::type_t<nth::type<int>>> == nth::type<int>);
 static_assert(nth::type<nth::type_t<nth::type<bool>>> == nth::type<bool>);

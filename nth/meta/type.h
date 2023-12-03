@@ -73,6 +73,11 @@ struct Type {
     return TypeId(+[] { return std::string_view(Name); });
   }
 
+  template <std::convertible_to<T> U>
+  static constexpr auto cast(U&& u) {
+    return static_cast<T>(std::forward<U>(u));
+  }
+
   static constexpr Type<std::decay_t<T>> decayed() { return {}; }
 
   static constexpr Type<std::remove_reference_t<T>> without_reference() {
@@ -116,8 +121,8 @@ struct Type {
     return os << std::string_view(name());
   }
 
-  private:
-   static constexpr auto Name = Type::name();
+ private:
+  static constexpr auto Name = Type::name();
 };
 
 template <typename T>
@@ -127,7 +132,7 @@ std::false_type IsTypeImpl(...);
 template <typename R, typename... Parameters>
 struct FunctionSignature<R(Parameters...)> {
   static constexpr Type<R> return_type;
-  static constexpr auto parameters  = sequence<Type<Parameters>{}...>;
+  static constexpr auto parameters = sequence<Type<Parameters>{}...>;
 };
 
 }  // namespace internal_type
@@ -149,7 +154,7 @@ using type_t = typename decltype(t)::type;
 // useful in two common scenarios: First, when the you need to retrieve the
 // first element of a pack (which could alternately be computed via
 // `nth::type_t<nth::type_sequence<Pack...>.head()>`). Second, when you want to
-// repeat the same type for each element of a pack, you can use 
+// repeat the same type for each element of a pack, you can use
 //
 //   ```
 //   nth::first_t<T, Pack>...
@@ -157,7 +162,8 @@ using type_t = typename decltype(t)::type;
 // where you might otherwise need to coerce the cumbersome
 //
 //   ```
-//   nth::type_sequence<Pack...>.template transform<[](auto) { return nth::type<T>; }>();
+//   nth::type_sequence<Pack...>.template transform<[](auto) { return
+//   nth::type<T>; }>();
 //   ```
 // back into a pack.
 template <typename T, typename...>

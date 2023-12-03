@@ -26,17 +26,19 @@ inline constexpr char const EnsureLogLine[] =
 
 #define NTH_DEBUG_INTERNAL_CONTRACT_CHECK(log_line, verbosity, responder_type, \
                                           action_prefix, ...)                  \
-  if (::nth::debug::internal_contracts::responder_type NthInternalResponder;   \
-      NTH_DEBUG_INTERNAL_VERBOSITY_DISABLED(verbosity) or                      \
-          [&](::nth::source_location NthInternalourceLocation)                 \
-          -> decltype(auto) {                                                  \
-        static ::nth::internal_debug::LogLineWithArity<3> const                \
-            NthInternalLogLine(log_line, NthInternalourceLocation);            \
-        NthInternalResponder.set_log_line(NthInternalLogLine);                 \
-        return (NthInternalResponder);                                         \
-      }(::nth::source_location::current())                                     \
-                 .set((#__VA_ARGS__),                                          \
-                      NTH_DEBUG_INTERNAL_TRACE_INJECTED_EXPR(__VA_ARGS__))) {  \
+  if (NTH_DEBUG_INTERNAL_VERBOSITY_DISABLED(verbosity)) {                      \
+  } else if (::nth::debug::internal_contracts::responder_type                  \
+                 NthInternalResponder;                                         \
+             [&](::nth::source_location NthInternalourceLocation)              \
+                 -> decltype(auto) {                                           \
+               static ::nth::internal_debug::LogLineWithArity<3> const         \
+                   NthInternalLogLine(log_line, NthInternalourceLocation);     \
+               NthInternalResponder.set_log_line(NthInternalLogLine);          \
+               return (NthInternalResponder);                                  \
+             }(::nth::source_location::current())                              \
+                        .set((#__VA_ARGS__),                                   \
+                             NTH_DEBUG_INTERNAL_TRACE_INJECTED_EXPR(           \
+                                 __VA_ARGS__))) {                              \
   } else                                                                       \
     switch (0)                                                                 \
     default:                                                                   \
