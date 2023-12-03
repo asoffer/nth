@@ -96,3 +96,20 @@ cc_test(
         "//nth/debug/property",
     ],
 )
+
+cc_library(
+    name = "stack",
+    hdrs = ["stack.h"],
+    deps = [
+        "//nth/debug",
+    ],
+)
+
+cc_test(
+    name = "stack_test",
+    srcs = ["stack_test.cc"],
+    deps = [
+        ":stack",
+        "//nth/test:main",
+    ],
+)
