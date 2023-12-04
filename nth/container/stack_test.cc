@@ -110,8 +110,6 @@ NTH_INVOKE_TEST("stack/basic/*") {
   co_yield nth::type<std::array<char, 11>>;
 }
 
-
-
 NTH_TEST("stack/top") {
   stack<std::string> s;
 
@@ -121,6 +119,17 @@ NTH_TEST("stack/top") {
   s.top() = "world";
   NTH_EXPECT(s.top() == "world");
   NTH_EXPECT(static_cast<stack<std::string> const&>(s).top() == "world");
+}
+
+NTH_TEST("stack/top-span") {
+  stack<int> s           = {0, 1, 2, 3, 4};
+  std::span<int, 2> span = s.top_span<2>();
+  NTH_EXPECT(span[0] == 3);
+  NTH_EXPECT(span[1] == 4);
+  s.pop();
+  span = s.top_span<2>();
+  NTH_EXPECT(span[0] == 2);
+  NTH_EXPECT(span[1] == 3);
 }
 
 NTH_TEST("stack/emplace") {
