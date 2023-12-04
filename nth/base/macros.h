@@ -36,6 +36,12 @@ struct NthRequireExpansionInGlobalNamespace {};
 #define NTH_SECOND_ARGUMENT(...) NTH_INTERNAL_SECOND_ARGUMENT(__VA_ARGS__)
 #define NTH_INTERNAL_SECOND_ARGUMENT(a, b, ...) b
 
+// NTH_TAIL_ARGUMENTS
+//
+// Expands to all arguments except the first.
+#define NTH_TAIL_ARGUMENTS(...) NTH_INTERNAL_TAIL_ARGUMENTS(__VA_ARGS__)
+#define NTH_INTERNAL_TAIL_ARGUMENTS(a, ...) __VA_ARGS__
+
 // NTH_CONCATENATE
 //
 // Expands to its arguments except that the last token of the first argument and

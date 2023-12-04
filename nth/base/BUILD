@@ -37,6 +37,22 @@ cc_test(
 )
 
 cc_library(
+    name = "pack",
+    hdrs = ["pack.h"],
+    deps = [
+        ":macros",
+    ],
+)
+
+cc_test(
+    name = "pack_test",
+    srcs = ["pack_test.cc"],
+    deps = [
+        ":pack"
+    ],
+)
+
+cc_library(
     name = "platform",
     hdrs = ["platform.h"],
     deps = [],

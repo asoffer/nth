@@ -53,11 +53,11 @@ struct stack {
 
   // Returns a span over the top `n` elements in the stack.
   std::span<value_type> top_span(size_type n) {
-    NTH_REQUIRE((v.debug), size() > n);
+    NTH_REQUIRE((v.debug), size() >= n);
     return std::span(next_ - n, n);
   }
   std::span<value_type const> top_span(size_type n) const {
-    NTH_REQUIRE((v.debug), size() > n);
+    NTH_REQUIRE((v.debug), size() >= n);
     return std::span(next_ - n, n);
   }
   template <size_type N>
