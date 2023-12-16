@@ -89,7 +89,7 @@ struct stack {
   bool empty() const { return size() == 0; }
 
   // Returns the amount of space left before a reallocation is required.
-  constexpr bool remaining_capacity() const { return left_; }
+  constexpr size_type remaining_capacity() const { return left_; }
 
   size_type capacity() const { return *capacity_address(); }
 
@@ -266,11 +266,12 @@ void stack<T>::reallocate() {
   size_type buffer_size = buffer_size_from_capacity(cap);
   void* new_alloc       = ::operator new(2 * buffer_size, alignment());
   value_type* new_ptr   = static_cast<value_type*>(new_alloc);
-  value_type* old_start = next_ + static_cast<ptrdiff_t>(left_ - cap);
+  ptrdiff_t size = static_cast<ptrdiff_t>(cap) - static_cast<ptrdiff_t>(left_);
+  value_type* old_start = next_ - size;
   if constexpr (std::is_trivially_copyable_v<value_type> and
                 std::is_trivially_destructible_v<value_type>) {
-    std::memcpy(new_ptr, old_start, (cap - left_) * sizeof(value_type));
-    new_ptr += (cap - left_);
+    std::memcpy(new_ptr, old_start, size * sizeof(value_type));
+    new_ptr += size;
   } else {
     for (value_type* p = old_start; p != next_; ++p) {
       new_ptr = 1 + new (new_ptr) value_type(static_cast<value_type&&>(*p));
@@ -280,7 +281,7 @@ void stack<T>::reallocate() {
   ::operator delete(old_start, alignment());
 
   next_ = new_ptr;
-  left_ = capacity_offset(2 * buffer_size) / sizeof(value_type) - cap;
+  left_ = capacity_offset(2 * buffer_size) / sizeof(value_type) - size;
   *capacity_address() = capacity_offset(2 * buffer_size) / sizeof(value_type);
 }
 

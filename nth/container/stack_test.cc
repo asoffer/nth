@@ -164,5 +164,36 @@ NTH_TEST("stack/destruction") {
   NTH_EXPECT(n == size_t{100});
 }
 
+NTH_TEST("stack/size-unchanged-when/reconstitute", auto s) {
+  size_t previous_size = s.size();
+  auto [ptr, remaining] = std::move(s).release();
+  s                     = decltype(s)::reconstitute_from(ptr, remaining);
+  NTH_EXPECT(s.size() == previous_size);
+}
+
+NTH_TEST("stack/size-unchanged-when/reallocate", auto s) {
+  size_t previous_size = s.size();
+  s.reallocate();
+  NTH_EXPECT(s.size() == previous_size);
+}
+
+NTH_INVOKE_TEST("stack/size-unchanged-when/*") {
+  co_yield stack<int>{};
+  co_yield stack<int>{3};
+  co_yield stack<int>{0, 1, 2, 3};
+
+  co_yield stack<bool>{};
+  co_yield stack<bool>{true};
+  co_yield stack<bool>{true, false, true};
+
+  co_yield stack<std::string>{};
+  co_yield stack<std::string>{"hello"};
+  co_yield stack<std::string>{"hello", "world"};
+}
+
+
+NTH_TEST("stack/reallocate") {
+}
+
 }  // namespace
 }  // namespace nth
