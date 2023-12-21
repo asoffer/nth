@@ -38,7 +38,7 @@ void RegisterExpectationResultHandler(
 // `ExpectationResultHandlerRange`:
 //
 // Represents a collection of registered `ExpectationResult` handlers. which can
-// be iterated over. Specifically, `ExpectationResultHandlerRange` adheres
+// be iterated over.
 struct ExpectationResultHandlerRange {
   struct const_iterator {
     using value_type = void (*)(ExpectationResult const&);

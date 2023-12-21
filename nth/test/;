@@ -5,7 +5,6 @@
 #include <cstdio>
 
 #include "absl/synchronization/mutex.h"
-#include "absl/strings/str_cat.h"
 #include "nth/debug/expectation_result.h"
 #include "nth/debug/log/log.h"
 #include "nth/debug/log/stderr_log_sink.h"
@@ -44,23 +43,14 @@ struct ExpectationResultHolder {
 };
 
 struct BenchmarkResultHolder {
-  void add(nth::test::BenchmarkResult const& result) {
+  void add(nth::BenchmarkResult const& result) {
     absl::MutexLock lock(&mutex_);
     results_.push_back(result);
   }
 
-  std::vector<nth::test::BenchmarkResult> results() {
-    std::vector<nth::test::BenchmarkResult> results;
-    {
-      absl::MutexLock lock(&mutex_);
-      results = results_;
-    }
-    return results;
-  }
-
  private:
   mutable absl::Mutex mutex_;
-  std::vector<nth::test::BenchmarkResult> results_;
+  std::vector<nth::BenchmarkResult> results_;
 };
 
 nth::NoDestructor<ExpectationResultHolder> expectation_results;
@@ -100,15 +90,14 @@ int main() {
       [](nth::debug::ExpectationResult const& result) {
         expectation_results->add(result);
       });
-  nth::test::RegisterBenchmarkResultHandler(
-      [](nth::test::BenchmarkResult const& result) {
+  nth::debug::RegisterBenchmarkResultHandler(
+      [](nth::debug::BenchmarkResult const& result) {
         benchmark_results->add(result);
       });
-  int32_t tests          = 0;
-  int32_t passed         = 0;
-  size_t benchmark_count = 0;
+  int32_t tests  = 0;
+  int32_t passed = 0;
   for (auto const& [name, test] : nth::test::RegisteredTests()) {
-    int before      = expectation_results->failure_count();
+    int before = expectation_results->failure_count();
     NTH_LOG("\x1b[96m[ {} {} TEST ]\x1b[0m")
         .configure(nth::stderr_log_sink, {.metadata = false}) <<= {
         name,
@@ -119,61 +108,6 @@ int main() {
     bool success = (before == after);
     ++tests;
     passed += success ? 1 : 0;
-    auto bm_results = benchmark_results->results();
-    if (bm_results.size() != benchmark_count) {
-      std::span bm_span = std::span(bm_results).subspan(benchmark_count);
-
-      // TODO: You should be able to configure when no interpolation arguments
-      // are provided.
-      NTH_LOG(
-          "  \x1b[96mBENCHMARKS:{}                          Samples      Mean "
-          "             Std. Dev")
-          .configure(nth::stderr_log_sink, {.metadata = false}) <<= {""};
-
-      size_t max_name_length = 0;
-      for (auto const& benchmark_result : bm_span) {
-        if (benchmark_result.name.size() > max_name_length) {
-          max_name_length = benchmark_result.name.size();
-        }
-      }
-      for (auto const& benchmark_result : bm_span) {
-        std::string mean_str    = absl::StrCat(benchmark_result.mean);
-        size_t mean_decimal_pos = mean_str.find('.');
-        if (mean_decimal_pos == std::string::npos) {
-          mean_str.push_back('.');
-          mean_decimal_pos = mean_str.size() - 1;
-        }
-        std::string stddev_str =
-            absl::StrCat(std::sqrt(benchmark_result.variance));
-        size_t stddev_decimal_pos = stddev_str.find('.');
-        if (stddev_decimal_pos == std::string::npos) {
-          stddev_str.push_back('.');
-          stddev_decimal_pos = stddev_str.size() - 1;
-        }
-
-        NTH_LOG("    [ {} ]{}{}{}{}{}{}{}")
-            .configure(nth::stderr_log_sink, {.metadata = false}) <<= {
-            benchmark_result.name,
-            max_name_length > 35 ? "\n" : "",
-            CharSpacer{.content = ' ',
-                       .count   = (max_name_length > 35
-                                       ? 46
-                                       : (38 - benchmark_result.name.size())) -
-                                DigitCount(benchmark_result.samples)},
-            benchmark_result.samples,
-            CharSpacer{.content = ' ', .count = 10 - mean_decimal_pos},
-            mean_str,
-            CharSpacer{.content = ' ',
-                       .count   = mean_decimal_pos + 15 - mean_str.size() -
-                                stddev_decimal_pos},
-            stddev_str,
-        };
-      }
-      NTH_LOG("{}\x1b[0m")
-          .configure(nth::stderr_log_sink, {.metadata = false}) <<= {""};
-    }
-    benchmark_count = bm_results.size();
-
     NTH_LOG("\x1b[{}m[ {} {} {} TEST ]\x1b[0m")
         .configure(nth::stderr_log_sink, {.metadata = false}) <<= {
         success ? "96" : "91",

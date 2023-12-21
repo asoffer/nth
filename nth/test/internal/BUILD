@@ -8,6 +8,17 @@ cc_library(
 )
 
 cc_library(
+    name = "benchmark",
+    testonly = True,
+    hdrs = ["benchmark.h"],
+    srcs = ["benchmark.cc"],
+    deps = [
+        "//nth/test:benchmark_result",
+        "//nth/meta:compile_time_string",
+    ],
+)
+
+cc_library(
     name = "invocation",
     hdrs = ["invocation.h"],
     testonly = True,

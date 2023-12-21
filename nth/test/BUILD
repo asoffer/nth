@@ -20,6 +20,26 @@ cc_test(
 )
 
 cc_library(
+    name = "benchmark",
+    testonly = True,
+    hdrs = ["benchmark.h"],
+    deps = [
+        "//nth/test/internal:benchmark",
+    ],
+)
+
+cc_library(
+    name = "benchmark_result",
+    testonly = True,
+    hdrs = ["benchmark_result.h"],
+    srcs = ["benchmark_result.cc"],
+    deps = [
+        "//nth/utility:no_destructor",
+        "@com_google_absl//absl/synchronization",
+    ],
+)
+
+cc_library(
     name = "fuzz",
     testonly = True,
     hdrs = ["fuzz.h"],
@@ -44,12 +64,12 @@ cc_library(
     srcs = ["test.cc"],
     testonly = True,
     deps = [
-      ":arguments",
-      ":fuzz",
-      "//nth/base:macros",
-      "//nth/debug/property",
-      "//nth/debug/contracts",
-      "//nth/test/internal:test",
+        ":arguments",
+        ":fuzz",
+        "//nth/base:macros",
+        "//nth/debug/property",
+        "//nth/debug/contracts",
+        "//nth/test/internal:test",
     ],
 )
 
@@ -58,11 +78,12 @@ cc_library(
     srcs = ["main.cc"],
     testonly = True,
     deps = [
-      ":test",
-      "//nth/debug/log",
-      "//nth/debug/log:stderr_log_sink",
-      "//nth/utility:no_destructor",
-      "@com_google_absl//absl/synchronization",
+        ":benchmark_result",
+        ":test",
+        "//nth/debug/log",
+        "//nth/debug/log:stderr_log_sink",
+        "//nth/utility:no_destructor",
+        "@com_google_absl//absl/synchronization",
     ],
 )
 
