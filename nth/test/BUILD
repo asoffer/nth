@@ -34,8 +34,7 @@ cc_library(
     hdrs = ["benchmark_result.h"],
     srcs = ["benchmark_result.cc"],
     deps = [
-        "//nth/utility:no_destructor",
-        "@com_google_absl//absl/synchronization",
+        "//nth/base/internal:global_registry",
     ],
 )
 

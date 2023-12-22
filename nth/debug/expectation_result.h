@@ -3,6 +3,7 @@
 
 #include <cstdint>
 
+#include "nth/base/internal/global_registry.h"
 #include "nth/debug/source_location.h"
 
 namespace nth::debug {
@@ -35,39 +36,6 @@ struct ExpectationResult {
 void RegisterExpectationResultHandler(
     void (*handler)(ExpectationResult const&));
 
-// `ExpectationResultHandlerRange`:
-//
-// Represents a collection of registered `ExpectationResult` handlers. which can
-// be iterated over.
-struct ExpectationResultHandlerRange {
-  struct const_iterator {
-    using value_type = void (*)(ExpectationResult const&);
-
-    const_iterator& operator++();
-    const_iterator operator++(int);
-
-    value_type operator*() const;
-    value_type const* operator->() const;
-
-    friend bool operator==(const_iterator, const_iterator) = default;
-    friend bool operator!=(const_iterator, const_iterator) = default;
-
-   private:
-    friend ExpectationResultHandlerRange;
-    friend ExpectationResultHandlerRange RegisteredExpectationResultHandlers();
-
-    explicit const_iterator(uintptr_t const* ptr = nullptr) : ptr_(ptr) {}
-    uintptr_t const* ptr_;
-  };
-  const_iterator begin() const { return begin_; }
-  const_iterator end() const { return const_iterator(); }
-
- private:
-  friend ExpectationResultHandlerRange RegisteredExpectationResultHandlers();
-  ExpectationResultHandlerRange(const_iterator begin) : begin_(begin) {}
-  const_iterator begin_;
-};
-
 // `RegisteredExpectationResultHandlers`:
 //
 // Returns a view over the globally registered `ExpectationResult` handlers.
@@ -77,7 +45,8 @@ struct ExpectationResultHandlerRange {
 // registration happens after the function returns, the returned
 // `ExpectationResultHandlerRange` will not contain the newly registered
 // handler.
-ExpectationResultHandlerRange RegisteredExpectationResultHandlers();
+internal_base::RegistrarImpl<void (*)(ExpectationResult const&)>::Range
+RegisteredExpectationResultHandlers();
 
 }  // namespace nth::debug
 

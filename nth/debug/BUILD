@@ -20,17 +20,7 @@ cc_library(
     srcs = ["expectation_result.cc"],
     deps = [
         ":source_location",
-        "//nth/utility:no_destructor",
-        "@com_google_absl//absl/synchronization",
-    ],
-)
-
-cc_test(
-    name = "expectation_result_test",
-    srcs = ["expectation_result_test.cc"],
-    deps = [
-        ":expectation_result",
-        "//nth/debug/internal:raw_check",
+        "//nth/base/internal:global_registry",
     ],
 )
 

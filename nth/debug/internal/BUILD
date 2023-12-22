@@ -4,6 +4,10 @@ cc_library(
     name = "raw_check",
     hdrs = ["raw_check.h"],
     deps = [],
+    visibility = [
+        "//nth/debug:__subpackages__",
+        "//nth/base/internal:__pkg__",
+    ],
 )
 
 cc_library(
