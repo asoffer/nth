@@ -93,10 +93,13 @@ struct stack {
 
   size_type capacity() const { return *capacity_address(); }
 
-  void reallocate();
+  // Reserves enough capacity to store at least `n` elements in total.
+  void reserve(size_type n);
 
  private:
   explicit stack(value_type* next, size_type left) : next_(next), left_(left) {}
+
+  void reallocate();
 
   static size_type* round_up_for_capacity(void* ptr);
 
@@ -264,8 +267,19 @@ template <typename T>
 void stack<T>::reallocate() {
   size_type cap         = capacity();
   size_type buffer_size = buffer_size_from_capacity(cap);
-  void* new_alloc       = ::operator new(2 * buffer_size, alignment());
-  value_type* new_ptr   = static_cast<value_type*>(new_alloc);
+  reserve(buffer_size / sizeof(value_type) + cap);
+}
+
+template <typename T>
+void stack<T>::reserve(size_type n) {
+  size_type cap = capacity();
+  if (n < cap) [[unlikely]] { return; }
+  size_type buffer_size  = buffer_size_from_capacity(cap);
+  size_type new_capacity = (n > 2 * cap) ? n : 2 * cap;
+  size_type alloc_size   = new_capacity * sizeof(value_type) +
+                         (buffer_size - cap * sizeof(value_type));
+  void* new_alloc     = ::operator new(alloc_size, alignment());
+  value_type* new_ptr = static_cast<value_type*>(new_alloc);
   ptrdiff_t size = static_cast<ptrdiff_t>(cap) - static_cast<ptrdiff_t>(left_);
   value_type* old_start = next_ - size;
   if constexpr (std::is_trivially_copyable_v<value_type> and
@@ -280,9 +294,9 @@ void stack<T>::reallocate() {
   }
   ::operator delete(old_start, alignment());
 
-  next_ = new_ptr;
-  left_ = capacity_offset(2 * buffer_size) / sizeof(value_type) - size;
-  *capacity_address() = capacity_offset(2 * buffer_size) / sizeof(value_type);
+  next_               = new_ptr;
+  left_               = capacity_offset(alloc_size) / sizeof(value_type) - size;
+  *capacity_address() = capacity_offset(alloc_size) / sizeof(value_type);
 }
 
 }  // namespace nth

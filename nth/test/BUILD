@@ -77,6 +77,7 @@ cc_library(
     srcs = ["main.cc"],
     testonly = True,
     deps = [
+        ":benchmark",
         ":benchmark_result",
         ":test",
         "//nth/debug/log",

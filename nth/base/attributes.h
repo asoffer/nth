@@ -69,4 +69,21 @@
       "This compiler does not support guaranteed tail-call optimization");
 #endif
 
+// NTH_ATTRIBUTE(inline_always)
+// Defines an attribute indicating that the annotated function must be inlined
+// by the compiler. Note that this attribute refers to how the compiler
+// generates executable code, not the `inline` attribute in C++.
+#if defined(__GNUC__) || defined(__clang__)
+#define NTH_BASE_ATTRIBUTES_INTERNAL_SUPPORTS_inline_always true
+#define NTH_BASE_ATTRIBUTES_INTERNAL_inline_always                             \
+  __attribute__((always_inline))
+#elif defined(_MSC_VER) && !defined(__clang__)
+#define NTH_BASE_ATTRIBUTES_INTERNAL_SUPPORTS_inline_always true
+#define NTH_BASE_ATTRIBUTES_INTERNAL_inline_always __forceinline
+#else
+#define NTH_BASE_ATTRIBUTES_INTERNAL_SUPPORTS_inline_always false
+#define NTH_BASE_ATTRIBUTES_INTERNAL_inline_always                             \
+  static_assert(false, "The compiler does not support force-inlining");
+#endif
+
 #endif  // NTH_BASE_ATTRIBUTES_H

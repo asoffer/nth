@@ -4,6 +4,7 @@
 #include <string>
 
 #include "nth/test/test.h"
+#include "nth/test/benchmark.h"
 
 namespace nth {
 namespace {
@@ -171,9 +172,9 @@ NTH_TEST("stack/size-unchanged-when/reconstitute", auto s) {
   NTH_EXPECT(s.size() == previous_size);
 }
 
-NTH_TEST("stack/size-unchanged-when/reallocate", auto s) {
+NTH_TEST("stack/size-unchanged-when/reserve", auto s) {
   size_t previous_size = s.size();
-  s.reallocate();
+  s.reserve(s.size() + 1);
   NTH_EXPECT(s.size() == previous_size);
 }
 
@@ -192,7 +193,20 @@ NTH_INVOKE_TEST("stack/size-unchanged-when/*") {
 }
 
 
-NTH_TEST("stack/reallocate") {
+NTH_TEST("stack/benchmark/push", auto t) {
+  NTH_MEASURE() {
+    nth::stack<nth::type_t<t>> stack;
+    NTH_TIME("push") {
+      nth::DoNotOptimize(stack);
+      stack.push(nth::type_t<t>{});
+      nth::DoNotOptimize(stack);
+    }
+  }
+}
+
+NTH_INVOKE_TEST("stack/benchmark/push") {
+  co_yield nth::type<int>;
+  co_yield nth::type<std::string>;
 }
 
 }  // namespace

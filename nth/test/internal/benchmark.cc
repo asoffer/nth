@@ -1,27 +1,25 @@
 #include "nth/test/internal/benchmark.h"
 
+#include <iostream>
 #include "nth/test/benchmark_result.h"
 
 namespace nth::test::internal_benchmark {
 
-MeasurementStrategy::~MeasurementStrategy() {
+void SamplerBase::Register(std::string_view name, std::vector<size_t>* sample) {
+  samples_.emplace_back(name, sample);
+}
+
+SamplerBase::~SamplerBase() {
   for (const auto& [name, samples] : samples_) {
-    size_t total        = 0;
-    size_t square_total = 0;
-    for (auto d : *samples) {
-      total += d;
-      square_total += d * d;
-    }
-
-    size_t size = samples->size();
-
+    size_t total = 0;
+    for (auto d : *samples) { total += d; }
+    size_t size     = samples->size();
+    double mean     = static_cast<double>(total) / size;
+    double variance = 0;
+    for (auto d : *samples) { variance += (d - mean) * (d - mean); }
+    variance /= (size - 1);
     test::BenchmarkResult results{
-        .name     = name,
-        .samples  = size,
-        .mean     = static_cast<double>(total) / size,
-        .variance = (static_cast<double>(square_total) / size) -
-                    (static_cast<double>(total) * total / (size * size)),
-    };
+        .name = name, .samples = size, .mean = mean, .variance = variance};
     samples->clear();
 
     for (auto handler : test::RegisteredBenchmarkResultHandlers()) {
