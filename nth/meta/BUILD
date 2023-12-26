@@ -46,6 +46,21 @@ cc_test(
 )
 
 cc_library(
+    name = "layout",
+    hdrs = ["layout.h"],
+    deps = [
+        ":sequence",
+        ":type",
+    ],
+)
+
+cc_test(
+    name = "layout_test",
+    srcs = ["layout_test.cc"],
+    deps = [":layout"],
+)
+
+cc_library(
     name = "sequence",
     hdrs = ["sequence.h"],
 )

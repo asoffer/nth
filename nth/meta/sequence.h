@@ -127,6 +127,14 @@ struct Sequence {
     }
   }
 
+  template <size_t N = 1>
+  [[nodiscard]] static constexpr auto drop_back() requires(sizeof...(Vs) >= N) {
+    return []<size_t... Ns>(std::integer_sequence<size_t, Ns...>) {
+      return select<Ns...>();
+    }
+    (std::make_index_sequence<sizeof...(Vs) - N>{});
+  }
+
   template <size_t... Ns>
   static constexpr auto select() {
     return Sequence<__type_pack_element<Ns, TypeWrap<Vs>...>::value...>{};
