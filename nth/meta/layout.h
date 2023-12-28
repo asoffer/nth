@@ -2,11 +2,15 @@
 #define NTH_META_LAYOUT_H
 
 #include <cstddef>
+#include <climits>
 
 #include "nth/meta/sequence.h"
 #include "nth/meta/type.h"
 
 namespace nth::layout {
+
+inline constexpr size_t bits_per_byte = CHAR_BIT;
+
 namespace internal_layout {
 
 struct UsedCategory;
@@ -118,7 +122,7 @@ template <typename T>
 struct LayoutFor {
   // By default, we assume all bits are used.
   using type =
-      Layout<alignof(T), LayoutBitSequence<Used<sizeof(T) * CHAR_BIT>>>;
+      Layout<alignof(T), LayoutBitSequence<Used<sizeof(T) * bits_per_byte>>>;
 };
 
 template <typename T>
@@ -141,7 +145,7 @@ template <typename T>
 struct LayoutFor<T*> {
   using type = Layout<
       alignof(T),
-      LayoutBitSequence<Used<sizeof(void*) * CHAR_BIT - Log2(alignof(T))>,
+      LayoutBitSequence<Used<sizeof(void*) * bits_per_byte - Log2(alignof(T))>,
                         Unset<Log2(alignof(T))>>>;
 };
 
