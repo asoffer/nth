@@ -1,6 +1,24 @@
 package(default_visibility = ["//visibility:public"])
 
 cc_library(
+    name = "disjoint_set",
+    hdrs = ["disjoint_set.h"],
+    deps = [
+        ":flyweight_map",
+        "//nth/debug",
+    ],
+)
+
+cc_test(
+    name = "disjoint_set_test",
+    srcs = ["disjoint_set_test.cc"],
+    deps = [
+        ":disjoint_set",
+        "//nth/test:main",
+    ],
+)
+
+cc_library(
     name = "flyweight_map",
     hdrs = ["flyweight_map.h"],
     deps = [
