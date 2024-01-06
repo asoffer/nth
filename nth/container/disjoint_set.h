@@ -67,10 +67,15 @@ struct disjoint_set {
       return ptr_->first;
     }
 
+    friend bool operator==(handle, handle) = default;
+
+    template <typename H>
+    friend H AbslHashValue(H h, handle handle) {
+      return H::combine(std::move(h), handle.ptr_);
+    }
+
    private:
     friend disjoint_set;
-
-    friend bool operator==(handle, handle) = default;
 
     handle &parent() { return ptr_->second.buffer.template as<handle>(); }
     size_t &size() { return ptr_->second.size; }
@@ -169,7 +174,8 @@ typename disjoint_set<T>::handle disjoint_set<T>::representative(handle h) {
 }
 
 template <typename T>
-typename disjoint_set<T>::handle disjoint_set<T>::representative_impl(handle h) {
+typename disjoint_set<T>::handle disjoint_set<T>::representative_impl(
+    handle h) {
   handle &parent = h.parent();
   if (parent == h) { return h; }
   return parent = representative_impl(parent);
