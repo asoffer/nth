@@ -6,6 +6,7 @@
 #include <utility>
 
 #include "nth/container/flyweight_map.h"
+#include "nth/debug/debug.h"
 #include "nth/utility/buffer.h"
 
 namespace nth {
@@ -49,22 +50,32 @@ struct disjoint_set {
   }
 
   struct handle {
+    // Returns an empty handle.
+    explicit constexpr handle() : ptr_(nullptr) {}
+
     explicit handle(
         flyweight_map<value_type, internal_disjoint_set::Entry>::iterator iter,
         internal_disjoint_set::passkey = {})
-        : iter_(iter) {}
+        : ptr_(&*iter) {}
 
-    value_type const &operator*() const { return iter_->first; }
+    [[nodiscard]] bool empty() const { return ptr_ == nullptr; }
+
+    // Returns a reference to the underlying element referred to by this handle.
+    // Behavior is undefined if the handle is unpopulated.
+    value_type const &operator*() const {
+      NTH_REQUIRE((v.debug), ptr_ != nullptr);
+      return ptr_->first;
+    }
 
    private:
     friend disjoint_set;
 
     friend bool operator==(handle, handle) = default;
 
-    handle &parent() { return iter_->second.buffer.template as<handle>(); }
-    size_t &size() { return iter_->second.size; }
+    handle &parent() { return ptr_->second.buffer.template as<handle>(); }
+    size_t &size() { return ptr_->second.size; }
 
-    flyweight_map<value_type, internal_disjoint_set::Entry>::iterator iter_;
+    std::pair<value_type const, internal_disjoint_set::Entry> *ptr_;
   };
   static_assert(std::is_trivially_destructible_v<handle>);
 
@@ -75,10 +86,12 @@ struct disjoint_set {
   std::pair<handle, bool> insert(value_type const &v);
   std::pair<handle, bool> insert(value_type &&v);
 
-  // Returns a handle to an element equivalent to `v`.
+  // Returns a handle to an element equivalent to `v` if an element equivalent
+  // to `v` is present in the container. An empty handle is returned otherwise.
   handle find(value_type const &v);
 
-  // Returns a handle to an element in the same subset as `v`.
+  // Returns a handle to an element in the same subset as `v`. Behavior is
+  // undefined if `v` is not present in the container.
   handle find_representative(value_type const &v);
 
   // Returns a representative handle referencing an element in the same subset
@@ -96,6 +109,8 @@ struct disjoint_set {
   size_t size() const { return entries_.size(); }
 
  private:
+  handle representative_impl(handle h);
+
   flyweight_map<value_type, internal_disjoint_set::Entry> entries_;
 };
 
@@ -103,13 +118,17 @@ struct disjoint_set {
 
 template <typename T>
 disjoint_set<T>::handle disjoint_set<T>::find(value_type const &v) {
-  return handle(entries_.find(v));
+  auto iter = entries_.find(v);
+  if (iter == entries_.end()) { return handle(); }
+  return handle(iter);
 }
 
 template <typename T>
 disjoint_set<T>::handle disjoint_set<T>::find_representative(
     value_type const &v) {
-  return representative(find(v));
+  auto iter = entries_.find(v);
+  if (iter == entries_.end()) { return handle(); }
+  return representative(handle(iter));
 }
 
 template <typename T>
@@ -145,9 +164,15 @@ std::pair<typename disjoint_set<T>::handle, bool> disjoint_set<T>::insert(
 
 template <typename T>
 typename disjoint_set<T>::handle disjoint_set<T>::representative(handle h) {
+  if (h.empty()) { return h; }
+  return representative_impl(h);
+}
+
+template <typename T>
+typename disjoint_set<T>::handle disjoint_set<T>::representative_impl(handle h) {
   handle &parent = h.parent();
   if (parent == h) { return h; }
-  return parent = representative(parent);
+  return parent = representative_impl(parent);
 }
 
 }  // namespace nth
