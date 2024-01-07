@@ -5,6 +5,11 @@
 namespace nth {
 namespace {
 
+NTH_TEST("disjoint_set/handle") {
+  disjoint_set<int>::handle h;
+  NTH_EXPECT(h.empty());
+}
+
 NTH_TEST("disjoint_set/empty") {
   disjoint_set<int> set;
   NTH_EXPECT(set.empty());
@@ -35,15 +40,31 @@ NTH_TEST("disjoint_set/representative") {
   disjoint_set<int> set{1, 2, 3};
   auto h = set.find(1);
   NTH_EXPECT(h == set.representative(h));
+  NTH_ASSERT(h != disjoint_set<int>::handle());
+  NTH_ASSERT(not h.empty());
   NTH_EXPECT(*h == 1);
 
   h = set.find(2);
   NTH_EXPECT(h == set.representative(h));
+  NTH_ASSERT(h != disjoint_set<int>::handle());
+  NTH_ASSERT(not h.empty());
   NTH_EXPECT(*h == 2);
 
   h = set.find(3);
   NTH_EXPECT(h == set.representative(h));
+  NTH_ASSERT(h != disjoint_set<int>::handle());
+  NTH_ASSERT(not h.empty());
   NTH_EXPECT(*h == 3);
+
+  h = set.find(4);
+  NTH_EXPECT(h == set.representative(h));
+  NTH_ASSERT(h == disjoint_set<int>::handle());
+  NTH_ASSERT(h.empty());
+
+  h = set.find_representative(5);
+  NTH_EXPECT(h == set.representative(h));
+  NTH_ASSERT(h == disjoint_set<int>::handle());
+  NTH_ASSERT(h.empty());
 }
 
 NTH_TEST("disjoint_set/join") {
