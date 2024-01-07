@@ -1,7 +1,6 @@
 #ifndef NTH_META_TYPE_H
 #define NTH_META_TYPE_H
 
-#include <iosfwd>
 #include <memory>
 #include <type_traits>
 
@@ -30,9 +29,7 @@ struct TypeId {
     sink.Append(id.id_());
   }
 
-  friend std::ostream& operator<<(std::ostream& os, TypeId id) {
-    return os << id.id_();
-  }
+  friend void NthPrint(auto& p, auto&, TypeId id) { p.write(id.id_()); }
 
  private:
   template <typename T>

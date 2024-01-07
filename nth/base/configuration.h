@@ -1,8 +1,6 @@
 #ifndef NTH_BASE_CONFIGURATION_H
 #define NTH_BASE_CONFIGURATION_H
 
-#include <cstdlib>
-
 #include "nth/base/macros.h"
 
 // This file defines macros that detect compilation options across multiple
@@ -68,6 +66,8 @@ inline constexpr bool StrEq(char const *lhs, char const *rhs) {
   }
 }
 
+[[noreturn]] void InvalidBuildMode();
+
 }  // namespace internal_configuration
 
 enum class build {
@@ -88,14 +88,15 @@ inline constexpr build build_mode = [] {
   } else if (nth::internal_configuration::StrEq(mode, "fast")) {
     return build::fast;
   } else {
+    using ::nth::internal_configuration::InvalidBuildMode;
     // Compile-time execution reaching this point will fail on the line
-    // containing the call to `std::abort`. As most compilers show the line with
-    // non-constexpr function call, we want to include on that line a useful
-    // error message. To ensure that all the contents stay on that line, we turn
-    // off clang-tidy surrounding it.
+    // containing the call to `InvalidBuildMode`. As most compilers show the
+    // line with non-constexpr function call, we want to include on that line a
+    // useful error message. To ensure that all the contents stay on that line,
+    // we turn off clang-tidy surrounding it.
     //
     // clang-format off
-    std::abort();  // Invalid build mode: Must be 'optimize', 'harden', 'debug', or 'fast'.
+    InvalidBuildMode();  // Must be 'optimize', 'harden', 'debug', or 'fast'.
     // clang-format on
   }
 }();

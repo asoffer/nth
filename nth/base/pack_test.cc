@@ -1,7 +1,5 @@
 #include "nth/base/pack.h"
 
-#include <cstdlib>
-
 // Tests for `each`
 static_assert([](auto... ns) {
   int i = 0;
@@ -80,10 +78,10 @@ static_assert([](auto... ns) {
   return i;
 }(1, 2, 3) == 123);
 
-
+[[noreturn]] void NonConstexprFunction();
 
 constexpr bool Even(int n) {
-  if (n == -1) { std::abort(); }
+  if (n == -1) { NonConstexprFunction(); }
   return (n % 2) == 0;
 }
 

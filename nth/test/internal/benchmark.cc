@@ -1,6 +1,5 @@
 #include "nth/test/internal/benchmark.h"
 
-#include <iostream>
 #include "nth/test/benchmark_result.h"
 
 namespace nth::test::internal_benchmark {

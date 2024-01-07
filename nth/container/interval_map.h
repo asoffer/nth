@@ -2,7 +2,6 @@
 #define NTH_CONTAINER_INTERVAL_MAP_H
 
 #include <concepts>
-#include <iostream>
 #include <utility>
 
 #include "absl/container/btree_map.h"

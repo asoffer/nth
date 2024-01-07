@@ -1,8 +1,6 @@
 #ifndef NTH_BASE_PACK_H
 #define NTH_BASE_PACK_H
 
-#include <cstddef>
-
 #include "nth/base/macros.h"
 
 // Defines a collection of macros that wrap common parameter-pack expansion
@@ -70,6 +68,6 @@
   (NTH_IGNORE_PARENTHESES(p)(__VA_ARGS__) and ...)
 
 #define NTH_PACK_INTERNAL_count_if(p, ...)                                     \
-  (::std::size_t{} + ... + (NTH_IGNORE_PARENTHESES(p)(__VA_ARGS__) ? 1 : 0))
+  (unsigned{} + ... + (NTH_IGNORE_PARENTHESES(p)(__VA_ARGS__) ? 1 : 0))
 
 #endif  // NTH_BASE_PACK_H
