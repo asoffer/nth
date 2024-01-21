@@ -14,7 +14,8 @@ cc_test(
     srcs = ["environment_variable_test.cc"],
     deps = [
         ":environment_variable",
-        "@com_google_googletest//:gtest_main",
+        "//nth/meta:type",
+        "//nth/test:main",
     ],
 )
 
@@ -76,7 +77,7 @@ cc_test(
     srcs = ["printer_test.cc"],
     deps = [
         ":printer",
-        "@com_google_googletest//:gtest_main",
+        "//nth/test:main",
     ],
 )
 
@@ -91,6 +92,6 @@ cc_test(
     srcs = ["string_printer_test.cc"],
     deps = [
         ":string_printer",
-        "@com_google_googletest//:gtest_main",
+        "//nth/test:main",
     ],
 )

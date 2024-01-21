@@ -2,8 +2,8 @@
 
 #include <string_view>
 
-#include "gtest/gtest.h"
 #include "nth/io/string_printer.h"
+#include "nth/test/test.h"
 
 namespace nth {
 namespace {
@@ -17,104 +17,104 @@ void UniversalPrint(string_printer& p, auto const& value,
   f(p, value);
 }
 
-TEST(UniversalPrint, Builtin) {
+NTH_TEST("UniversalPrint/Builtin") {
   std::string s;
   string_printer p(s);
   UniversalPrint(p, "hello");
   UniversalPrint(p, '!');
-  EXPECT_EQ(s, "hello!");
+  NTH_EXPECT(s == "hello!");
 }
 
-TEST(UniversalPrint, Ostream) {
+NTH_TEST("UniversalPrint/Ostream") {
   std::string s;
   string_printer p(s);
   UniversalPrint(p, 1234);
-  EXPECT_EQ(s, "1234");
+  NTH_EXPECT(s == "1234");
 }
 
-TEST(UniversalPrint, Bools) {
+NTH_TEST("UniversalPrint/Bools") {
   std::string s;
   string_printer p(s);
   UniversalPrint(p, true);
-  EXPECT_EQ(s, "true");
+  NTH_EXPECT(s == "true");
   s.clear();
   UniversalPrint(p, false);
-  EXPECT_EQ(s, "false");
+  NTH_EXPECT(s == "false");
 }
 
 struct S {
   int32_t value;
 };
 
-TEST(UniversalPrint, Tuple) {
+NTH_TEST("UniversalPrint/Tuple") {
   std::string s;
   string_printer p(s);
   UniversalPrint(p, std::tuple<>{});
-  EXPECT_EQ(s, "{}");
+  NTH_EXPECT(s == "{}");
   s.clear();
 
   UniversalPrint(p, std::tuple<int>{});
-  EXPECT_EQ(s, "{0}");
+  NTH_EXPECT(s == "{0}");
   s.clear();
 
   UniversalPrint(p, std::tuple<int, bool>{});
-  EXPECT_EQ(s, "{0, false}");
+  NTH_EXPECT(s == "{0, false}");
   s.clear();
 }
 
-TEST(UniversalPrint, Optional) {
+NTH_TEST("UniversalPrint/Optional") {
   std::string s;
   string_printer p(s);
   UniversalPrint(p, nullptr);
-  EXPECT_EQ(s, "nullptr");
+  NTH_EXPECT(s == "nullptr");
   s.clear();
 
   UniversalPrint(p, std::nullopt);
-  EXPECT_EQ(s, "std::nullopt");
+  NTH_EXPECT(s == "std::nullopt");
   s.clear();
   UniversalPrint(p, std::optional<int>());
-  EXPECT_EQ(s, "std::nullopt");
+  NTH_EXPECT(s == "std::nullopt");
   s.clear();
   UniversalPrint(p, std::optional<int>(3));
-  EXPECT_EQ(s, "3");
+  NTH_EXPECT(s == "3");
 }
 
 struct Thing {
   friend void NthPrint(Printer auto& p, auto&, Thing) { p.write("thing"); }
 };
-TEST(UniversalPrint, NthPrint) {
+NTH_TEST("UniversalPrint/NthPrint") {
   std::string s;
   string_printer p(s);
   Thing t;
   UniversalPrint(p, t);
-  EXPECT_EQ(s, "thing");
+  NTH_EXPECT(s == "thing");
 }
 
-TEST(UniversalPrint, Variant) {
+NTH_TEST("UniversalPrint/Variant") {
   std::string s;
   string_printer p(s);
   UniversalPrint(p, std::variant<int, bool>(5));
-  EXPECT_EQ(s, "5");
+  NTH_EXPECT(s == "5");
   s.clear();
   UniversalPrint(p, std::variant<int, bool>(true));
-  EXPECT_EQ(s, "true");
+  NTH_EXPECT(s == "true");
 }
 
-TEST(UniversalPrint, Fallback) {
+NTH_TEST("UniversalPrint/Fallback") {
   std::string s;
   string_printer p(s);
   UniversalPrint(p, S{.value = 17});
-  EXPECT_EQ(
-      s,
+  NTH_EXPECT(
+      s ==
       "[Unprintable value of type nth::(anonymous namespace)::S: 11 00 00 00]");
 }
 
-TEST(UniversalPrint, ArrayLike) {
+NTH_TEST("UniversalPrint/ArrayLike") {
   int a[3] = {1, 2, 3};
   std::string s;
   string_printer p(s);
   UniversalPrint(p, a);
-  EXPECT_EQ(s, "{1, 2, 3}");
+  NTH_EXPECT(s == "{1, 2, 3}");
 
   struct A {
     struct iter {
@@ -132,7 +132,7 @@ TEST(UniversalPrint, ArrayLike) {
 
   s.clear();
   UniversalPrint(p, A{});
-  EXPECT_EQ(s, "{3, 4, 5}");
+  NTH_EXPECT(s == "{3, 4, 5}");
 }
 
 }  // namespace

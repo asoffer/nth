@@ -1,121 +1,117 @@
 #include "nth/io/environment_variable.h"
 
-#include "gtest/gtest.h"
+#include "nth/meta/type.h"
+#include "nth/test/test.h"
 
 namespace nth {
 namespace {
 
-template <typename>
-struct EnvironmentVariable : testing::Test {};
-
 constexpr char const E[] = "NTH_IO_ENVIRONMENT_VARIABLE_TEST_KEY";
 constexpr char const V[] = "NTH_IO_ENVIRONMENT_VARIABLE_TEST_VALUE";
 
-constexpr auto e_types =
-    nth::type_sequence<char const (&)[sizeof(E)], char const *,
-                       std::string_view, std::string>;
-constexpr auto v_types =
-    nth::type_sequence<char const (&)[sizeof(V)], char const *,
-                       std::string_view, std::string>;
+NTH_INVOKE_TEST("environment-variable/*") {
+  co_yield nth::TestArguments{nth::type<std::string>, nth::type<std::string>};
+  co_yield nth::TestArguments{nth::type<std::string>,
+                              nth::type<std::string_view>};
+  co_yield nth::TestArguments{nth::type<std::string>, nth::type<char const *>};
+  co_yield nth::TestArguments{nth::type<std::string>,
+                              nth::type<char const(&)[sizeof(V)]>};
 
-using TypePairs =
-    nth::type_t<e_types
-                    .reduce([](auto... es) {
-                      return (v_types.transform<[](auto v) {
-                        return nth::type<std::pair<nth::type_t<decltype(es){}>,
-                                                   nth::type_t<v>>>;
-                      }>() + ...);
-                    })
-                    .reduce([](auto... ts) {
-                      return nth::type<testing::Types<nth::type_t<ts>...>>;
-                    })>;
-TYPED_TEST_SUITE(EnvironmentVariable, TypePairs);
+  co_yield nth::TestArguments{nth::type<std::string_view>,
+                              nth::type<std::string>};
+  co_yield nth::TestArguments{nth::type<std::string_view>,
+                              nth::type<std::string_view>};
+  co_yield nth::TestArguments{nth::type<std::string_view>,
+                              nth::type<char const *>};
+  co_yield nth::TestArguments{nth::type<std::string_view>,
+                              nth::type<char const(&)[sizeof(V)]>};
 
-TYPED_TEST(EnvironmentVariable, LoadUnset) {
-  using key_type = typename TypeParam::first_type;
+  co_yield nth::TestArguments{nth::type<char const *>, nth::type<std::string>};
+  co_yield nth::TestArguments{nth::type<char const *>,
+                              nth::type<std::string_view>};
+  co_yield nth::TestArguments{nth::type<char const *>, nth::type<char const *>};
+  co_yield nth::TestArguments{nth::type<char const *>,
+                              nth::type<char const(&)[sizeof(V)]>};
+
+  co_yield nth::TestArguments{nth::type<char const(&)[sizeof(E)]>,
+                              nth::type<std::string>};
+  co_yield nth::TestArguments{nth::type<char const(&)[sizeof(E)]>,
+                              nth::type<std::string_view>};
+  co_yield nth::TestArguments{nth::type<char const(&)[sizeof(E)]>,
+                              nth::type<char const *>};
+  co_yield nth::TestArguments{nth::type<char const(&)[sizeof(E)]>,
+                              nth::type<char const(&)[sizeof(V)]>};
+}
+
+NTH_TEST("environment-variable/load-unset", auto key, auto) {
+  using key_type = nth::type_t<key>;
 
   ::unsetenv(E);
 
   std::optional<std::string> result =
       LoadEnvironmentVariable(static_cast<key_type>(E));
-  EXPECT_FALSE(result.has_value());
+  NTH_EXPECT(not result.has_value());
 }
 
-TYPED_TEST(EnvironmentVariable, LoadSet) {
-  using key_type   = typename TypeParam::first_type;
-  using value_type = typename TypeParam::second_type;
+NTH_TEST("environment-variable/load-set", auto key, auto value) {
+  using key_type   = nth::type_t<key>;
+  using value_type = nth::type_t<value>;
 
   ::setenv(E, V, 1);
 
   std::optional<std::string> result =
       LoadEnvironmentVariable(static_cast<key_type>(E));
-  ASSERT_TRUE(result.has_value());
-  EXPECT_EQ(*result, static_cast<value_type>(V));
+  NTH_ASSERT(result.has_value());
+  NTH_EXPECT(*result == static_cast<value_type>(V));
 }
 
-TYPED_TEST(EnvironmentVariable, LoadSeesCallToStoreDirect) {
-  using key_type   = typename TypeParam::first_type;
-  using value_type = typename TypeParam::second_type;
+NTH_TEST("environment-variable/load-sees-call-to-store-direct", auto key,
+         auto value) {
+  using key_type   = nth::type_t<key>;
+  using value_type = nth::type_t<value>;
 
   ::setenv(E, "value", 1);
   std::optional<std::string> result =
       LoadEnvironmentVariable(static_cast<key_type>(E));
-  ASSERT_TRUE(result.has_value());
-  EXPECT_EQ(*result, "value");
+  NTH_ASSERT(result.has_value());
+  NTH_EXPECT(*result == "value");
 
   StoreEnvironmentVariable(static_cast<key_type>(E),
                            static_cast<value_type>(V));
   result = LoadEnvironmentVariable(static_cast<key_type>(E));
-  ASSERT_TRUE(result.has_value());
-  EXPECT_EQ(*result, V);
+  NTH_ASSERT(result.has_value());
+  NTH_EXPECT(*result == V);
 
   StoreEnvironmentVariable(static_cast<key_type>(E), std::nullopt);
   result = LoadEnvironmentVariable(static_cast<key_type>(E));
-  ASSERT_FALSE(result.has_value());
+  NTH_EXPECT(not result.has_value());
 }
 
-TYPED_TEST(EnvironmentVariable, LoadSeesCallToStoreThroughOptional) {
-  using key_type   = typename TypeParam::first_type;
-  using value_type = typename TypeParam::second_type;
+NTH_TEST("environment-variable/load-sees-call-to-store-through-optional",
+         auto key, auto value) {
+  using key_type   = nth::type_t<key>;
+  using value_type = nth::type_t<value>;
 
   ::setenv(E, "value", 1);
   std::optional<std::string> result =
       LoadEnvironmentVariable(static_cast<key_type>(E));
-  ASSERT_TRUE(result.has_value());
-  EXPECT_EQ(*result, "value");
+  NTH_ASSERT(result.has_value());
+  NTH_EXPECT(*result == "value");
 
   StoreEnvironmentVariable(static_cast<key_type>(E),
                            std::optional(static_cast<value_type>(V)));
   result = LoadEnvironmentVariable(static_cast<key_type>(E));
-  ASSERT_TRUE(result.has_value());
-  EXPECT_EQ(*result, V);
+  NTH_ASSERT(result.has_value());
+  NTH_EXPECT(*result == V);
   StoreEnvironmentVariable(
       static_cast<key_type>(E),
       std::optional<std::decay_t<value_type>>(std::nullopt));
   result = LoadEnvironmentVariable(static_cast<key_type>(E));
-  ASSERT_FALSE(result.has_value());
-}
-
-TYPED_TEST(EnvironmentVariable, EnvironmentVisibleToChildren) {
-  using key_type   = typename TypeParam::first_type;
-  using value_type = typename TypeParam::second_type;
-
-
-  StoreEnvironmentVariable(static_cast<key_type>(E),
-                           static_cast<value_type>(V));
-
-  // Using death test as a mechanism for testing that the environment variables
-  // are propogated to child processes.
-  EXPECT_DEATH(
-      {
-        std::optional<std::string> result =
-            LoadEnvironmentVariable(static_cast<key_type>(E));
-        if (result == V) { std::abort(); }
-      },
-      "");
+  NTH_EXPECT(not result.has_value());
 }
 
 // TODO: Add tests that cover thread-safety.
+// TODO: Test that environment variables are propogated to child processes.
 
 }  // namespace
 }  // namespace nth

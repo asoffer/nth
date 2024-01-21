@@ -2,7 +2,7 @@
 
 #include <string_view>
 
-#include "gtest/gtest.h"
+#include "nth/test/test.h"
 
 namespace nth {
 namespace {
@@ -14,13 +14,13 @@ struct APrinter {
   void write(std::string_view);
 };
 
-TEST(Printer, DistinguishesPrintersCorrectly) {
+NTH_TEST("printer/distinguishes-printers-correctly") {
   constexpr bool n = Printer<NotAPrinter>;
   constexpr bool a = Printer<APrinter>;
   constexpr bool m = Printer<MinimalPrinter>;
-  EXPECT_FALSE(n);
-  EXPECT_TRUE(a);
-  EXPECT_TRUE(m);
+  NTH_EXPECT(not n);
+  NTH_EXPECT(a);
+  NTH_EXPECT(m);
 }
 
 }  // namespace

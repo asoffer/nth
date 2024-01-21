@@ -35,6 +35,6 @@ cc_test(
     deps = [
         ":universal",
         "//nth/io:string_printer",
-        "@com_google_googletest//:gtest_main",
+        "//nth/test:main",
     ],
 )

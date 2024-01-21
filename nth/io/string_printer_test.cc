@@ -1,22 +1,22 @@
 #include "nth/io/string_printer.h"
 
-#include "gtest/gtest.h"
+#include "nth/test/test.h"
 
 namespace nth {
 namespace {
 
-TEST(StringPrinter, Builtin) {
+NTH_TEST("string_printer/builtin") {
   std::string s;
   string_printer p(s);
-  EXPECT_EQ(s, "");
+  NTH_EXPECT(s == "");
   p.write(1, 'x');
-  EXPECT_EQ(s, "x");
+  NTH_EXPECT(s == "x");
   p.write(1, 'y');
-  EXPECT_EQ(s, "xy");
+  NTH_EXPECT(s == "xy");
   p.write(1, 'z');
-  EXPECT_EQ(s, "xyz");
+  NTH_EXPECT(s == "xyz");
   p.write(std::string_view("abc"));
-  EXPECT_EQ(s, "xyzabc");
+  NTH_EXPECT(s == "xyzabc");
 }
 
 }  // namespace

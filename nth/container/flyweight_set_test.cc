@@ -1,158 +1,168 @@
 #include "nth/container/flyweight_set.h"
 
-#include "gmock/gmock.h"
-#include "gtest/gtest.h"
+#include "nth/test/test.h"
 
 namespace nth {
 namespace {
 
-using ::testing::ElementsAre;
-using ::testing::Pair;
-using ::testing::Pointee;
+using ::nth::debug::ElementsAreSequentially;
 
-TEST(FlyweightSet, DefaultConstruction) {
+NTH_TEST("flyweight_set/default-construction") {
   flyweight_set<std::string> f;
-  EXPECT_TRUE(f.empty());
-  EXPECT_EQ(f.size(), 0);
+  NTH_EXPECT(f.empty());
+  NTH_EXPECT(f.size() == size_t{0});
 }
 
-TEST(FlyweightSet, Insert) {
+NTH_TEST("flyweight_set/insert") {
   flyweight_set<std::string> f;
 
   auto [p1, inserted1] = f.insert("abc");
-  EXPECT_FALSE(f.empty());
-  EXPECT_EQ(f.size(), 1);
+  NTH_EXPECT(not f.empty());
+  NTH_EXPECT(f.size() == size_t{1});
 
   auto [p2, inserted2] = f.insert("def");
-  EXPECT_FALSE(f.empty());
-  EXPECT_EQ(f.size(), 2);
+  NTH_EXPECT(not f.empty());
+  NTH_EXPECT(f.size() == size_t{2});
 
   auto [p3, inserted3] = f.insert("abc");
-  EXPECT_FALSE(f.empty());
-  EXPECT_EQ(f.size(), 2);
+  NTH_EXPECT(not f.empty());
+  NTH_EXPECT(f.size() == size_t{2});
 
-  EXPECT_TRUE(inserted1);
-  EXPECT_TRUE(inserted2);
-  EXPECT_FALSE(inserted3);
+  NTH_EXPECT(inserted1);
+  NTH_EXPECT(inserted2);
+  NTH_EXPECT(not inserted3);
 
-  EXPECT_NE(p1, p2);
-  EXPECT_EQ(p1, p3);
+  NTH_EXPECT(p1 != p2);
+  NTH_EXPECT(p1 == p3);
 
-  EXPECT_THAT(f, ElementsAre("abc", "def"));
+  NTH_EXPECT(f >>=
+             ElementsAreSequentially(std::string("abc"), std::string("def")));
 }
 
-TEST(FlyweightSet, ListInitialization) {
+NTH_TEST("flyweight_set/list-initialization") {
   flyweight_set<std::string> f{"a", "b", "c", "a", "c", "f"};
 
-  EXPECT_FALSE(f.empty());
-  EXPECT_EQ(f.size(), 4);
+  NTH_EXPECT(not f.empty());
+  NTH_EXPECT(f.size() == size_t{4});
 
-  EXPECT_THAT(f, ElementsAre("a", "b", "c", "f"));
+  NTH_EXPECT(f >>= ElementsAreSequentially(std::string("a"), std::string("b"),
+                                           std::string("c"), std::string("f")));
 }
 
-TEST(FlyweightSet, Clear) {
+NTH_TEST("flyweight_set/clear") {
   flyweight_set<std::string> f{"a", "b", "c", "d"};
-  EXPECT_FALSE(f.empty());
-  EXPECT_EQ(f.size(), 4);
+  NTH_EXPECT(not f.empty());
+  NTH_EXPECT(f.size() == size_t{4});
   f.clear();
-  EXPECT_TRUE(f.empty());
-  EXPECT_EQ(f.size(), 0);
+  NTH_EXPECT(f.empty());
+  NTH_EXPECT(f.size() == size_t{0});
 }
 
-TEST(FlyweightSet, CopyConstruction) {
+NTH_TEST("flyweight_set/copy-construction") {
   flyweight_set<std::string> f{"a", "b", "c", "d"};
   flyweight_set<std::string> g = f;
 
-  EXPECT_FALSE(f.empty());
-  EXPECT_EQ(f.size(), 4);
+  NTH_EXPECT(not f.empty());
+  NTH_EXPECT(f.size() == size_t{4});
 
-  EXPECT_FALSE(g.empty());
-  EXPECT_EQ(g.size(), 4);
+  NTH_EXPECT(not g.empty());
+  NTH_EXPECT(g.size() == size_t{4});
 
-  EXPECT_THAT(f, ElementsAre("a", "b", "c", "d"));
-  EXPECT_THAT(g, ElementsAre("a", "b", "c", "d"));
+  NTH_EXPECT(f >>= ElementsAreSequentially(std::string("a"), std::string("b"),
+                                           std::string("c"), std::string("d")));
+  NTH_EXPECT(g >>= ElementsAreSequentially(std::string("a"), std::string("b"),
+                                           std::string("c"), std::string("d")));
 }
 
-TEST(FlyweightSet, MoveConstruction) {
+NTH_TEST("flyweight_set/move-construction") {
   flyweight_set<std::string> f{"a", "b", "c", "d"};
   flyweight_set<std::string> g = std::move(f);
 
-  EXPECT_FALSE(g.empty());
-  EXPECT_EQ(g.size(), 4);
-  EXPECT_THAT(g, ElementsAre("a", "b", "c", "d"));
-  EXPECT_NE(g.find("a"), g.end());
+  NTH_EXPECT(not g.empty());
+  NTH_EXPECT(g.size() == size_t{4});
+  NTH_EXPECT(g >>= ElementsAreSequentially(std::string("a"), std::string("b"),
+                                           std::string("c"), std::string("d")));
+  NTH_EXPECT(g.find("a") != g.end());
 }
 
-TEST(FlyweightSet, CopyAssignment) {
+NTH_TEST("flyweight_set/copy-assignment") {
   flyweight_set<std::string> f{"a", "b", "c", "d"};
   flyweight_set<std::string> g;
   g = f;
 
-  EXPECT_FALSE(f.empty());
-  EXPECT_EQ(f.size(), 4);
+  NTH_EXPECT(not f.empty());
+  NTH_EXPECT(f.size() == size_t{4});
 
-  EXPECT_FALSE(g.empty());
-  EXPECT_EQ(g.size(), 4);
+  NTH_EXPECT(not g.empty());
+  NTH_EXPECT(g.size() == size_t{4});
 
-  EXPECT_THAT(f, ElementsAre("a", "b", "c", "d"));
-  EXPECT_THAT(g, ElementsAre("a", "b", "c", "d"));
+  NTH_EXPECT(f >>= ElementsAreSequentially(std::string("a"), std::string("b"),
+                                           std::string("c"), std::string("d")));
+  NTH_EXPECT(g >>= ElementsAreSequentially(std::string("a"), std::string("b"),
+                                           std::string("c"), std::string("d")));
 }
 
-TEST(FlyweightSet, MoveAssignment) {
+NTH_TEST("flyweight_set/move-assignment") {
   flyweight_set<std::string> f{"a", "b", "c", "d"};
   flyweight_set<std::string> g;
   g = std::move(f);
 
-  EXPECT_FALSE(g.empty());
-  EXPECT_EQ(g.size(), 4);
-  EXPECT_THAT(g, ElementsAre("a", "b", "c", "d"));
+  NTH_EXPECT(not g.empty());
+  NTH_EXPECT(g.size() == size_t{4});
+  NTH_EXPECT(g >>= ElementsAreSequentially(std::string("a"), std::string("b"),
+                                           std::string("c"), std::string("d")));
 }
 
-TEST(FlyweightSet, Iterators) {
+NTH_TEST("flyweight_set/iterators") {
   flyweight_set<std::string> f{"a", "b", "c", "d", "c", "b"};
-  EXPECT_THAT(std::vector(f.begin(), f.end()), ElementsAre("a", "b", "c", "d"));
-  EXPECT_THAT(std::vector(f.cbegin(), f.cend()),
-              ElementsAre("a", "b", "c", "d"));
-  EXPECT_THAT(std::vector(f.rbegin(), f.rend()),
-              ElementsAre("d", "c", "b", "a"));
-  EXPECT_THAT(std::vector(f.crbegin(), f.crend()),
-              ElementsAre("d", "c", "b", "a"));
+  NTH_EXPECT(std::vector(f.begin(), f.end()) >>=
+             ElementsAreSequentially(std::string("a"), std::string("b"),
+                                     std::string("c"), std::string("d")));
+  NTH_EXPECT(std::vector(f.cbegin(), f.cend()) >>=
+             ElementsAreSequentially(std::string("a"), std::string("b"),
+                                     std::string("c"), std::string("d")));
+  NTH_EXPECT(std::vector(f.rbegin(), f.rend()) >>=
+             ElementsAreSequentially(std::string("d"), std::string("c"),
+                                     std::string("b"), std::string("a")));
+  NTH_EXPECT(std::vector(f.crbegin(), f.crend()) >>=
+             ElementsAreSequentially(std::string("d"), std::string("c"),
+                                     std::string("b"), std::string("a")));
 }
 
-TEST(FlyweightSet, ConstAccess) {
+NTH_TEST("flyweight_set/const-access") {
   flyweight_set<std::string> const f{"a", "b", "c", "d", "a"};
-  EXPECT_THAT(f.front(), "a");
-  EXPECT_THAT(f.back(), "d");
+  NTH_EXPECT(f.front() == "a");
+  NTH_EXPECT(f.back() == "d");
 }
 
-TEST(FlyweightSet, Find) {
+NTH_TEST("flyweight_set/find") {
   flyweight_set<std::string> f{"a", "b", "c", "d"};
-  EXPECT_EQ(f.find("x"), f.end());
-  EXPECT_EQ(f.find("a"), f.begin());
-  EXPECT_EQ(f.find("d"), std::prev(f.end()));
+  NTH_EXPECT(f.find("x") == f.end());
+  NTH_EXPECT(f.find("a") == f.begin());
+  NTH_EXPECT(f.find("d") == std::prev(f.end()));
 }
 
-TEST(FlyweightSet, Index) {
+NTH_TEST("flyweight_set/index") {
   flyweight_set<std::string> f{"a", "b", "c", "d"};
-  EXPECT_EQ(f.index("x"), f.end_index());
-  EXPECT_EQ(f.index("a"), 0);
-  EXPECT_EQ(f.index("d"), 3);
+  NTH_EXPECT(f.index("x") == f.end_index());
+  NTH_EXPECT(f.index("a") == size_t{0});
+  NTH_EXPECT(f.index("d") == size_t{3});
 }
 
-TEST(FlyweightSet, StressTest) {
+NTH_TEST("flyweight_set/stress-test") {
   flyweight_set<size_t> f;
   for (size_t i = 0; i < 1000; ++i) {
     f.insert(i);
-    for (size_t j : f) { ASSERT_EQ(f.index(j), j) << i; }
+    for (size_t j : f) { NTH_EXPECT(f.index(j) == j); }
   }
 }
 
-TEST(FlyweightSet, FromIndex) {
+NTH_TEST("flyweight_set/from-index") {
   flyweight_set<std::string> f{"a", "b", "c", "d"};
-  EXPECT_EQ(f.from_index(0), "a");
-  EXPECT_EQ(f.from_index(1), "b");
-  EXPECT_EQ(f.from_index(2), "c");
-  EXPECT_EQ(f.from_index(3), "d");
+  NTH_EXPECT(f.from_index(0) == "a");
+  NTH_EXPECT(f.from_index(1) == "b");
+  NTH_EXPECT(f.from_index(2) == "c");
+  NTH_EXPECT(f.from_index(3) == "d");
 }
 
 }  // namespace

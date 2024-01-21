@@ -34,7 +34,7 @@ cc_test(
     srcs = ["flyweight_map_test.cc"],
     deps = [
         ":flyweight_map",
-        "@com_google_googletest//:gtest_main",
+        "//nth/test:main",
     ],
 )
 
@@ -54,7 +54,7 @@ cc_test(
     srcs = ["flyweight_set_test.cc"],
     deps = [
         ":flyweight_set",
-        "@com_google_googletest//:gtest_main",
+        "//nth/test:main",
     ],
 )
 
