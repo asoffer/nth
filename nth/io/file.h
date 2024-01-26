@@ -23,6 +23,11 @@ struct file {
   // Constructs a file object not associated with any underlying system file.
   constexpr file() = default;
 
+  // Constructs a file object from the `std::FILE*` handle. This objcet is
+  // responsible for closing the underlying file before destruction. A separate
+  // call to `std::fclose` must not happen.
+  explicit file(std::FILE* f) : file_ptr_(f) {}
+
   file(file const&)            = delete;
   file& operator=(file const&) = delete;
 
@@ -87,9 +92,6 @@ struct file {
   }
 
   friend file TemporaryFile();
-  friend file internal_file::MakeFile(std::FILE* f);
-
-  explicit file(std::FILE* f) : file_ptr_(f) {}
 
   std::FILE* file_ptr_ = nullptr;
 };
