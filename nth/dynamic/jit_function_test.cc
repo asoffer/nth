@@ -1,0 +1,37 @@
+#include "nth/dynamic/jit_function.h"
+
+#include "nth/test/test.h"
+
+namespace nth {
+namespace {
+
+NTH_TEST("jit_function/default-construction") {
+  jit_function<void()> f;
+  NTH_EXPECT(not f);
+  NTH_EXPECT(static_cast<void (*)()>(f) == nullptr);
+}
+
+std::span<std::byte const> SquareFunctionCode() {
+  // TODO: Architecture dependence.
+  static constexpr uint8_t buffer[] = {
+      0x0f, 0xaf, 0xff,  // imul edi, edi
+      0x89, 0xf8,        // mov eax, edi
+      0xc3,              // ret
+  };
+
+  return std::span<std::byte const>(reinterpret_cast<std::byte const*>(buffer),
+                                    sizeof(buffer));
+}
+
+NTH_TEST("jit_function/success") {
+  jit_function<int(int)> square(SquareFunctionCode());
+  NTH_ASSERT(static_cast<bool>(square));
+  NTH_ASSERT(static_cast<int (*)(int)>(square) != nullptr);
+  NTH_ASSERT(static_cast<int (*)(int)>(square)(17) == 289);
+  NTH_ASSERT(square(17) == 289);
+}
+
+// TODO: Inject behavior into internals so we can test the failure paths.
+
+}  // namespace
+}  // namespace nth
