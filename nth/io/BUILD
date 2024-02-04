@@ -82,6 +82,21 @@ cc_test(
 )
 
 cc_library(
+    name = "reader",
+    hdrs = ["reader.h"],
+    deps = [],
+)
+
+cc_library(
+    name = "reader_test",
+    testonly = True,
+    hdrs = ["reader_test.h"],
+    deps = [
+        "//nth/test",
+    ],
+)
+
+cc_library(
     name = "string_printer",
     hdrs = ["string_printer.h"],
     deps = [],
@@ -92,6 +107,23 @@ cc_test(
     srcs = ["string_printer_test.cc"],
     deps = [
         ":string_printer",
+        "//nth/test:main",
+    ],
+)
+
+cc_library(
+    name = "string_reader",
+    hdrs = ["string_reader.h"],
+    srcs = ["string_reader.cc"],
+    deps = [":reader"],
+)
+
+cc_test(
+    name = "string_reader_test",
+    srcs = ["string_reader_test.cc"],
+    deps = [
+        ":reader_test",
+        ":string_reader",
         "//nth/test:main",
     ],
 )
