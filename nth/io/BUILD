@@ -92,6 +92,7 @@ cc_library(
     testonly = True,
     hdrs = ["reader_test.h"],
     deps = [
+        ":reader",
         "//nth/test",
     ],
 )
@@ -125,5 +126,38 @@ cc_test(
         ":reader_test",
         ":string_reader",
         "//nth/test:main",
+    ],
+)
+
+cc_library(
+    name = "string_writer",
+    hdrs = ["string_writer.h"],
+    srcs = ["string_writer.cc"],
+    deps = [":writer"],
+)
+
+cc_test(
+    name = "string_writer_test",
+    srcs = ["string_writer_test.cc"],
+    deps = [
+        ":writer_test",
+        ":string_writer",
+        "//nth/test:main",
+    ],
+)
+
+cc_library(
+    name = "writer",
+    hdrs = ["writer.h"],
+    deps = [],
+)
+
+cc_library(
+    name = "writer_test",
+    testonly = True,
+    hdrs = ["writer_test.h"],
+    deps = [
+        ":writer",
+        "//nth/test",
     ],
 )
