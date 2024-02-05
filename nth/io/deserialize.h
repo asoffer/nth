@@ -11,9 +11,24 @@
 #include <type_traits>
 
 #include "nth/io/reader.h"
+#include "nth/container/free_functions.h"
 #include "nth/utility/bytes.h"
 
 namespace nth::io {
+
+// A concept indicating that a type `T` can be deserialized with a deserializer
+// `D`.
+template <typename T, typename D>
+concept deserializable_with = requires(D& d, T& value) {
+  { NthDeserialize(d, value) } -> std::same_as<bool>;
+};
+
+// Deserializes a sequence of `values...` with the deserializer `D`, one
+// immediately after the other.
+template <typename D>
+bool deserialize(D& d, deserializable_with<D> auto&... values) {
+  return (NthDeserialize(d, values) and ...);
+}
 
 // Reads `sizeof(x)` bytes from `r` interpreting them as a `T`. If reading is
 // successful, returns `true` and populates `x` with the read data as if by
@@ -87,18 +102,24 @@ bool deserialize_integer(reader auto& r, Num& n) requires(sizeof(Num) <= 256) {
   return r.cursor() - *c == length + 1;
 }
 
-// A concept indicating that a type `T` can be deserialized with a deserializer
-// `D`.
-template <typename T, typename D>
-concept deserializable_with = requires(D& d, T& value) {
-  { NthDeserialize(d, value) } -> std::same_as<bool>;
-};
+// Reads a length-prefixed sequence of elements and populates `seq` with them in
+// the order of serialization.
+bool deserialize_sequence(reader auto& r, auto& seq) requires requires {
+  { std::size(seq) } -> std::unsigned_integral;
+}
+{
+  using size_type = decltype(std::size(seq));
+  size_type seq_size;
+  if (not nth::io::deserialize_integer(r, seq_size)) { return false; }
 
-// Deserializes a sequence of `values...` with the deserializer `D`, one
-// immediately after the other.
-template <typename D>
-bool deserialize(D& d, deserializable_with<D> auto&... values) {
-  return (NthDeserialize(d, values) and ...);
+  if constexpr (requires { nth::reserve(seq, seq_size); }) {
+    nth::reserve(seq, seq_size);
+  }
+
+  for (size_type i = 0; i < seq_size; ++i) {
+    if (not nth::io::deserialize(r, nth::emplace(seq))) { return false; }
+  }
+  return true;
 }
 
 }  // namespace nth::io

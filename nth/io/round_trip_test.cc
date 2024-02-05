@@ -1,3 +1,7 @@
+#include <cstdint>
+#include <string>
+#include <vector>
+
 #include "nth/io/deserialize.h"
 #include "nth/io/serialize.h"
 #include "nth/io/string_reader.h"
@@ -72,6 +76,40 @@ NTH_INVOKE_TEST("round-trip/integer") {
        }) {
     co_yield n;
   }
+}
+
+struct Thing {
+  int n;
+  friend bool NthSerialize(auto &s, Thing const &t) {
+    return serialize_integer(s, t.n);
+  }
+  friend bool NthDeserialize(auto &d, Thing &t) {
+    return deserialize_integer(d, t.n);
+  }
+  friend bool operator==(Thing, Thing) = default;
+};
+
+decltype(auto) NthEmplace(std::vector<Thing> &v) { return v.emplace_back(); }
+
+NTH_TEST("round-trip/sequence", std::vector<Thing> const & v) {
+  std::vector<Thing> round_tripped;
+  std::string s;
+
+  string_writer w(s);
+  NTH_ASSERT(serialize_sequence(w, v));
+
+  string_reader r(s);
+  NTH_ASSERT(deserialize_sequence(r, round_tripped));
+
+  NTH_ASSERT(r.size() == 0u);
+  NTH_EXPECT(v == round_tripped);
+}
+
+NTH_INVOKE_TEST("round-trip/sequence") {
+  co_yield std::vector<Thing>{};
+  co_yield std::vector<Thing>{Thing{0}};
+  co_yield std::vector<Thing>{Thing{0}, Thing{1}};
+  co_yield std::vector<Thing>{Thing{0}, Thing{1}, Thing{2}, Thing{3}, Thing{4}, Thing{5}};
 }
 
 }  // namespace

@@ -8,10 +8,24 @@
 #include <span>
 #include <type_traits>
 
+#include "nth/container/free_functions.h"
 #include "nth/io/writer.h"
 #include "nth/utility/bytes.h"
 
 namespace nth::io {
+
+// A concept indicating that a type `T` can be serialized with a serializer `S`.
+template <typename T, typename S>
+concept serializable_with = requires(S& s, T const& value) {
+  { NthSerialize(s, value) } -> std::same_as<bool>;
+};
+
+// Serializes a sequence of `values...` with the serializer `S`, one
+// immediately after the other.
+template <typename S>
+bool serialize(S& s, serializable_with<S> auto&... values) {
+  return (NthSerialize(s, values) and ...);
+}
 
 // Writes `x` to `w` with the same bit-representation, taking exactly
 // `sizeof(x)` bytes. Returns whether or not the write succeeded.
@@ -78,18 +92,20 @@ bool serialize_integer(writer auto& w,
   }
 }
 
-// A concept indicating that a type `T` can be deserialized with a deserializer
-// `S`.
-template <typename T, typename S>
-concept serializable_with = requires(S& s, T const& value) {
-  { NthSerialize(s, value) } -> std::same_as<bool>;
-};
-
-// Serializes a sequence of `values...` with the serializer `S`, one
-// immediately after the other.
-template <typename S>
-bool serialize(S& s, serializable_with<S> auto&... values) {
-  return (NthSerialize(s, values) and ...);
+// Writes a length-prefixed sequence of the elements in `seq`. The call to
+// `std::size(seq)` must return the number of elements iterated over when used
+// as the range-expression in a range-for loop.
+bool serialize_sequence(writer auto& w, auto const& seq) requires requires {
+  { std::size(seq) } -> std::integral;
+  std::begin(seq);
+  std::end(seq);
+}
+{
+  if (not nth::io::serialize_integer(w, std::size(seq))) { return false; }
+  for (auto const& elem : seq) {
+    if (not nth::io::serialize(w, elem)) { return false; }
+  }
+  return true;
 }
 
 }  // namespace nth::io

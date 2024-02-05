@@ -5,6 +5,7 @@ cc_library(
     hdrs = ["deserialize.h"],
     deps = [
         ":reader",
+        "//nth/container:free_functions",
         "//nth/utility:bytes",
     ],
 )
@@ -123,6 +124,7 @@ cc_library(
     hdrs = ["serialize.h"],
     deps = [
         ":writer",
+        "//nth/container:free_functions",
         "//nth/utility:bytes",
     ],
 )
