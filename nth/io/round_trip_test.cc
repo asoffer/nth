@@ -95,8 +95,6 @@ struct Thing {
   }
 };
 
-decltype(auto) NthEmplace(std::vector<Thing> &v) { return v.emplace_back(); }
-
 NTH_TEST("round-trip/sequence", std::vector<Thing> const & v) {
   std::vector<Thing> round_tripped;
   std::string s;

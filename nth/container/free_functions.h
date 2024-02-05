@@ -20,6 +20,21 @@ struct insert_t {
 };
 inline constexpr insert_t insert;
 
+struct emplace_back_t {
+  template <typename C, typename... Args>
+  decltype(auto) operator()(C&& c, Args&&... args) const requires requires {
+    std::forward<C>(c).emplace_back(std::forward<Args>(args)...);
+  }
+  { return std::forward<C>(c).emplace_back(std::forward<Args>(args)...); }
+
+  template <typename C, typename... Args>
+  decltype(auto) operator()(C&& c, Args&&... args) const requires requires {
+    NthEmplaceBack(std::forward<C>(c), std::forward<Args>(args)...);
+  }
+  { return NthEmplaceBack(std::forward<C>(c), std::forward<Args>(args)...); }
+};
+inline constexpr emplace_back_t emplace_back;
+
 struct emplace_t {
   template <typename C, typename... Args>
   decltype(auto) operator()(C&& c, Args&&... args) const requires requires {
