@@ -150,7 +150,8 @@ auto TracedExpr<Action, Ts...>::operator[](
   return TracedExpr<Index,
                     ::nth::debug::internal_trace::Erased<
                         TracedValue<TracedExpr<Action, Ts...>>>,
-                    ::nth::debug::internal_trace::Erased<I>>(
+                    ::nth::debug::internal_trace::Erased<I>
+                        NTH_DEBUG_INTERNAL_MAYBE_VARIADIC>(
       *this, index NTH_DEBUG_INTERNAL_MAYBE_VARIADIC);
 }
 

@@ -95,7 +95,7 @@ def _impl(ctx):
         tool_path(name = "strip",   path = "/bin/false"),
     ]
     features = [
-        std_lib_version("2a"),
+        std_lib_version("2b"),
         compiler_flags(ctx.attr.warnings + [
             "-fbracket-depth=1024",
             "-fdiagnostics-color=always",
