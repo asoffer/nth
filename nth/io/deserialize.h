@@ -35,7 +35,7 @@ bool deserialize(D& d, deserializable_with<D> auto&... values) {
 // `std::memcpy`ing the bytes. If reading is unsuccessful, returns `false`, and
 // the value of `x` is unspecified.
 template <int&..., typename T>
-requires std::integral<T> or std::floating_point<T>
+requires std::is_trivially_copyable_v<T>
 bool deserialize_fixed(reader auto& r, T& x) { return r.read(nth::bytes(x)); }
 
 // Attempts to read a fixed-length encoding into `l` from `r`. If successful,

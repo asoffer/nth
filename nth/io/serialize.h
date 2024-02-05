@@ -30,7 +30,7 @@ bool serialize(S& s, serializable_with<S> auto&... values) {
 // Writes `x` to `w` with the same bit-representation, taking exactly
 // `sizeof(x)` bytes. Returns whether or not the write succeeded.
 template <int&..., typename T>
-requires std::integral<T> or std::floating_point<T>
+requires std::is_trivially_copyable_v<T>
 bool serialize_fixed(writer auto& w, T x) { return w.write(nth::bytes(x)); }
 
 // Writes a length-prefixed integer to `w` with the value `n`. The length prefix
