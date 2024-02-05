@@ -1,6 +1,15 @@
 package(default_visibility = ["//visibility:public"])
 
 cc_library(
+    name = "deserialize",
+    hdrs = ["deserialize.h"],
+    deps = [
+        ":reader",
+        "//nth/utility:bytes",
+    ],
+)
+
+cc_library(
     name = "environment_variable",
     hdrs = ["environment_variable.h"],
     srcs = ["environment_variable.cc"],
@@ -97,6 +106,27 @@ cc_library(
     ],
 )
 
+cc_test(
+    name = "round_trip_test",
+    srcs = ["round_trip_test.cc"],
+    deps = [
+        ":deserialize",
+        ":string_reader",
+        ":string_writer",
+        ":serialize",
+        "//nth/test:main",
+    ],
+)
+
+cc_library(
+    name = "serialize",
+    hdrs = ["serialize.h"],
+    deps = [
+        ":writer",
+        "//nth/utility:bytes",
+    ],
+)
+
 cc_library(
     name = "string_printer",
     hdrs = ["string_printer.h"],
@@ -149,7 +179,9 @@ cc_test(
 cc_library(
     name = "writer",
     hdrs = ["writer.h"],
-    deps = [],
+    deps = [
+        "//nth/utility:bytes",
+    ],
 )
 
 cc_library(

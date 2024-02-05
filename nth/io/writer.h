@@ -3,8 +3,11 @@
 
 #include <concepts>
 #include <cstdint>
+#include <cstring>
 #include <optional>
 #include <span>
+
+#include "nth/utility/bytes.h"
 
 namespace nth::io {
 
@@ -49,9 +52,9 @@ concept writer = requires(W mutable_writer, W const& const_writer) {
     // passed-in argument at current cursor (as computed by
     // `const_writer.cursor()`). If the function returns `false`, we say the
     // write was "unsuccessful", and there are no guarantees on the state of
-    // writer. If the function returns `true`, we say the write was "successful",
-    // the bytes contained in the passed-in `span` must be written.
-    // The cursor must not be moved.
+    // writer. If the function returns `true`, we say the write was
+    // "successful", the bytes contained in the passed-in `span` must be
+    // written. The cursor must not be moved.
     mutable_writer.write_at(std::declval<typename W::cursor_type>(),
                             std::declval<std::span<std::byte const>>())
     } -> std::same_as<bool>;

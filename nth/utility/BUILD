@@ -1,6 +1,14 @@
 package(default_visibility = ["//visibility:public"])
 
 cc_library(
+    name = "bytes",
+    hdrs = ["bytes.h"],
+    deps = [
+        "//nth/base:attributes",
+    ],
+)
+
+cc_library(
     name = "buffer",
     hdrs = ["buffer.h"],
     deps = [],
