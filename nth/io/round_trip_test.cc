@@ -2,6 +2,7 @@
 #include <string>
 #include <vector>
 
+#include "nth/container/flyweight_set.h"
 #include "nth/io/deserialize.h"
 #include "nth/io/serialize.h"
 #include "nth/io/string_reader.h"
@@ -87,6 +88,11 @@ struct Thing {
     return deserialize_integer(d, t.n);
   }
   friend bool operator==(Thing, Thing) = default;
+
+  template <typename H>
+  friend H AbslHashValue(H h, Thing t) {
+    return H::combine(std::move(h), t.n);
+  }
 };
 
 decltype(auto) NthEmplace(std::vector<Thing> &v) { return v.emplace_back(); }
@@ -109,7 +115,33 @@ NTH_INVOKE_TEST("round-trip/sequence") {
   co_yield std::vector<Thing>{};
   co_yield std::vector<Thing>{Thing{0}};
   co_yield std::vector<Thing>{Thing{0}, Thing{1}};
-  co_yield std::vector<Thing>{Thing{0}, Thing{1}, Thing{2}, Thing{3}, Thing{4}, Thing{5}};
+  co_yield std::vector<Thing>{Thing{0}, Thing{1}, Thing{2},
+                              Thing{3}, Thing{4}, Thing{5}};
+}
+
+NTH_TEST("round-trip/unordered", flyweight_set<Thing> const &set) {
+  flyweight_set<Thing> round_tripped;
+  std::string s;
+
+  string_writer w(s);
+  NTH_ASSERT(serialize_sequence(w, set));
+
+  string_reader r(s);
+  NTH_ASSERT(deserialize_sequence(r, round_tripped));
+
+  NTH_ASSERT(r.size() == 0u);
+  NTH_EXPECT(set.size() == round_tripped.size());
+  for (auto const & element : set) {
+    NTH_ASSERT(round_tripped.find(element) != round_tripped.end());
+  }
+}
+
+NTH_INVOKE_TEST("round-trip/unordered") {
+  co_yield flyweight_set<Thing>{};
+  co_yield flyweight_set<Thing>{Thing{0}};
+  co_yield flyweight_set<Thing>{Thing{0}, Thing{1}};
+  co_yield flyweight_set<Thing>{Thing{0}, Thing{1}, Thing{2},
+                                Thing{3}, Thing{4}, Thing{5}};
 }
 
 }  // namespace

@@ -116,8 +116,19 @@ bool deserialize_sequence(reader auto& r, auto& seq) requires requires {
     nth::reserve(seq, seq_size);
   }
 
-  for (size_type i = 0; i < seq_size; ++i) {
-    if (not nth::io::deserialize(r, nth::emplace(seq))) { return false; }
+  using value_type = std::decay_t<decltype(seq)>::value_type;
+  if constexpr (requires {
+                  { nth::emplace(seq) } -> std::same_as<value_type&>;
+                }) {
+    for (size_type i = 0; i < seq_size; ++i) {
+      if (not nth::io::deserialize(r, nth::emplace(seq))) { return false; }
+    }
+  } else {
+    value_type element;
+    for (size_type i = 0; i < seq_size; ++i) {
+      if (not nth::io::deserialize(r, element)) { return false; }
+      nth::insert(seq, element);
+    }
   }
   return true;
 }

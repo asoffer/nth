@@ -5,6 +5,21 @@
 
 namespace nth {
 
+struct insert_t {
+  template <typename C, typename... Args>
+  decltype(auto) operator()(C&& c, Args&&... args) const requires requires {
+    std::forward<C>(c).insert(std::forward<Args>(args)...);
+  }
+  { return std::forward<C>(c).insert(std::forward<Args>(args)...); }
+
+  template <typename C, typename... Args>
+  decltype(auto) operator()(C&& c, Args&&... args) const requires requires {
+    NthInsert(std::forward<C>(c), std::forward<Args>(args)...);
+  }
+  { return NthInsert(std::forward<C>(c), std::forward<Args>(args)...); }
+};
+inline constexpr insert_t insert;
+
 struct emplace_t {
   template <typename C, typename... Args>
   decltype(auto) operator()(C&& c, Args&&... args) const requires requires {

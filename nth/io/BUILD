@@ -115,6 +115,7 @@ cc_test(
         ":string_reader",
         ":string_writer",
         ":serialize",
+        "//nth/container:flyweight_set",
         "//nth/test:main",
     ],
 )
