@@ -1,5 +1,5 @@
-#ifndef NTH_IO_DESERIALIZE_H
-#define NTH_IO_DESERIALIZE_H
+#ifndef NTH_IO_SERIALIZE_DESERIALIZE_H
+#define NTH_IO_SERIALIZE_DESERIALIZE_H
 
 #include <climits>
 #include <concepts>
@@ -10,8 +10,10 @@
 #include <span>
 #include <type_traits>
 
-#include "nth/io/reader.h"
 #include "nth/container/free_functions.h"
+#include "nth/io/serialize/reader.h"
+#include "nth/io/serialize/sequence.h"
+#include "nth/meta/concepts.h"
 #include "nth/utility/bytes.h"
 
 namespace nth::io {
@@ -26,7 +28,8 @@ concept deserializable_with = requires(D& d, T& value) {
 // Deserializes a sequence of `values...` with the deserializer `D`, one
 // immediately after the other.
 template <typename D>
-bool deserialize(D& d, deserializable_with<D> auto&... values) {
+bool deserialize(D& d, deserializable_with<D> auto&&... values) requires(
+    lvalue_proxy<decltype(values)>and...) {
   return (NthDeserialize(d, values) and ...);
 }
 
@@ -141,4 +144,4 @@ bool deserialize_sequence(reader auto& r, auto& seq) requires requires {
 
 }  // namespace nth::io
 
-#endif  // NTH_IO_DESERIALIZE_H
+#endif  // NTH_IO_SERIALIZE_DESERIALIZE_H

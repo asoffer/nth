@@ -3,10 +3,10 @@
 #include <vector>
 
 #include "nth/container/flyweight_set.h"
-#include "nth/io/deserialize.h"
-#include "nth/io/serialize.h"
-#include "nth/io/string_reader.h"
-#include "nth/io/string_writer.h"
+#include "nth/io/serialize/deserialize.h"
+#include "nth/io/serialize/serialize.h"
+#include "nth/io/serialize/string_reader.h"
+#include "nth/io/serialize/string_writer.h"
 #include "nth/test/test.h"
 
 namespace nth::io {
@@ -95,7 +95,8 @@ struct Thing {
   }
 };
 
-NTH_TEST("round-trip/sequence", std::vector<Thing> const & v) {
+NTH_TEST("round-trip/sequence/serialize_sequence",
+         std::vector<Thing> const &v) {
   std::vector<Thing> round_tripped;
   std::string s;
 
@@ -109,7 +110,21 @@ NTH_TEST("round-trip/sequence", std::vector<Thing> const & v) {
   NTH_EXPECT(v == round_tripped);
 }
 
-NTH_INVOKE_TEST("round-trip/sequence") {
+NTH_TEST("round-trip/sequence/as_sequence", std::vector<Thing> const &v) {
+  std::vector<Thing> round_tripped;
+  std::string s;
+
+  string_writer w(s);
+  NTH_ASSERT(serialize(w, as_sequence(v)));
+
+  string_reader r(s);
+  NTH_ASSERT(deserialize(r, as_sequence(round_tripped)));
+
+  NTH_ASSERT(r.size() == 0u);
+  NTH_EXPECT(v == round_tripped);
+}
+
+NTH_INVOKE_TEST("round-trip/sequence/*") {
   co_yield std::vector<Thing>{};
   co_yield std::vector<Thing>{Thing{0}};
   co_yield std::vector<Thing>{Thing{0}, Thing{1}};

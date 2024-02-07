@@ -1,11 +1,11 @@
-#ifndef NTH_IO_STRING_READER_H
-#define NTH_IO_STRING_READER_H
+#ifndef NTH_IO_SERIALIZE_STRING_READER_H
+#define NTH_IO_SERIALIZE_STRING_READER_H
 
 #include <cstddef>
 #include <span>
 #include <string_view>
 
-#include "nth/io/reader.h"
+#include "nth/io/serialize/reader.h"
 
 namespace nth::io {
 
@@ -43,4 +43,4 @@ struct string_reader {
 
 }  // namespace nth::io
 
-#endif  // NTH_IO_STRING_READER_H
+#endif  // NTH_IO_SERIALIZE_STRING_READER_H

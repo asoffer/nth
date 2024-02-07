@@ -1,5 +1,5 @@
-#ifndef NTH_IO_SERIALIZE_H
-#define NTH_IO_SERIALIZE_H
+#ifndef NTH_IO_SERIALIZE_SERIALIZE_H
+#define NTH_IO_SERIALIZE_SERIALIZE_H
 
 #include <concepts>
 #include <cstddef>
@@ -9,7 +9,8 @@
 #include <type_traits>
 
 #include "nth/container/free_functions.h"
-#include "nth/io/writer.h"
+#include "nth/io/serialize/sequence.h"
+#include "nth/io/serialize/writer.h"
 #include "nth/utility/bytes.h"
 
 namespace nth::io {
@@ -110,4 +111,4 @@ bool serialize_sequence(writer auto& w, auto const& seq) requires requires {
 
 }  // namespace nth::io
 
-#endif  // NTH_IO_SERIALIZE_H
+#endif  // NTH_IO_SERIALIZE_SERIALIZE_H

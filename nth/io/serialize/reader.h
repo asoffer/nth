@@ -1,5 +1,5 @@
-#ifndef NTH_IO_READER_H
-#define NTH_IO_READER_H
+#ifndef NTH_IO_SERIALIZE_READER_H
+#define NTH_IO_SERIALIZE_READER_H
 
 #include <concepts>
 #include <cstddef>
@@ -72,4 +72,4 @@ concept reader = requires(R mutable_reader, R const& const_reader) {
 
 }  // namespace nth::io
 
-#endif  // NTH_IO_READER_H
+#endif  // NTH_IO_SERIALIZE_READER_H

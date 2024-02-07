@@ -1,10 +1,10 @@
-#ifndef NTH_IO_STRING_WRITER_H
-#define NTH_IO_STRING_WRITER_H
+#ifndef NTH_IO_SERIALIZE_STRING_WRITER_H
+#define NTH_IO_SERIALIZE_STRING_WRITER_H
 
 #include <span>
 #include <string>
 
-#include "nth/io/writer.h"
+#include "nth/io/serialize/writer.h"
 
 namespace nth::io {
 
@@ -29,4 +29,4 @@ struct string_writer {
 
 }  // namespace nth::io
 
-#endif  // NTH_IO_STRING_WRITER_H
+#endif  // NTH_IO_SERIALIZE_STRING_WRITER_H

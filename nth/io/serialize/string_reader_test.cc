@@ -1,14 +1,14 @@
-#include "nth/io/string_reader.h"
+#include "nth/io/serialize/string_reader.h"
 
 #include <string_view>
 
-#include "nth/io/reader_test.h"
+#include "nth/io/serialize/reader_test.h"
 #include "nth/test/test.h"
 
 namespace nth::io {
 namespace {
 
-NTH_INVOKE_TEST("nth/io/reader/**") {
+NTH_INVOKE_TEST("nth/io/serialize/reader/**") {
   co_yield TestArguments{type<string_reader>, ""};
   co_yield TestArguments{type<string_reader>, std::string_view("")};
   co_yield TestArguments{type<string_reader>, std::string("")};
