@@ -23,7 +23,7 @@ concept serializable_with = requires(S& s, T const& value) {
 // Serializes a sequence of `values...` with the serializer `S`, one
 // immediately after the other.
 template <typename S>
-bool serialize(S& s, serializable_with<S> auto&... values) {
+bool serialize(S& s, serializable_with<S> auto const&... values) {
   return (NthSerialize(s, values) and ...);
 }
 
