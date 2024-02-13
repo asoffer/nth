@@ -1,8 +1,8 @@
-#include "nth/io/serialize/string_writer.h"
+#include "nth/io/writer/string.h"
 
 #include <string_view>
 
-#include "nth/io/serialize/writer_test.h"
+#include "nth/io/writer/writer.h"
 #include "nth/test/test.h"
 
 namespace nth::io {
@@ -12,7 +12,7 @@ std::span<std::byte const> to_bytes(std::string_view s) {
   return std::span(reinterpret_cast<std::byte const *>(s.data()), s.size());
 }
 
-NTH_INVOKE_TEST("nth/io/serialize/writer/**") {
+NTH_INVOKE_TEST("nth/io/writer/**") {
   std::string s;
   co_yield TestArguments{type<string_writer>, s};
 }

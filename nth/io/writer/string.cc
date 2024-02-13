@@ -1,10 +1,10 @@
-#include "nth/io/serialize/string_writer.h"
+#include "nth/io/writer/string.h"
 
 #include <cstring>
 #include <span>
 #include <string>
 
-#include "nth/io/serialize/writer.h"
+#include "nth/io/writer/writer.h"
 
 namespace nth::io {
 

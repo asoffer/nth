@@ -1,8 +1,8 @@
-#include "nth/io/serialize/string_reader.h"
+#include "nth/io/reader/string.h"
 
 #include <cstring>
 
-#include "nth/io/serialize/reader.h"
+#include "nth/io/reader/reader.h"
 
 namespace nth::io {
 

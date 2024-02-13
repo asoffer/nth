@@ -1,10 +1,10 @@
-#ifndef NTH_IO_SERIALIZE_WRITER_TEST_H
-#define NTH_IO_SERIALIZE_WRITER_TEST_H
+#ifndef NTH_IO_WRITER_TEST_H
+#define NTH_IO_WRITER_TEST_H
 
 #include <cstddef>
 #include <utility>
 
-#include "nth/io/serialize/writer.h"
+#include "nth/io/writer/writer.h"
 #include "nth/test/test.h"
 
 NTH_TEST("nth/io/writer/api", nth::Type auto writer,
@@ -17,8 +17,8 @@ NTH_TEST("nth/io/writer/api", nth::Type auto writer,
       std::constructible_from<writer_type, decltype(constructor_arguments)...>);
 }
 
-NTH_TEST("nth/io/serialize/writer/write-updates-cursor/empty",
-         nth::Type auto writer, auto &&...constructor_arguments) {
+NTH_TEST("nth/io/writer/write-updates-cursor/empty", nth::Type auto writer,
+         auto &&...constructor_arguments) {
   using writer_type = nth::type_t<writer>;
   using cursor_type = writer_type::cursor_type;
 
@@ -33,8 +33,8 @@ NTH_TEST("nth/io/serialize/writer/write-updates-cursor/empty",
   NTH_EXPECT(cursor_end == cursor_start);
 }
 
-NTH_TEST("nth/io/serialize/writer/write-updates-cursor/multi-byte",
-         nth::Type auto writer, auto &&...constructor_arguments) {
+NTH_TEST("nth/io/writer/write-updates-cursor/multi-byte", nth::Type auto writer,
+         auto &&...constructor_arguments) {
   using writer_type = nth::type_t<writer>;
   using cursor_type = writer_type::cursor_type;
 
@@ -47,8 +47,8 @@ NTH_TEST("nth/io/serialize/writer/write-updates-cursor/multi-byte",
   NTH_EXPECT(cursor_end - cursor_start == 20);
 }
 
-NTH_TEST("nth/io/serialize/writer/write-at/cursor-stable",
-         nth::Type auto writer, auto &&...constructor_arguments) {
+NTH_TEST("nth/io/writer/write-at/cursor-stable", nth::Type auto writer,
+         auto &&...constructor_arguments) {
   using writer_type = nth::type_t<writer>;
   using cursor_type = writer_type::cursor_type;
 
@@ -62,7 +62,7 @@ NTH_TEST("nth/io/serialize/writer/write-at/cursor-stable",
   NTH_EXPECT(cursor_end == w.cursor());
 }
 
-NTH_TEST("nth/io/serialize/writer/allocate/positive", nth::Type auto writer,
+NTH_TEST("nth/io/writer/allocate/positive", nth::Type auto writer,
          auto &&...constructor_arguments) {
   using writer_type = nth::type_t<writer>;
   using cursor_type = writer_type::cursor_type;
@@ -77,7 +77,7 @@ NTH_TEST("nth/io/serialize/writer/allocate/positive", nth::Type auto writer,
   NTH_EXPECT(cursor_end - cursor_start == 20);
 }
 
-NTH_TEST("nth/io/serialize/writer/allocate/nothing", nth::Type auto writer,
+NTH_TEST("nth/io/writer/allocate/nothing", nth::Type auto writer,
          auto &&...constructor_arguments) {
   using writer_type = nth::type_t<writer>;
   using cursor_type = writer_type::cursor_type;
@@ -92,4 +92,4 @@ NTH_TEST("nth/io/serialize/writer/allocate/nothing", nth::Type auto writer,
   NTH_EXPECT(cursor_end == cursor_start);
 }
 
-#endif  // NTH_IO_SERIALIZE_WRITER_TEST_H
+#endif  // NTH_IO_WRITER_TEST_H

@@ -3,10 +3,10 @@
 #include <vector>
 
 #include "nth/container/flyweight_set.h"
+#include "nth/io/reader/string.h"
 #include "nth/io/serialize/deserialize.h"
 #include "nth/io/serialize/serialize.h"
-#include "nth/io/serialize/string_reader.h"
-#include "nth/io/serialize/string_writer.h"
+#include "nth/io/writer/string.h"
 #include "nth/test/test.h"
 
 namespace nth::io {
@@ -144,7 +144,7 @@ NTH_TEST("round-trip/unordered", flyweight_set<Thing> const &set) {
 
   NTH_ASSERT(r.size() == 0u);
   NTH_EXPECT(set.size() == round_tripped.size());
-  for (auto const & element : set) {
+  for (auto const &element : set) {
     NTH_ASSERT(round_tripped.find(element) != round_tripped.end());
   }
 }

@@ -1,5 +1,5 @@
-#ifndef NTH_IO_SERIALIZE_WRITER_H
-#define NTH_IO_SERIALIZE_WRITER_H
+#ifndef NTH_IO_WRITER_H
+#define NTH_IO_WRITER_H
 
 #include <concepts>
 #include <cstdint>
@@ -73,4 +73,4 @@ concept writer = requires(W mutable_writer, W const& const_writer) {
 
 }  // namespace nth::io
 
-#endif  // NTH_IO_SERIALIZE_WRITER_H
+#endif  // NTH_IO_WRITER_H

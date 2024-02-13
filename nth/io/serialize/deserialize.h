@@ -11,7 +11,7 @@
 #include <type_traits>
 
 #include "nth/container/free_functions.h"
-#include "nth/io/serialize/reader.h"
+#include "nth/io/reader/reader.h"
 #include "nth/io/serialize/sequence.h"
 #include "nth/meta/concepts.h"
 #include "nth/utility/bytes.h"

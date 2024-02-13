@@ -1,13 +1,13 @@
-#ifndef NTH_IO_SERIALIZE_READER_TEST_H
-#define NTH_IO_SERIALIZE_READER_TEST_H
+#ifndef NTH_IO_READER_TEST_H
+#define NTH_IO_READER_TEST_H
 
 #include <cstddef>
 #include <utility>
 
-#include "nth/io/serialize/reader.h"
+#include "nth/io/reader/reader.h"
 #include "nth/test/test.h"
 
-NTH_TEST("nth/io/serialize/reader/api", nth::Type auto reader,
+NTH_TEST("nth/io/reader/api", nth::Type auto reader,
          auto &&...constructor_arguments) {
   using reader_type = nth::type_t<reader>;
   using cursor_type = reader_type::cursor_type;
@@ -17,7 +17,7 @@ NTH_TEST("nth/io/serialize/reader/api", nth::Type auto reader,
       std::constructible_from<reader_type, decltype(constructor_arguments)...>);
 }
 
-NTH_TEST("nth/io/serialize/reader/read-updates-cursor/empty",
+NTH_TEST("nth/io/reader/read-updates-cursor/empty",
          nth::Type auto reader, auto &&...constructor_arguments) {
   using reader_type = nth::type_t<reader>;
   using cursor_type = reader_type::cursor_type;
@@ -33,7 +33,7 @@ NTH_TEST("nth/io/serialize/reader/read-updates-cursor/empty",
   NTH_EXPECT(cursor_end == cursor_start);
 }
 
-NTH_TEST("nth/io/serialize/reader/read-updates-cursor/multi-byte",
+NTH_TEST("nth/io/reader/read-updates-cursor/multi-byte",
          nth::Type auto reader, auto &&...constructor_arguments) {
   using reader_type = nth::type_t<reader>;
   using cursor_type = reader_type::cursor_type;
@@ -47,7 +47,7 @@ NTH_TEST("nth/io/serialize/reader/read-updates-cursor/multi-byte",
   NTH_EXPECT(cursor_end - cursor_start == 20);
 }
 
-NTH_TEST("nth/io/serialize/reader/read-at/cursor-stable", nth::Type auto reader,
+NTH_TEST("nth/io/reader/read-at/cursor-stable", nth::Type auto reader,
          auto &&...constructor_arguments) {
   using reader_type = nth::type_t<reader>;
   using cursor_type = reader_type::cursor_type;
@@ -62,7 +62,7 @@ NTH_TEST("nth/io/serialize/reader/read-at/cursor-stable", nth::Type auto reader,
   NTH_EXPECT(cursor_end == r.cursor());
 }
 
-NTH_TEST("nth/io/serialize/reader/skip/positive", nth::Type auto reader,
+NTH_TEST("nth/io/reader/skip/positive", nth::Type auto reader,
          auto &&...constructor_arguments) {
   using reader_type = nth::type_t<reader>;
   using cursor_type = reader_type::cursor_type;
@@ -76,7 +76,7 @@ NTH_TEST("nth/io/serialize/reader/skip/positive", nth::Type auto reader,
   NTH_EXPECT(cursor_end - cursor_start == 20);
 }
 
-NTH_TEST("nth/io/serialize/reader/skip/nothing", nth::Type auto reader,
+NTH_TEST("nth/io/reader/skip/nothing", nth::Type auto reader,
          auto &&...constructor_arguments) {
   using reader_type = nth::type_t<reader>;
   using cursor_type = reader_type::cursor_type;
@@ -89,7 +89,7 @@ NTH_TEST("nth/io/serialize/reader/skip/nothing", nth::Type auto reader,
   NTH_EXPECT(cursor_end == cursor_start);
 }
 
-NTH_TEST("nth/io/serialize/reader/skip/to-end", nth::Type auto reader,
+NTH_TEST("nth/io/reader/skip/to-end", nth::Type auto reader,
          auto &&...constructor_arguments) {
   using reader_type = nth::type_t<reader>;
   using cursor_type = reader_type::cursor_type;
@@ -103,7 +103,7 @@ NTH_TEST("nth/io/serialize/reader/skip/to-end", nth::Type auto reader,
   NTH_EXPECT(cursor_end - cursor_start == previous_size);
 }
 
-NTH_TEST("nth/io/serialize/reader/skip/passed-end", nth::Type auto reader,
+NTH_TEST("nth/io/reader/skip/passed-end", nth::Type auto reader,
          auto &&...constructor_arguments) {
   using reader_type = nth::type_t<reader>;
 
@@ -112,4 +112,4 @@ NTH_TEST("nth/io/serialize/reader/skip/passed-end", nth::Type auto reader,
   NTH_ASSERT(not r.skip(r.size() + 1));
 }
 
-#endif  // NTH_IO_SERIALIZE_READER_TEST_H
+#endif  // NTH_IO_READER_TEST_H

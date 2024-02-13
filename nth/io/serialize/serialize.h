@@ -10,7 +10,7 @@
 
 #include "nth/container/free_functions.h"
 #include "nth/io/serialize/sequence.h"
-#include "nth/io/serialize/writer.h"
+#include "nth/io/writer/writer.h"
 #include "nth/utility/bytes.h"
 
 namespace nth::io {
