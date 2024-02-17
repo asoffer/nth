@@ -40,15 +40,16 @@ cc_library(
 
 cc_library(
     name = "fakeable_function",
+    testonly = True,
     hdrs = ["fakeable_function.h"],
     deps = [
         "//nth/base:attributes",
         "//nth/base:macros",
+        "//nth/debug:fakeable_function",
         "//nth/meta:type",
         "//nth/utility:any_invocable",
     ],
 )
-
 
 cc_library(
     name = "fuzz",
@@ -76,6 +77,7 @@ cc_library(
     testonly = True,
     deps = [
         ":arguments",
+        ":fakeable_function",
         ":fuzz",
         "//nth/base:macros",
         "//nth/debug/property",

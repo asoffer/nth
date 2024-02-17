@@ -6,7 +6,7 @@ cc_library(
     srcs = ["fstat.cc"],
     deps = [
         "//nth/base:attributes",
-        "//nth/test:fakeable_function",
+        "//nth/debug:fakeable_function",
     ],
 )
 
@@ -16,7 +16,7 @@ cc_library(
     srcs = ["lseek.cc"],
     deps = [
         "//nth/base:attributes",
-        "//nth/test:fakeable_function",
+        "//nth/debug:fakeable_function",
     ],
 )
 
@@ -26,7 +26,7 @@ cc_library(
     srcs = ["open.cc"],
     deps = [
         "//nth/base:attributes",
-        "//nth/test:fakeable_function",
+        "//nth/debug:fakeable_function",
     ],
 )
 
@@ -36,6 +36,6 @@ cc_library(
     srcs = ["read.cc"],
     deps = [
         "//nth/base:attributes",
-        "//nth/test:fakeable_function",
+        "//nth/debug:fakeable_function",
     ],
 )

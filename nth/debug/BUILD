@@ -25,6 +25,15 @@ cc_library(
 )
 
 cc_library(
+    name = "fakeable_function",
+    hdrs = ["fakeable_function.h"],
+    deps = [
+        "//nth/base:attributes",
+        "//nth/base:macros",
+    ],
+)
+
+cc_library(
     name = "source_location",
     hdrs = ["source_location.h"],
     deps = [
