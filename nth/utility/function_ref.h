@@ -7,7 +7,7 @@
 namespace nth {
 namespace internal_function_ref {
 template <typename F, typename... Args>
-auto Invoker(void *obj, Args... args) {
+std::invoke_result_t<F, Args...> Invoker(void *obj, Args... args) {
   return (*reinterpret_cast<std::decay_t<F> *>(obj))(args...);
 };
 
@@ -28,7 +28,9 @@ struct function_ref<Ret(Args...)> {
   function_ref(F &&f NTH_ATTRIBUTE(lifetimebound)) requires(
       std::is_invocable_r_v<Ret, F, Args...>)
       : data_(std::addressof(f)), invoker_(internal_function_ref::Invoker<F>) {}
+
   explicit operator bool() const { return invoker_ != nullptr; }
+
   constexpr Ret operator()(Args... args) const {
     if (data_) {
       return invoker_(data_, args...);

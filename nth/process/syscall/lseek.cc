@@ -6,7 +6,7 @@
 
 namespace nth::sys {
 
-NTH_REAL_IMPLEMENTATION(ssize_t, lseek, (int fd, off_t offset, int whence)) {
+NTH_REAL_IMPLEMENTATION(off_t, lseek, (int, fd)(off_t, offset)(int, whence)) {
   return ::lseek(fd, offset, whence);
 }
 

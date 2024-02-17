@@ -7,7 +7,7 @@
 
 namespace nth::sys {
 
-NTH_FAKEABLE(ssize_t, lseek, (int fd, off_t offset, int whence));
+NTH_FAKEABLE(off_t, lseek, (int, fd)(off_t, offset)(int, whence));
 
 }  // namespace nth::sys
 

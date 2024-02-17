@@ -1,6 +1,12 @@
 package(default_visibility = ["//visibility:public"])
 
 cc_library(
+    name = "any_invocable",
+    hdrs = ["any_invocable.h"],
+    deps = [],
+)
+
+cc_library(
     name = "bytes",
     hdrs = ["bytes.h"],
     deps = [

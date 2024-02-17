@@ -7,7 +7,7 @@
 
 namespace nth::sys {
 
-NTH_FAKEABLE(int, open, (char const *path, int flags));
+NTH_FAKEABLE(int, open, (char const *, path)(int, flags));
 
 }  // namespace nth::sys
 

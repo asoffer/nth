@@ -6,7 +6,7 @@
 
 namespace nth::sys {
 
-NTH_REAL_IMPLEMENTATION(ssize_t, read, (int fd, void* ptr, size_t count)) {
+NTH_REAL_IMPLEMENTATION(ssize_t, read, (int, fd)(void*, ptr)(size_t, count)) {
   return ::read(fd, ptr, count);
 }
 

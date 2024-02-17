@@ -21,7 +21,6 @@ cc_test(
         ":file",
         ":test",
         "//nth/test:main",
-        "//nth/utility:function_ref",
     ]
 )
 

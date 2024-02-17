@@ -6,7 +6,7 @@
 
 namespace nth::sys {
 
-NTH_REAL_IMPLEMENTATION(int, open, (char const *path, int flags)) {
+NTH_REAL_IMPLEMENTATION(int, open, (char const *, path)(int, flags)) {
   return ::open(path, flags);
 }
 

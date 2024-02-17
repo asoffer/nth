@@ -7,7 +7,7 @@
 
 namespace nth::sys {
 
-NTH_FAKEABLE(ssize_t, read, (int fd, void *ptr, size_t count));
+NTH_FAKEABLE(ssize_t, read, (int, fd)(void *, ptr)(size_t, count));
 
 }  // namespace nth::sys
 

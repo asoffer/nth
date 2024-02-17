@@ -45,6 +45,7 @@ cc_library(
         "//nth/base:attributes",
         "//nth/base:macros",
         "//nth/meta:type",
+        "//nth/utility:any_invocable",
     ],
 )
 
