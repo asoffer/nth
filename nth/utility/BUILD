@@ -25,6 +25,12 @@ cc_test(
 )
 
 cc_library(
+    name = "function_ref",
+    hdrs = ["function_ref.h"],
+    deps = [],
+)
+
+cc_library(
     name = "iterator_range",
     hdrs = ["iterator_range.h"],
     deps = [

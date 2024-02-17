@@ -39,6 +39,17 @@ cc_library(
 )
 
 cc_library(
+    name = "fakeable_function",
+    hdrs = ["fakeable_function.h"],
+    deps = [
+        "//nth/base:attributes",
+        "//nth/base:macros",
+        "//nth/meta:type",
+    ],
+)
+
+
+cc_library(
     name = "fuzz",
     testonly = True,
     hdrs = ["fuzz.h"],

@@ -9,7 +9,7 @@
 
 namespace nth::io {
 
-// Writes data to a string referenced by the writer.
+// Reads data from the `std::string_view` passed into the constructor of this `reader`.
 struct string_reader {
   explicit string_reader(std::string_view s) : s_(s) {}
 
