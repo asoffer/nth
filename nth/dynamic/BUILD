@@ -13,6 +13,7 @@ cc_test(
     srcs = ["jit_function_test.cc"],
     deps = [
         ":jit_function",
+        "//nth/base:platform",
         "//nth/test:main",
     ],
 )
