@@ -8,14 +8,16 @@
 #include <span>
 #include <string_view>
 
+#include "nth/meta/concepts.h"
+
 namespace nth {
 
 enum class sign : int8_t { negative = -1, zero = 0, positive = 1 };
 
 struct integer {
   // Assumptions used in construction.
-  static_assert(sizeof(uintptr_t) == sizeof(long long));
   static_assert(sizeof(uintptr_t) == sizeof(unsigned long long));
+  static_assert(sizeof(uintptr_t) == sizeof(uint64_t));
 
   integer() : size_(0), data_{0, 0} {}
   integer(long long n);
@@ -46,6 +48,41 @@ struct integer {
 
   friend integer operator+(integer const &lhs, integer const &rhs);
 
+  integer &operator*=(unsigned long long rhs);
+  integer &operator*=(std::signed_integral auto n) {
+    if (n == 0 or zero(*this)) {
+      return *this = 0;
+    } else if (n < 0) {
+      sign_ = 1 - sign_;
+    }
+    return *this *= static_cast<std::make_unsigned_t<decltype(n)>>(n);
+  }
+
+  friend integer operator*(integer const &lhs, unsigned long long rhs);
+  friend integer operator*(integer &&lhs, unsigned long long rhs);
+
+  template <nth::decays_to<integer> I>
+  friend integer operator*(I &&lhs, std::signed_integral auto rhs) {
+    switch (rhs) {
+      case 0: return 0;
+      case 1: return lhs;
+      case -1: return -std::forward<I>(lhs);
+    }
+    auto result = std::forward<I>(lhs);
+    if (rhs < 0) { result.sign_ = 1 - result.sign_; }
+    result.SlowMul(static_cast<std::make_unsigned_t<decltype(rhs)>>(rhs));
+    return std::forward<I>(result);
+  }
+  template <nth::decays_to<integer> I>
+  friend integer operator*(std::signed_integral auto lhs, I &&rhs) {
+    return std::forward<I>(rhs) * lhs;
+  }
+
+  template <nth::decays_to<integer> I>
+  friend integer operator*(unsigned long long lhs, I &&rhs) {
+    return std::forward<I>(rhs) * lhs;
+  }
+
   integer &&operator-() &&;
   integer operator-() const & { return -integer(*this); }
   integer &operator++() &;
@@ -67,23 +104,25 @@ struct integer {
   }
 
  private:
-  void ResizeTo(uintptr_t n);
+  void ResizeTo(uint64_t n);
 
   void ReduceMagnitudeByOne();
   void IncreaseMagnitudeByOne();
 
-  std::span<uintptr_t const> words() const;
-  std::span<uintptr_t> words();
+  std::span<uint64_t const> words() const;
+  std::span<uint64_t> words();
 
   std::string_view PrintUsingBuffer(std::span<char> buffer) const;
 
-  uintptr_t unchecked_capacity() const;
-  uintptr_t *&unchecked_data();
-  uintptr_t const *unchecked_data() const;
+  void SlowMul(unsigned long long);
 
-  uintptr_t size_ : sizeof(uintptr_t) * CHAR_BIT - 1;
-  uintptr_t sign_ : 1;
-  uintptr_t data_[2];
+  uint64_t unchecked_capacity() const;
+  uint64_t *&unchecked_data();
+  uint64_t const *unchecked_data() const;
+
+  uint64_t size_ : sizeof(uint64_t) * CHAR_BIT - 1;
+  uint64_t sign_ : 1;
+  uint64_t data_[2];
 };
 
 sign sign(integer const &n);

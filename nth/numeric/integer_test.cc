@@ -115,16 +115,6 @@ NTH_INVOKE_TEST("nth/regular/3/**") {
   }
 }
 
-NTH_INVOKE_TEST("nth/numeric/addition/3/*") {
-  for (auto const &x : SampleValues()) {
-    for (auto const &y : SampleValues()) {
-      for (auto const &z : SampleValues()) {
-        co_yield nth::TestArguments{x, y, z};
-      }
-    }
-  }
-}
-
 NTH_TEST("integer/symmetric-equality/with-lhs-conversion", auto lhs,
          integer const &rhs) {
   NTH_EXPECT((NTH_TRACE(lhs) == rhs) == (NTH_TRACE(rhs) == lhs));
@@ -289,6 +279,36 @@ NTH_INVOKE_TEST("nth/numeric/addition/2/*") {
   for (auto const &x : SampleValues()) {
     for (auto const &y : SampleValues()) { co_yield nth::TestArguments{x, y}; }
   }
+}
+
+NTH_INVOKE_TEST("nth/numeric/addition/3/*") {
+  for (auto const &x : SampleValues()) {
+    for (auto const &y : SampleValues()) {
+      for (auto const &z : SampleValues()) {
+        co_yield nth::TestArguments{x, y, z};
+      }
+    }
+  }
+}
+
+NTH_INVOKE_TEST("nth/numeric/multiplication/1/*") {
+  for (auto const &v : SampleValues()) { co_yield v; }
+}
+
+NTH_TEST("integer/multiplication") {
+  NTH_EXPECT(integer(1) * 10 == integer(10));
+  NTH_EXPECT(integer(10) * 10 == integer(100));
+  NTH_EXPECT(integer::from_words({1, 1}) * 4 == integer::from_words({4, 4}));
+  NTH_EXPECT(integer(0x40000000'00000000) * 4 == integer::from_words({0, 1}));
+  NTH_EXPECT(
+      integer::from_words({0xffffffffffffffff, 0xffffffffffffffff}) * 3 ==
+      integer::from_words({0xfffffffffffffffd, 0xffffffffffffffff, 0x2}));
+  NTH_LOG("{}")<<={integer::from_words({0xffffffffffffffff, 0xffffffffffffffff}) *
+                 std::numeric_limits<int64_t>::lowest()};
+  NTH_EXPECT(integer::from_words({0xffffffffffffffff, 0xffffffffffffffff}) *
+                 std::numeric_limits<int64_t>::lowest() ==
+             -integer::from_words(
+                 {0x8000000000000000, 0xffffffffffffffff, 0x7fffffffffffffff}));
 }
 
 NTH_TEST("integer/addition/same-sign") {

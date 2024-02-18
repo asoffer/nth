@@ -140,4 +140,22 @@ NTH_TEST("nth/numeric/addition/3/associative", auto const &var_x,
   NTH_EXPECT(x + (y + z) == (x + y) + z);
 }
 
+NTH_TEST("nth/numeric/multiplication/1/with-zero", auto const &var_x) {
+  auto x = NTH_TRACE(var_x);
+  NTH_EXPECT(x * 0 == 0);
+  NTH_EXPECT(0 * x == 0);
+}
+
+NTH_TEST("nth/numeric/multiplication/1/with-one", auto const &var_x) {
+  auto x = NTH_TRACE(var_x);
+  NTH_EXPECT(x * 1 == x);
+  NTH_EXPECT(1 * x == x);
+}
+
+NTH_TEST("nth/numeric/multiplication/1/with-negative-one", auto const &var_x) {
+  auto x = NTH_TRACE(var_x);
+  NTH_EXPECT(x * -1 == -x);
+  NTH_EXPECT(-1 * x == -x);
+}
+
 #endif  // NTH_NUMERIC_TEST_TRAITS_H
