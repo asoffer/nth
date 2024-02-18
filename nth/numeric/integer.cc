@@ -119,10 +119,6 @@ void MoveToHeap(uintptr_t (&data)[2]) {
 
 }  // namespace
 
-// Assumptions used in construction.
-static_assert(sizeof(uintptr_t) == sizeof(long long));
-static_assert(sizeof(uintptr_t) == sizeof(unsigned long long));
-
 void integer::ResizeTo(uintptr_t new_size) {
   if (size_ > 2 and new_size <= 2) {
     auto *ptr = unchecked_data();
@@ -211,16 +207,17 @@ std::span<uintptr_t> integer::words() {
   }
 }
 
-integer integer::from_words(std::span<uintptr_t const> words) {
+integer integer::from_words(std::initializer_list<unsigned long long> words) {
   switch (words.size()) {
     case 0: return integer(0);
-    case 1: return integer(words[0]);
+    case 1: return integer(*words.begin());
     case 2: {
       integer n;
       n.size_    = words.size();
       n.sign_    = 0;
-      n.data_[0] = words[0];
-      n.data_[1] = words[1];
+      auto iter  = words.begin();
+      n.data_[0] = *iter++;
+      n.data_[1] = *iter;
       return n;
     }
     default: {
@@ -230,7 +227,8 @@ integer integer::from_words(std::span<uintptr_t const> words) {
       auto *ptr  = HeapAllocate(n.size_);
       n.data_[0] = reinterpret_cast<uintptr_t>(ptr);
       n.data_[1] = n.size_;
-      std::memcpy(ptr, words.data(), sizeof(uintptr_t) * words.size());
+      std::memcpy(ptr, words.begin(),
+                  sizeof(unsigned long long) * words.size());
       return n;
     }
   }
@@ -409,6 +407,26 @@ uintptr_t const *integer::unchecked_data() const {
 uintptr_t *&integer::unchecked_data() {
   NTH_REQUIRE((v.debug), size_ > 2u);
   return *reinterpret_cast<uintptr_t **>(&data_[0]);
+}
+
+std::string_view integer::PrintUsingBuffer(std::span<char> buffer) const {
+  static constexpr std::string_view HexChars = "0123456789abcdef";
+
+  auto end  = words().rend();
+  char *ptr = buffer.data();
+  auto iter = words().rbegin();
+  size_t i  = 0;
+  for (; i < 16; ++i) {
+    if (((*iter >> (60 - 4 * i)) & 0xf) != 0) { break; }
+  }
+  for (; i < 16; ++i) { *ptr++ = HexChars[(*iter >> (60 - 4 * i)) & 0xf]; }
+  ++iter;
+  for (; iter != end; ++iter) {
+    for (size_t i = 0; i < 16; ++i) {
+      *ptr++ = HexChars[(*iter >> (60 - 4 * i)) & 0xf];
+    }
+  }
+  return std::string_view(buffer.data(), ptr - buffer.data());
 }
 
 }  // namespace nth

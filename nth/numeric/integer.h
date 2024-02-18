@@ -1,28 +1,38 @@
 #ifndef NTH_NUMERIC_INTEGER_H
 #define NTH_NUMERIC_INTEGER_H
 
+#include <climits>
 #include <concepts>
 #include <cstdint>
-#include <iomanip>
-#include <iostream>
+#include <memory>
 #include <span>
-#include <sstream>
+#include <string_view>
 
 namespace nth {
 
 enum class sign : int8_t { negative = -1, zero = 0, positive = 1 };
 
 struct integer {
+  // Assumptions used in construction.
+  static_assert(sizeof(uintptr_t) == sizeof(long long));
+  static_assert(sizeof(uintptr_t) == sizeof(unsigned long long));
+
   integer() : size_(0), data_{0, 0} {}
   integer(long long n);
   integer(unsigned long long n);
-  integer(std::signed_integral auto n) : integer(long_long{n}) {}
-  integer(std::unsigned_integral auto n) : integer(unsigned_long_long{n}) {}
+  integer(std::signed_integral auto n) : integer(static_cast<long long>(n)) {}
+  integer(std::unsigned_integral auto n)
+      : integer(static_cast<unsigned long long>(n)) {}
   integer(integer const &);
   integer(integer &&);
 
-  // Constructs an `integer` from the sequence of `uintptr_t`s.
-  static integer from_words(std::span<uintptr_t const> words);
+  // Constructs an `integer` from the sequence of `unsigned long long`s, where
+  // each word in `words` is interpreted from least-to-most significant. Note
+  // that words are cast up to `unsigned long long` regardless of how they are
+  // specified, so even if one writes the initializer list as `{uint8_t{1},
+  // uint8_t{1}}`, this will be interpreted as 18446744073709551617 (assuming
+  // sizeof(unsigned long long) is 8), rather than 257.
+  static integer from_words(std::initializer_list<unsigned long long> words);
 
   integer &operator=(integer const &);
   integer &operator=(integer &&);
@@ -51,27 +61,12 @@ struct integer {
       p.write("0");
       return;
     }
-    std::span w = n.words();
-    std::stringstream ss;
-    auto iter = w.rbegin();
-    if (negative(n)) {
-      ss << "-0x" << std::hex << *iter++;
-      for (; iter != w.rend(); ++iter) {
-        ss << std::setfill('0') << std::setw(sizeof(uintptr_t) * 2) << *iter;
-      }
-    } else {
-      ss << "0x" << std::hex << *iter++;
-      for (; iter != w.rend(); ++iter) {
-        ss << std::setfill('0') << std::setw(sizeof(uintptr_t) * 2) << *iter;
-      }
-    }
-    p.write(ss.str());
+    p.write(negative(n) ? "-0x" : "0x");
+    std::unique_ptr<char[]> buffer(new char[16 * n.size_]);
+    p.write(n.PrintUsingBuffer(std::span(buffer.get(), 16 * n.size_)));
   }
 
  private:
-  using long_long          = long long;
-  using unsigned_long_long = unsigned long long;
-
   void ResizeTo(uintptr_t n);
 
   void ReduceMagnitudeByOne();
@@ -79,6 +74,8 @@ struct integer {
 
   std::span<uintptr_t const> words() const;
   std::span<uintptr_t> words();
+
+  std::string_view PrintUsingBuffer(std::span<char> buffer) const;
 
   uintptr_t unchecked_capacity() const;
   uintptr_t *&unchecked_data();
