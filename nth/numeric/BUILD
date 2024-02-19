@@ -4,7 +4,11 @@ cc_library(
     name = "integer",
     hdrs = ["integer.h"],
     srcs = ["integer.cc"],
-    deps = ["//nth/debug"],
+    deps = [
+        "//nth/debug",
+        "//nth/io/serialize",
+        "//nth/io/serialize:deserialize",
+    ],
 )
 
 cc_library(
@@ -22,6 +26,7 @@ cc_test(
     deps = [
       ":integer",
       ":test_traits",
+      "//nth/io/serialize:round_trip",
       "//nth/test:main",
     ],
 )

@@ -12,6 +12,19 @@ cc_library(
     ],
 )
 
+cc_library(
+    name = "round_trip",
+    testonly = True,
+    hdrs = ["round_trip.h"],
+    deps = [
+        "//nth/io/serialize",
+        "//nth/io/serialize:deserialize",
+        "//nth/io/writer:string",
+        "//nth/io/reader:string",
+        "//nth/test",
+    ],
+)
+
 cc_test(
     name = "round_trip_test",
     srcs = ["round_trip_test.cc"],

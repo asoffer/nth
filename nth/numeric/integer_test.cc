@@ -1,5 +1,6 @@
 #include "nth/numeric/integer.h"
 
+#include "nth/io/serialize/round_trip.h"
 #include "nth/numeric/test_traits.h"
 #include "nth/strings/format/universal.h"
 #include "nth/test/test.h"
@@ -452,6 +453,10 @@ NTH_TEST("integer/addition/different-signs") {
                  -integer::from_words({0x00000000'00000002, 0x00000000'00000001,
                                        0x00000000'00000001}) ==
              -1);
+}
+
+NTH_INVOKE_TEST("nth/io/serialize/round-trip") {
+  for (auto const &v : SampleValues()) { co_yield v; }
 }
 
 }  // namespace
