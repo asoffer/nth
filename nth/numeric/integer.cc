@@ -135,8 +135,7 @@ integer::integer(long long n) : size_(n != 0), sign_(n < 0), data_{0, 0} {
   } else if (n != std::numeric_limits<long long>::lowest()) {
     data_[0] = -n;
   } else {
-    data_[1] = 1;
-    size_    = 2;
+    data_[0] = 0x80000000'00000000;
   }
 }
 

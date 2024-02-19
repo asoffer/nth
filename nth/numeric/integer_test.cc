@@ -26,6 +26,52 @@ std::vector<integer> SampleValues() {
   };
 }
 
+NTH_TEST("integer/cast", auto n) {
+  NTH_EXPECT(static_cast<decltype(n)>(integer(n)) == n);
+}
+
+NTH_INVOKE_TEST("integer/cast") {
+  co_yield uint8_t{0};
+  co_yield uint8_t{10};
+  co_yield std::numeric_limits<uint8_t>::max();
+
+  co_yield int8_t{0};
+  co_yield int8_t{10};
+  co_yield int8_t{-10};
+  co_yield std::numeric_limits<int8_t>::max();
+  co_yield std::numeric_limits<int8_t>::lowest();
+
+  co_yield uint16_t{0};
+  co_yield uint16_t{10};
+  co_yield std::numeric_limits<uint16_t>::max();
+
+  co_yield int16_t{0};
+  co_yield int16_t{10};
+  co_yield int16_t{-10};
+  co_yield std::numeric_limits<int16_t>::max();
+  co_yield std::numeric_limits<int16_t>::lowest();
+
+  co_yield uint32_t{0};
+  co_yield uint32_t{10};
+  co_yield std::numeric_limits<uint32_t>::max();
+
+  co_yield int32_t{0};
+  co_yield int32_t{10};
+  co_yield int32_t{-10};
+  co_yield std::numeric_limits<int32_t>::max();
+  co_yield std::numeric_limits<int32_t>::lowest();
+
+  co_yield uint64_t{0};
+  co_yield uint64_t{10};
+  co_yield std::numeric_limits<uint64_t>::max();
+
+  co_yield int64_t{0};
+  co_yield int64_t{10};
+  co_yield int64_t{-10};
+  co_yield std::numeric_limits<int64_t>::max();
+  co_yield std::numeric_limits<int64_t>::lowest();
+}
+
 NTH_TEST("integer/print") {
   std::string s;
   string_printer p(s);
@@ -303,8 +349,6 @@ NTH_TEST("integer/multiplication") {
   NTH_EXPECT(
       integer::from_words({0xffffffffffffffff, 0xffffffffffffffff}) * 3 ==
       integer::from_words({0xfffffffffffffffd, 0xffffffffffffffff, 0x2}));
-  NTH_LOG("{}")<<={integer::from_words({0xffffffffffffffff, 0xffffffffffffffff}) *
-                 std::numeric_limits<int64_t>::lowest()};
   NTH_EXPECT(integer::from_words({0xffffffffffffffff, 0xffffffffffffffff}) *
                  std::numeric_limits<int64_t>::lowest() ==
              -integer::from_words(

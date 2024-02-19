@@ -8,6 +8,7 @@
 #include <span>
 #include <string_view>
 
+#include "nth/debug/debug.h"
 #include "nth/meta/concepts.h"
 
 namespace nth {
@@ -93,6 +94,19 @@ struct integer {
   friend bool positive(integer const &n);
   friend bool zero(integer const &n);
 
+  template <std::integral N>
+  explicit operator N() const {
+    if constexpr (std::is_signed_v<N>) {
+      if (negative(*this)) {
+        return -static_cast<N>(data_[0]);
+      } else {
+        return static_cast<N>(data_[0]);
+      }
+    } else {
+      return static_cast<N>(data_[0]);
+    }
+  }
+
   friend void NthPrint(auto &p, auto &, integer const &n) {
     if (n.size_ == 0) {
       p.write("0");
@@ -101,6 +115,13 @@ struct integer {
     p.write(negative(n) ? "-0x" : "0x");
     std::unique_ptr<char[]> buffer(new char[16 * n.size_]);
     p.write(n.PrintUsingBuffer(std::span(buffer.get(), 16 * n.size_)));
+  }
+
+  template <typename H>
+  friend H AbslHashValue(H h, integer const &n) {
+    h = H::combine(std::move(h), n.sign_);
+    return H::combine_contiguous(std::move(h), n.words().data(),
+                                 n.words().size());
   }
 
  private:
