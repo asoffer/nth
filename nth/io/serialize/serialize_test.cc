@@ -63,6 +63,8 @@ struct BasicSerializer {
     return result_type::success();
   }
 
+  std::string& context(decltype(nth::type<std::string>)) { return content_; }
+
  private:
   std::string& content_;
   bool fail_ = false;
@@ -71,6 +73,9 @@ struct BasicSerializer {
 struct BoolReturningSerializer : BasicSerializer {
   using BasicSerializer::BasicSerializer;
 };
+
+static_assert(serializer_with_context<BoolReturningSerializer, std::string>);
+static_assert(not serializer_with_context<BoolReturningSerializer, bool>);
 
 struct result_promise_return_type {
   result_promise_return_type(result_type::promise_type& promise);

@@ -15,9 +15,17 @@
 #include "nth/io/internal/sequence.h"
 #include "nth/io/reader/reader.h"
 #include "nth/meta/concepts.h"
+#include "nth/meta/type.h"
 #include "nth/utility/bytes.h"
 
 namespace nth::io {
+
+// A concept matching any deserializer type that provides access to the given
+// `ContextTypes...`.
+template <typename S, typename... ContextTypes>
+concept deserializer_with_context = (requires(S s) {
+  { s.context(nth::type<ContextTypes>) } -> std::same_as<ContextTypes&>;
+} and ...);
 
 // An alias template that extracts the result type associated with the
 // deserializer `D`. By default, the result type is `bool`, where `true`

@@ -23,7 +23,15 @@ struct BasicDeserializer {
   int value_ = 0;
 };
 
-struct BoolReturningDeserializer : BasicDeserializer {};
+struct BoolReturningDeserializer : BasicDeserializer {
+  std::string& context(decltype(nth::type<std::string>)) { return context_; }
+
+ private:
+  std::string context_;
+};
+
+static_assert(deserializer_with_context<BoolReturningDeserializer, std::string>);
+static_assert(not deserializer_with_context<BoolReturningDeserializer, bool>);
 
 struct result_type {
   explicit result_type() : message_("unknown failure") {}
