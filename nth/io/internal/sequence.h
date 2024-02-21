@@ -22,17 +22,7 @@ struct as_sequence<Seq&> {
 
   explicit as_sequence(Seq& seq) : ref_(seq) {}
 
-  template <typename S>
-  requires std::is_const_v<Seq>
-  friend bool NthSerialize(S& s, as_sequence seq) {
-    return serialize_sequence(s, seq.ref_);
-  }
-
-  template <typename D>
-  requires(not std::is_const_v<Seq>)  //
-      friend bool NthDeserialize(D& s, as_sequence seq) {
-    return deserialize_sequence(s, seq.ref_);
-  }
+  Seq& ref() const { return ref_; }
 
  private:
   Seq& ref_;

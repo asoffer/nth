@@ -5,7 +5,7 @@
 #include <string>
 
 #include "nth/io/reader/string.h"
-#include "nth/io/serialize/deserialize.h"
+#include "nth/io/deserialize/deserialize.h"
 #include "nth/io/serialize/serialize.h"
 #include "nth/io/writer/string.h"
 #include "nth/test/test.h"

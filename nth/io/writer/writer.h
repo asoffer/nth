@@ -21,7 +21,7 @@ concept write_cursor = std::equality_comparable<C> and requires(C const& c) {
 };
 
 // Concept defining a `writer`, representing an object into which one can
-// serialize data.
+// write data.
 template <typename W>
 concept writer = requires(W mutable_writer, W const& const_writer) {
   // There must be a `cursor_type` nested type which meets the requirements of
@@ -70,6 +70,71 @@ concept writer = requires(W mutable_writer, W const& const_writer) {
     mutable_writer.write(std::declval<std::span<std::byte const>>())
     } -> std::same_as<bool>;
 };
+
+// Writes `x` to `w` with the same bit-representation, taking exactly
+// `sizeof(x)` bytes. Returns whether or not the write succeeded.
+template <int&..., typename T>
+bool write_fixed(writer auto& w, T x) requires std::is_trivially_copyable_v<T> {
+  return w.write(nth::bytes(x));
+}
+
+// Writes a length-prefixed integer to `w` with the value `n`. The length prefix
+// must fit in a single byte, meaning that integers represented must be
+// representable in `256` or fewer bytes. The number is represented in
+// little-endian order.
+bool write_integer(writer auto& w,
+                   std::signed_integral auto n) requires(sizeof(n) <= 256) {
+  auto c = w.allocate(1);
+  if (not c) { return false; }
+
+  std::byte b = static_cast<std::byte>(n < 0);
+  if (not w.write(nth::bytes(b))) { return false; }
+
+  std::make_unsigned_t<decltype(n)> m;
+  std::memcpy(&m, &n, sizeof(m));
+  if (n < 0) { m = ~m + 1; }
+
+  if constexpr (sizeof(n) == 1) {
+    return w.write(nth::bytes(m)) and
+           w.write_at(*c, nth::bytes(static_cast<std::byte>(1)));
+  } else {
+    std::byte buffer[sizeof(n)];
+    std::byte* ptr = buffer;
+    while (m) {
+      *ptr++ = static_cast<std::byte>(m & uint8_t{0xff});
+      m >>= 8;
+    }
+    auto length = ptr - buffer;
+    return w.write(std::span(buffer, length)) and
+           w.write_at(*c, nth::bytes(static_cast<std::byte>(length)));
+  }
+}
+
+// Writes a length-prefixed integer to `w` with the value `n`. The length prefix
+// must fit in a single byte, meaning that integers represented must be
+// representable in `256` or fewer bytes. The number is represented as a
+// sign-byte (1 for negative numbers, 0 otherwise) followed by the magnitude of
+// the number in little-endian order.
+bool write_integer(writer auto& w,
+                   std::unsigned_integral auto n) requires(sizeof(n) <= 256) {
+  auto c = w.allocate(1);
+  if (not c) { return false; }
+
+  if constexpr (sizeof(n) == 1) {
+    return w.write(nth::bytes(n)) and
+           w.write_at(*c, nth::bytes(static_cast<std::byte>(1)));
+  } else {
+    std::byte buffer[sizeof(n)];
+    std::byte* ptr = buffer;
+    while (n) {
+      *ptr++ = static_cast<std::byte>(n & uint8_t{0xff});
+      n >>= 8;
+    }
+    auto length = ptr - buffer;
+    return w.write(std::span(buffer, length)) and
+           w.write_at(*c, nth::bytes(static_cast<std::byte>(length)));
+  }
+}
 
 }  // namespace nth::io
 

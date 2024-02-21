@@ -9,8 +9,8 @@
 #include <string_view>
 
 #include "nth/debug/debug.h"
-#include "nth/io/serialize/deserialize.h"
-#include "nth/io/serialize/serialize.h"
+#include "nth/io/reader/reader.h"
+#include "nth/io/writer/writer.h"
 #include "nth/meta/concepts.h"
 
 namespace nth {
@@ -127,12 +127,12 @@ struct integer {
   }
 
   friend bool NthSerialize(auto &s, integer const &n) {
-    if (not nth::io::serialize_fixed(s, static_cast<bool>(n.sign_)) or
-        not nth::io::serialize_integer(s, n.size_)) {
+    if (not nth::io::write_fixed(s, static_cast<bool>(n.sign_)) or
+        not nth::io::write_integer(s, n.size_)) {
       return false;
     }
     for (uintptr_t w : n.words()) {
-      if (not nth::io::serialize_fixed(s, w)) { return false; }
+      if (not nth::io::write_fixed(s, w)) { return false; }
     }
     return true;
   }
@@ -140,24 +140,23 @@ struct integer {
   friend bool NthDeserialize(auto &d, integer &n) {
     bool sig;
     uintptr_t size;
-    if (not nth::io::deserialize_fixed(d, sig) or
-        not nth::io::deserialize_integer(d, size)) {
+    if (not nth::io::read_fixed(d, sig) or not nth::io::read_integer(d, size)) {
       return false;
     }
     n.sign_ = sig;
     n.size_ = size;
     switch (size) {
-      case 0:return true;
-      case 1: return nth::io::deserialize_fixed(d, n.data_[0]);
+      case 0: return true;
+      case 1: return nth::io::read_fixed(d, n.data_[0]);
       case 2:
-        return nth::io::deserialize_fixed(d, n.data_[0]) and
-               nth::io::deserialize_fixed(d, n.data_[1]);
+        return nth::io::read_fixed(d, n.data_[0]) and
+               nth::io::read_fixed(d, n.data_[1]);
       default: {
         uintptr_t *ptr = new uintptr_t[size];
-        n.data_[0]       = reinterpret_cast<uintptr_t>(ptr);
-        n.data_[1]       = size;
+        n.data_[0]     = reinterpret_cast<uintptr_t>(ptr);
+        n.data_[1]     = size;
         for (size_t i = 0; i < size; ++i) {
-          if (not nth::io::deserialize_fixed(d, *ptr++)) { return false; }
+          if (not nth::io::read_fixed(d, *ptr++)) { return false; }
         }
         return true;
       } break;

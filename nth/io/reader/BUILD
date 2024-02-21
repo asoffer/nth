@@ -27,7 +27,9 @@ cc_test(
 cc_library(
     name = "reader",
     hdrs = ["reader.h"],
-    deps = [],
+    deps = [
+        "//nth/utility:bytes",
+    ],
 )
 
 cc_library(

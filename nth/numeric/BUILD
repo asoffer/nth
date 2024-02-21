@@ -6,8 +6,8 @@ cc_library(
     srcs = ["integer.cc"],
     deps = [
         "//nth/debug",
-        "//nth/io/serialize",
-        "//nth/io/serialize:deserialize",
+        "//nth/io/reader",
+        "//nth/io/writer",
     ],
 )
 

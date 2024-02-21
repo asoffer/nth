@@ -3,8 +3,8 @@
 #include <vector>
 
 #include "nth/container/flyweight_set.h"
+#include "nth/io/deserialize/deserialize.h"
 #include "nth/io/reader/string.h"
-#include "nth/io/serialize/deserialize.h"
 #include "nth/io/serialize/serialize.h"
 #include "nth/io/writer/string.h"
 #include "nth/test/test.h"
@@ -17,10 +17,10 @@ NTH_TEST("round-trip/integer", auto n) {
   std::string s;
 
   string_writer w(s);
-  NTH_ASSERT(serialize_integer(w, n));
+  NTH_ASSERT(write_integer(w, n));
 
   string_reader r(s);
-  NTH_ASSERT(deserialize_integer(r, m));
+  NTH_ASSERT(read_integer(r, m));
 
   NTH_ASSERT(r.size() == 0u);
   NTH_EXPECT((int)m == (int)n);
@@ -82,10 +82,10 @@ NTH_INVOKE_TEST("round-trip/integer") {
 struct Thing {
   int n;
   friend bool NthSerialize(auto &s, Thing const &t) {
-    return serialize_integer(s, t.n);
+    return write_integer(s, t.n);
   }
   friend bool NthDeserialize(auto &d, Thing &t) {
-    return deserialize_integer(d, t.n);
+    return read_integer(d, t.n);
   }
   friend bool operator==(Thing, Thing) = default;
 
@@ -101,10 +101,10 @@ NTH_TEST("round-trip/sequence/serialize_sequence",
   std::string s;
 
   string_writer w(s);
-  NTH_ASSERT(serialize_sequence(w, v));
+  NTH_ASSERT(serialize(w, as_sequence(v)));
 
   string_reader r(s);
-  NTH_ASSERT(deserialize_sequence(r, round_tripped));
+  NTH_ASSERT(deserialize(r, as_sequence(round_tripped)));
 
   NTH_ASSERT(r.size() == 0u);
   NTH_EXPECT(v == round_tripped);
@@ -137,10 +137,10 @@ NTH_TEST("round-trip/unordered", flyweight_set<Thing> const &set) {
   std::string s;
 
   string_writer w(s);
-  NTH_ASSERT(serialize_sequence(w, set));
+  NTH_ASSERT(serialize(w, as_sequence(set)));
 
   string_reader r(s);
-  NTH_ASSERT(deserialize_sequence(r, round_tripped));
+  NTH_ASSERT(deserialize(r, as_sequence(round_tripped)));
 
   NTH_ASSERT(r.size() == 0u);
   NTH_EXPECT(set.size() == round_tripped.size());
