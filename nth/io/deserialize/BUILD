@@ -4,11 +4,12 @@ cc_library(
     name = "deserialize",
     hdrs = ["deserialize.h"],
     deps = [
+        "//nth/container:free_functions",
         "//nth/io/deserialize/internal:deserialize",
         "//nth/io/internal:sequence",
-        "//nth/container:free_functions",
-        "//nth/meta:concepts",
         "//nth/io/reader",
+        "//nth/meta:concepts",
+        "//nth/meta:type",
         "//nth/utility:bytes",
     ],
 )
