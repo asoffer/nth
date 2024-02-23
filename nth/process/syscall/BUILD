@@ -39,3 +39,13 @@ cc_library(
         "//nth/debug:fakeable_function",
     ],
 )
+
+cc_library(
+    name = "write",
+    hdrs = ["write.h"],
+    srcs = ["write.cc"],
+    deps = [
+        "//nth/base:attributes",
+        "//nth/debug:fakeable_function",
+    ],
+)

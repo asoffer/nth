@@ -1,11 +1,26 @@
 package(default_visibility = ["//visibility:public"])
 
 cc_library(
-    name = "writer",
-    hdrs = ["writer.h"],
+    name = "file",
+    hdrs = ["file.h"],
+    srcs = ["file.cc"],
     deps = [
-        "//nth/utility:bytes",
+        ":writer",
+        "//nth/io:file_path",
+        "//nth/process/syscall:lseek",
+        "//nth/process/syscall:open",
+        "//nth/process/syscall:write",
     ],
+)
+
+cc_test(
+    name = "file_test",
+    srcs = ["file_test.cc"],
+    deps = [
+        ":file",
+        ":test",
+        "//nth/test:main",
+    ]
 )
 
 cc_library(
@@ -32,5 +47,13 @@ cc_library(
     deps = [
         ":writer",
         "//nth/test",
+    ],
+)
+
+cc_library(
+    name = "writer",
+    hdrs = ["writer.h"],
+    deps = [
+        "//nth/utility:bytes",
     ],
 )
