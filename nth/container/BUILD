@@ -37,6 +37,23 @@ cc_test(
 )
 
 cc_library(
+    name = "flat_tree",
+    hdrs = ["flat_tree.h"],
+    deps = [
+        "//nth/container/internal:flat_tree",
+    ],
+)
+
+cc_test(
+    name = "flat_tree_test",
+    srcs = ["flat_tree_test.cc"],
+    deps = [
+        ":flat_tree",
+        "//nth/test:main",
+    ],
+)
+
+cc_library(
     name = "flyweight_map",
     hdrs = ["flyweight_map.h"],
     deps = [

@@ -120,6 +120,21 @@ cc_test(
 )
 
 cc_library(
+    name = "offset_ptr",
+    hdrs = ["offset_ptr.h"],
+    deps = [],
+)
+
+cc_test(
+    name = "offset_ptr_test",
+    srcs = ["offset_ptr_test.cc"],
+    deps = [
+        ":offset_ptr",
+        "//nth/test:main",
+    ],
+)
+
+cc_library(
     name = "projected_span",
     hdrs = ["projected_span.h"],
     deps = [
