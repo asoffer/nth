@@ -9,13 +9,13 @@
 namespace nth {
 namespace {
 
-struct Error {
-  using promise_type = early_exit_promise_type<Error>;
-
+struct Error : nth::early_exitable<Error> {
+  using nth::early_exitable<Error>::early_exitable;
   explicit Error(int n) : value_(n) {}
-  ~Error();
-  explicit Error(early_exit_constructor_t, Error*& v) { v = this; };
-  friend bool operator==(Error, Error) = default;
+
+  friend bool operator==(Error lhs, Error rhs) {
+    return lhs.value_ == rhs.value_;
+  }
   explicit operator bool() const { return value_ >= 0; }
 
   int value() const { return value_; }
@@ -25,17 +25,17 @@ struct Error {
 };
 
 template <typename T>
-struct ErrorOr {
-  using promise_type = early_exit_promise_type<ErrorOr>;
+struct ErrorOr : nth::early_exitable<ErrorOr<T>> {
+  using nth::early_exitable<ErrorOr>::early_exitable;
 
   explicit ErrorOr(Error e) : value_(e) {}
   explicit ErrorOr(T t) : value_(t) {}
-  ~ErrorOr();
-  explicit ErrorOr(early_exit_constructor_t, ErrorOr*& v) { v = this; };
 
   explicit operator Error const&() const { return std::get<Error>(value_); }
 
-  friend bool operator==(ErrorOr const&, ErrorOr const&) = default;
+  friend bool operator==(ErrorOr const& lhs, ErrorOr const&rhs) {
+    return lhs.value_ == rhs.value_;
+  }
   explicit operator bool() const { return std::holds_alternative<T>(value_); }
   T const& operator*() const { return std::get<T>(value_); }
 
@@ -43,19 +43,9 @@ struct ErrorOr {
   std::variant<Error, T> value_ = Error(0);
 };
 
-// TODO: For some reason ASAN complains if `Error` is marked as
-// default-destructible inside the class body, but not if it is marked so out of
-// line. Investigate if this is a real memory issue or a miscompile with Clang.
-Error::~Error()     = default;
-template <typename T>
-ErrorOr<T>::~ErrorOr() = default;
-
 static_assert(supports_early_exit<Error>);
 static_assert(supports_early_exit<ErrorOr<int>>);
 static_assert(supports_early_exit<ErrorOr<std::string>>);
-static_assert(early_exit_type<Error> == nth::type<void>);
-static_assert(early_exit_type<ErrorOr<int>> == nth::type<int>);
-static_assert(early_exit_type<ErrorOr<std::string>> == nth::type<std::string>);
 
 NTH_INVOKE_TEST("nth/utility/early-exit") {
   co_yield nth::type<Error>;

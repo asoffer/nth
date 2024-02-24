@@ -8,37 +8,31 @@
 
 #include "nth/base/attributes.h"
 #include "nth/meta/type.h"
+#include "nth/meta/concepts.h"
 #include "nth/utility/unconstructible.h"
 
 namespace nth {
-template <typename From, typename To>
-concept explicitly_convertible_to = requires(From const& from) {
-  static_cast<To>(from);
+namespace internal_early_exit {
+
+struct promise_return_type_base;
+struct early_exit_constructor_t
+    : unconstructible_except_by<internal_early_exit::promise_return_type_base> {
 };
 
-struct early_exit_constructor_t;
+}  // namespace internal_early_exit
+
+template <typename>
+struct early_exitable;
 
 // A concept matching any type that supports early-exiting via `co_await`. A
-// type `T` must have a constructor accepting an `early_exit_constructor_t` and
-// a mutable reference to a pointer to itself. This constructor must assign
-// `this` to the reference. The type must also be convertible to bool.
+// type `T` must derive from `early_exitable<T>` and `using` this base-classes
+// constructor. The type must also be convertible to bool.
 template <typename T>
-concept supports_early_exit =
-    (std::is_constructible_v<T, early_exit_constructor_t, T*&> and
-     requires(T const& t) { static_cast<bool>(t); });
-
-// For any type `T` supporting early-exiting, computes the associated return
-// type. If the type can be dereferenced, the type of `*t`, removing any
-// CV-reference qualifiers is the associated return type. Otherwise, the
-// associated return type is `void`.
-template <supports_early_exit T>
-inline constexpr auto early_exit_type = [] {
-  if constexpr (requires(T const& t) { *t; }) {
-    return type<std::remove_cvref_t<decltype(*std::declval<T>())>>;
-  } else {
-    return type<void>;
-  }
-}();
+concept supports_early_exit = std::derived_from<T, early_exitable<T>> and
+    (std::is_constructible_v<T, internal_early_exit::early_exit_constructor_t,
+                             T*&>and requires(T const& t) {
+      static_cast<bool>(t);
+    });
 
 // A concept matching early-exit handlers for a type `T` that supports
 // early-exiting. The handle must be invocable with a `T const&` or with no
@@ -46,14 +40,6 @@ inline constexpr auto early_exit_type = [] {
 template <typename Handler, typename T>
 concept early_exit_handler_for =
     std::is_invocable_v<Handler, T> or std::is_invocable_v<Handler>;
-
-namespace internal_early_exit {
-struct promise_return_type_base;
-}  // namespace internal_early_exit
-
-struct early_exit_constructor_t
-    : unconstructible_except_by<internal_early_exit::promise_return_type_base> {
-};
 
 namespace internal_early_exit {
 
@@ -84,29 +70,49 @@ struct promise_return_type : promise_return_type_base {
 }  // namespace internal_early_exit
 
 template <typename T>
-struct early_exit_promise_type {
-  internal_early_exit::promise_return_type<T> get_return_object() { return *this; }
+struct early_exitable {
+  struct promise_type {
+    internal_early_exit::promise_return_type<T> get_return_object() {
+      return *this;
+    }
 
-  static constexpr std::suspend_never initial_suspend() noexcept { return {}; }
-  static constexpr std::suspend_never final_suspend() noexcept { return {}; }
-  static constexpr void unhandled_exception() noexcept {}
+    static constexpr std::suspend_never initial_suspend() noexcept {
+      return {};
+    }
+    static constexpr std::suspend_never final_suspend() noexcept { return {}; }
+    static constexpr void unhandled_exception() noexcept {}
 
-  template <nth::explicitly_convertible_to<T> U>
-  void return_value(U&& value);
+    template <nth::explicitly_convertible_to<T> U>
+    void return_value(U&& value);
 
-  template <nth::explicitly_convertible_to<T> U>
-  auto await_transform(U && value);
-  template <nth::explicitly_convertible_to<T> U>
-  auto await_transform(U const& value);
+    template <nth::explicitly_convertible_to<T> U>
+    auto await_transform(U&& value);
+    template <nth::explicitly_convertible_to<T> U>
+    auto await_transform(U const& value);
 
- private:
-  friend internal_early_exit::promise_return_type<T>;
-  T* value_;
+   private:
+    friend internal_early_exit::promise_return_type<T>;
+    T* value_;
+  };
+
+  early_exitable() = default;
+  explicit early_exitable(internal_early_exit::early_exit_constructor_t,
+                          T*& v) {
+    v = static_cast<T*>(this);
+  };
+
+  // TODO: If the type has trivial ABI it ends up being destroyed earlier than
+  // desired, and the write in `return_value` will seemingly be undefined
+  // behavior. It's unclear whether we're relying on undefined behavior here, or
+  // the destructor's triviality is insufficient grounds for choosing to pass
+  // the object in registers, making some optimizations unsound (i.e., it's a
+  // miscompile).
+  ~early_exitable() {}
 };
 
 template <typename T>
 template <nth::explicitly_convertible_to<T> U>
-void early_exit_promise_type<T>::return_value(U&& value) {
+void early_exitable<T>::promise_type::return_value(U&& value) {
   if constexpr (requires { *value_ = std::forward<U>(value); }) {
     *value_ = std::forward<U>(value);
   } else {
@@ -116,7 +122,7 @@ void early_exit_promise_type<T>::return_value(U&& value) {
 
 template <typename T>
 template <nth::explicitly_convertible_to<T> U>
-auto early_exit_promise_type<T>::await_transform(U&& value) {
+auto early_exitable<T>::promise_type::await_transform(U&& value) {
   struct awaitable_t {
     bool await_ready() const { return static_cast<bool>(value); }
 
@@ -126,7 +132,7 @@ auto early_exit_promise_type<T>::await_transform(U&& value) {
     }
     void await_resume() const requires(not requires(U u) { *std::move(u); }) {}
 
-    void await_suspend(std::coroutine_handle<early_exit_promise_type> h) {
+    void await_suspend(std::coroutine_handle<promise_type> h) {
       h.promise().return_value(std::move(value));
       h.destroy();
     }
@@ -138,14 +144,14 @@ auto early_exit_promise_type<T>::await_transform(U&& value) {
 
 template <typename T>
 template <nth::explicitly_convertible_to<T> U>
-auto early_exit_promise_type<T>::await_transform(U const& value) {
+auto early_exitable<T>::promise_type::await_transform(U const& value) {
   struct awaitable_t {
     bool await_ready() const { return static_cast<bool>(value); }
     decltype(auto) await_resume() const requires(requires(U const& u) { *u; }) {
       return *value;
     }
     void await_resume() const requires(not requires(U const& u) { *u; }) {}
-    void await_suspend(std::coroutine_handle<early_exit_promise_type> h) {
+    void await_suspend(std::coroutine_handle<promise_type> h) {
       h.promise().return_value(value);
       h.destroy();
     }
@@ -159,7 +165,7 @@ namespace internal_early_exit {
 
 template <typename In,
           early_exit_handler_for<std::remove_reference_t<In>> Handler>
-struct on_exit {
+struct on_exit : early_exitable<on_exit<In, Handler>> {
  private:
   static_assert(std::is_reference_v<In>);
   static_assert(std::is_reference_v<Handler>);
@@ -173,8 +179,6 @@ struct on_exit {
   }();
 
  public:
-  using promise_type = early_exit_promise_type<on_exit>;
-
   on_exit(In input NTH_ATTRIBUTE(lifetimebound),
           Handler handler NTH_ATTRIBUTE(lifetimebound))
       : input_(std::forward<In>(input)),

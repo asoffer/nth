@@ -63,6 +63,14 @@ concept lvalue_proxy = std::is_lvalue_reference_v<T> or requires {
       typename std::decay_t<T>::nth_lvalue_proxy>;
 };
 
+// A concept matching types that are explicitly convertible to `To`.
+template <typename From, typename To>
+concept explicitly_convertible_to = requires(From const& from) {
+  static_cast<To>(from);
+};
+
+
+
 }  // namespace nth
 
 #endif  // NTH_META_CONCEPTS_H

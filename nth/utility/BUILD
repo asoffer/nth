@@ -36,6 +36,7 @@ cc_library(
     deps = [
         ":unconstructible",
         "//nth/base:attributes",
+        "//nth/meta:concepts",
         "//nth/meta:type",
     ],
 )
