@@ -31,6 +31,33 @@ cc_test(
 )
 
 cc_library(
+    name = "early_exit",
+    hdrs = ["early_exit.h"],
+    deps = [],
+)
+
+cc_library(
+    name = "early_exit_test_cases",
+    hdrs = ["early_exit_test_cases.h"],
+    testonly = True,
+    deps = [
+        ":early_exit",
+        "//nth/test",
+    ],
+)
+
+cc_test(
+    name = "early_exit_test",
+    srcs = ["early_exit_test.cc"],
+    deps = [
+        ":early_exit",
+        ":early_exit_test_cases",
+        "//nth/meta:type",
+        "//nth/test:main",
+    ],
+)
+
+cc_library(
     name = "function_ref",
     hdrs = ["function_ref.h"],
     deps = [],

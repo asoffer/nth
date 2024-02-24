@@ -37,7 +37,7 @@ template <typename T>
 struct unconstructible_except_by {
  private:
   friend T;
-  unconstructible_except_by() = default;
+  constexpr unconstructible_except_by() = default;
 };
 
 }  // namespace nth
