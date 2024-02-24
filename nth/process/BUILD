@@ -21,3 +21,13 @@ cc_library(
         "//nth/utility:early_exit",
     ],
 )
+
+cc_test(
+    name = "exit_code_test",
+    srcs = ["exit_code_test.cc"],
+    deps = [
+        ":exit_code",
+        "//nth/utility:early_exit_test_cases",
+        "//nth/test:main",
+    ],
+)
