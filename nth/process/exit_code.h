@@ -4,6 +4,7 @@
 #include <cstdint>
 
 #include "nth/process/signal.h"
+#include "nth/utility/early_exit.h"
 
 namespace nth {
 
@@ -28,6 +29,11 @@ struct exit_code {
 
   friend bool operator==(exit_code, exit_code) = default;
   friend bool operator!=(exit_code, exit_code) = default;
+
+  // Enable early-exit handling
+  using promise_type = early_exit_promise_type<exit_code>;
+  explicit exit_code(early_exit_constructor_t, exit_code*& v) { v = this; }
+  explicit constexpr operator bool() const { return code_ == 0; }
 
  private:
   constexpr exit_code(uint8_t n) : code_(n) {}

@@ -33,7 +33,11 @@ cc_test(
 cc_library(
     name = "early_exit",
     hdrs = ["early_exit.h"],
-    deps = [],
+    deps = [
+        ":unconstructible",
+        "//nth/base:attributes",
+        "//nth/meta:type",
+    ],
 )
 
 cc_library(

@@ -18,5 +18,6 @@ cc_library(
     ],
     deps = [
         ":signal",
+        "//nth/utility:early_exit",
     ],
 )
