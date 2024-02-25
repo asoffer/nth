@@ -284,12 +284,12 @@ NTH_TEST("early_exit/on-exit/return-value/take-void/continue") {
 
   Error v = [&]() -> Error {
     ++count;
-    co_await on_exit(ErrorOr<std::string>("hello"), [&] {
+    std::string s = co_await on_exit(ErrorOr<std::string>("hello"), [&] {
       ++exit_handler_count;
       return Error(-3);
     });
     ++count;
-    co_await on_exit(ErrorOr<std::string>("hello"), [&] {
+    s = co_await on_exit(ErrorOr<std::string>("hello"), [&] {
       ++exit_handler_count;
       return Error(-4);
     });
@@ -308,12 +308,12 @@ NTH_TEST("early_exit/on-exit/return-value/take-void/exit") {
 
   Error v = [&]() -> Error {
     ++count;
-    co_await on_exit(ErrorOr<std::string>("hello"), [&] {
+    std::string s = co_await on_exit(ErrorOr<std::string>("hello"), [&] {
       ++exit_handler_count;
       return Error(-3);
     });
     ++count;
-    co_await on_exit(ErrorOr<std::string>(Error(-3)), [&] {
+    s = co_await on_exit(ErrorOr<std::string>(Error(-3)), [&] {
       ++exit_handler_count;
       return Error(-4);
     });

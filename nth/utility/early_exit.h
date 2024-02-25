@@ -185,6 +185,9 @@ struct on_exit : early_exitable<on_exit<In, Handler>> {
         handler_(std::forward<Handler>(handler)) {}
 
   explicit operator bool() const { return static_cast<bool>(input_); }
+  decltype(auto) operator*() const requires(requires { *std::declval<In>(); }) {
+    return *std::forward<In>(input_);
+  }
 
   explicit constexpr operator nth::type_t<out_type>() const
       requires(out_type != nth::type<void>) {
