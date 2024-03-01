@@ -33,6 +33,7 @@ NTH_TEST("stable_container/basic/insertion-stability") {
   stable_container<int> c;
   c.insert(0);
   auto entry = c.insert(1000);
+  NTH_EXPECT(c.size() == size_t{2});
   for (size_t i = 0; i < 100; ++i) { c.insert(i); }
 
   NTH_EXPECT(not c.empty());
@@ -53,18 +54,6 @@ NTH_TEST("stable_container/basic/move-stability") {
   NTH_EXPECT(*entry == 1000);
 }
 
-NTH_TEST("stable_container/basic/move", auto type) {
-  using T = nth::type_t<type>;
-  stack<T> s1, s2;
-  s1.push({});
-  s1.push({});
-  s2 = std::move(s1);
-  NTH_EXPECT(s2.size() == size_t{2});
-
-  auto s3 = std::move(s2);
-  NTH_EXPECT(s3.size() == size_t{2});
-}
-
 NTH_INVOKE_TEST("stable_container/basic/*") {
   co_yield nth::type<std::string>;
   co_yield nth::type<uint64_t>;
@@ -73,6 +62,13 @@ NTH_INVOKE_TEST("stable_container/basic/*") {
   co_yield nth::type<uint8_t>;
   co_yield nth::type<std::array<char, 3>>;
   co_yield nth::type<std::array<char, 11>>;
+}
+
+NTH_TEST("stable_container/basic/iteration") {
+  stable_container<int> c = {1, 1, 2, 3, 5, 8, 13, 21};
+  NTH_EXPECT(c >>= debug::ElementsAreSequentially(1, 1, 2, 3, 5, 8, 13, 21));
+  for (int& n : c) { ++n; }
+  NTH_EXPECT(c >>= debug::ElementsAreSequentially(2, 2, 3, 4, 6, 9, 14, 22));
 }
 
 }  // namespace
