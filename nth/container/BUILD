@@ -139,6 +139,24 @@ cc_test(
 )
 
 cc_library(
+    name = "stable_container",
+    hdrs = ["stable_container.h"],
+    deps = [
+        ":stack",
+        "//nth/debug",
+    ],
+)
+
+cc_test(
+    name = "stable_container_test",
+    srcs = ["stable_container_test.cc"],
+    deps = [
+        ":stable_container",
+        "//nth/test:main",
+    ],
+)
+
+cc_library(
     name = "stack",
     hdrs = ["stack.h"],
     deps = [
