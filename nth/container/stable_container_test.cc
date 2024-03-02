@@ -29,6 +29,22 @@ NTH_TEST("stable_container/basic/insert", auto type) {
   NTH_EXPECT(c.size() == size_t{2});
 }
 
+NTH_TEST("stable_container/basic/index", auto type) {
+  using T = nth::type_t<type>;
+  stable_container<T> c;
+
+  auto entry = c.insert(T{});
+  NTH_EXPECT(not c.empty());
+  NTH_EXPECT(c.size() == size_t{1});
+  NTH_EXPECT(entry.index() == size_t{0});
+
+  T t{};
+  entry = c.insert(t);
+  NTH_EXPECT(not c.empty());
+  NTH_EXPECT(c.size() == size_t{2});
+  NTH_EXPECT(entry.index() == size_t{1});
+}
+
 NTH_TEST("stable_container/basic/insertion-stability") {
   stable_container<int> c;
   c.insert(0);
@@ -64,11 +80,30 @@ NTH_INVOKE_TEST("stable_container/basic/*") {
   co_yield nth::type<std::array<char, 11>>;
 }
 
+NTH_TEST("stable_container/basic/iteration/empty") {
+  stable_container<int> c;
+  NTH_EXPECT(c >>= debug::ElementsAreSequentially());
+}
+
 NTH_TEST("stable_container/basic/iteration") {
   stable_container<int> c = {1, 1, 2, 3, 5, 8, 13, 21};
   NTH_EXPECT(c >>= debug::ElementsAreSequentially(1, 1, 2, 3, 5, 8, 13, 21));
   for (int& n : c) { ++n; }
   NTH_EXPECT(c >>= debug::ElementsAreSequentially(2, 2, 3, 4, 6, 9, 14, 22));
+  auto const& cc = c;
+  NTH_EXPECT(cc >>= debug::ElementsAreSequentially(2, 2, 3, 4, 6, 9, 14, 22));
+}
+
+NTH_TEST("stable_container/basic/entry") {
+  stable_container<int> c;
+  for (int i = 0; i < 50; ++i) { c.insert(i); }
+
+  for (int i = 0; i < 50; ++i) {
+    auto entry = c.entry(i);
+    NTH_EXPECT(entry.index() == static_cast<size_t>(i));
+    NTH_EXPECT(*c.entry(entry.index()) == i);
+    NTH_EXPECT(*c.centry(entry.index()) == i);
+  }
 }
 
 }  // namespace
