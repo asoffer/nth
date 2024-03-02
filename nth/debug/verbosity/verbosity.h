@@ -1,11 +1,11 @@
-#ifndef NTH_DEBUG_VERBOSITY_H
-#define NTH_DEBUG_VERBOSITY_H
+#ifndef NTH_DEBUG_VERBOSITY_VERBOSITY_H
+#define NTH_DEBUG_VERBOSITY_VERBOSITY_H
 
 #include "nth/base/attributes.h"
 #include "nth/base/configuration.h"
 #include "nth/debug/source_location.h"
 
-namespace nth {
+namespace nth::debug {
 
 // Verbosity requirements are a configuration knob for debug logging. Log
 // messages and expectations may specify a verbosity requirement as an optional
@@ -32,7 +32,7 @@ namespace nth {
 // verbosity requirements must be properly namespaced.
 //
 // A verbosity requirement can be specified as a type publicly inherits from
-// `nth::VerbosityRequirement`, is invocable with a `nth::source_location`, and
+// `nth::debug::verbosity`, is invocable with a `nth::source_location`, and
 // whose invocation returns something contextually convertible to `bool`. To use
 // a verbosity requirement, one must pass an instance of that type. It is common
 // to provide global constants for these instances.
@@ -49,21 +49,21 @@ namespace nth {
 //     assertions without a specified verbosity requirement will be be enacted
 //     as if `v.harden` was specified.
 
-struct VerbosityRequirement {};
+struct verbosity {};
 
 namespace internal_verbosity {
 
-struct Always : VerbosityRequirement {
+struct Always : verbosity {
   constexpr bool operator()(source_location) const { return true; }
 };
 
-struct Debug : VerbosityRequirement {
+struct Debug : verbosity {
   constexpr bool operator()(source_location) const {
     return nth::build_mode == nth::build::debug;
   }
 };
 
-struct Hardened : VerbosityRequirement {
+struct Hardened : verbosity {
   constexpr bool operator()(source_location) const {
     return nth::build_mode == nth::build::harden or
            nth::build_mode == nth::build::debug;
@@ -79,14 +79,14 @@ struct WhenImpl {
   bool value_;
 };
 
-struct When : VerbosityRequirement {
+struct When : verbosity {
   constexpr WhenImpl const& operator()(bool value) const { return impl_[value]; }
 
  private:
   static constexpr WhenImpl impl_[2] = {WhenImpl(false), WhenImpl(true)};
 };
 
-struct Never : VerbosityRequirement {
+struct Never : verbosity {
   constexpr bool operator()(source_location) const { return false; }
 };
 
@@ -99,9 +99,6 @@ struct V {
 };
 
 }  // namespace internal_verbosity
+}  // namespace nth::debug
 
-inline constexpr internal_verbosity::V debug_verbosity;
-
-}  // namespace nth
-
-#endif  // NTH_DEBUG_VERBOSITY_H
+#endif  // NTH_DEBUG_VERBOSITY_VERBOSITY_H

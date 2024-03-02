@@ -43,7 +43,7 @@ cc_library(
         ":sink",
         "//nth/base:macros",
         "//nth/debug/log/internal:log",
-        "//nth/debug/internal:verbosity",
+        "//nth/debug/verbosity",
     ],
 )
 

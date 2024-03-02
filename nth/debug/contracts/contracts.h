@@ -36,7 +36,8 @@
 //
 // ```
 // std::vector<int> my_vector = {10, -2};
-// NTH_REQUIRE(my_vector >>= ElementsAreInOrder(GreaterThan(5), LessThan(3)));
+// NTH_REQUIRE(my_vector >>= ElementsAreSequentially(GreaterThan(5),
+//                                                   LessThan(3)));
 // ```
 //
 // Debug assertions are not free, and in many build environments prohibitively

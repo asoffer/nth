@@ -1,9 +1,6 @@
 #ifndef NTH_DEBUG_CONTRACTS_INTERNAL_ON_EXIT_H
 #define NTH_DEBUG_CONTRACTS_INTERNAL_ON_EXIT_H
 
-#include <concepts>
-#include <utility>
-
 #include "nth/debug/log/log.h"
 #include "nth/debug/source_location.h"
 #include "nth/strings/interpolate.h"
@@ -21,21 +18,25 @@ struct Logger {
   }
 
  private:
-  template <std::invocable<source_location> Fn>
+  template <typename Fn>
   friend struct OnExit;
 
   source_location loc_;
 };
 
-template <std::invocable<source_location> Fn>
+template <typename Fn>
+// Requires `Fn&&` is invocable with `source_location`. This requirement is not
+// specified as a concept because all instantiations of this type are created
+// internal to this library, meaning that we can avoid unnecessary `#include`s
+// with no loss of user-visible safety.
 struct OnExit {
-  explicit constexpr OnExit(Fn &&f, source_location location)
-      : f_(std::forward<Fn>(f)), logger_(location) {}
+  explicit constexpr OnExit(Fn f, source_location location)
+      : f_(static_cast<Fn &&>(f)), logger_(location) {}
   OnExit(OnExit const &)            = delete;
   OnExit(OnExit &&)                 = delete;
   OnExit &operator=(OnExit const &) = delete;
   OnExit &operator=(OnExit &&)      = delete;
-  ~OnExit() { std::move(f_)(logger_.loc_); }
+  ~OnExit() { static_cast<Fn &&>(f_)(logger_.loc_); }
 
  private:
   Fn f_;

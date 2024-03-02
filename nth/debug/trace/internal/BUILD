@@ -27,6 +27,7 @@ cc_library(
     deps = [
         ":actions",
         ":implementation",
+        "//nth/meta/concepts:c_array",
     ],
 )
 

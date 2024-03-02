@@ -67,5 +67,6 @@
 // NTH_LOG((v.always), "Log this line no matter what!");
 // NTH_LOG((v.debug), "Only log me in debug builds.");
 // ```
+#include "nth/debug/verbosity/verbosity.h"
 
 #endif  // NTH_DEBUG_DEBUG_H

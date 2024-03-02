@@ -6,6 +6,7 @@
 #include "nth/base/macros.h"
 #include "nth/base/platform.h"
 #include "nth/debug/log/internal/log.h"
+#include "nth/debug/verbosity/verbosity.h"
 
 namespace nth::debug::internal_unreachable {
 
@@ -50,7 +51,7 @@ namespace nth::debug::internal_unreachable {
 
 #define NTH_DEBUG_INTERNAL_UNREACHABLE_IMPL(interpolation_string)              \
   NTH_DEBUG_INTERNAL_UNREACHABLE_WITH_VERBOSITY(                               \
-      (::nth::debug_verbosity.always), interpolation_string)
+      (::nth::debug::internal_verbosity::V::always), interpolation_string)
 
 #define NTH_DEBUG_INTERNAL_UNREACHABLE_WITH_VERBOSITY(verbosity,               \
                                                       interpolation_string)    \

@@ -8,17 +8,17 @@
 
 #include "nth/base/macros.h"
 #include "nth/configuration/verbosity.h"
-#include "nth/debug/internal/verbosity.h"
 #include "nth/debug/log/entry.h"
 #include "nth/debug/log/internal/interpolation_arguments.h"
 #include "nth/debug/log/internal/voidifier.h"
 #include "nth/debug/log/line.h"
 #include "nth/debug/source_location.h"
+#include "nth/debug/verbosity/verbosity.h"
 #include "nth/strings/interpolate.h"
 
 #define NTH_DEBUG_INTERNAL_VERBOSITY_DISABLED(verbosity)                       \
   ([&] {                                                                       \
-    [[maybe_unused]] constexpr auto& v = ::nth::debug_verbosity;               \
+    [[maybe_unused]] constexpr ::nth::debug::internal_verbosity::V v;          \
     return not(verbosity)(::nth::source_location::current());                  \
   }())
 
