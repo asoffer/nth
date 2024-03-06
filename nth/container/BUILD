@@ -37,18 +37,18 @@ cc_test(
 )
 
 cc_library(
-    name = "flat_tree",
-    hdrs = ["flat_tree.h"],
+    name = "flat_forest",
+    hdrs = ["flat_forest.h"],
     deps = [
-        "//nth/container/internal:flat_tree",
+        "//nth/utility:iterator_range",
     ],
 )
 
 cc_test(
-    name = "flat_tree_test",
-    srcs = ["flat_tree_test.cc"],
+    name = "flat_forest_test",
+    srcs = ["flat_forest_test.cc"],
     deps = [
-        ":flat_tree",
+        ":flat_forest",
         "//nth/test:main",
     ],
 )

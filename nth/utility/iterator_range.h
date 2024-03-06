@@ -34,6 +34,9 @@ struct iterator_range : private internal_iterator_range::Base<B, 0>,
       : internal_iterator_range::Base<B, 0>(std::move(b)),
         internal_iterator_range::Base<E, 1>(std::move(e)) {}
 
+  auto size() const requires requires(B b, E e) { e - b; }
+  { return end() - begin(); }
+
   auto begin() const {
     return static_cast<internal_iterator_range::Base<B, 0> const&>(*this)
         .iterator();

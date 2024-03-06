@@ -5,10 +5,15 @@
 #include <type_traits>
 #include <utility>
 
+#include "nth/base/attributes.h"
+
 namespace nth {
 
+struct from_offset_t {};
+inline constexpr from_offset_t from_offset;
+
 template <typename T>
-struct offset_ptr {
+struct NTH_ATTRIBUTE(trivial_abi) offset_ptr {
   using element_type = T;
   using pointer      = T *;
 
@@ -16,6 +21,8 @@ struct offset_ptr {
   offset_ptr(decltype(nullptr)) : offset_ptr() {}
   explicit offset_ptr(pointer ptr) : offset_(to_int(this) - to_int(ptr)) {}
   offset_ptr(offset_ptr const &ptr) : offset_ptr(ptr.get()) {}
+  offset_ptr(from_offset_t, uintptr_t offset) : offset_(offset) {}
+  offset_ptr(from_offset_t, offset_ptr o) : offset_(o.offset_) {}
 
   offset_ptr &operator=(decltype(nullptr)) {
     offset_ = to_int(this);
