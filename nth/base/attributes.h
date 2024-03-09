@@ -86,4 +86,18 @@
   static_assert(false, "The compiler does not support force-inlining");
 #endif
 
+// NTH_ATTRIBUTE(trivial_abi)
+// Defines an attribute indicating that the annotated struct is trivial for the
+// purposes of calls, indicating that it can be passed in registers.
+#if defined(__clang__)
+#define NTH_BASE_ATTRIBUTES_INTERNAL_SUPPORTS_trivial_abi true
+#define NTH_BASE_ATTRIBUTES_INTERNAL_trivial_abi [[clang::trivial_abi]]
+#else
+#define NTH_BASE_ATTRIBUTES_INTERNAL_SUPPORTS_trivial_abi false
+#define NTH_BASE_ATTRIBUTES_INTERNAL_trivial_abi                               \
+  static_assert(false,                                                         \
+                "The compiler does not support annotating types as having "    \
+                "trivial ABI.");
+#endif
+
 #endif  // NTH_BASE_ATTRIBUTES_H

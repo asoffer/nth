@@ -37,6 +37,23 @@ cc_test(
 )
 
 cc_library(
+    name = "flat_forest",
+    hdrs = ["flat_forest.h"],
+    deps = [
+        "//nth/utility:iterator_range",
+    ],
+)
+
+cc_test(
+    name = "flat_forest_test",
+    srcs = ["flat_forest_test.cc"],
+    deps = [
+        ":flat_forest",
+        "//nth/test:main",
+    ],
+)
+
+cc_library(
     name = "flyweight_map",
     hdrs = ["flyweight_map.h"],
     deps = [
