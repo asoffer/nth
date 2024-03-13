@@ -103,6 +103,20 @@ cc_test(
 )
 
 cc_library(
+    name = "move",
+    hdrs = ["move.h"],
+    deps = [],
+)
+
+cc_test(
+    name = "move_test",
+    srcs = ["move_test.cc"],
+    deps = [
+        ":move",
+    ],
+)
+
+cc_library(
     name = "no_destructor",
     hdrs = ["no_destructor.h"],
     deps = [
