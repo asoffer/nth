@@ -21,6 +21,7 @@ struct c_array<T[N]> {
 
 }  // namespace internal_concepts
 
+// Matches a c-style array type.
 template <typename T>
 concept c_array = internal_concepts::c_array<T>::value;
 
