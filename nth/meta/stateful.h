@@ -1,9 +1,6 @@
 #ifndef NTH_META_STATEFUL_H
 #define NTH_META_STATEFUL_H
 
-#include <concepts>
-#include <type_traits>
-
 #include "nth/base/macros.h"
 #include "nth/meta/constant.h"
 #include "nth/meta/sequence.h"
@@ -18,12 +15,12 @@ struct state {
   static constexpr auto list = List;
 };
 
-template <int N, std::derived_from<MutableSequenceBase> Tag>
+template <int N, typename Tag>
 struct reader {
   friend auto constexpr state_func(reader<N, Tag>);
 };
 
-template <int N, auto List, std::derived_from<MutableSequenceBase> Tag>
+template <int N, auto List, typename Tag>
 struct setter {
   friend auto constexpr state_func(reader<N, Tag>) { return List; }
 
