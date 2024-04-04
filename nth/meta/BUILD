@@ -3,7 +3,9 @@ package(default_visibility = ["//visibility:public"])
 cc_library(
     name = "compile_time_string",
     hdrs = ["compile_time_string.h"],
-    deps = [],
+    deps = [
+        "//nth/meta/concepts:constructible",
+    ],
 )
 
 cc_test(

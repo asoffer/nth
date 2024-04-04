@@ -103,7 +103,7 @@ struct Type {
 
   static consteval auto name() {
     constexpr std::string_view indicator = "[T = ";
-    constexpr CompileTimeString str(__PRETTY_FUNCTION__);
+    constexpr compile_time_string str(__PRETTY_FUNCTION__);
     constexpr size_t index =
         std::string_view(str).find(indicator) + indicator.size();
     return str.template substr<index, str.size() - (index + 1)>();

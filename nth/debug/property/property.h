@@ -16,7 +16,7 @@ namespace nth::debug {
 // A `Property` represents a description of a property of a value to be
 // tested/verified. As a concrete example, an `Property` might represent the
 // property "the number is less than 5", or "the sequence is sorted."
-template <CompileTimeString Name, typename F, typename... Ts>
+template <compile_time_string Name, typename F, typename... Ts>
 struct Property
     : private debug::internal_property::ParameterizedProperty<Name, F> {
   using NthInternalIsDebugProperty = void;
@@ -63,7 +63,7 @@ struct Property
 //
 // To test that `my_vector` contains exactly two elements, the first of which is
 // greater than 5 and the second of which is less than three.
-template <CompileTimeString Name, typename F, typename... Ts>
+template <compile_time_string Name, typename F, typename... Ts>
 auto operator>>=(auto const& value, Property<Name, F, Ts...> const& property) {
   return ::nth::debug::internal_property::PropertyWrap<
       Property<Name, F, Ts...> const&, decltype(value)>{property, value};
@@ -71,7 +71,7 @@ auto operator>>=(auto const& value, Property<Name, F, Ts...> const& property) {
 
 // Evaluates the `property` on the `value`, returning true if the property holds
 // for the value and false otherwise.
-template <CompileTimeString Name, typename F, typename... Ts>
+template <compile_time_string Name, typename F, typename... Ts>
 bool Matches(Property<Name, F, Ts...> const& property, auto const& value) {
   return property(value);
 }
@@ -81,7 +81,7 @@ bool Matches(auto const& match_value, auto const& value) {
 }
 
 // Constructs a `Property` from the given invocable `f`.
-template <CompileTimeString Name, int&..., typename F>
+template <compile_time_string Name, int&..., typename F>
 consteval auto MakeProperty(F&& f) {
   return internal_property::ParameterizedProperty<Name, std::remove_cvref_t<F>>(
       std::forward<F>(f));

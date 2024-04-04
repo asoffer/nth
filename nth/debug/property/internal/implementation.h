@@ -11,12 +11,12 @@
 
 namespace nth::debug {
 
-template <CompileTimeString Name, typename F, typename... Ts>
+template <compile_time_string Name, typename F, typename... Ts>
 struct Property;
 
 namespace internal_property {
 
-template <CompileTimeString Name, typename F>
+template <compile_time_string Name, typename F>
 struct ParameterizedProperty {
   explicit consteval ParameterizedProperty(F f) : f_(std::move(f)) {}
 

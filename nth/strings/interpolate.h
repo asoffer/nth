@@ -44,7 +44,7 @@ struct InterpolationString {
     return i;
   }
 
-  CompileTimeString<Length> NthInternalInterpolationStringDataMember;
+  compile_time_string<Length> NthInternalInterpolationStringDataMember;
 };
 
 template <size_t N>

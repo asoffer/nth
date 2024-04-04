@@ -56,7 +56,7 @@ struct TimeBlockStateBase {
   bool ready_ = false;
 };
 
-template <CompileTimeString Name>
+template <compile_time_string Name>
 struct TimeBlockState : TimeBlockStateBase {
   explicit TimeBlockState(Sampler<MeasurementStrategy>& s)
       : TimeBlockStateBase(s) {

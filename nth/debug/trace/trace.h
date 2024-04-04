@@ -69,7 +69,7 @@ namespace nth::debug {
 // Returns an object representing the tracing of the evaluated
 // expression passed-in as `value`. The expression `value` must outlive the
 // return value.
-template <CompileTimeString S, int &..., typename T>
+template <compile_time_string S, int &..., typename T>
 constexpr auto Trace(NTH_ATTRIBUTE(lifetimebound) T const &value) {
   return internal_trace::TracedExpr<internal_trace::IdentityAction<S>,
                                     T const &>(value);

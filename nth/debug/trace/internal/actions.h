@@ -8,7 +8,7 @@
 
 namespace nth::debug::internal_trace {
 
-template <nth::CompileTimeString S>
+template <compile_time_string S>
 struct IdentityAction {
   using NthInternalDebugIdentityAction = void;
 
