@@ -76,6 +76,23 @@ cc_test(
 )
 
 cc_library(
+    name = "null_terminated_string_view",
+    hdrs = ["null_terminated_string_view.h"],
+    deps = [
+        "//nth/debug",
+    ],
+)
+
+cc_test(
+    name = "null_terminated_string_view_test",
+    srcs = ["null_terminated_string_view_test.cc"],
+    deps = [
+        ":null_terminated_string_view",
+        "//nth/test:main",
+    ],
+)
+
+cc_library(
     name = "text",
     hdrs = ["text.h"],
     srcs = ["text.cc"],
