@@ -5,7 +5,7 @@ cc_library(
     hdrs = ["environment_variable.h"],
     srcs = ["environment_variable.cc"],
     deps = [
-        "//nth/strings:null_termination",
+        "//nth/strings:null_terminated_string_view",
     ],
 )
 

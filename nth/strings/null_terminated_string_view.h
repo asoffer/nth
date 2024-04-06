@@ -4,9 +4,9 @@
 #include <cstddef>
 #include <cstring>
 #include <string>
+#include <string_view>
 
 #include "nth/base/attributes.h"
-#include "nth/debug/debug.h"
 
 namespace nth {
 
@@ -78,15 +78,19 @@ struct null_terminated_string_view {
            std::memcmp(lhs.data(), rhs.data(), lhs.size()) == 0;
   }
 
+  constexpr operator std::string_view () const {
+    return std::string_view(data_, size_);
+  }
+
 
   void remove_prefix(size_t length) {
-    NTH_REQUIRE((v.harden), length <= size_);
+    // NTH_REQUIRE((v.harden), length <= size_);
     data_ += length;
     size_ -= length;
   }
 
   [[nodiscard]] char operator[](size_t n) const {
-    NTH_REQUIRE((v.harden), n <= size_);
+    // NTH_REQUIRE((v.harden), n <= size_);
     return data_[n];
   }
 
@@ -99,7 +103,7 @@ template <size_t N>
 constexpr null_terminated_string_view::null_terminated_string_view(
     from_array_tag, char const (&data)[N])
     : data_(data), size_(N - 1) {
-  NTH_REQUIRE((v.harden), data[N - 1] == 0);
+  // NTH_REQUIRE((v.harden), data[N - 1] == 0);
 }
 
 }  // namespace nth

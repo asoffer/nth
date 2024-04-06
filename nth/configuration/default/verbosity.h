@@ -13,7 +13,10 @@ inline decltype(auto) HardenedOrTest() {
     return debug::internal_verbosity::V::always;
   } else {
     static auto const& v = debug::internal_verbosity::V::when(
-        nth::LoadEnvironmentVariable("TEST_BINARY").has_value());
+        nth::environment::load(
+            null_terminated_string_view(null_terminated_string_view::from_array,
+                                        "TEST_BINARY"))
+            .has_value());
     return v;
   }
 }

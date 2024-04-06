@@ -6,16 +6,9 @@
 #include <optional>
 #include <string>
 
-#include "nth/strings/null_termination.h"
+#include "nth/strings/null_terminated_string_view.h"
 
-namespace nth {
-namespace internal_environment_variable {
-
-std::optional<std::string> Get(char const *name);
-void Unset(char const *name);
-void Set(char const *name, char const *value);
-
-}  // namespace internal_environment_variable
+namespace nth::environment {
 
 // These functions are used for interacting with environment variables. While
 // the C++ standard provides `std::getenv`, it does not provide any mechanism
@@ -40,31 +33,18 @@ void Set(char const *name, char const *value);
 // Returns the string stored in the environment variable named `name` when
 // invoked, if the environment variable is set. Otherwise, returns
 // `std::nullopt`.
-template <StringLike S>
-std::optional<std::string> LoadEnvironmentVariable(S const &name) {
-  return nth::InvokeOnNullTerminated(internal_environment_variable::Get, name);
-}
+std::optional<std::string> load(null_terminated_string_view name);
 
 // Sets the environment variable named `name` to the value `value`. If the
 // overload accepting an optional is provided an unengaged optional, or for the
 // overload taking `std::nullopt_t`, the environment variable is unset.
-template <StringLike Name, StringLike Value>
-void StoreEnvironmentVariable(Name const &name, Value const &value) {
-  nth::InvokeOnNullTerminated(internal_environment_variable::Set, name, value);
-}
+void store(null_terminated_string_view name, null_terminated_string_view value);
 
-template <StringLike Name>
-void StoreEnvironmentVariable(Name const &name, std::nullopt_t) {
-  nth::InvokeOnNullTerminated(internal_environment_variable::Unset, name);
-}
+void store(null_terminated_string_view name, std::nullopt_t);
 
-template <StringLike Name, StringLike Value>
-void StoreEnvironmentVariable(Name const &name,
-                              std::optional<Value> const &value) {
-  value ? nth::StoreEnvironmentVariable(name, *value)
-        : nth::StoreEnvironmentVariable(name, std::nullopt);
-}
+void store(null_terminated_string_view name,
+           std::optional<null_terminated_string_view> value);
 
-}  // namespace nth
+}  // namespace nth::environment
 
 #endif  // NTH_IO_ENVIRONMENT_VARIABLE_H

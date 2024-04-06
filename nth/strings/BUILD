@@ -54,32 +54,10 @@ cc_test(
 )
 
 cc_library(
-    name = "null_termination",
-    hdrs = ["null_termination.h"],
-    srcs = [
-        "internal/null_termination.h",
-        "internal/null_termination.cc"
-    ],
-    deps = [
-        "//nth/base:attributes",
-        "//nth/meta:type",
-    ],
-)
-
-cc_test(
-    name = "null_termination_test",
-    srcs = ["null_termination_test.cc"],
-    deps = [
-        ":null_termination",
-        "//nth/test:main",
-    ],
-)
-
-cc_library(
     name = "null_terminated_string_view",
     hdrs = ["null_terminated_string_view.h"],
     deps = [
-        "//nth/debug",
+        "//nth/base:attributes",
     ],
 )
 

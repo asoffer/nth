@@ -2,28 +2,32 @@
 
 #include <mutex>
 
-namespace nth {
-namespace internal_environment_variable {
+namespace nth::environment {
 
 static constinit std::mutex set_env_mutex;
 
-std::optional<std::string> Get(char const *name) {
-  std::unique_lock lock(internal_environment_variable::set_env_mutex);
-  char const *s = std::getenv(name);
+std::optional<std::string> load(null_terminated_string_view name) {
+  std::unique_lock lock(set_env_mutex);
+  char const *s = std::getenv(name.data());
   if (s) { return s; }
   return std::nullopt;
 }
 
-void Unset(char const *name) {
-  std::unique_lock lock(internal_environment_variable::set_env_mutex);
-  ::unsetenv(name);
+void store(null_terminated_string_view name,
+           null_terminated_string_view value) {
+  std::unique_lock lock(set_env_mutex);
+  ::setenv(name.data(), value.data(), 1);
 }
 
-void Set(char const *name, char const *value) {
-  std::unique_lock lock(internal_environment_variable::set_env_mutex);
-  ::setenv(name, value, 1);
+void store(null_terminated_string_view name, std::nullopt_t) {
+  std::unique_lock lock(set_env_mutex);
+  ::unsetenv(name.data());
 }
 
-}  // namespace internal_environment_variable
+void store(null_terminated_string_view name,
+           std::optional<null_terminated_string_view> value) {
+  value ? nth::environment::store(name, *value)
+        : nth::environment::store(name, std::nullopt);
+}
 
-}  // namespace nth
+}  // namespace nth::environment
