@@ -2,13 +2,15 @@
 #define NTH_UTILITY_FUNCTION_REF_H
 
 #include <memory>
-#include <type_traits>
+
+#include "nth/meta/concepts/core.h"
+#include "nth/meta/concepts/invocable.h"
 
 namespace nth {
 namespace internal_function_ref {
 template <typename F, typename... Args>
-std::invoke_result_t<F, Args...> Invoker(void *obj, Args... args) {
-  return (*reinterpret_cast<std::decay_t<F> *>(obj))(args...);
+nth::return_type<F, Args...> Invoker(void *obj, Args... args) {
+  return (*reinterpret_cast<nth::decayed<F> *>(obj))(args...);
 };
 
 }  // namespace internal_function_ref
@@ -26,7 +28,8 @@ struct function_ref<Ret(Args...)> {
 
   template <typename F>
   function_ref(F &&f NTH_ATTRIBUTE(lifetimebound)) requires(
-      std::is_invocable_r_v<Ret, F, Args...>)
+      nth::invocable<F, Args...>
+          and nth::precisely<nth::return_type<F, Args...>, Ret>)
       : data_(std::addressof(f)), invoker_(internal_function_ref::Invoker<F>) {}
 
   explicit operator bool() const { return invoker_ != nullptr; }

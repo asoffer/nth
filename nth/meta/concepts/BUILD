@@ -25,6 +25,18 @@ cc_test(
 )
 
 cc_library(
+    name = "convertible",
+    hdrs = ["convertible.h"],
+    deps = [],
+)
+
+cc_test(
+    name = "convertible_test",
+    srcs = ["convertible_test.cc"],
+    deps = [":convertible"],
+)
+
+cc_library(
     name = "constructible",
     hdrs = ["constructible.h"],
     deps = [],
@@ -46,4 +58,31 @@ cc_test(
     name = "core_test",
     srcs = ["core_test.cc"],
     deps = [":core"],
+)
+
+cc_library(
+    name = "hash",
+    hdrs = ["hash.h"],
+    deps = [
+        ":convertible",
+        ":invocable",
+    ],
+)
+
+cc_test(
+    name = "hash_test",
+    srcs = ["hash_test.cc"],
+    deps = [":hash"],
+)
+
+cc_library(
+    name = "invocable",
+    hdrs = ["invocable.h"],
+    deps = [":core"],
+)
+
+cc_test(
+    name = "invocable_test",
+    srcs = ["invocable_test.cc"],
+    deps = [":invocable"],
 )

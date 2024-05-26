@@ -7,6 +7,8 @@
 #include <type_traits>
 #include <utility>
 
+#include "nth/meta/concepts/invocable.h"
+
 namespace nth {
 namespace internal_meta {
 
@@ -69,7 +71,7 @@ struct Sequence {
     return {};
   }
 
-  static constexpr auto reduce(std::invocable<decltype(Vs)...> auto F) {
+  static constexpr auto reduce(nth::invocable<decltype(Vs)...> auto F) {
     return F(Vs...);
   }
 

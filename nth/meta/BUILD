@@ -17,7 +17,10 @@ cc_test(
 cc_library(
     name = "concepts",
     hdrs = ["concepts.h"],
-    deps = [],
+    deps = [
+        "//nth/meta/concepts:convertible",
+        "//nth/meta/concepts:core",
+    ],
 )
 
 cc_test(
@@ -63,6 +66,9 @@ cc_test(
 cc_library(
     name = "sequence",
     hdrs = ["sequence.h"],
+    deps = [
+        "//nth/meta/concepts:invocable",
+    ],
 )
 
 cc_test(

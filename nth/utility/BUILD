@@ -3,7 +3,10 @@ package(default_visibility = ["//visibility:public"])
 cc_library(
     name = "any_invocable",
     hdrs = ["any_invocable.h"],
-    deps = [],
+    deps = [
+        "//nth/meta/concepts:core",
+        "//nth/meta/concepts:invocable",
+    ],
 )
 
 cc_library(
@@ -36,7 +39,9 @@ cc_library(
     deps = [
         ":unconstructible",
         "//nth/base:attributes",
-        "//nth/meta:concepts",
+        "//nth/meta/concepts:convertible",
+        "//nth/meta/concepts:core",
+        "//nth/meta/concepts:invocable",
         "//nth/meta:type",
     ],
 )
@@ -65,7 +70,10 @@ cc_test(
 cc_library(
     name = "function_ref",
     hdrs = ["function_ref.h"],
-    deps = [],
+    deps = [
+        "//nth/meta/concepts:core",
+        "//nth/meta/concepts:invocable",
+    ],
 )
 
 cc_library(
@@ -90,7 +98,9 @@ cc_test(
 cc_library(
     name = "lazy",
     hdrs = ["lazy.h"],
-    deps = [],
+    deps = [
+        "//nth/meta/concepts:invocable",
+    ],
 )
 
 cc_test(
@@ -169,7 +179,7 @@ cc_library(
     name = "ptr_union",
     hdrs = ["ptr_union.h"],
     deps = [
-        "//nth/meta:concepts",
+        "//nth/meta/concepts:core",
         "//nth/meta:type",
     ],
 )

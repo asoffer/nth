@@ -7,8 +7,10 @@
 #include <utility>
 
 #include "nth/base/attributes.h"
+#include "nth/meta/concepts/convertible.h"
+#include "nth/meta/concepts/core.h"
+#include "nth/meta/concepts/invocable.h"
 #include "nth/meta/type.h"
-#include "nth/meta/concepts.h"
 #include "nth/utility/unconstructible.h"
 
 namespace nth {
@@ -39,7 +41,7 @@ concept supports_early_exit = std::derived_from<T, early_exitable<T>> and
 // arguments.
 template <typename Handler, typename T>
 concept early_exit_handler_for =
-    std::is_invocable_v<Handler, T> or std::is_invocable_v<Handler>;
+    nth::invocable<Handler, T> or nth::invocable<Handler>;
 
 namespace internal_early_exit {
 
@@ -171,10 +173,10 @@ struct on_exit : early_exitable<on_exit<In, Handler>> {
   static_assert(std::is_reference_v<Handler>);
 
   static constexpr auto out_type = [] {
-    if constexpr (std::is_invocable_v<Handler, In const&>) {
-      return nth::type<std::invoke_result_t<Handler, In const&>>;
+    if constexpr (nth::invocable<Handler, In const&>) {
+      return nth::type<nth::return_type<Handler, In const&>>;
     } else {
-      return nth::type<std::invoke_result_t<Handler>>;
+      return nth::type<nth::return_type<Handler>>;
     }
   }();
 
@@ -206,7 +208,7 @@ struct on_exit : early_exitable<on_exit<In, Handler>> {
 
  private:
   constexpr decltype(auto) invoke() const {
-    if constexpr (std::is_invocable_v<Handler, In const&>) {
+    if constexpr (nth::invocable<Handler, In const&>) {
       return std::forward<Handler>(handler_)(input_);
     } else {
       return std::forward<Handler>(handler_)();

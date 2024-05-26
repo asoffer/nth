@@ -9,7 +9,7 @@
 #include "absl/container/flat_hash_set.h"
 #include "nth/container/internal/index.h"
 #include "nth/debug/debug.h"
-#include "nth/meta/concepts.h"
+#include "nth/meta/concepts/hash.h"
 
 namespace nth {
 

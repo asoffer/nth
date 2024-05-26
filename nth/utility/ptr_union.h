@@ -6,7 +6,7 @@
 #include <type_traits>
 #include <utility>
 
-#include "nth/meta/concepts.h"
+#include "nth/meta/concepts/core.h"
 #include "nth/meta/type.h"
 
 namespace nth {

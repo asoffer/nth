@@ -59,7 +59,7 @@ cc_library(
     deps = [
         "//nth/container/internal:index",
         "//nth/debug",
-        "//nth/meta:concepts",
+        "//nth/meta/concepts:hash",
         "@com_google_absl//absl/container:flat_hash_set"
     ],
 )
@@ -79,7 +79,7 @@ cc_library(
     deps = [
         "//nth/container/internal:index",
         "//nth/debug",
-        "//nth/meta:concepts",
+        "//nth/meta/concepts:hash",
         "@com_google_absl//absl/container:flat_hash_set"
     ],
 )

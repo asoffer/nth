@@ -7,6 +7,7 @@ cc_library(
         "//nth/debug/property/internal:concepts",
         "//nth/debug/property/internal:implementation",
         "//nth/debug/contracts",
+        "//nth/meta/concepts:invocable",
     ],
 )
 

@@ -11,7 +11,7 @@
 #include "nth/debug/debug.h"
 #include "nth/io/reader/reader.h"
 #include "nth/io/writer/writer.h"
-#include "nth/meta/concepts.h"
+#include "nth/meta/concepts/core.h"
 
 namespace nth {
 

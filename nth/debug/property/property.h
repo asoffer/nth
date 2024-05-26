@@ -9,6 +9,7 @@
 #include "nth/debug/property/internal/concepts.h"
 #include "nth/debug/property/internal/implementation.h"
 #include "nth/debug/trace/trace.h"
+#include "nth/meta/concepts/invocable.h"
 
 namespace nth::debug {
 
@@ -39,7 +40,7 @@ struct Property
 
   template <typename Fn>
   constexpr auto on_each_argument_reversed(Fn&& f) const
-      requires((std::invocable<Fn, Ts> and ...)) {
+      requires((nth::invocable<Fn, Ts> and ...)) {
     std::apply(
         [&](auto const&... args) {
           [[maybe_unused]] int dummy;
