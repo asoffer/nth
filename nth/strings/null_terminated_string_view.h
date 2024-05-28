@@ -41,7 +41,7 @@ struct null_terminated_string_view {
   // array. The length of the array is determined as if by `std::strlen`.
   explicit constexpr null_terminated_string_view(from_pointer_tag,
                                                  char const *data)
-      : data_(data), size_([&] -> size_t {
+      : data_(data), size_([&]() -> size_t {
           // clang-format off
           if consteval {
               auto *p = data;

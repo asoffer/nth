@@ -69,7 +69,9 @@ cc_test(
 cc_library(
     name = "printer",
     hdrs = ["printer.h"],
-    deps = [],
+    deps = [
+        "//nth/meta/concepts:core",
+    ],
 )
 
 cc_test(

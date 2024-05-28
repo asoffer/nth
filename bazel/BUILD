@@ -34,6 +34,7 @@ cc_toolchain_config(
         "-Wextra",
         "-Wpedantic",
         "-Wuninitialized",
+        "-Wno-c++2b-extensions",
         "-Wno-gcc-compat",
     ]
 )
@@ -61,6 +62,7 @@ cc_toolchain_config(
         "-Wextra",
         "-Wpedantic",
         "-Wuninitialized",
+        "-Wno-c++2b-extensions",
         "-Wno-gcc-compat",
     ]
 )
