@@ -35,6 +35,6 @@ cc_library(
         "//nth/debug/property/internal:concepts",
         "//nth/debug/property/internal:implementation",
         "//nth/debug/trace/internal:implementation",
-        "@com_google_absl//absl/synchronization",
+        "@abseil-cpp//absl/synchronization",
     ],
 )

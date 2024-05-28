@@ -60,7 +60,7 @@ cc_library(
         "//nth/container/internal:index",
         "//nth/debug",
         "//nth/meta/concepts:hash",
-        "@com_google_absl//absl/container:flat_hash_set"
+        "@abseil-cpp//absl/container:flat_hash_set"
     ],
 )
 
@@ -80,7 +80,7 @@ cc_library(
         "//nth/container/internal:index",
         "//nth/debug",
         "//nth/meta/concepts:hash",
-        "@com_google_absl//absl/container:flat_hash_set"
+        "@abseil-cpp//absl/container:flat_hash_set"
     ],
 )
 
@@ -141,7 +141,7 @@ cc_library(
         ":interval",
         ":interval_set",
         "//nth/debug",
-        "@com_google_absl//absl/container:btree"
+        "@abseil-cpp//absl/container:btree"
     ],
 )
 

@@ -5,7 +5,7 @@ cc_library(
     hdrs = ["global_registry.h"],
     deps = [
         "//nth/utility:no_destructor",
-        "@com_google_absl//absl/synchronization",
+        "@abseil-cpp//absl/synchronization",
     ],
     visibility = [
         "//nth/debug:__pkg__",
