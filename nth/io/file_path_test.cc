@@ -38,7 +38,7 @@ NTH_TEST("file_path/canonicalization") {
   NTH_EXPECT(file_path::try_construct("./") != std::nullopt);
   NTH_EXPECT(file_path::try_construct("a/.") != std::nullopt);
   NTH_EXPECT(file_path::try_construct("a/..") != std::nullopt);
-  NTH_EXPECT(file_path::try_construct("/") == std::nullopt);
+  NTH_EXPECT(file_path::try_construct("/") != std::nullopt);
   NTH_EXPECT(file_path::try_construct("//") == std::nullopt);
   NTH_EXPECT(file_path::try_construct("/..") == std::nullopt);
   NTH_EXPECT(file_path::try_construct("./../") == std::nullopt);
