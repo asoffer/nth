@@ -38,6 +38,21 @@ struct decay_impl<R(Args...)> : decay_impl<R (*)(Args...)> {};
 template <typename T, int N>
 struct decay_impl<T[N]> : decay_impl<T *> {};
 
+template <typename T>
+struct reference_category {
+  static constexpr int value = 0;
+};
+
+template <typename T>
+struct reference_category<T&> {
+  static constexpr int value = 1;
+};
+
+template <typename T>
+struct reference_category<T&&> {
+  static constexpr int value = 2;
+};
+
 }  // namespace internal_concepts
 
 // Represents a hypothetical value of type `T` to be used with concepts and
@@ -65,6 +80,24 @@ using decayed = internal_concepts::decay_impl<T>::type;
 // A concept matching any type that decays to `T`.
 template <typename T, typename U>
 concept decays_to = nth::precisely<nth::decayed<T>, U>;
+
+// A concept matching any lvalue-reference
+template <typename T>
+concept lvalue_reference = (internal_concepts::reference_category<T>::value ==
+                            1);
+
+// A concept matching any rvalue-reference
+template <typename T>
+concept rvalue_reference = (internal_concepts::reference_category<T>::value ==
+                            2);
+template <typename T>
+
+// A concept matching any reference-type (lvalue or rvalue).
+concept reference = lvalue_reference<T> or rvalue_reference<T>;
+
+// A concept matching any non-reference type.
+template <typename T>
+concept by_value = not reference<T>;
 
 }  // namespace nth
 

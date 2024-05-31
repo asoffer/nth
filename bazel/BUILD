@@ -36,6 +36,7 @@ cc_toolchain_config(
         "-Wuninitialized",
         "-Wno-c++2b-extensions",
         "-Wno-gcc-compat",
+        "-Wno-gnu-statement-expression-from-macro-expansion",
     ]
 )
 
@@ -64,5 +65,6 @@ cc_toolchain_config(
         "-Wuninitialized",
         "-Wno-c++2b-extensions",
         "-Wno-gcc-compat",
+        "-Wno-gnu-statement-expression-from-macro-expansion",
     ]
 )

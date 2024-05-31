@@ -32,4 +32,34 @@ static_assert(nth::decays_to<int const volatile&, int>);
 static_assert(nth::decays_to<void(), void (*)()>);
 static_assert(nth::decays_to<int[3], int*>);
 
+static_assert(nth::lvalue_reference<int &>);
+static_assert(not nth::rvalue_reference<int &>);
+static_assert(nth::reference<int &>);
+static_assert(not nth::by_value<int &>);
+
+static_assert(nth::lvalue_reference<int const &>);
+static_assert(not nth::rvalue_reference<int const &>);
+static_assert(nth::reference<int const &>);
+static_assert(not nth::by_value<int const &>);
+
+static_assert(not nth::lvalue_reference<int &&>);
+static_assert(nth::rvalue_reference<int &&>);
+static_assert(nth::reference<int &&>);
+static_assert(not nth::by_value<int &&>);
+
+static_assert(not nth::lvalue_reference<int const &&>);
+static_assert(nth::rvalue_reference<int const &&>);
+static_assert(nth::reference<int const &&>);
+static_assert(not nth::by_value<int const &&>);
+
+static_assert(not nth::lvalue_reference<int>);
+static_assert(not nth::rvalue_reference<int>);
+static_assert(not nth::reference<int>);
+static_assert(nth::by_value<int>);
+
+static_assert(not nth::lvalue_reference<int const>);
+static_assert(not nth::rvalue_reference<int const>);
+static_assert(not nth::reference<int const>);
+static_assert(nth::by_value<int const>);
+
 int main() {}
