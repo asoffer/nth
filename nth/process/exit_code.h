@@ -4,13 +4,10 @@
 #include <cstdint>
 
 #include "nth/process/signal.h"
-#include "nth/utility/early_exit.h"
 
 namespace nth {
 
-struct exit_code : early_exitable<exit_code> {
-  using early_exitable<exit_code>::early_exitable;
-
+struct exit_code {
   // Declarations of static constant members defining exist codes, such as
   // `exit_code::success`, or `exit_code::generic_error`. See the xmacro file
   // for a complete list of declared exit codes.

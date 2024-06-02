@@ -18,7 +18,6 @@ cc_library(
     ],
     deps = [
         ":signal",
-        "//nth/utility:early_exit",
     ],
 )
 
@@ -27,7 +26,6 @@ cc_test(
     srcs = ["exit_code_test.cc"],
     deps = [
         ":exit_code",
-        "//nth/utility:early_exit_test_cases",
         "//nth/test:main",
     ],
 )
