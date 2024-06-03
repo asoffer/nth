@@ -1,6 +1,12 @@
 package(default_visibility = ["//visibility:public"])
 
 cc_library(
+    name = "always_false",
+    hdrs = ["always_false.h"],
+    deps = [],
+)
+
+cc_library(
     name = "compile_time_string",
     hdrs = ["compile_time_string.h"],
     deps = [
