@@ -6,6 +6,7 @@
 #include "nth/debug/log/line.h"
 #include "nth/debug/log/sink.h"
 #include "nth/io/file_printer.h"
+#include "nth/strings/interpolate.h"
 
 namespace nth {
 

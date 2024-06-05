@@ -49,19 +49,19 @@ namespace nth::debug::internal_unreachable {
   }                                                                            \
   static_assert(true)
 
-#define NTH_DEBUG_INTERNAL_UNREACHABLE_IMPL(interpolation_string)              \
+#define NTH_DEBUG_INTERNAL_UNREACHABLE_IMPL(interpolation_str)                 \
   NTH_DEBUG_INTERNAL_UNREACHABLE_WITH_VERBOSITY(                               \
-      (::nth::debug::internal_verbosity::V::always), interpolation_string)
+      (::nth::debug::internal_verbosity::V::always), interpolation_str)
 
 #define NTH_DEBUG_INTERNAL_UNREACHABLE_WITH_VERBOSITY(verbosity,               \
-                                                      interpolation_string)    \
+                                                      interpolation_str)       \
   if constexpr (nth::build_mode == nth::build::optimize) {                     \
     ::nth::debug::internal_unreachable::unreachable();                         \
   } else                                                                       \
     NTH_DEBUG_INTERNAL_LOG_AND_ACT(                                            \
         verbosity,                                                             \
         "Program execution has reached a state believed to be unreachable. "   \
-        "This is a bug.\n" interpolation_string,                               \
+        "This is a bug.\n" interpolation_str,                                  \
         NTH_DEBUG_INTERNAL_UNREACHABLE_HANDLER(),                              \
         NTH_DEBUG_INTERNAL_UNREACHABLE_VOIDIFIER{})
 

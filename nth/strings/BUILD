@@ -37,6 +37,7 @@ cc_library(
     deps = [
         "//nth/io:printer",
         "//nth/strings/format:formatter",
+        "//nth/strings/interpolate:string",
         "//nth/meta:compile_time_string",
     ],
 )

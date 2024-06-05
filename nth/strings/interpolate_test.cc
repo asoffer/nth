@@ -10,21 +10,21 @@ namespace {
 
 #if 0
 TODO: Death tests are not yet supported.
-NTH_TEST("InterpolationString/construction") {
-  NTH_EXPECT([] { InterpolationString("{"); } >>= nth::AbortsExecution());
-  NTH_EXPECT([] { InterpolationString("{"); } >>= nth::AbortsExecution());
-  NTH_EXPECT([] { InterpolationString("}"); } >>= nth::AbortsExecution());
-  NTH_EXPECT([] { InterpolationString("{x}"); } >>= nth::AbortsExecution());
-  NTH_EXPECT([] { InterpolationString("{{}"); } >>= nth::AbortsExecution());
-  NTH_EXPECT([] { InterpolationString("{}{x"); } >>= nth::AbortsExecution());
-  [[maybe_unused]] constexpr InterpolationString f1("{}");
-  [[maybe_unused]] constexpr InterpolationString f2("{}{}");
+NTH_TEST("interpolation_string/construction") {
+  NTH_EXPECT([] { interpolation_string("{"); } >>= nth::AbortsExecution());
+  NTH_EXPECT([] { interpolation_string("{"); } >>= nth::AbortsExecution());
+  NTH_EXPECT([] { interpolation_string("}"); } >>= nth::AbortsExecution());
+  NTH_EXPECT([] { interpolation_string("{x}"); } >>= nth::AbortsExecution());
+  NTH_EXPECT([] { interpolation_string("{{}"); } >>= nth::AbortsExecution());
+  NTH_EXPECT([] { interpolation_string("{}{x"); } >>= nth::AbortsExecution());
+  [[maybe_unused]] constexpr interpolation_string f1("{}");
+  [[maybe_unused]] constexpr interpolation_string f2("{}{}");
 }
 
-NTH_TEST("InterpolationString/utf8-construction") {
-  [[maybe_unused]] constexpr InterpolationString f1("\xc0\x80");
-  [[maybe_unused]] constexpr InterpolationString f2("\xc0\x80{}");
-  NTH_EXPECT([] { InterpolationString("\xc0\x80}"); } >>=
+NTH_TEST("interpolation_string/utf8-construction") {
+  [[maybe_unused]] constexpr interpolation_string f1("\xc0\x80");
+  [[maybe_unused]] constexpr interpolation_string f2("\xc0\x80{}");
+  NTH_EXPECT([] { interpolation_string("\xc0\x80}"); } >>=
              nth::AbortsExecution());
 }
 #endif
@@ -35,7 +35,7 @@ struct TrivialFormatter {
   }
 };
 
-NTH_TEST("InterpolationString/printer") {
+NTH_TEST("interpolation_string/printer") {
   std::string s;
   string_printer p(s);
   TrivialFormatter t;
@@ -59,7 +59,7 @@ NTH_TEST("InterpolationString/printer") {
   NTH_EXPECT(s == "cumpleaños");
 }
 
-NTH_TEST("InterpolationString/universal-formatter") {
+NTH_TEST("interpolation_string/universal-formatter") {
   std::string s;
   string_printer p(s);
   universal_formatter f({

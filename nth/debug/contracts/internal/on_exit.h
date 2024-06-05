@@ -9,7 +9,7 @@ namespace nth::debug::internal_contracts {
 
 struct Logger {
   explicit Logger(source_location location) : loc_(location) {}
-  template <::nth::InterpolationString S>
+  template <::nth::interpolation_string S>
   void Log(auto const &...arguments) requires(sizeof...(arguments) ==
                                               S.placeholders()) {
     static ::nth::internal_debug::log_line_with_arity<sizeof...(arguments)>
