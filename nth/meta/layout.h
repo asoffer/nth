@@ -1,6 +1,8 @@
 #ifndef NTH_META_LAYOUT_H
 #define NTH_META_LAYOUT_H
 
+#include <climits>
+
 #include "nth/meta/sequence.h"
 #include "nth/meta/type.h"
 

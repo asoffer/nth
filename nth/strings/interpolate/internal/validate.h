@@ -1,6 +1,7 @@
 #ifndef NTH_STRINGS_INTERPOLATE_INTERNAL_VALIDATE_H
 #define NTH_STRINGS_INTERPOLATE_INTERNAL_VALIDATE_H
 
+#include <bit>
 #include <cstdint>
 #include <optional>
 #include <string_view>
