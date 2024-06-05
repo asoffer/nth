@@ -9,15 +9,15 @@
 
 namespace nth {
 
-struct VectorLogSink : LogSink {
-  explicit VectorLogSink(std::vector<LogEntry>& log) : log_(log) {}
+struct VectorLogSink : log_sink {
+  explicit VectorLogSink(std::vector<log_entry>& log) : log_(log) {}
 
-  void send(LogLine const&, LogEntry const& log_entry) override {
+  void send(log_line const&, log_entry const& log_entry) override {
     log_.push_back(log_entry);
   }
 
  private:
-  std::vector<LogEntry>& log_;
+  std::vector<log_entry>& log_;
 };
 
 }  // namespace nth

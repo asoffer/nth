@@ -14,20 +14,11 @@ cc_library(
 )
 
 cc_library(
-    name = "line_metadata",
-    hdrs = ["line_metadata.h"],
-    deps = [
-        "//nth/debug:source_location",
-    ],
-)
-
-cc_library(
     name = "line",
     visibility = ["//nth/debug/log:__subpackages__"],
     hdrs = ["line.h"],
     srcs = ["line.cc"],
     deps = [
-        ":line_metadata",
         "//nth/debug/log/internal:interpolation_arguments",
         "//nth/debug/log/internal:voidifier",
         "//nth/debug:source_location",
@@ -61,7 +52,10 @@ cc_library(
     name = "sink",
     visibility = ["//nth/debug/log:__subpackages__"],
     hdrs = ["sink.h"],
-    deps = [],
+    srcs = ["sink.cc"],
+    deps = [
+      "//nth/base/internal:global_registry",
+    ],
 )
 
 cc_library(

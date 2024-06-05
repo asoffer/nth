@@ -9,12 +9,12 @@
 
 namespace nth {
 
-struct StdErrLogSink : LogSink {
+struct StdErrLogSink : log_sink {
   struct options {
     bool metadata = true;
   };
 
-  void send(LogLine const& line, LogEntry const& log_entry) override {
+  void send(log_line const& line, log_entry const& log_entry) override {
     auto formatter = nth::config::log_formatter();
 
     if (options_.metadata) { formatter(stderr_printer, line.metadata()); }

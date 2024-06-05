@@ -12,25 +12,25 @@
 
 namespace nth {
 
-// A particular invocation of a `LogLine` along with encoded arguments.
-struct LogEntry {
+// A particular invocation of a `log_line` along with encoded arguments.
+struct log_entry {
   internal_debug::log_entry_component_iterator component_begin() const;
   internal_debug::log_entry_component_iterator component_end() const;
 
-  LogLineId id() const { return id_; }
+  log_line_id id() const { return id_; }
 
-  // private:
   template <size_t>
-  friend struct nth::internal_debug::LogLineWithArity;
+  friend struct nth::internal_debug::log_line_with_arity;
 
-  LogEntry() = delete;
-  explicit LogEntry(LogLineId id, size_t placeholders);
+  log_entry() = delete;
+  explicit log_entry(log_line_id id, size_t placeholders);
 
   std::string& data() & { return data_; }
 
   void demarcate() { offsets_.push_back(data_.size()); }
 
-  LogLineId id_;
+ private:
+  log_line_id id_;
   std::string data_;
   std::vector<size_t> offsets_ = {0};
 };
@@ -38,22 +38,21 @@ struct LogEntry {
 namespace internal_debug {
 
 template <size_t PlaceholderCount>
-Voidifier LogLineWithArity<PlaceholderCount>::operator<<=(
+Voidifier log_line_with_arity<PlaceholderCount>::operator<<=(
     NTH_ATTRIBUTE(lifetimebound)
-        InterpolationArguments<PlaceholderCount> const& entry) const {
-  LogEntry log_entry(id(), PlaceholderCount);
+        InterpolationArguments<PlaceholderCount> const& e) const {
+  log_entry entry(id(), PlaceholderCount);
 
-  bounded_string_printer printer(log_entry.data(),
-                                 nth::config::log_print_bound);
+  bounded_string_printer printer(entry.data(), nth::config::log_print_bound);
 
   auto formatter = nth::config::log_formatter();
   std::apply(
       [&](auto... entries) {
-        ((formatter(printer, entries), log_entry.demarcate()), ...);
+        ((formatter(printer, entries), entry.demarcate()), ...);
       },
-      entry.entries());
+      e.entries());
 
-  for (auto* sink : RegisteredLogSinks()) { sink->send(*this, log_entry); }
+  for (auto* sink : registered_log_sinks()) { sink->send(*this, entry); }
 
   return Voidifier();
 }

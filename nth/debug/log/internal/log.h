@@ -16,6 +16,25 @@
 #include "nth/debug/verbosity/verbosity.h"
 #include "nth/strings/interpolate.h"
 
+namespace nth::internal_log {
+
+inline constexpr size_t PlaceholderCount(std::string_view s) {
+  size_t i       = 0;
+  size_t nesting = 0;
+  for (char c : s) {
+    switch (c) {
+      case '{':
+        if (nesting == 0) { ++i; }
+        ++nesting;
+        break;
+      case '}': --nesting; break;
+    }
+  }
+  return i;
+}
+
+}  // namespace nth::internal_log
+
 #define NTH_DEBUG_INTERNAL_VERBOSITY_DISABLED(verbosity)                       \
   ([&] {                                                                       \
     [[maybe_unused]] constexpr ::nth::debug::internal_verbosity::V v;          \
@@ -28,19 +47,22 @@
       NTH_DEBUG_INTERNAL_VERBOSITY_DISABLED(verbosity)                         \
           ? disabled_action                                                    \
           : enabled_voidifier <<=                                              \
-            [&]<::nth::InterpolationString NthInterpolationString>(            \
-                ::nth::source_location NthSourceLocation =                     \
-                    ::nth::source_location::current()) -> decltype(auto) {     \
-        static ::nth::internal_debug::LogLineWithArity<                        \
-            NthInterpolationString.placeholders()>                             \
-            NthLogLine(NthInterpolationString, NthSourceLocation);             \
-        if constexpr (NthInterpolationString.placeholders() == 0) {            \
+            [&]<size_t Count>(::nth::source_location NthSourceLocation =       \
+                                  ::nth::source_location::current())           \
+          -> decltype(auto) {                                                  \
+        static constexpr ::nth::InterpolationString NthInterpolationString =   \
+            (interpolation_string);                                            \
+        static ::nth::internal_debug::log_line_with_arity<Count> NthLogLine(   \
+            NthInterpolationString, NthSourceLocation);                        \
+        if constexpr (Count == 0) {                                            \
           NthLogLine <<= {};                                                   \
           return (::nth::internal_debug::interpolation_argument_ignorer);      \
         } else {                                                               \
           return (NthLogLine);                                                 \
         }                                                                      \
-      }.template operator()<(interpolation_string)>())
+      }                                                                        \
+                 .template operator()<::nth::internal_log::PlaceholderCount(   \
+                     interpolation_string)>())
 
 #define NTH_DEBUG_INTERNAL_LOG_IMPL(interpolation_string)                      \
   NTH_DEBUG_INTERNAL_LOG_WITH_VERBOSITY(                                       \

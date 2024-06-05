@@ -20,16 +20,15 @@ void ResponderBase::RecordExpectationResult(bool result) {
 }
 
 void ResponderBase::WriteExpression(bounded_string_printer &printer,
-                                    LogEntry &log_entry,
-                                    char const *expression) {
+                                    log_entry &entry, char const *expression) {
   printer.write("    ");
   printer.write(expression);
-  log_entry.demarcate();
+  entry.demarcate();
 }
 
-void ResponderBase::Send(LogEntry const &log_entry) {
-  for (auto *sink : nth::internal_debug::RegisteredLogSinks()) {
-    sink->send(*line_, log_entry);
+void ResponderBase::Send(log_entry const &entry) {
+  for (auto *sink : nth::internal_debug::registered_log_sinks()) {
+    sink->send(*line_, entry);
   }
 }
 
@@ -37,12 +36,12 @@ bool ResponderBase::set_impl(char const *expression, bool b) {
   RecordExpectationResult(b);
 
   if (not value_) {
-    LogEntry log_entry(line_->id(), 1);
+    log_entry entry(line_->id(), 1);
 
-    bounded_string_printer printer(log_entry.data(),
+    bounded_string_printer printer(entry.data(),
                                    nth::config::trace_print_bound);
 
-    WriteExpression(printer, log_entry, expression);
+    WriteExpression(printer, entry, expression);
 
     std::vector<internal_trace::TraversalAction> stack;
     for (auto const *element : internal_trace::bool_value_stash) {
@@ -51,13 +50,13 @@ bool ResponderBase::set_impl(char const *expression, bool b) {
       TraversalPrinterContext context(printer);
       context.Traverse(std::move(stack));
     }
-    log_entry.demarcate();
+    entry.demarcate();
 
     printer.write("Tree");
-    log_entry.demarcate();
+    entry.demarcate();
 
-    for (auto *sink : nth::internal_debug::RegisteredLogSinks()) {
-      sink->send(*line_, log_entry);
+    for (auto *sink : nth::internal_debug::registered_log_sinks()) {
+      sink->send(*line_, entry);
     }
     internal_trace::bool_value_stash.clear();
   }

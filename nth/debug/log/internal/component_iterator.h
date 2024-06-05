@@ -2,7 +2,7 @@
 #include <vector>
 
 namespace nth {
-struct LogEntry;
+struct log_entry;
 
 namespace internal_debug {
 
@@ -17,7 +17,7 @@ struct log_entry_component_iterator {
                          log_entry_component_iterator const&) = default;
 
  private:
-  friend nth::LogEntry;
+  friend nth::log_entry;
 
   using vector_iterator = typename std::vector<size_t>::const_iterator;
 

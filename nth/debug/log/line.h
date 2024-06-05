@@ -10,41 +10,61 @@
 
 namespace nth {
 
-// Forward-declaration of type identifier by `LogLineId` defined below.
-struct LogLine;
+// Forward-declaration of type identifier by `log_line_id` defined below.
+struct log_line;
 
-// `LogLineId` uniquely identifies an instantiation of a logging line. Two
-// invocations of the same `NTH_LOG` will have the same `LogLineId`. Notably,
+// `log_line_id` uniquely identifies an instantiation of a logging line. Two
+// invocations of the same `NTH_LOG` will have the same `log_line_id`. Notably,
 // within a template, instantiations with different template arguments will
 // compare unequal.
-struct LogLineId {
-  // Returns a reference identified `LogLine`.
-  constexpr LogLine const& line() const { return *line_; }
+struct log_line_id {
+  // Returns a reference identified `log_line`.
+  constexpr log_line const& line() const { return *line_; }
 
-  template <int&..., typename T = int>
-  constexpr size_t value() const {
-    // Implementation note: The template is not used in any meaningful sense. It
-    // exists to make `line_` dependent and therefore not eagerly instantiable,
-    // so that we can effectively spell `line_->value()` while `LogLine` is
-    // still an incomplete type.
-    return (T{}, line_)->id_;
-  }
+  constexpr size_t value() const;
 
-  friend constexpr bool operator==(LogLineId, LogLineId) = default;
-  friend constexpr bool operator!=(LogLineId, LogLineId) = default;
+  friend constexpr bool operator==(log_line_id, log_line_id) = default;
 
  private:
-  friend struct LogLine;
+  friend struct log_line;
 
-  explicit constexpr LogLineId(LogLine const* line = nullptr) : line_(line) {}
-  LogLine const* line_ = nullptr;
+  explicit constexpr log_line_id() = default;
+  explicit constexpr log_line_id(log_line const* line) : line_(line) {}
+  log_line const* line_ = nullptr;
 };
 
 // Represents a particular invocation of a log message.
-struct LogLine {
+struct log_line {
+  // Metadata pertaining to the debug-log line including where it was
+  // encountered, invocation time, thread-id, etc.
+  struct metadata {
+    explicit metadata(struct source_location loc) : source_location_(loc) {}
+
+    // The location in source at which the log occurs.
+    struct source_location source_location() const {
+      return source_location_;
+    }
+
+    friend void NthPrint(auto& printer, auto& formatter,
+                         metadata const& metadata) {
+      printer.write("\x1b[0;34m");
+      formatter(printer, metadata.source_location().file_name());
+      printer.write(" ");
+      formatter(printer, metadata.source_location().function_name());
+      printer.write(":");
+      formatter(printer, metadata.source_location().line());
+      printer.write("]\x1b[0m ");
+    }
+
+   private:
+    struct source_location source_location_;
+  };
+
   // Returns metadata pertaining about where and when the debug-log line
   // occurred.
-  LogLineMetadata metadata() const { return metadata_; }
+  struct metadata metadata() const {
+    return metadata_;
+  }
 
   // The interpolation string to which log arguments are passed.
   std::string_view interpolation_string() const {
@@ -52,29 +72,33 @@ struct LogLine {
   }
 
   // A unique identifier associated with this log line.
-  LogLineId id() const { return LogLineId(this); }
+  log_line_id id() const { return log_line_id(this); }
 
  protected:
-  explicit LogLine(std::string_view interpolation_string,
-                   source_location location, size_t arity);
+  friend log_line_id;
+
+  explicit log_line(std::string_view interpolation_string,
+                    source_location location);
 
   std::string_view interpolation_string_;
-  LogLineMetadata metadata_;
+  struct metadata metadata_;
   size_t id_;
-  size_t arity_;
-  LogLine const* next_ = nullptr;
 
-  static std::atomic<LogLine const*> head_;
-  static LogLine const stub_;
+  static std::atomic<log_line const*> head_;
+  static log_line const stub_;
 };
 
 namespace internal_debug {
 
-struct SinkOptionsResetter {
-  ~SinkOptionsResetter() { fn_(sink_); }
+struct sink_options_resetter {
+  sink_options_resetter() {}
+  sink_options_resetter(void* sink, void (*fn)(void*)) : sink_(sink), fn_(fn) {}
+  ~sink_options_resetter() { fn_(sink_); }
 
-  void set_sink(void* sink) { sink_ = sink; }
-  void set_fn(void (*fn)(void*)) { fn_ = fn; }
+  template <typename Sink>
+  static void erased_set_options(void* s) {
+    static_cast<Sink*>(s)->set_options({});
+  }
 
  private:
   void* sink_;
@@ -82,17 +106,18 @@ struct SinkOptionsResetter {
 };
 
 template <size_t PlaceholderCount>
-struct LogLineWithArity : LogLine {
-  explicit LogLineWithArity(std::string_view interpolation_string,
-                            source_location location)
-      : LogLine(interpolation_string, location, PlaceholderCount) {}
+struct log_line_with_arity : log_line {
+  explicit log_line_with_arity(std::string_view interpolation_string,
+                               source_location location)
+      : log_line(interpolation_string, location) {}
 
   template <typename Sink>
-  LogLineWithArity& configure(Sink& sink, typename Sink::options const& options,
-                              SinkOptionsResetter&& r = {}) {
+  log_line_with_arity& configure(Sink& sink,
+                                 typename Sink::options const& options,
+                                 sink_options_resetter&& r = {}) {
     sink.set_options(options);
-    r.set_sink(&sink);
-    r.set_fn([](void* s) { static_cast<Sink*>(s)->set_options({}); });
+    r = sink_options_resetter(&sink,
+                              sink_options_resetter::erased_set_options<Sink>);
     return *this;
   }
 
@@ -102,6 +127,9 @@ struct LogLineWithArity : LogLine {
 };
 
 }  // namespace internal_debug
+
+constexpr size_t log_line_id::value() const { return line_->id_; }
+
 }  // namespace nth
 
 #endif  // NTH_DEBUG_LOG_LINE_H

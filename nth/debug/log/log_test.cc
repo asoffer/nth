@@ -16,9 +16,9 @@ size_t ComponentCount(Iter b, Iter e) {
 }
 
 int AlwaysLog() {
-  std::vector<nth::LogEntry> log;
+  std::vector<nth::log_entry> log;
   nth::VectorLogSink sink(log);
-  nth::RegisterLogSink(sink);
+  nth::register_log_sink(sink);
 
 #line 100
   NTH_LOG((v.always), "No interpolation");
@@ -61,9 +61,9 @@ int AlwaysLog() {
 }
 
 int NeverLog() {
-  std::vector<nth::LogEntry> log;
+  std::vector<nth::log_entry> log;
   nth::VectorLogSink sink(log);
-  nth::RegisterLogSink(sink);
+  nth::register_log_sink(sink);
 
 #line 100
   NTH_LOG((v.never), "No interpolation");

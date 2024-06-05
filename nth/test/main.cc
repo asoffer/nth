@@ -95,7 +95,7 @@ size_t DigitCount(size_t n) {
 
 int main() {
   size_t width = TerminalWidth();
-  nth::RegisterLogSink(nth::stderr_log_sink);
+  nth::register_log_sink(nth::stderr_log_sink);
   nth::debug::RegisterExpectationResultHandler(
       [](nth::debug::ExpectationResult const& result) {
         expectation_results->add(result);

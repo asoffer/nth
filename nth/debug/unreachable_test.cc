@@ -21,9 +21,9 @@ void log_with_verbosity_off() { NTH_UNREACHABLE((v.never), "{}") <<= {3}; }
 void log_with_verbosity_on() { NTH_UNREACHABLE((v.always), ""); }
 
 int main() {
-  std::vector<nth::LogEntry> log;
+  std::vector<nth::log_entry> log;
   nth::VectorLogSink sink(log);
-  nth::RegisterLogSink(sink);
+  nth::register_log_sink(sink);
 
   no_logging();
   if (unreachable_count != 1) { return 1; }

@@ -12,8 +12,8 @@ struct Logger {
   template <::nth::InterpolationString S>
   void Log(auto const &...arguments) requires(sizeof...(arguments) ==
                                               S.placeholders()) {
-    static ::nth::internal_debug::LogLineWithArity<sizeof...(arguments)> line(
-        S, loc_);
+    static ::nth::internal_debug::log_line_with_arity<sizeof...(arguments)>
+        line(S, loc_);
     line <<= {arguments...};
   }
 

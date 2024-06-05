@@ -6,7 +6,7 @@
 #include "nth/debug/log/stderr_log_sink.h"
 
 int main(int argc, char const* argv[]) {
-  nth::RegisterLogSink(nth::stderr_log_sink);
+  nth::register_log_sink(nth::stderr_log_sink);
 
   std::vector<std::string_view> arguments;
   for (int i = 0; i < argc; ++i) {

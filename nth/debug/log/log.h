@@ -34,6 +34,6 @@
 //
 #define NTH_LOG(...) NTH_DEBUG_INTERNAL_LOG(__VA_ARGS__)
 
-// TODO: Document `LogLine`, `LogEntry`, and `LogSink`.
+// TODO: Document `log_line`, `log_entry`, and `log_sink`.
 
 #endif  // NTH_DEBUG_LOG_LOG_H

@@ -8,7 +8,7 @@ cc_library(
         "@abseil-cpp//absl/synchronization",
     ],
     visibility = [
-        "//nth/debug:__pkg__",
+        "//nth/debug:__subpackages__",
         "//nth/test:__pkg__",
     ],
 )

@@ -92,18 +92,18 @@ struct ResponderBase {
   void RecordExpectationResult(bool result);
 
   static void WriteExpression(bounded_string_printer &printer,
-                              LogEntry &log_entry, char const *expression);
-  void Send(LogEntry const &log_entry);
+                              log_entry &entry, char const *expression);
+  void Send(log_entry const &entry);
   ~ResponderBase();
 
-  constexpr void set_log_line(nth::LogLine const &line) { line_ = &line; }
+  constexpr void set_log_line(nth::log_line const &line) { line_ = &line; }
 
  protected:
   bool set_impl(char const *expression, bool b);
 
   bool value_ : 1;
   bool set_ : 1             = false;
-  nth::LogLine const *line_ = nullptr;
+  nth::log_line const *line_ = nullptr;
 };
 
 struct AbortingResponder : ResponderBase {
@@ -113,9 +113,9 @@ struct AbortingResponder : ResponderBase {
     RecordExpectationResult(w);
 
     if (not value_) {
-      LogEntry log_entry(line_->id(), 1);
+      log_entry entry(line_->id(), 1);
 
-      bounded_string_printer printer(log_entry.data(),
+      bounded_string_printer printer(entry.data(),
                                      nth::config::trace_print_bound);
 
       {
@@ -124,12 +124,12 @@ struct AbortingResponder : ResponderBase {
                                                  stack);
         TraversalPrinterContext context(printer);
         context.Traverse(std::move(stack));
-        log_entry.demarcate();
+        entry.demarcate();
       }
 
       {
         printer.write("Property");
-        log_entry.demarcate();
+        entry.demarcate();
       }
 
       {
@@ -137,10 +137,10 @@ struct AbortingResponder : ResponderBase {
         MakeTraversal(w.property, stack);
         TraversalPrinterContext context(printer);
         context.Traverse(std::move(stack));
-        log_entry.demarcate();
+        entry.demarcate();
       }
 
-      Send(log_entry);
+      Send(entry);
     }
 
     return value_;
@@ -153,23 +153,23 @@ struct AbortingResponder : ResponderBase {
     RecordExpectationResult(Evaluate(b));
 
     if (not value_) {
-      LogEntry log_entry(line_->id(), 1);
+      log_entry entry(line_->id(), 1);
 
-      bounded_string_printer printer(log_entry.data(),
+      bounded_string_printer printer(entry.data(),
                                      nth::config::trace_print_bound);
 
-      WriteExpression(printer, log_entry, expression);
+      WriteExpression(printer, entry, expression);
 
       printer.write("Tree");
-      log_entry.demarcate();
+      entry.demarcate();
 
       std::vector<internal_trace::TraversalAction> stack;
       internal_trace::VTable(b).traverse(std::addressof(b), stack);
       TraversalPrinterContext context(printer);
       context.Traverse(std::move(stack));
-      log_entry.demarcate();
+      entry.demarcate();
 
-      Send(log_entry);
+      Send(entry);
     }
     return value_;
   }
@@ -205,9 +205,9 @@ struct NoOpResponder : ResponderBase {
     RecordExpectationResult(w);
 
     if (not value_) {
-      LogEntry log_entry(line_->id(), 1);
+      log_entry entry(line_->id(), 1);
 
-      bounded_string_printer printer(log_entry.data(),
+      bounded_string_printer printer(entry.data(),
                                      nth::config::trace_print_bound);
 
       {
@@ -216,12 +216,12 @@ struct NoOpResponder : ResponderBase {
                                                  stack);
         TraversalPrinterContext context(printer);
         context.Traverse(std::move(stack));
-        log_entry.demarcate();
+        entry.demarcate();
       }
 
       {
         printer.write("Property");
-        log_entry.demarcate();
+        entry.demarcate();
       }
 
       {
@@ -229,10 +229,10 @@ struct NoOpResponder : ResponderBase {
         MakeTraversal(w.property, stack);
         TraversalPrinterContext context(printer);
         context.Traverse(std::move(stack));
-        log_entry.demarcate();
+        entry.demarcate();
       }
 
-      Send(log_entry);
+      Send(entry);
     }
 
     return value_;
@@ -245,23 +245,23 @@ struct NoOpResponder : ResponderBase {
     RecordExpectationResult(Evaluate(b));
 
     if (not value_) {
-      LogEntry log_entry(line_->id(), 1);
+      log_entry entry(line_->id(), 1);
 
-      bounded_string_printer printer(log_entry.data(),
+      bounded_string_printer printer(entry.data(),
                                      nth::config::trace_print_bound);
 
-      WriteExpression(printer, log_entry, expression);
+      WriteExpression(printer, entry, expression);
 
       printer.write("Tree");
-      log_entry.demarcate();
+      entry.demarcate();
 
       std::vector<internal_trace::TraversalAction> stack;
       internal_trace::VTable(b).traverse(std::addressof(b), stack);
       TraversalPrinterContext context(printer);
       context.Traverse(std::move(stack));
-      log_entry.demarcate();
+      entry.demarcate();
 
-      Send(log_entry);
+      Send(entry);
     }
     return value_;
   }

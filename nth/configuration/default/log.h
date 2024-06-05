@@ -1,7 +1,6 @@
 #ifndef NTH_CONFIGURATION_DEFAULT_LOG_H
 #define NTH_CONFIGURATION_DEFAULT_LOG_H
 
-#include "nth/debug/log/line_metadata.h"
 #include "nth/strings/format/universal.h"
 
 namespace nth::config {

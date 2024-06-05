@@ -31,7 +31,7 @@ inline constexpr char const EnsureLogLine[] =
                  NthInternalResponder;                                         \
              [&](::nth::source_location NthInternalourceLocation)              \
                  -> decltype(auto) {                                           \
-               static ::nth::internal_debug::LogLineWithArity<3> const         \
+               static ::nth::internal_debug::log_line_with_arity<3> const      \
                    NthInternalLogLine(log_line, NthInternalourceLocation);     \
                NthInternalResponder.set_log_line(NthInternalLogLine);          \
                return (NthInternalResponder);                                  \
@@ -67,7 +67,7 @@ inline constexpr char const EnsureLogLine[] =
         if (NTH_DEBUG_INTERNAL_VERBOSITY_DISABLED(verbosity)) { return; }      \
         ::nth::debug::internal_contracts::AbortingResponder                    \
             NthInternalResponder;                                              \
-        static ::nth::internal_debug::LogLineWithArity<3> const                \
+        static ::nth::internal_debug::log_line_with_arity<3> const             \
             NthInternalLogLine(                                                \
                 ::nth::debug::internal_contracts::EnsureLogLine,               \
                 NthInternalourceLocation);                                     \

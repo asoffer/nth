@@ -5,7 +5,7 @@
 
 namespace nth {
 
-struct LogLine;
+struct log_line;
 
 namespace internal_debug {
 
@@ -13,7 +13,7 @@ struct Voidifier {
   template <typename T>
   friend void operator<<=(Voidifier, T const&) {
     constexpr bool MissingInterpolationArguments =
-        not std::derived_from<T, LogLine>;
+        not std::derived_from<T, log_line>;
     // clang-format off
     static_assert(MissingInterpolationArguments,
         "\n\n"
