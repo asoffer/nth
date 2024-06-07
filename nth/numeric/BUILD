@@ -9,6 +9,7 @@ cc_library(
         "//nth/meta/concepts:core",
         "//nth/io/reader",
         "//nth/io/writer",
+        "//nth/strings/interpolate",
     ],
 )
 

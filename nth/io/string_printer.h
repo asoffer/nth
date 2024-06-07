@@ -4,11 +4,13 @@
 #include <string>
 #include <string_view>
 
+#include "nth/io/printer.h"
+
 namespace nth {
 
 // `string_printer` may be constructed with a `std::string&`. All writes to the
 // printer will append to the referenced string.
-struct string_printer {
+struct string_printer : nth::io::printer<string_printer> {
   explicit constexpr string_printer(std::string& s) : s_(s) {}
   void write(size_t n, char c) { s_.append(n, c); }
   void write(std::string_view s) { s_.append(s); }
@@ -27,7 +29,7 @@ struct string_printer {
 // the total size of the referenced string. If another printer writes to the
 // same string, or the string is not empty upon construction, the total size of
 // the string may exceed the given bound.
-struct bounded_string_printer {
+struct bounded_string_printer : nth::io::printer<bounded_string_printer> {
   explicit constexpr bounded_string_printer(std::string& s, size_t bound)
       : s_(s), left_(bound) {}
 

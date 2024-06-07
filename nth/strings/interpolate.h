@@ -9,16 +9,15 @@
 
 #include "nth/io/printer.h"
 #include "nth/meta/compile_time_string.h"
-#include "nth/strings/format/formatter.h"
 #include "nth/strings/internal/interpolate.h"
 #include "nth/strings/interpolate/string.h"
 
 namespace nth {
 
-// Formats each of `Ts...` with the `Printer p` according to the non-type
-// template parameter `I`.
+// Formats each of `Ts...` with the `nth::io::printer_type p` according to the
+// non-type template parameter `I`.
 template <interpolation_string I, int&..., typename... Ts>
-constexpr void Interpolate(Printer auto& p, FormatterFor<Ts...> auto& formatter,
+constexpr void Interpolate(io::printer_type auto& p, auto& formatter,
                            Ts const&... ts)  //
     requires(sizeof...(Ts) == I.placeholders()) {
   constexpr std::string_view str = I;
@@ -51,7 +50,8 @@ constexpr void Interpolate(Printer auto& p, FormatterFor<Ts...> auto& formatter,
 // over `std::string_view`s; users should format individual entries ahead of
 // time.
 template <interpolation_string I, int&..., typename Iter>
-constexpr void InterpolateErased(Printer auto& p, Iter b, Iter e) requires(
+constexpr void
+InterpolateErased(io::printer_type auto& p, Iter b, Iter e) requires(
     std::convertible_to<decltype(*std::declval<Iter>()), std::string_view>) {
   constexpr std::string_view str = I;
   if constexpr (I.placeholders() == 0) {
@@ -76,7 +76,7 @@ constexpr void InterpolateErased(Printer auto& p, Iter b, Iter e) requires(
 
 template <int&..., typename Iter>
 void InterpolateErased(
-    std::string_view str, Printer auto& p, Iter b,
+    std::string_view str, io::printer_type auto& p, Iter b,
     Iter e) requires(std::convertible_to<decltype(*std::declval<Iter>()),
                                          std::string_view>) {
   // TODO: Do this as we go to avoid the need for an allocation.

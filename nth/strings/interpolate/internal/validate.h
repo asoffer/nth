@@ -63,20 +63,12 @@ inline constexpr void validate_interpolation_string(
   while (not interpolation_string.empty()) {
     if (auto codepoint = extract_next_utf8_codepoint(interpolation_string)) {
       switch (*codepoint) {
-        case '{': {
-          if (brace_depth == 1) { validation_failed(/* Nested braces. */); }
-          ++brace_depth;
-        } break;
+        case '{': ++brace_depth; break;
         case '}': {
           if (brace_depth == 0) {
             validation_failed(/* `}` without matching `{`. */);
           }
           --brace_depth;
-        } break;
-        default: {
-          if (brace_depth == 1) {
-            validation_failed(/* `{` must be followed by `}`. */);
-          }
         } break;
       }
     } else {

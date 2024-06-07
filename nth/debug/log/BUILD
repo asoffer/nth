@@ -45,6 +45,8 @@ cc_test(
         ":log",
         ":vector_log_sink",
         "//nth/debug:unreachable",
+        "@abseil-cpp//absl/debugging:failure_signal_handler",
+        "@abseil-cpp//absl/debugging:symbolize",
     ],
 )
 

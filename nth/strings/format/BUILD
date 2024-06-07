@@ -1,24 +1,6 @@
 package(default_visibility = ["//visibility:public"])
 
 cc_library(
-    name = "formatter",
-    hdrs = ["formatter.h"],
-    deps = [
-        "//nth/io:printer",
-    ],
-)
-
-cc_test(
-    name = "formatter_test",
-    srcs = ["formatter_test.cc"],
-    deps = [
-        ":formatter",
-        "//nth/io:printer",
-    ],
-)
-
-
-cc_library(
     name = "universal",
     hdrs = ["universal.h"],
     deps = [

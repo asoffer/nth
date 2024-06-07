@@ -15,6 +15,7 @@ cc_library(
         "//nth/base:attributes",
         "//nth/configuration:log",
         "//nth/io:string_printer",
+        "//nth/strings/interpolate",
     ],
 )
 

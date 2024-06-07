@@ -36,7 +36,6 @@ cc_library(
     srcs = ["internal/interpolate.h"],
     deps = [
         "//nth/io:printer",
-        "//nth/strings/format:formatter",
         "//nth/strings/interpolate:string",
         "//nth/meta:compile_time_string",
     ],
@@ -48,7 +47,6 @@ cc_test(
     deps = [
         ":interpolate",
         "//nth/io:string_printer",
-        "//nth/strings/format:formatter",
         "//nth/strings/format:universal", # TODO: Cut this dep.
         "//nth/test:main",
     ],

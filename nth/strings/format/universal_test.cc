@@ -80,8 +80,9 @@ NTH_TEST("UniversalPrint/Optional") {
 }
 
 struct Thing {
-  friend void NthPrint(Printer auto& p, auto&, Thing) { p.write("thing"); }
+  friend void NthFormat(io::printer_type auto p, Thing) { p.write("thing"); }
 };
+
 NTH_TEST("UniversalPrint/NthPrint") {
   std::string s;
   string_printer p(s);

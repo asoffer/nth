@@ -5,13 +5,14 @@
 #include "nth/commandline/internal/invoke.h"
 #include "nth/commandline/internal/parse.h"
 #include "nth/debug/debug.h"
+#include "nth/io/printer.h"
 #include "nth/io/file_printer.h"
 
 namespace nth {
 namespace internal_commandline {
 namespace {
 
-void WriteHelpMessage(Usage const &usage, nth::Printer auto &p) {
+void WriteHelpMessage(Usage const &usage, nth::io::printer_type auto &p) {
   p.write(usage.description);
   p.write("\n\n");
   size_t max_length =

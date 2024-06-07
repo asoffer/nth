@@ -31,10 +31,11 @@ struct file_path {
   // path.
   std::string const &path() const { return name_; }
 
-  friend void NthPrint(Printer auto &p, auto &, file_path const &path) {
+  template <io::printer_type P>
+  friend void NthFormat(P p, file_path const &path) {
     std::stringstream ss;
     ss << std::quoted(path.name_);
-    p.write(ss.str());
+    return P::print(std::move(p), ss.str());
   }
 
   friend bool operator==(file_path const &, file_path const &) = default;

@@ -4,19 +4,18 @@
 #include <cstddef>
 #include <string_view>
 
-#include "nth/meta/compile_time_string.h"
 #include "nth/strings/interpolate/internal/validate.h"
 
 namespace nth {
 
 // A `interpolation_string` is a mechanism by which one can specify how to write
-// a collection of objects with an `nth::Printer`.
+// a collection of objects with an `nth::interpolation_printer`.
 template <size_t Length>
 struct interpolation_string {
-  consteval interpolation_string(char const (&buffer)[Length + 1])
-      : NthInternalInterpolationStringDataMember(buffer) {
-    internal_strings::validate_interpolation_string(
-        std::string_view(buffer, Length));
+  consteval interpolation_string(char const (&buffer)[Length + 1]) {
+    for (unsigned i = 0; i < Length + 1; ++i) {
+      NthInternalInterpolationStringDataMember[i] = buffer[i];
+    }
   }
 
   // The number of characters (UTF-8 code units) in the interpolation string.
@@ -27,12 +26,36 @@ struct interpolation_string {
     return NthInternalInterpolationStringDataMember;
   }
 
+  consteval char operator[](size_t n) const {
+    return NthInternalInterpolationStringDataMember[n];
+  }
+
   constexpr auto operator<=>(interpolation_string const&) const = default;
 
   // Returns the number of placeholders in this interpolation string.
   constexpr size_t placeholders() const;
 
-  compile_time_string<Length> NthInternalInterpolationStringDataMember;
+  template <unsigned Offset, unsigned Len = Length - Offset>
+  constexpr interpolation_string<Len> unchecked_substr() const {
+    return interpolation_string<Len>(data() + Offset, 0);
+  }
+
+  char NthInternalInterpolationStringDataMember[Length + 1];
+
+ private:
+  template <size_t>
+  friend struct interpolation_string;
+
+  constexpr interpolation_string(char const* ptr, int) {
+    for (unsigned i = 0; i < Length; ++i) {
+      NthInternalInterpolationStringDataMember[i] = ptr[i];
+    }
+    NthInternalInterpolationStringDataMember[Length] = 0;
+  }
+
+  constexpr char const* data() const {
+    return NthInternalInterpolationStringDataMember;
+  }
 };
 
 template <size_t N>

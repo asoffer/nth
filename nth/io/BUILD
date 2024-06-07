@@ -53,7 +53,9 @@ cc_library(
     name = "file_printer",
     hdrs = ["file_printer.h"],
     srcs = ["file_printer.cc"],
-    deps = [],
+    deps = [
+        ":printer",
+    ],
 )
 
 cc_test(
@@ -71,6 +73,7 @@ cc_library(
     hdrs = ["printer.h"],
     deps = [
         "//nth/meta/concepts:core",
+        "//nth/meta:type",
     ],
 )
 
@@ -86,7 +89,9 @@ cc_test(
 cc_library(
     name = "string_printer",
     hdrs = ["string_printer.h"],
-    deps = [],
+    deps = [
+        "//nth/io:printer",
+    ],
 )
 
 cc_test(

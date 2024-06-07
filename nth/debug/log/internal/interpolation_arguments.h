@@ -3,11 +3,13 @@
 
 #include <array>
 #include <memory>
+#include <utility>
 
 #include "nth/base/attributes.h"
 #include "nth/configuration/log.h"
 #include "nth/debug/log/internal/voidifier.h"
 #include "nth/io/string_printer.h"
+#include "nth/strings/interpolate/interpolate.h"
 
 namespace nth::internal_debug {
 
@@ -16,17 +18,28 @@ struct ErasedInterpolationArgument {
   template <typename T>
   ErasedInterpolationArgument(NTH_ATTRIBUTE(lifetimebound) T const& t)
       : object_(std::addressof(t)),
-        log_([](bounded_string_printer& p, void const* t) {
-          nth::config::log_formatter()(p, *reinterpret_cast<T const*>(t));
+        log_([](bounded_string_printer p, void const* t) {
+          io::print(interpolating_printer<"{}", bounded_string_printer>(p),
+                    *reinterpret_cast<T const*>(t));
         }) {}
 
-  friend void NthPrint(bounded_string_printer& p, auto&,
-                       ErasedInterpolationArgument e) {
-    e.log_(p, e.object_);
+
+  template <auto S>
+  friend void NthFormat(interpolating_printer<S, bounded_string_printer> p,
+                        ErasedInterpolationArgument e) {
+    static constexpr std::string_view h = "hello";
+    e.log_(p.inner(), &h);
+    e.log_(std::move(p.inner()), e.object_);
+  }
+  friend void NthFormat(bounded_string_printer p,
+                        ErasedInterpolationArgument e) {
+    static constexpr std::string_view h = "hello";
+    e.log_(p, &h);
+    e.log_(std::move(p), e.object_);
   }
 
   void const* object_;
-  void (*log_)(bounded_string_printer& p, void const*);
+  void (*log_)(bounded_string_printer, void const*);
 };
 
 // Arguments passed directly to a log macro via `operator<<=` as in the example:

@@ -1,7 +1,6 @@
 #include "nth/strings/interpolate.h"
 
 #include "nth/io/string_printer.h"
-#include "nth/strings/format/formatter.h"
 #include "nth/strings/format/universal.h"
 #include "nth/test/test.h"
 
@@ -30,7 +29,7 @@ NTH_TEST("interpolation_string/utf8-construction") {
 #endif
 
 struct TrivialFormatter {
-  void operator()(nth::Printer auto& p, std::string_view s) const {
+  void operator()(nth::io::printer_type auto& p, std::string_view s) const {
     p.write(s);
   }
 };

@@ -109,7 +109,7 @@ struct integer {
     }
   }
 
-  friend void NthPrint(auto &p, auto &, integer const &n) {
+  friend void NthFormat(nth::io::printer_type auto p, integer const &n) {
     if (n.size_ == 0) {
       p.write("0");
       return;

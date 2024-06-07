@@ -9,6 +9,8 @@
 #include "nth/debug/log/internal/component_iterator.h"
 #include "nth/debug/log/line.h"
 #include "nth/debug/log/sink.h"
+#include "nth/io/printer.h"
+#include "nth/strings/interpolate/interpolate.h"
 
 namespace nth {
 
@@ -45,10 +47,13 @@ Voidifier log_line_with_arity<PlaceholderCount>::operator<<=(
 
   bounded_string_printer printer(entry.data(), nth::config::log_print_bound);
 
-  auto formatter = nth::config::log_formatter();
   std::apply(
       [&](auto... entries) {
-        ((formatter(printer, entries), entry.demarcate()), ...);
+        ((nth::io::print(
+              interpolating_printer<"{}", bounded_string_printer>(printer),
+              entries),
+          entry.demarcate()),
+         ...);
       },
       e.entries());
 
