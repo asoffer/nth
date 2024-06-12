@@ -32,12 +32,12 @@ namespace nth::debug::internal_unreachable {
 #define NTH_DEBUG_INTERNAL_UNREACHABLE_HANDLER                                 \
   NTH_DEBUG_INTERNAL_TEST_UNREACHABLE
 #define NTH_DEBUG_INTERNAL_UNREACHABLE_VOIDIFIER                               \
-  ::nth::internal_debug::InvokingVoidifier<                                    \
+  ::nth::internal_log::invoking_voidifier<                                     \
       NTH_DEBUG_INTERNAL_UNREACHABLE_HANDLER>
 #else
 #define NTH_DEBUG_INTERNAL_UNREACHABLE_HANDLER std::abort
 #define NTH_DEBUG_INTERNAL_UNREACHABLE_VOIDIFIER                               \
-  ::nth::internal_debug::NonReturningVoidifier<                                \
+  ::nth::internal_log::non_returning_voidifier<                                \
       NTH_DEBUG_INTERNAL_UNREACHABLE_HANDLER>
 #endif
 

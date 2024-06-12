@@ -5,17 +5,13 @@ package(default_visibility = ["//nth/configuration:__subpackages__"])
 cc_library(
     name = "log",
     hdrs = ["log.h"],
-    deps = [
-        "//nth/strings:interpolate",
-        "//nth/strings/format:universal",
-    ]
+    deps = []
 )
 
 cc_library(
     name = "trace",
     hdrs = ["trace.h"],
     deps = [
-        "//nth/strings/format:universal",
     ]
 )
 

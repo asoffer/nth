@@ -114,7 +114,8 @@ cc_library(
     hdrs = ["type.h"],
     deps = [
         ":compile_time_string",
-        ":sequence"
+        ":sequence",
+        "//nth/strings/interpolate:string",
     ],
 )
 

@@ -31,28 +31,6 @@ cc_test(
 )
 
 cc_library(
-    name = "interpolate",
-    hdrs = ["interpolate.h"],
-    srcs = ["internal/interpolate.h"],
-    deps = [
-        "//nth/io:printer",
-        "//nth/strings/interpolate:string",
-        "//nth/meta:compile_time_string",
-    ],
-)
-
-cc_test(
-    name = "interpolate_test",
-    srcs = ["interpolate_test.cc"],
-    deps = [
-        ":interpolate",
-        "//nth/io:string_printer",
-        "//nth/strings/format:universal", # TODO: Cut this dep.
-        "//nth/test:main",
-    ],
-)
-
-cc_library(
     name = "null_terminated_string_view",
     hdrs = ["null_terminated_string_view.h"],
     deps = [

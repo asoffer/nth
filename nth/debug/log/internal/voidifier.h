@@ -5,15 +5,15 @@
 
 namespace nth {
 
-struct log_line;
+struct log_line_base;
 
-namespace internal_debug {
+namespace internal_log {
 
-struct Voidifier {
+struct voidifier {
   template <typename T>
-  friend void operator<<=(Voidifier, T const&) {
+  friend void operator<<=(voidifier, T const&) {
     constexpr bool MissingInterpolationArguments =
-        not std::derived_from<T, log_line>;
+        not std::derived_from<T, log_line_base>;
     // clang-format off
     static_assert(MissingInterpolationArguments,
         "\n\n"
@@ -40,16 +40,16 @@ struct Voidifier {
 };
 
 template <auto F>
-struct InvokingVoidifier : Voidifier {
-  ~InvokingVoidifier() { F(); }
+struct invoking_voidifier : voidifier {
+  ~invoking_voidifier() { F(); }
 };
 
 template <auto F>
-struct NonReturningVoidifier : Voidifier {
-  [[noreturn]] ~NonReturningVoidifier() { F(); }
+struct non_returning_voidifier : voidifier {
+  [[noreturn]] ~non_returning_voidifier() { F(); }
 };
 
-}  // namespace internal_debug
+}  // namespace internal_log
 }  // namespace nth
 
 #endif  // NTH_DEBUG_LOG_INTERNAL_VOIDIFIER_H

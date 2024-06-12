@@ -20,10 +20,10 @@ void ResponderBase::RecordExpectationResult(bool result) {
 }
 
 void ResponderBase::WriteExpression(bounded_string_printer &printer,
-                                    log_entry &entry, char const *expression) {
+                                    log_entry &, char const *expression) {
   printer.write("    ");
   printer.write(expression);
-  entry.demarcate();
+  // entry.demarcate();
 }
 
 void ResponderBase::Send(log_entry const &entry) {
@@ -36,7 +36,7 @@ bool ResponderBase::set_impl(char const *expression, bool b) {
   RecordExpectationResult(b);
 
   if (not value_) {
-    log_entry entry(line_->id(), 1);
+    log_entry entry(line_->id());
 
     bounded_string_printer printer(entry.data(),
                                    nth::config::trace_print_bound);
@@ -50,10 +50,10 @@ bool ResponderBase::set_impl(char const *expression, bool b) {
       TraversalPrinterContext context(printer);
       context.Traverse(std::move(stack));
     }
-    entry.demarcate();
+    // entry.demarcate();
 
     printer.write("Tree");
-    entry.demarcate();
+    // entry.demarcate();
 
     for (auto *sink : nth::internal_debug::registered_log_sinks()) {
       sink->send(*line_, entry);

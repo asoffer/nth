@@ -4,11 +4,11 @@
 #include <cstdint>
 #include <cstdio>
 
-#include "absl/synchronization/mutex.h"
 #include "absl/strings/str_cat.h"
+#include "absl/synchronization/mutex.h"
 #include "nth/debug/expectation_result.h"
-#include "nth/debug/log/log.h"
-#include "nth/debug/log/stderr_log_sink.h"
+#include "nth/io/file_printer.h"
+#include "nth/io/format/format.h"
 #include "nth/test/benchmark_result.h"
 #include "nth/test/test.h"
 #include "nth/utility/no_destructor.h"
@@ -67,15 +67,16 @@ nth::NoDestructor<ExpectationResultHolder> expectation_results;
 nth::NoDestructor<BenchmarkResultHolder> benchmark_results;
 
 struct CharSpacer {
-  friend void NthPrint(auto& p, auto&, CharSpacer s) {
-    p.write(s.count, s.content);
+  friend void NthFormat(auto p, nth::io::format_spec<CharSpacer>,
+                        CharSpacer s) {
+    p.write(std::string(s.count, s.content));
   }
   char content;
   size_t count;
 };
 
 struct Spacer {
-  friend void NthPrint(auto& p, auto&, Spacer s) {
+  friend void NthFormat(auto p, nth::io::format_spec<Spacer>, Spacer s) {
     for (size_t i = 0; i < s.count; ++i) { p.write(s.content); }
   }
   std::string_view content;
@@ -95,7 +96,6 @@ size_t DigitCount(size_t n) {
 
 int main() {
   size_t width = TerminalWidth();
-  nth::register_log_sink(nth::stderr_log_sink);
   nth::debug::RegisterExpectationResultHandler(
       [](nth::debug::ExpectationResult const& result) {
         expectation_results->add(result);
@@ -108,12 +108,10 @@ int main() {
   int32_t passed         = 0;
   size_t benchmark_count = 0;
   for (auto const& [name, test] : nth::test::RegisteredTests()) {
-    int before      = expectation_results->failure_count();
-    NTH_LOG("\x1b[96m[ {} {} TEST ]\x1b[0m")
-        .configure(nth::stderr_log_sink, {.metadata = false}) <<= {
-        name,
-        CharSpacer{.content = '.', .count = width - 10 - name.size()},
-    };
+    int before = expectation_results->failure_count();
+    nth::interpolate<"\x1b[96m[ {} {} TEST ]\x1b[0m\n">(
+        nth::stderr_printer, name,
+        CharSpacer{.content = '.', .count = width - 10 - name.size()});
     test();
     int after    = expectation_results->failure_count();
     bool success = (before == after);
@@ -123,12 +121,9 @@ int main() {
     if (bm_results.size() != benchmark_count) {
       std::span bm_span = std::span(bm_results).subspan(benchmark_count);
 
-      // TODO: You should be able to configure when no interpolation arguments
-      // are provided.
-      NTH_LOG(
-          "  \x1b[96mBENCHMARKS:{}                          Samples      Mean "
-          "             Std. Dev")
-          .configure(nth::stderr_log_sink, {.metadata = false}) <<= {""};
+      nth::stderr_printer.write(
+          "  \x1b[96mBENCHMARKS:                          Samples      Mean    "
+          "          Std. Dev\n");
 
       size_t max_name_length = 0;
       for (auto const& benchmark_result : bm_span) {
@@ -151,10 +146,9 @@ int main() {
           stddev_decimal_pos = stddev_str.size() - 1;
         }
 
-        NTH_LOG("    [ {} ]{}{}{}{}{}{}{}")
-            .configure(nth::stderr_log_sink, {.metadata = false}) <<= {
-            benchmark_result.name,
-            max_name_length > 35 ? "\n" : "",
+        nth::interpolate<"    [ {} ]{}{}{}{}{}{}{}\n">(
+            nth::stderr_printer, benchmark_result.name,
+            std::string_view(max_name_length > 35 ? "\n" : ""),
             CharSpacer{.content = ' ',
                        .count   = (max_name_length > 35
                                        ? 46
@@ -166,21 +160,15 @@ int main() {
             CharSpacer{.content = ' ',
                        .count   = mean_decimal_pos + 15 - mean_str.size() -
                                 stddev_decimal_pos},
-            stddev_str,
-        };
+            stddev_str);
       }
-      NTH_LOG("{}\x1b[0m")
-          .configure(nth::stderr_log_sink, {.metadata = false}) <<= {""};
+      nth::stderr_printer.write("\x1b[0m\n");
     }
     benchmark_count = bm_results.size();
-
-    NTH_LOG("\x1b[{}m[ {} {} {} TEST ]\x1b[0m")
-        .configure(nth::stderr_log_sink, {.metadata = false}) <<= {
-        success ? "96" : "91",
-        name,
+    nth::interpolate<"\x1b[{}m[ {} {} {} TEST ]\x1b[0m\n">(
+        nth::stderr_printer, success ? "96" : "91", name,
         CharSpacer{.content = '.', .count = TerminalWidth() - 17 - name.size()},
-        success ? "PASSED" : "FAILED",
-    };
+        success ? "PASSED" : "FAILED");
   }
 
   size_t digit_width_tests = DigitCount(passed) + DigitCount(tests);
@@ -189,23 +177,20 @@ int main() {
       DigitCount(expectation_results->total_count());
   size_t digit_width = std::max(digit_width_tests, digit_width_expectations);
 
-  NTH_LOG(
+  nth::interpolate<
       "\n"
       "    \u256d{}\u256e\n"
       "    \u2502 Test Execution Summary:{}\u2502\n"
       "    \u2502   Tests:        {} passed / {} executed{}\u2502\n"
       "    \u2502   Expectations: {} passed / {} executed{}\u2502\n"
-      "    \u2570{}\u256f\n")
-      .configure(nth::stderr_log_sink, {.metadata = false}) <<=
-      {Spacer{.content = "\u2500", .count = digit_width + 37},
-       CharSpacer{.content = ' ', .count = 13 + digit_width},
-       passed,
-       tests,
-       CharSpacer{.content = ' ', .count = digit_width - digit_width_tests + 1},
-       expectation_results->success_count(),
-       expectation_results->total_count(),
-       CharSpacer{.content = ' ',
-                  .count   = digit_width - digit_width_expectations + 1},
-       Spacer{.content = "\u2500", .count = digit_width + 37}};
+      "    \u2570{}\u256f\n\n">(
+      nth::stderr_printer,
+      Spacer{.content = "\u2500", .count = digit_width + 37},
+      CharSpacer{.content = ' ', .count = 13 + digit_width}, passed, tests,
+      CharSpacer{.content = ' ', .count = digit_width - digit_width_tests + 1},
+      expectation_results->success_count(), expectation_results->total_count(),
+      CharSpacer{.content = ' ',
+                 .count   = digit_width - digit_width_expectations + 1},
+      Spacer{.content = "\u2500", .count = digit_width + 37});
   return expectation_results->failure_count() == 0 ? 0 : 1;
 }

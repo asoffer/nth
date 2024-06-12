@@ -4,6 +4,7 @@
 #include <cstddef>
 #include <string_view>
 
+#include "nth/base/attributes.h"
 #include "nth/strings/interpolate/internal/validate.h"
 
 namespace nth {
@@ -22,6 +23,8 @@ struct interpolation_string {
   static constexpr size_t size() { return Length; }
   static constexpr size_t length() { return Length; }
 
+  static constexpr bool empty() { return Length == 0; }
+
   constexpr operator std::string_view() const {
     return NthInternalInterpolationStringDataMember;
   }
@@ -30,7 +33,25 @@ struct interpolation_string {
     return NthInternalInterpolationStringDataMember[n];
   }
 
+  constexpr size_t count(char x) const {
+    size_t n = 0;
+    for (char c : std::string_view(*this)) {
+      if (c == x) { ++n; }
+    }
+    return n;
+  }
+
   constexpr auto operator<=>(interpolation_string const&) const = default;
+
+  template <size_t N>
+  requires(N != Length) constexpr bool operator==(
+      interpolation_string<N> const&) const {
+    return false;
+  }
+
+  constexpr bool operator==(std::string_view s) const {
+    return static_cast<std::string_view>(*this) == s;
+  }
 
   // Returns the number of placeholders in this interpolation string.
   constexpr size_t placeholders() const;

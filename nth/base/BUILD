@@ -25,7 +25,9 @@ cc_library(
 cc_library(
     name = "macros",
     hdrs = ["macros.h"],
-    deps = [],
+    deps = [
+        ":platform",
+    ],
 )
 
 cc_test(

@@ -5,7 +5,6 @@
 #include <string_view>
 #include <vector>
 
-#include "nth/configuration/trace.h"
 #include "nth/io/string_printer.h"
 
 namespace nth::debug::internal_trace {
@@ -80,14 +79,13 @@ struct TraversalContext {
 
   void Traverse(std::vector<TraversalAction> &&stack);
 
-  void write(auto const &v) { return formatter_(printer_, v); }
+  void write(auto const &) { /*printer_, v);*/ }
 
  protected:
   bounded_string_printer &printer() { return printer_; }
 
  private:
   bounded_string_printer &printer_;
-  nth::config::trace_formatter formatter_;
 };
 
 }  // namespace nth::debug::internal_trace

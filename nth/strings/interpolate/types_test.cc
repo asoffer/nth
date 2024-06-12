@@ -1,65 +1,106 @@
 #include "nth/strings/interpolate/types.h"
 
-#include <cstdio>
 #include <cstdlib>
 
 #include "nth/meta/type.h"
 
-#define NTH_RAW_ASSERT_IMPL2(file, line, ...)                                  \
-  do {                                                                         \
-    if (not(__VA_ARGS__)) {                                                    \
-      std::fputs("FAILED in " file " on line " #line ":\n  " #__VA_ARGS__      \
-                 "\n\n",                                                       \
-                 stderr);                                                      \
-      std::abort();                                                            \
-    }                                                                          \
-  } while (false)
-
-#define NTH_RAW_ASSERT_IMPL(file, line, ...)                                   \
-  NTH_RAW_ASSERT_IMPL2(file, line, __VA_ARGS__)
-
-#define NTH_RAW_ASSERT(...) NTH_RAW_ASSERT_IMPL(__FILE__, __LINE__, __VA_ARGS__)
-
 struct GlobalStruct {
-  friend constexpr auto NthDefaultInterpolationString(
+  friend consteval auto NthDefaultFormatSpec(
       decltype(nth::type<GlobalStruct>)) {
-    return nth::interpolation_string("GlobalStruct");
+    enum class E { A, B, C } s = E::A;
+    return s;
+  }
+
+  template <nth::interpolation_string S>
+  consteval friend auto NthFormatSpec(decltype(nth::type<GlobalStruct>)) {
+    if constexpr (S == "A") {
+      return nth::io::format_spec<GlobalStruct>::A;
+    } else if constexpr (S == "B") {
+      return nth::io::format_spec<GlobalStruct>::B;
+    } else if constexpr (S == "C") {
+      return nth::io::format_spec<GlobalStruct>::C;
+    } else {
+      std::abort();
+    }
   }
 };
 
 namespace ns {
 
 struct NamespacedStruct {
-  friend constexpr auto NthDefaultInterpolationString(
+  friend consteval auto NthDefaultFormatSpec(
       decltype(nth::type<NamespacedStruct>)) {
-    return nth::interpolation_string("NamespacedStruct");
+    enum class E { A, B, C } s = E::A;
+    return s;
+  }
+
+  template <nth::interpolation_string S>
+  consteval friend auto NthFormatSpec(decltype(nth::type<NamespacedStruct>)) {
+    if constexpr (S == "A") {
+      return nth::io::format_spec<NamespacedStruct>::A;
+    } else if constexpr (S == "B") {
+      return nth::io::format_spec<NamespacedStruct>::B;
+    } else if constexpr (S == "C") {
+      return nth::io::format_spec<NamespacedStruct>::C;
+    } else {
+      std::abort();
+    }
   }
 };
 
-struct NamespacedStructDefault {};
-
-enum NamespacedEnum { A, B, C };
-constexpr auto NthDefaultInterpolationString(
-    decltype(nth::type<NamespacedEnum>)) {
-  return nth::interpolation_string("NamespacedEnum.{}");
-}
-
 }  // namespace ns
 
-void tests() {
-  NTH_RAW_ASSERT(nth::default_interpolation_string_for<bool> == "b");
-  NTH_RAW_ASSERT(nth::default_interpolation_string_for<int> == "d");
-  NTH_RAW_ASSERT(nth::default_interpolation_string_for<char> == "c");
-  NTH_RAW_ASSERT(nth::default_interpolation_string_for<signed char> == "d");
-  NTH_RAW_ASSERT(nth::default_interpolation_string_for<GlobalStruct> ==
-                 "GlobalStruct");
-  NTH_RAW_ASSERT(nth::default_interpolation_string_for<ns::NamespacedStruct> ==
-                 "NamespacedStruct");
-  NTH_RAW_ASSERT(
-      nth::default_interpolation_string_for<ns::NamespacedStructDefault> ==
-      "?");
-  NTH_RAW_ASSERT(nth::default_interpolation_string_for<ns::NamespacedEnum> ==
-                 "NamespacedEnum.{}");
-}
+static_assert(nth::format_spec_from<"", bool>() ==
+              nth::io::default_format_spec<bool>());
+static_assert(nth::format_spec_from<"d", bool>() ==
+              nth::io::format_spec<bool>::decimal);
+static_assert(nth::format_spec_from<"b", bool>() ==
+              nth::io::format_spec<bool>::word);
+static_assert(nth::format_spec_from<"B", bool>() ==
+              nth::io::format_spec<bool>::Word);
+static_assert(nth::format_spec_from<"B!", bool>() ==
+              nth::io::format_spec<bool>::WORD);
 
-int main() { tests(); }
+static_assert(nth::format_spec_from<"", int>() ==
+              nth::io::default_format_spec<int>());
+static_assert(nth::format_spec_from<"d", int>() ==
+              nth::io::format_spec<int>::decimal);
+static_assert(nth::format_spec_from<"x", int>() ==
+              nth::io::format_spec<int>::hexadecimal);
+
+static_assert(nth::format_spec_from<"", char>() ==
+              nth::io::default_format_spec<char>());
+static_assert(nth::format_spec_from<"d", char>() ==
+              nth::io::format_spec<char>::decimal);
+static_assert(nth::format_spec_from<"x", char>() ==
+              nth::io::format_spec<char>::hexadecimal);
+static_assert(nth::format_spec_from<"X", char>() ==
+              nth::io::format_spec<char>::Hexadecimal);
+
+static_assert(nth::format_spec_from<"", signed char>() ==
+              nth::io::default_format_spec<signed char>());
+static_assert(nth::format_spec_from<"d", signed char>() ==
+              nth::io::format_spec<signed char>::decimal);
+static_assert(nth::format_spec_from<"x", signed char>() ==
+              nth::io::format_spec<signed char>::hexadecimal);
+
+static_assert(nth::format_spec_from<"", GlobalStruct>() ==
+              nth::io::default_format_spec<GlobalStruct>());
+static_assert(nth::format_spec_from<"A", GlobalStruct>() ==
+              nth::io::format_spec<GlobalStruct>::A);
+static_assert(nth::format_spec_from<"B", GlobalStruct>() ==
+              nth::io::format_spec<GlobalStruct>::B);
+static_assert(nth::format_spec_from<"C", GlobalStruct>() ==
+              nth::io::format_spec<GlobalStruct>::C);
+
+
+static_assert(nth::format_spec_from<"", ns::NamespacedStruct>() ==
+              nth::io::default_format_spec<ns::NamespacedStruct>());
+static_assert(nth::format_spec_from<"A", ns::NamespacedStruct>() ==
+              nth::io::format_spec<ns::NamespacedStruct>::A);
+static_assert(nth::format_spec_from<"B", ns::NamespacedStruct>() ==
+              nth::io::format_spec<ns::NamespacedStruct>::B);
+static_assert(nth::format_spec_from<"C", ns::NamespacedStruct>() ==
+              nth::io::format_spec<ns::NamespacedStruct>::C);
+
+int main() {}

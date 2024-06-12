@@ -12,6 +12,7 @@
 #include "nth/io/reader/reader.h"
 #include "nth/io/writer/writer.h"
 #include "nth/meta/concepts/core.h"
+#include "nth/strings/interpolate/string.h"
 
 namespace nth {
 
@@ -109,7 +110,8 @@ struct integer {
     }
   }
 
-  friend void NthFormat(nth::io::printer_type auto p, integer const &n) {
+  friend void NthFormat(nth::io::printer_type auto p, io::format_spec<integer>,
+                        integer const &n) {
     if (n.size_ == 0) {
       p.write("0");
       return;

@@ -8,14 +8,13 @@ cc_library(
 )
 
 cc_library(
-    name = "interpolation_arguments",
-    hdrs = ["interpolation_arguments.h"],
+    name = "arguments",
+    hdrs = ["arguments.h"],
     deps = [
         ":voidifier",
-        "//nth/base:attributes",
-        "//nth/configuration:log",
+        "//nth/debug/log:line",
+        "//nth/debug/log:entry",
         "//nth/io:string_printer",
-        "//nth/strings/interpolate",
     ],
 )
 
@@ -23,14 +22,13 @@ cc_library(
     name = "log",
     hdrs = ["log.h"],
     deps = [
-        ":interpolation_arguments",
+        ":arguments",
         ":voidifier",
         "//nth/base:macros",
         "//nth/configuration:verbosity",
         "//nth/debug/log:line",
         "//nth/debug/log:entry",
         "//nth/debug:source_location",
-        "//nth/strings:interpolate",
     ],
 )
 

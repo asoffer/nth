@@ -19,7 +19,7 @@
       verbosity,                                                               \
       "This code-path has not yet been implemented.\n" interpolation_string,   \
       std::abort(),                                                            \
-      ::nth::internal_debug::NonReturningVoidifier<std::abort>())
+      ::nth::internal_log::non_returning_voidifier<std::abort>())
 
 #define NTH_DEBUG_INTERNAL_UNIMPLEMENTED(...)                                  \
   NTH_IF(NTH_IS_EMPTY(__VA_ARGS__),                                            \

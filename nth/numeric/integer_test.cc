@@ -2,7 +2,6 @@
 
 #include "nth/io/serialize/round_trip.h"
 #include "nth/numeric/test_traits.h"
-#include "nth/strings/format/universal.h"
 #include "nth/strings/interpolate/interpolate.h"
 #include "nth/test/test.h"
 
@@ -78,78 +77,63 @@ NTH_TEST("integer/print") {
   std::string s;
   string_printer p(s);
 
-  nth::io::print(nth::interpolating_printer<"{}", string_printer>(p),
-                 integer(0));
+  nth::interpolate<"{}">(p, integer(0));
   NTH_EXPECT(s == "0");
   s.clear();
 
-  nth::io::print(nth::interpolating_printer<"{}", string_printer>(p),
-                 integer(1));
+  nth::interpolate<"{}">(p, integer(1));
   NTH_EXPECT(s == "0x1");
   s.clear();
 
-  nth::io::print(nth::interpolating_printer<"{}", string_printer>(p),
-                 integer(-1));
+  nth::interpolate<"{}">(p, integer(-1));
   NTH_EXPECT(s == "-0x1");
   s.clear();
 
-  nth::io::print(nth::interpolating_printer<"{}", string_printer>(p),
-                 integer(10));
+  nth::interpolate<"{}">(p, integer(10));
   NTH_EXPECT(s == "0xa");
   s.clear();
 
-  nth::io::print(nth::interpolating_printer<"{}", string_printer>(p),
-                 integer(-10));
+  nth::interpolate<"{}">(p, integer(-10));
   NTH_EXPECT(s == "-0xa");
   s.clear();
 
-  nth::io::print(nth::interpolating_printer<"{}", string_printer>(p),
-                 integer(16));
+  nth::interpolate<"{}">(p, integer(16));
   NTH_EXPECT(s == "0x10");
   s.clear();
 
-  nth::io::print(nth::interpolating_printer<"{}", string_printer>(p),
-                 integer(-16));
+  nth::interpolate<"{}">(p, integer(-16));
   NTH_EXPECT(s == "-0x10");
   s.clear();
 
-  nth::io::print(nth::interpolating_printer<"{}", string_printer>(p),
-                 integer(std::numeric_limits<uintptr_t>::max()));
+  nth::interpolate<"{}">(p, integer(std::numeric_limits<uintptr_t>::max()));
   NTH_EXPECT(s == "0xffffffffffffffff");
   s.clear();
 
-  nth::io::print(nth::interpolating_printer<"{}", string_printer>(p),
-                 -integer(std::numeric_limits<uintptr_t>::max()));
+  nth::interpolate<"{}">(p, -integer(std::numeric_limits<uintptr_t>::max()));
   NTH_EXPECT(s == "-0xffffffffffffffff");
   s.clear();
 
-  nth::io::print(nth::interpolating_printer<"{}", string_printer>(p),
-                 integer::from_words({0, 1}));
+  nth::interpolate<"{}">(p, integer::from_words({0, 1}));
   NTH_EXPECT(s == "0x10000000000000000");
   s.clear();
 
-  nth::io::print(nth::interpolating_printer<"{}", string_printer>(p),
-                 -integer::from_words({0, 1}));
+  nth::interpolate<"{}">(p, -integer::from_words({0, 1}));
   NTH_EXPECT(s == "-0x10000000000000000");
   s.clear();
 
-  nth::io::print(nth::interpolating_printer<"{}", string_printer>(p),
-                 integer::from_words({0, 33}));
+  nth::interpolate<"{}">(p, integer::from_words({0, 33}));
   NTH_EXPECT(s == "0x210000000000000000");
   s.clear();
 
-  nth::io::print(nth::interpolating_printer<"{}", string_printer>(p),
-                 -integer::from_words({0, 33}));
+  nth::interpolate<"{}">(p, -integer::from_words({0, 33}));
   NTH_EXPECT(s == "-0x210000000000000000");
   s.clear();
 
-  nth::io::print(nth::interpolating_printer<"{}", string_printer>(p),
-                 integer::from_words({1, 0, 33}));
+  nth::interpolate<"{}">(p, integer::from_words({1, 0, 33}));
   NTH_EXPECT(s == "0x2100000000000000000000000000000001");
   s.clear();
 
-  nth::io::print(nth::interpolating_printer<"{}", string_printer>(p),
-                 -integer::from_words({1, 0, 33}));
+  nth::interpolate<"{}">(p, -integer::from_words({1, 0, 33}));
   NTH_EXPECT(s == "-0x2100000000000000000000000000000001");
   s.clear();
 }

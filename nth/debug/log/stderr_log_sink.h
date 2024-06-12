@@ -6,30 +6,17 @@
 #include "nth/debug/log/line.h"
 #include "nth/debug/log/sink.h"
 #include "nth/io/file_printer.h"
-#include "nth/strings/interpolate.h"
+#include "nth/strings/interpolate/string.h"
 
 namespace nth {
 
 struct StdErrLogSink : log_sink {
-  struct options {
-    bool metadata = true;
-  };
-
-  void send(log_line const& line, log_entry const& log_entry) override {
-    auto formatter = nth::config::log_formatter();
-
-    if (options_.metadata) { formatter(stderr_printer, line.metadata()); }
-    nth::InterpolateErased(line.interpolation_string(), stderr_printer,
-                           log_entry.component_begin(),
-                           log_entry.component_end());
+  void send(log_line_base const&, log_entry const&) override {
+    // nth::interpolate<"{\x1b[0;34m{} {}:{}]\x1b[0m} ">(stderr_printer,
+    //                                                   line.metadata());
 
     stderr_printer.write("\n");
   }
-
-  void set_options(options options) { options_ = options; }
-
- private:
-  options options_;
 };
 inline StdErrLogSink stderr_log_sink;
 

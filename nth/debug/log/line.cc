@@ -2,13 +2,11 @@
 
 namespace nth {
 
-log_line const log_line::stub_("", source_location::current());
-std::atomic<log_line const*> log_line::head_{&log_line::stub_};
+log_line_base const log_line_base::stub_;
+std::atomic<log_line_base const*> log_line_base::head_{&log_line_base::stub_};
 
-log_line::log_line(std::string_view interpolation_string,
-                   struct source_location location)
-    : interpolation_string_(interpolation_string), metadata_(location) {
-  log_line const* head = nullptr;
+log_line_base::log_line_base() : metadata_(nth::source_location::current()) {
+  log_line_base const* head = nullptr;
   do {
     head = head_.load(std::memory_order::relaxed);
     id_  = head->id_ + 1;

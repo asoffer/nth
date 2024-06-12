@@ -20,7 +20,6 @@ cc_library(
     deps = [
         "//nth/debug/log",
         "//nth/debug:source_location",
-        "//nth/strings:interpolate",
     ],
 )
 

@@ -9,7 +9,7 @@ cc_library(
         ":line",
         ":sink",
         "//nth/configuration:log",
-        "//nth/debug/log/internal:component_iterator",
+        "//nth/strings/interpolate",
     ],
 )
 
@@ -19,9 +19,11 @@ cc_library(
     hdrs = ["line.h"],
     srcs = ["line.cc"],
     deps = [
-        "//nth/debug/log/internal:interpolation_arguments",
         "//nth/debug/log/internal:voidifier",
         "//nth/debug:source_location",
+        "//nth/io:printer",
+        "//nth/io/format",
+        "//nth/strings/interpolate:string",
     ],
 )
 
@@ -44,9 +46,7 @@ cc_test(
     deps = [
         ":log",
         ":vector_log_sink",
-        "//nth/debug:unreachable",
-        "@abseil-cpp//absl/debugging:failure_signal_handler",
-        "@abseil-cpp//absl/debugging:symbolize",
+        "//nth/test/raw:test",
     ],
 )
 

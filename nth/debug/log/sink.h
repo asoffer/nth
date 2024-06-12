@@ -8,8 +8,8 @@ namespace nth {
 // Any object whose type inherits from `log_sink` may be registered as a log
 // sink to receive all log messages received after registration.
 struct log_sink {
-  virtual ~log_sink()                                                = default;
-  virtual void send(struct log_line const&, struct log_entry const&) = 0;
+  virtual ~log_sink() = default;
+  virtual void send(struct log_line_base const&, struct log_entry const&) = 0;
 };
 
 namespace internal_debug {

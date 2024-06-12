@@ -8,9 +8,18 @@
 namespace nth {
 
 // Represents a source location for the purposes of debugging. There are no
-// guarantees the values of any 
+// guarantees the values of any
 struct source_location {
   source_location() = delete;
+
+  // Returns a `source_location` reperesenting a location as described by the
+  // provided informaiton. Behavior is undefined unless `file` and `function`
+  // are null-terminated C-style strings.
+  static constexpr source_location unchecked(char const* file,
+                                             char const* function,
+                                             unsigned line) {
+    return source_location(file, function, line);
+  }
 
   // Returns a `source_location` reperesenting the location at which this
   // function call is invoked.

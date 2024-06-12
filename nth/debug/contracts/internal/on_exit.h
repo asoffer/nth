@@ -3,25 +3,17 @@
 
 #include "nth/debug/log/log.h"
 #include "nth/debug/source_location.h"
-#include "nth/strings/interpolate.h"
+#include "nth/strings/interpolate/string.h"
 
 namespace nth::debug::internal_contracts {
 
+template <compile_time_string File, int Line>
 struct Logger {
-  explicit Logger(source_location location) : loc_(location) {}
   template <::nth::interpolation_string S>
   void Log(auto const &...arguments) requires(sizeof...(arguments) ==
                                               S.placeholders()) {
-    static ::nth::internal_debug::log_line_with_arity<sizeof...(arguments)>
-        line(S, loc_);
-    line <<= {arguments...};
+    internal_log::location_injector<__FILE__, __LINE__, S>() <<= {arguments...};
   }
-
- private:
-  template <typename Fn>
-  friend struct OnExit;
-
-  source_location loc_;
 };
 
 template <typename Fn>
@@ -30,17 +22,17 @@ template <typename Fn>
 // internal to this library, meaning that we can avoid unnecessary `#include`s
 // with no loss of user-visible safety.
 struct OnExit {
-  explicit constexpr OnExit(Fn f, source_location location)
-      : f_(static_cast<Fn &&>(f)), logger_(location) {}
+  explicit constexpr OnExit(Fn f, source_location loc)
+      : f_(static_cast<Fn &&>(f)), loc_(loc) {}
   OnExit(OnExit const &)            = delete;
   OnExit(OnExit &&)                 = delete;
   OnExit &operator=(OnExit const &) = delete;
   OnExit &operator=(OnExit &&)      = delete;
-  ~OnExit() { static_cast<Fn &&>(f_)(logger_.loc_); }
+  ~OnExit() { static_cast<Fn &&>(f_)(loc_); }
 
  private:
   Fn f_;
-  Logger logger_;
+  source_location loc_;
 };
 
 template <typename Fn>

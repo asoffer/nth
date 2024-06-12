@@ -3,10 +3,10 @@
 
 #include <charconv>
 #include <cstddef>
-#include <iostream>
+#include <string_view>
 
+#include "nth/io/format/format.h"
 #include "nth/meta/type.h"
-#include "nth/strings/interpolate/format.h"
 #include "nth/strings/interpolate/string.h"
 
 namespace nth {
@@ -26,134 +26,96 @@ template <typename T>
 concept is_interpolation_string = is_interpolation_string_impl<T>::value;
 
 }  // namespace internal_strings
-}  // namespace nth
 
-#define NTH_STRINGS_DEFINE_DEFAULT_INTERNPOLATION_STRING(t, str)               \
-  inline constexpr nth::interpolation_string<sizeof(str) - 1>                  \
-  NthDefaultInterpolationString(decltype(nth::type<t>)) {                      \
-    return str;                                                                \
-  }
+template <nth::interpolation_string S>
+consteval auto NthFormatSpec(auto t) -> nth::io::format_spec<nth::type_t<t>> {
+  static_assert(S.empty());
+  return nth::io::default_format_spec<nth::type_t<t>>();
+}
 
-NTH_STRINGS_DEFINE_DEFAULT_INTERNPOLATION_STRING(bool, "b");
-NTH_STRINGS_DEFINE_DEFAULT_INTERNPOLATION_STRING(std::byte, "x");
-NTH_STRINGS_DEFINE_DEFAULT_INTERNPOLATION_STRING(char, "c");
-NTH_STRINGS_DEFINE_DEFAULT_INTERNPOLATION_STRING(signed char, "d");
-NTH_STRINGS_DEFINE_DEFAULT_INTERNPOLATION_STRING(unsigned char, "d");
-NTH_STRINGS_DEFINE_DEFAULT_INTERNPOLATION_STRING(short, "d");
-NTH_STRINGS_DEFINE_DEFAULT_INTERNPOLATION_STRING(unsigned short, "d");
-NTH_STRINGS_DEFINE_DEFAULT_INTERNPOLATION_STRING(int, "d");
-NTH_STRINGS_DEFINE_DEFAULT_INTERNPOLATION_STRING(unsigned int, "d");
-NTH_STRINGS_DEFINE_DEFAULT_INTERNPOLATION_STRING(long, "d");
-NTH_STRINGS_DEFINE_DEFAULT_INTERNPOLATION_STRING(unsigned long, "d");
-NTH_STRINGS_DEFINE_DEFAULT_INTERNPOLATION_STRING(long long, "d");
-NTH_STRINGS_DEFINE_DEFAULT_INTERNPOLATION_STRING(unsigned long long, "d");
-NTH_STRINGS_DEFINE_DEFAULT_INTERNPOLATION_STRING(decltype(nullptr), ".");
-
-void NthFormat(auto p, decltype(nullptr)) {
-  switch (nth::format_string(p)[0]) {
-    case 'p': p.write("0x0"); break;
-    case '.': p.write("nullptr"); break;
-    case 'd': p.write("0"); break;
-    default:
-      std::cerr << __LINE__ << std::string_view(nth::format_string(p)) << "\n";
-      std::abort();
+template <nth::interpolation_string S>
+consteval nth::io::format_spec<decltype(nullptr)> NthFormatSpec(
+    decltype(nth::type<decltype(nullptr)>)) {
+  using spec_type = io::format_spec<decltype(nullptr)>;
+  if constexpr (S == "x") {
+    return spec_type::hexadecimal;
+  } else if constexpr (S == "s") {
+    return spec_type::word;
+  } else if constexpr (S == "d") {
+    return spec_type::decimal;
+  } else {
+    std::abort();
   }
 }
 
-void NthFormat(auto p, bool b) {
-  switch (nth::format_string(p)[0]) {
-    case 'b': p.write(b ? "true" : "false"); break;
-    case 'B': p.write(b ? "True" : "False"); break;
-    case 'd': p.write(b ? "1" : "0"); break;
-    default:
-      std::cerr << __LINE__ << std::string_view(nth::format_string(p)) << "\n";
-      std::abort();
+template <nth::interpolation_string S>
+consteval nth::io::format_spec<bool> NthFormatSpec(decltype(nth::type<bool>)) {
+  using spec_type = io::format_spec<bool>;
+  if constexpr (S == "b") {
+    return spec_type::word;
+  } else if constexpr (S == "B") {
+    return spec_type::Word;
+  } else if constexpr (S == "B!") {
+    return spec_type::WORD;
+  } else if constexpr (S == "d") {
+    return spec_type::decimal;
+  } else {
+    std::abort();
   }
 }
 
-void NthFormat(auto p, char c) {
-  switch (nth::format_string(p)[0]) {
-    case 'c': {
-      char buffer[2] = {c, '\0'};
-      p.write(std::string_view(buffer));
-    } break;
-    case 'd': {
-      char buffer[3] = {};
-      auto result = std::to_chars(&buffer[0], &buffer[3], static_cast<int>(c));
-      p.write(std::string_view(&buffer[0], result.ptr));
-    } break;
-    default:
-      std::cerr << __LINE__ << std::string_view(nth::format_string(p)) << "\n";
-      std::abort();
+template <nth::interpolation_string S>
+consteval nth::io::format_spec<char> NthFormatSpec(decltype(nth::type<char>)) {
+  using spec_type = io::format_spec<char>;
+  if constexpr (S == "c") {
+    return spec_type::ascii;
+  } else if constexpr (S == "d") {
+    return spec_type::decimal;
+  } else if constexpr (S == "x") {
+    return spec_type::hexadecimal;
+  } else if constexpr (S == "X") {
+    return spec_type::Hexadecimal;
+  } else {
+    std::abort();
   }
 }
 
-void NthFormat(auto p, std::byte b) {
-  switch (nth::format_string(p)[0]) {
-    case 'x': {
-      constexpr char const Hex[] = "0123456789abcdef";
-      char buffer[3]             = {Hex[static_cast<uint8_t>(b) >> 4],
-                                    Hex[static_cast<uint8_t>(b) & 0x0f], '\0'};
-      p.write(std::string_view(buffer));
-    } break;
-    case 'X': {
-      constexpr char const Hex[] = "0123456789ABCDEF";
-      char buffer[3]             = {Hex[static_cast<uint8_t>(b) >> 4],
-                                    Hex[static_cast<uint8_t>(b) & 0x0f], '\0'};
-      p.write(std::string_view(buffer));
-    } break;
-    case 'd': {
-      char buffer[3] = {};
-      auto result = std::to_chars(&buffer[0], &buffer[3], static_cast<int>(b));
-      p.write(std::string_view(&buffer[0], result.ptr));
-    } break;
-    default:
-      std::cerr << __LINE__ << std::string_view(nth::format_string(p)) << "\n";
-      std::abort();
+template <nth::interpolation_string S>
+consteval nth::io::format_spec<std::byte> NthFormatSpec(
+    decltype(nth::type<std::byte>)) {
+  using spec_type = io::format_spec<std::byte>;
+  if constexpr (S == "d") {
+    return spec_type::decimal;
+  } else if constexpr (S == "x") {
+    return spec_type::hexadecimal;
+  } else if constexpr (S == "X") {
+    return spec_type::Hexadecimal;
+  } else {
+    std::abort();
   }
 }
 
-void NthFormat(auto p, std::integral auto n) {
-  int base;
-  switch (nth::format_string(p)[0]) {
-    case 'x': base = 16; break;
-    case 'd': base = 10; break;
-    default:
-      std::cerr << __LINE__ << std::string_view(nth::format_string(p)) << "\n";
-      std::abort();
+template <nth::interpolation_string S>
+consteval auto NthFormatSpec(auto t) -> nth::io::format_spec<nth::type_t<t>>
+requires std::integral<nth::type_t<t>> {
+  using spec_type = io::format_spec<nth::type_t<t>>;
+  if constexpr (S == "d") {
+    return static_cast<spec_type>(10);
+  } else if constexpr (S == "x") {
+    return static_cast<spec_type>(16);
+  } else {
+    std::abort();
   }
-
-  char buffer[1 + static_cast<int>(sizeof(n) * 8 * 0.31)] = {};
-  auto result = std::to_chars(&buffer[0], &buffer[3], n, base);
-  p.write(std::string_view(&buffer[0], result.ptr));
 }
 
-#undef NTH_STRINGS_DEFINE_DEFAULT_INTERNPOLATION_STRING
-
-namespace nth {
-namespace internal_strings {
-
-template <typename T>
-concept has_custom_default_interpolation_string = requires {
-  { NthDefaultInterpolationString(nth::type<T>) } -> is_interpolation_string;
-};
-
-}  // namespace internal_strings
-// Each type has a default interpolation string so that when a value of that is
-// attempted to be interpolated via with "{}", is is formated by the default
-// interpolation string for that type. By default, this interpolation string is
-// "?", which prints an unspecified representation.
-template <typename T>
-inline constexpr auto default_interpolation_string_for =
-    interpolation_string("?");
-
-// Type authors may customize the default interpolation string for their type by
-// implementing a function named `NthDefaultInterpolationString` that accepts a
-// `decltype(nth::type<T>)` and is findable via argument-dependent lookup. The
-// function must return an `nth::interpolation_string<N> for some `N`.
-template <internal_strings::has_custom_default_interpolation_string T>
-inline constexpr interpolation_string default_interpolation_string_for<T> =
-    NthDefaultInterpolationString(nth::type<T>);
+template <nth::interpolation_string S, typename T>
+consteval nth::io::format_spec<T> format_spec_from() {
+  if constexpr (S.empty()) {
+    return nth::io::default_format_spec<T>();
+  } else {
+    return NthFormatSpec<S>(nth::type<T>);
+  }
+}
 
 }  // namespace nth
 

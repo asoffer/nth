@@ -2,12 +2,8 @@
 
 #include <iostream>
 
-#include "absl/debugging/failure_signal_handler.h"
-#include "absl/debugging/symbolize.h"
 #include "nth/debug/log/vector_log_sink.h"
-
-#define NTH_INTERNAL_TEST_ASSERT(...)                                          \
-  if (not(__VA_ARGS__)) { return 1; }
+#include "nth/test/raw/test.h"
 
 template <typename Iter>
 size_t ComponentCount(Iter b, Iter e) {
@@ -27,42 +23,41 @@ int AlwaysLog() {
 #line 100
   NTH_LOG((v.always), "No interpolation");
 #line 200
-  NTH_LOG((v.always), "No interpolation with arguments.") <<= {};
+  NTH_LOG((v.always), "No interpolation with argument.") <<= {};
 #line 300
   NTH_LOG((v.always), "Interpolation with argument = {}.") <<= {3};
 #line 400
   NTH_LOG((v.always), "Interpolation with arguments = {}, {}.") <<=
       {4, "hello"};
 
-  NTH_INTERNAL_TEST_ASSERT(log.size() == 4);
+  NTH_RAW_TEST_ASSERT(log.size() == 4);
 
-  NTH_INTERNAL_TEST_ASSERT(
-      log[0].id().line().metadata().source_location().line() == 100);
-  NTH_INTERNAL_TEST_ASSERT(
+  NTH_RAW_TEST_ASSERT(log[0].id().line().metadata().source_location().line() ==
+                      100);
+  NTH_RAW_TEST_ASSERT(
       ComponentCount(log[0].component_begin(), log[0].component_end()) == 0);
 
-  NTH_INTERNAL_TEST_ASSERT(
-      log[1].id().line().metadata().source_location().line() == 200);
-  NTH_INTERNAL_TEST_ASSERT(
+  NTH_RAW_TEST_ASSERT(log[1].id().line().metadata().source_location().line() ==
+                      200);
+  NTH_RAW_TEST_ASSERT(
       ComponentCount(log[1].component_begin(), log[1].component_end()) == 0);
 
-  NTH_INTERNAL_TEST_ASSERT(
-      log[2].id().line().metadata().source_location().line() == 300);
-  NTH_INTERNAL_TEST_ASSERT(
+  NTH_RAW_TEST_ASSERT(log[2].id().line().metadata().source_location().line() ==
+                      300);
+  std::cerr << ComponentCount(log[2].component_begin(), log[2].component_end()) << "!\n";
+  NTH_RAW_TEST_ASSERT(
       ComponentCount(log[2].component_begin(), log[2].component_end()) == 1);
-  std::cerr << "[[[" << *log[2].component_begin() << "]]]\n";
-  NTH_INTERNAL_TEST_ASSERT(*log[2].component_begin() == "3");
-#if 0
+  std::cerr << *log[2].component_begin() << "\n";
+  NTH_RAW_TEST_ASSERT(*log[2].component_begin() == "3");
 
-  NTH_INTERNAL_TEST_ASSERT(
-      log[3].id().line().metadata().source_location().line() == 400);
-  NTH_INTERNAL_TEST_ASSERT(
+  NTH_RAW_TEST_ASSERT(log[3].id().line().metadata().source_location().line() ==
+                      400);
+  NTH_RAW_TEST_ASSERT(
       ComponentCount(log[3].component_begin(), log[3].component_end()) == 2);
   auto iter = log[3].component_begin();
-  NTH_INTERNAL_TEST_ASSERT(*iter == "4");
+  NTH_RAW_TEST_ASSERT(*iter == "4");
   ++iter;
-  NTH_INTERNAL_TEST_ASSERT(*iter == "hello");
-#endif
+  NTH_RAW_TEST_ASSERT(*iter == "hello");
 
   return 0;
 }
@@ -75,23 +70,19 @@ int NeverLog() {
 #line 100
   NTH_LOG((v.never), "No interpolation");
 #line 200
-  NTH_LOG((v.never), "No interpolation with arguments.") <<= {};
+  NTH_LOG((v.never), "No interpolation with argument") <<= {};
 #line 300
   NTH_LOG((v.never), "Interpolation with argument = {}.") <<= {3};
 #line 400
-  NTH_LOG((v.never), "Interpolation with arguments = {}, {}.") <<=
-      {4, "hello"};
+  NTH_LOG((v.never), "Interpolation with arguments = {}, {}.") <<= {4, "hello"};
 
-  NTH_INTERNAL_TEST_ASSERT(log.size() == 0);
+  NTH_RAW_TEST_ASSERT(log.size() == 0);
   return 0;
 }
 
 int main() {
-  absl::InitializeSymbolizer("");
-  absl::FailureSignalHandlerOptions opts;
-  absl::InstallFailureSignalHandler(opts);
-
-  NTH_INTERNAL_TEST_ASSERT(AlwaysLog() == 0);
-  NTH_INTERNAL_TEST_ASSERT(NeverLog() == 0);
+  NTH_RAW_TEST_ASSERT(AlwaysLog() == 0);
+  NTH_RAW_TEST_ASSERT(NeverLog() == 0);
   return 0;
 }
+

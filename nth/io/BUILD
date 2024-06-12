@@ -74,6 +74,8 @@ cc_library(
     deps = [
         "//nth/meta/concepts:core",
         "//nth/meta:type",
+        "//nth/strings/interpolate:string",
+        "//nth/io/format",
     ],
 )
 

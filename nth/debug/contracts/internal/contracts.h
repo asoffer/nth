@@ -24,26 +24,20 @@ inline constexpr char const EnsureLogLine[] =
 
 }  // namespace nth::debug::internal_contracts
 
-#define NTH_DEBUG_INTERNAL_CONTRACT_CHECK(log_line, verbosity, responder_type, \
+#define NTH_DEBUG_INTERNAL_CONTRACT_CHECK(line, verbosity, responder_type,     \
                                           action_prefix, ...)                  \
   if (NTH_DEBUG_INTERNAL_VERBOSITY_DISABLED(verbosity)) {                      \
   } else if (::nth::debug::internal_contracts::responder_type                  \
                  NthInternalResponder;                                         \
-             [&](::nth::source_location NthInternalourceLocation)              \
-                 -> decltype(auto) {                                           \
-               static ::nth::internal_debug::log_line_with_arity<3> const      \
-                   NthInternalLogLine(log_line, NthInternalourceLocation);     \
-               NthInternalResponder.set_log_line(NthInternalLogLine);          \
-               return (NthInternalResponder);                                  \
-             }(::nth::source_location::current())                              \
-                        .set((#__VA_ARGS__),                                   \
-                             NTH_DEBUG_INTERNAL_TRACE_INJECTED_EXPR(           \
-                                 __VA_ARGS__))) {                              \
+             NTH_INLINE_CODE_SNIPPET_BEGIN static ::nth::log_line<line> const  \
+                 NthInternalLogLine;                                           \
+             NthInternalResponder.set_log_line(NthInternalLogLine);            \
+             NTH_INLINE_CODE_SNIPPET_END(NthInternalResponder.set(             \
+                 (#__VA_ARGS__),                                               \
+                 NTH_DEBUG_INTERNAL_TRACE_INJECTED_EXPR(__VA_ARGS__)))) {      \
   } else                                                                       \
-    switch (0)                                                                 \
-    default:                                                                   \
-      action_prefix(void)::nth::debug::internal_contracts::Logger(             \
-          ::nth::source_location::current())
+    NTH_REQUIRE_EXPANSION_TO_PREFIX_SUBEXPRESSION(action_prefix(               \
+        void)::nth::debug::internal_contracts::Logger<__FILE__, __LINE__>())
 
 #define NTH_DEBUG_INTERNAL_REQUIRE_WITH_VERBOSITY(verbosity, ...)              \
   NTH_DEBUG_INTERNAL_CONTRACT_CHECK(                                           \
@@ -63,23 +57,21 @@ inline constexpr char const EnsureLogLine[] =
 #define NTH_DEBUG_INTERNAL_ENSURE_WITH_VERBOSITY(verbosity, ...)               \
   ::nth::debug::internal_contracts::OnExit NTH_CONCATENATE(NthInternalOnExit,  \
                                                            __LINE__)(          \
-      [&](nth::source_location NthInternalourceLocation) {                     \
+      [&](nth::source_location) {                                              \
         if (NTH_DEBUG_INTERNAL_VERBOSITY_DISABLED(verbosity)) { return; }      \
         ::nth::debug::internal_contracts::AbortingResponder                    \
             NthInternalResponder;                                              \
-        static ::nth::internal_debug::log_line_with_arity<3> const             \
-            NthInternalLogLine(                                                \
-                ::nth::debug::internal_contracts::EnsureLogLine,               \
-                NthInternalourceLocation);                                     \
+        static ::nth::log_line<                                                \
+            ::nth::debug::internal_contracts::EnsureLogLine> const             \
+            NthInternalLogLine;                                                \
         NthInternalResponder.set_log_line(NthInternalLogLine);                 \
         NthInternalResponder.set(                                              \
             (#__VA_ARGS__),                                                    \
             NTH_DEBUG_INTERNAL_TRACE_INJECTED_EXPR(__VA_ARGS__));              \
       },                                                                       \
       nth::source_location::current());                                        \
-  switch (0)                                                                   \
-  default:                                                                     \
-    (void)NTH_CONCATENATE(NthInternalOnExit, __LINE__)
+  NTH_REQUIRE_EXPANSION_TO_PREFIX_SUBEXPRESSION(                               \
+      (void)NTH_CONCATENATE(NthInternalOnExit, __LINE__))
 
 #define NTH_DEBUG_INTERNAL_ENSURE_WITHOUT_VERBOSITY(...)                       \
   NTH_DEBUG_INTERNAL_ENSURE_WITH_VERBOSITY(                                    \

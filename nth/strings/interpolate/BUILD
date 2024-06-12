@@ -1,34 +1,25 @@
 package(default_visibility = ["//visibility:public"])
 
 cc_library(
-    name = "format",
-    hdrs = ["format.h"],
-    deps = [
-        ":string",
-    ],
-)
-
-cc_library(
     name = "interpolate",
     hdrs = ["interpolate.h"],
     deps = [
         ":string",
         ":types",
-        "//nth/strings/interpolate/internal:interpolate",
-        "//nth/io:printer",
         "//nth/base:attributes",
+        "//nth/strings/interpolate/internal:interpolate",
+        "//nth/strings/interpolate/internal:parameter_tree",
+        "//nth/io:printer",
     ],
 )
 
-cc_binary(
-    name = "interpolate_main",
-    srcs = ["interpolate.cc"],
+cc_test(
+    name = "interpolate_test",
+    srcs = ["interpolate_test.cc"],
     deps = [
         ":interpolate",
-        "//nth/strings/interpolate/internal:interpolate",
-        "//nth/io:file_printer",
-        "//nth/io:printer",
-        "//nth/base:attributes",
+        "//nth/io:string_printer",
+        "//nth/test/raw:test",
     ],
 )
 
@@ -36,6 +27,7 @@ cc_library(
     name = "string",
     hdrs = ["string.h"],
     deps = [
+        "//nth/base:attributes",
         "//nth/meta:compile_time_string",
         "//nth/strings/interpolate/internal:validate",
     ],
@@ -45,9 +37,9 @@ cc_library(
     name = "types",
     hdrs = ["types.h"],
     deps = [
-        ":format",
         ":string",
         "//nth/meta:type",
+        "//nth/io/format",
     ],
 )
 

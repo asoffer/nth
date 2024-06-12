@@ -29,7 +29,9 @@ struct TypeId {
     sink.Append(id.id_());
   }
 
-  friend void NthPrint(auto& p, auto&, TypeId id) { p.write(id.id_()); }
+  // TODO: We cannot name `io::format_spec` because that header depends on this
+  // one.
+  friend void NthPrint(auto p, auto, TypeId id) { p.write(id.id_()); }
 
  private:
   template <typename T>
@@ -37,7 +39,7 @@ struct TypeId {
 
   constexpr explicit TypeId(std::string_view (*id)()) : id_(id) {}
 
-  std::string_view (*id_)() = 0;
+  std::string_view (*id_)() = nullptr;
 };
 
 namespace internal_type {

@@ -1,18 +1,32 @@
-package(default_visibility = ["//visibility:private"])
+package(default_visibility = ["//nth/strings/interpolate:__subpackages__"])
 
 cc_library(
     name = "interpolate",
     hdrs = ["interpolate.h"],
-    visibility = ["//nth/strings/interpolate:__subpackages__"],
     deps = [
         "//nth/meta:type",
     ],
 )
 
+cc_library(
+    name = "parameter_tree",
+    hdrs = ["parameter_tree.h"],
+    deps = [
+        "//nth/strings/interpolate:string",
+    ],
+)
+
+cc_test(
+    name = "parameter_tree_test",
+    srcs = ["parameter_tree_test.cc"],
+    deps = [
+        ":parameter_tree",
+        "//nth/test/raw:test",
+    ],
+)
 
 cc_library(
     name = "validate",
     hdrs = ["validate.h"],
-    visibility = ["//nth/strings/interpolate:__subpackages__"],
     deps = [],
 )
