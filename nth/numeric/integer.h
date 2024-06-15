@@ -113,7 +113,7 @@ struct integer {
   struct nth_io_format_spec {};
 
   friend nth::io::format_spec<integer> NthFormatSpec(
-      nth::interpolation_string_view, decltype(nth::type<integer>)) {
+      nth::interpolation_string_view, nth::type_tag<integer>) {
     return {};
   }
 

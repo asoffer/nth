@@ -115,6 +115,7 @@ cc_library(
     deps = [
         ":compile_time_string",
         ":sequence",
+        "//nth/meta/concepts:convertible",
         "//nth/strings/interpolate:string",
     ],
 )

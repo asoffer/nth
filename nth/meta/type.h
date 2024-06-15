@@ -5,103 +5,57 @@
 #include <type_traits>
 
 #include "nth/meta/compile_time_string.h"
+#include "nth/meta/concepts/convertible.h"
 #include "nth/meta/sequence.h"
 
 namespace nth {
-namespace internal_type {
 
+struct type_id;
+
+// `type_tag` is an empty type that enables encoding a type as a value. We use
+// the variable template `type<T>` as a value of type `type_tag<T>`. This allows
+// us to express compile-time queries about types in the more natural language
+// of expressions, such as `type<X> == type<Y>`.
 template <typename T>
-struct Type;
-
-template <typename>
-struct FunctionSignature;
-
-}  // namespace internal_type
-
-struct TypeId {
-  constexpr TypeId() = delete;
-
-  friend constexpr bool operator==(TypeId lhs, TypeId rhs) = default;
-  friend constexpr bool operator!=(TypeId lhs, TypeId rhs) = default;
-
-  template <typename S>
-  friend void AbslStringify(S& sink, TypeId id) {
-    sink.Append(id.id_());
-  }
-
-  // TODO: We cannot name `io::format_spec` because that header depends on this
-  // one.
-  friend void NthPrint(auto p, auto, TypeId id) { p.write(id.id_()); }
-
- private:
-  template <typename T>
-  friend struct ::nth::internal_type::Type;
-
-  constexpr explicit TypeId(std::string_view (*id)()) : id_(id) {}
-
-  std::string_view (*id_)() = nullptr;
-};
-
-namespace internal_type {
-
-template <typename, template <typename...> typename>
-struct IsAImpl : std::false_type {};
-template <typename... TemplateArgs, template <typename...> typename P>
-struct IsAImpl<P<TemplateArgs...>, P> : std::true_type {};
-
-template <typename T>
-struct Type {
+struct type_tag final {
   using type = T;
 
+  constexpr bool operator==(type_tag) const { return true; }
   template <typename R>
-  constexpr bool operator==(Type<R>) const {
-    return std::is_same_v<T, R>;
+  constexpr bool operator==(type_tag<R>) const {
+    return false;
   }
 
   template <typename R>
-  constexpr bool operator!=(Type<R> m) const {
+  constexpr bool operator!=(type_tag<R> m) const {
     return not operator==(m);
   }
 
   template <template <typename...> typename P>
-  static constexpr bool is_a() {
-    return IsAImpl<T, P>::value;
-  }
+  static constexpr bool is_a();
 
-  constexpr operator TypeId() const {
-    return TypeId(+[] { return std::string_view(Name); });
-  }
+  constexpr operator type_id() const;
 
-  template <std::convertible_to<T> U>
+  template <nth::explicitly_convertible_to<T> U>
   static constexpr auto cast(U&& u) {
     return static_cast<T>(std::forward<U>(u));
   }
 
-  static constexpr Type<std::decay_t<T>> decayed() { return {}; }
+  static constexpr type_tag<std::decay_t<T>> decayed() { return {}; }
 
-  static constexpr Type<std::remove_reference_t<T>> without_reference() {
+  static constexpr type_tag<std::remove_reference_t<T>> without_reference() {
     return {};
   }
 
-  static constexpr Type<std::remove_const_t<T>> without_const() { return {}; }
-  static constexpr Type<std::remove_volatile_t<T>> without_volatile() {
+  static constexpr type_tag<std::remove_const_t<T>> without_const() {
+    return {};
+  }
+  static constexpr type_tag<std::remove_volatile_t<T>> without_volatile() {
     return {};
   }
 
   static constexpr size_t size() { return sizeof(T); }
   static constexpr size_t alignment() { return alignof(T); }
-
-  static constexpr auto return_type() requires(std::is_function_v<T>) {
-    return internal_type::FunctionSignature<T>::return_type;
-  };
-
-  static constexpr auto parameters() requires(std::is_function_v<T>) {
-    return internal_type::FunctionSignature<T>::parameters;
-  };
-
-  static constexpr auto dependent(auto&& value) {
-    return std::forward<decltype(value)>(value);
-  }
 
   static consteval auto name() {
     constexpr std::string_view indicator = "[T = ";
@@ -111,37 +65,86 @@ struct Type {
     return str.template substr<index, str.size() - (index + 1)>();
   }
 
-  template <typename S>
-  friend void AbslStringify(S& sink, Type) {
-    sink.Append(std::string_view(name()));
-  }
-
-  friend std::ostream& operator<<(std::ostream& os, Type) {
-    return os << std::string_view(name());
-  }
+  static constexpr auto return_type() requires(std::is_function_v<T>);
+  static constexpr auto parameters() requires(std::is_function_v<T>);
 
  private:
-  static constexpr auto Name = Type::name();
+  static constexpr std::string_view get_name_impl() { return Name; }
+  static constexpr auto Name = type_tag::name();
 };
 
+// `type_id` is an erased version of `type_tag<T>`. It stores a unique
+// identifier so that two `type_id`s are equal precisely when they were
+// constructed from the same `type_tag` instantiation. However, this comparison
+// cannot be made at compile-time.
+struct type_id final {
+  constexpr type_id() = delete;
+
+  friend constexpr bool operator==(type_id lhs, type_id rhs) = default;
+  friend constexpr bool operator!=(type_id lhs, type_id rhs) = default;
+
+  // TODO: We cannot name `io::format_spec` because that header depends on this
+  // one.
+  friend void NthPrint(auto p, auto, type_id id) { p.write(id.id_()); }
+
+ private:
+  template <typename T>
+  friend struct ::nth::type_tag;
+
+  constexpr explicit type_id(std::string_view (*id)()) : id_(id) {}
+
+  std::string_view (*id_)() = nullptr;
+};
+
+namespace internal_type {
+
+template <typename>
+struct FunctionSignature;
+
+template <typename, template <typename...> typename>
+struct IsAImpl : std::false_type {};
+template <typename... TemplateArgs, template <typename...> typename P>
+struct IsAImpl<P<TemplateArgs...>, P> : std::true_type {};
+
 template <typename T>
-std::true_type IsTypeImpl(Type<T> const*);
+std::true_type IsTypeImpl(type_tag<T> const*);
 std::false_type IsTypeImpl(...);
 
 template <typename R, typename... Parameters>
 struct FunctionSignature<R(Parameters...)> {
-  static constexpr Type<R> return_type;
-  static constexpr auto parameters = sequence<Type<Parameters>{}...>;
+  static constexpr type_tag<R> return_type;
+  static constexpr auto parameters = sequence<type_tag<Parameters>{}...>;
 };
 
 }  // namespace internal_type
+
+template <typename T>
+constexpr auto type_tag<T>::return_type() requires(std::is_function_v<T>) {
+  return internal_type::FunctionSignature<T>::return_type;
+};
+
+template <typename T>
+constexpr auto type_tag<T>::parameters() requires(std::is_function_v<T>) {
+  return internal_type::FunctionSignature<T>::parameters;
+};
+
+template <typename T>
+template <template <typename...> typename P>
+constexpr bool type_tag<T>::is_a() {
+  return internal_type::IsAImpl<T, P>::value;
+}
+
+template <typename T>
+constexpr type_tag<T>::operator type_id() const {
+  return type_id(get_name_impl);
+}
 
 template <typename T>
 concept Type =
     decltype(internal_type::IsTypeImpl(static_cast<T const*>(nullptr)))::value;
 
 template <typename T>
-inline constexpr internal_type::Type<T> type;
+inline constexpr type_tag<T> type;
 
 template <typename... Ts>
 inline constexpr auto type_sequence = sequence<type<Ts>...>;

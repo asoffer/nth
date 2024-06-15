@@ -24,7 +24,7 @@ struct BasicDeserializer {
 };
 
 struct BoolReturningDeserializer : BasicDeserializer {
-  std::string& context(decltype(nth::type<std::string>)) { return context_; }
+  std::string& context(nth::type_tag<std::string>) { return context_; }
 
  private:
   std::string context_;

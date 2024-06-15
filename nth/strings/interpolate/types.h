@@ -6,8 +6,8 @@
 #include <string_view>
 
 #include "nth/io/format/format.h"
-#include "nth/meta/type.h"
 #include "nth/meta/concepts/convertible.h"
+#include "nth/meta/type.h"
 #include "nth/strings/interpolate/string.h"
 
 namespace nth {
@@ -29,7 +29,7 @@ concept is_interpolation_string = is_interpolation_string_impl<T>::value;
 }  // namespace internal_strings
 
 inline constexpr nth::io::format_spec<decltype(nullptr)> NthFormatSpec(
-    nth::interpolation_string_view s, decltype(nth::type<decltype(nullptr)>)) {
+    nth::interpolation_string_view s, nth::type_tag<decltype(nullptr)>) {
   using spec_type = io::format_spec<decltype(nullptr)>;
   if (s == "x") {
     return spec_type::hexadecimal;
@@ -43,7 +43,7 @@ inline constexpr nth::io::format_spec<decltype(nullptr)> NthFormatSpec(
 }
 
 inline constexpr nth::io::format_spec<bool> NthFormatSpec(
-    nth::interpolation_string_view s, decltype(nth::type<bool>)) {
+    nth::interpolation_string_view s, nth::type_tag<bool>) {
   using spec_type = io::format_spec<bool>;
   if (s == "b") {
     return spec_type::word;
@@ -59,7 +59,7 @@ inline constexpr nth::io::format_spec<bool> NthFormatSpec(
 }
 
 inline constexpr nth::io::format_spec<char> NthFormatSpec(
-    nth::interpolation_string_view s, decltype(nth::type<char>)) {
+    nth::interpolation_string_view s, nth::type_tag<char>) {
   using spec_type = io::format_spec<char>;
   if (s == "c") {
     return spec_type::ascii;
@@ -75,7 +75,7 @@ inline constexpr nth::io::format_spec<char> NthFormatSpec(
 }
 
 inline constexpr nth::io::format_spec<std::byte> NthFormatSpec(
-    nth::interpolation_string_view s, decltype(nth::type<std::byte>)) {
+    nth::interpolation_string_view s, nth::type_tag<std::byte>) {
   using spec_type = io::format_spec<std::byte>;
   if (s == "d") {
     return spec_type::decimal;

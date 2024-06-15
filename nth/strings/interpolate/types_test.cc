@@ -8,7 +8,7 @@ struct GlobalStruct {
   enum class nth_io_format_spec { A, B, C };
 
   friend constexpr auto NthFormatSpec(nth::interpolation_string_view s,
-                                      decltype(nth::type<GlobalStruct>)) {
+                                      nth::type_tag<GlobalStruct>) {
     if (s == "A") {
       return nth::io::format_spec<GlobalStruct>::A;
     } else if (s == "B") {
@@ -27,7 +27,7 @@ struct NamespacedStruct {
   enum class nth_io_format_spec { A, B, C };
 
   friend constexpr auto NthFormatSpec(nth::interpolation_string_view s,
-                                      decltype(nth::type<NamespacedStruct>)) {
+                                      nth::type_tag<NamespacedStruct>) {
     if (s == "A") {
       return nth::io::format_spec<NamespacedStruct>::A;
     } else if (s == "B") {

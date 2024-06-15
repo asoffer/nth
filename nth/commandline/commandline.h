@@ -98,7 +98,7 @@ struct Flag {
    private:
     friend struct FlagValueSet;
     friend internal_commandline::FlagParsingState;
-    TypeId type_;
+    type_id type_;
     std::function<bool(std::string_view, std::any &)> store_;
   };
 

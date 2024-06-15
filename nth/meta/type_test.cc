@@ -51,17 +51,6 @@ static_assert(nth::type<std::variant<int, bool>>.is_a<std::variant>());
 static_assert(not nth::type<std::optional<int>>.is_a<std::variant>());
 static_assert(nth::type<std::string>.is_a<std::basic_string>());
 
-// Dependent
-static_assert(nth::type<int>.dependent(true));
-static_assert(not nth::type<int>.dependent(false));
-
-// Construct but never invoke an expression that would static_assert false to
-// prove that the dependent value is indeed dependent.
-template <typename T>
-void Dependent() {
-  static_assert(nth::type<T>.dependent(false));
-}
-
 // Function types
 static_assert(nth::type<int()>.return_type() == nth::type<int>);
 static_assert(nth::type<void()>.return_type() == nth::type<void>);
@@ -99,12 +88,9 @@ static_assert(nth::type<int const &&>.without_reference() ==
 }  // namespace
 
 int main() {
-  auto to_string = [](nth::Type auto t) {
-    std::stringstream ss;
-    ss << t;
-    return ss.str();
+  auto to_string = [](nth::Type auto t) -> std::string {
+    return t.name();
   };
-
   if (to_string(nth::type<int>) != "int") { return 1; }
   if (to_string(nth::type<int **>) != "int **") { return 1; }
   if (to_string(nth::type<const int *const *>) != "const int *const *") {
@@ -112,18 +98,16 @@ int main() {
   }
   if (to_string(nth::type<SomeStruct>) != "SomeStruct") { return 1; }
 
-  auto t1         = nth::type<int>;
-  auto t2         = nth::type<int>;
-  auto t3         = t1;
-  nth::TypeId id1 = t1;
-  nth::TypeId id2 = t2;
-  nth::TypeId id3 = t3;
+  auto t1          = nth::type<int>;
+  auto t2          = nth::type<int>;
+  auto t3          = t1;
+  nth::type_id id1 = t1;
+  nth::type_id id2 = t2;
+  nth::type_id id3 = t3;
   if (id1 != id2) { return 1; }
   if (id2 != id3) { return 1; }
   if (id1 != id3) { return 1; }
 
-  std::stringstream ss;
-  ss << t1;
-  if (ss.str() != "int") { return 1; }
+  if (to_string(t1) != "int") { return 1; }
   return 0;
 }

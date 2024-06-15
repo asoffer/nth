@@ -74,12 +74,12 @@ void Bool() {
 
 struct point {
   friend constexpr nth::io::interpolation_spec NthDefaultFormatSpec(
-      decltype(nth::type<point>)) {
+      nth::type_tag<point>) {
     return nth::io::interpolation_spec::from<"({}, {})">();
   }
 
   friend nth::io::interpolation_spec NthFormatSpec(
-      nth::interpolation_string_view s, decltype(nth::type<point>)) {
+      nth::interpolation_string_view s, nth::type_tag<point>) {
     return nth::io::interpolation_spec(s);
   }
 

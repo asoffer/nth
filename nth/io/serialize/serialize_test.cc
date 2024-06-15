@@ -18,15 +18,14 @@ struct Thing {
 
 struct result_type {
   explicit result_type() : message_("unknown failure") {}
-  explicit result_type(std::string message)
-      : message_(std::move(message)) {}
+  explicit result_type(std::string message) : message_(std::move(message)) {}
   static result_type success() { return result_type(""); }
 
   operator bool() const { return message_.empty(); };
 
   friend bool operator==(result_type const&, result_type const&) = default;
 
-  friend void NthPrint(auto& p, auto& , result_type const &r) {
+  friend void NthPrint(auto& p, auto&, result_type const& r) {
     p.write("result[");
     p.write(r.message_);
     p.write("]");
@@ -38,11 +37,11 @@ struct result_type {
   void await_suspend(std::coroutine_handle<promise_type>);
   static constexpr void await_resume() {}
 
-  private:
-   friend struct result_promise_return_type;
+ private:
+  friend struct result_promise_return_type;
 
-   result_type(result_type*& location) { location = this; }
-   std::string message_;
+  result_type(result_type*& location) { location = this; }
+  std::string message_;
 };
 
 struct BasicSerializer {
@@ -63,7 +62,7 @@ struct BasicSerializer {
     return result_type::success();
   }
 
-  std::string& context(decltype(nth::type<std::string>)) { return content_; }
+  std::string& context(nth::type_tag<std::string>) { return content_; }
 
  private:
   std::string& content_;
@@ -180,7 +179,7 @@ result_type NthSerialize(ResultReturningSerializer& s,
 NTH_TEST("serialize/coroutine") {
   std::string content;
   ResultReturningSerializer s(content);
-  
+
   std::array<Thing, 2> things{
       Thing{.value = "hello"},
       Thing{.value = "world"},

@@ -72,7 +72,7 @@ struct CharSpacer {
   using nth_io_format_spec = TrivialFormatSpec;
 
   friend nth::io::format_spec<CharSpacer> NthFormatSpec(
-      nth::interpolation_string_view, decltype(nth::type<CharSpacer>)) {
+      nth::interpolation_string_view, nth::type_tag<CharSpacer>) {
     return {};
   }
 
@@ -88,7 +88,7 @@ struct Spacer {
   using nth_io_format_spec = TrivialFormatSpec;
 
   friend nth::io::format_spec<Spacer> NthFormatSpec(
-      nth::interpolation_string_view, decltype(nth::type<Spacer>)) {
+      nth::interpolation_string_view, nth::type_tag<Spacer>) {
     return {};
   }
 
