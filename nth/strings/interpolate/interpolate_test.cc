@@ -6,27 +6,6 @@
 
 namespace {
 
-#if 0
-TODO: Death tests are not yet supported.
-NTH_TEST("interpolation_string/construction") {
-  NTH_EXPECT([] { interpolation_string("{"); } >>= nth::AbortsExecution());
-  NTH_EXPECT([] { interpolation_string("{"); } >>= nth::AbortsExecution());
-  NTH_EXPECT([] { interpolation_string("}"); } >>= nth::AbortsExecution());
-  NTH_EXPECT([] { interpolation_string("{x}"); } >>= nth::AbortsExecution());
-  NTH_EXPECT([] { interpolation_string("{{}"); } >>= nth::AbortsExecution());
-  NTH_EXPECT([] { interpolation_string("{}{x"); } >>= nth::AbortsExecution());
-  [[maybe_unused]] constexpr interpolation_string f1("{}");
-  [[maybe_unused]] constexpr interpolation_string f2("{}{}");
-}
-
-NTH_TEST("interpolation_string/utf8-construction") {
-  [[maybe_unused]] constexpr interpolation_string f1("\xc0\x80");
-  [[maybe_unused]] constexpr interpolation_string f2("\xc0\x80{}");
-  NTH_EXPECT([] { (void)interpolation_string("\xc0\x80}"); } >>=
-             nth::AbortsExecution());
-}
-#endif
-
 void Simple() {
   std::string s;
   nth::string_printer p(s);
@@ -94,37 +73,23 @@ void Bool() {
 }
 
 struct point {
-  friend constexpr auto NthDefaultFormatSpec(decltype(nth::type<point>)) {
-    struct {
-      nth::io::format_spec<int> specs[2] = {
-          nth::io::default_format_spec<int>(),
-          nth::io::default_format_spec<int>()};
-    } s;
-    return s;
+  friend constexpr nth::io::interpolation_spec NthDefaultFormatSpec(
+      decltype(nth::type<point>)) {
+    return nth::io::interpolation_spec::from<"({}, {})">();
   }
 
-  template <nth::interpolation_string S>
-  friend consteval auto NthFormatSpec(decltype(nth::type<point>)) {
-    if constexpr (S == "pair") {
-      using T = decltype(NthDefaultFormatSpec(nth::type<point>));
-      return T{
-        .specs = {
-          nth::io::default_format_spec<int>(),
-          nth::io::default_format_spec<int>(),
-        }
-      };
-    } else {
-      return nth::io::default_format_spec<point>();
-    }
+  friend nth::io::interpolation_spec NthFormatSpec(
+      nth::interpolation_string_view s, decltype(nth::type<point>)) {
+    return nth::io::interpolation_spec(s);
   }
 
   template <nth::io::printer_type P>
-  friend void NthFormat(P p, auto spec, point const &pt) {
-    P::print(p, spec.specs[0], pt.x);
-    P::print(p, spec.specs[1], pt.y);
+  friend void NthFormat(P p, nth::io::format_spec<point> spec,
+                        point const &pt) {
+    nth::interpolate(p, spec, pt.x, pt.y);
   }
-  int x = 1;
-  int y = 2;
+  int x = 10;
+  int y = 20;
 };
 
 void UserDefined() {
@@ -133,11 +98,19 @@ void UserDefined() {
 
   point pt;
   nth::interpolate<"{}">(p, pt);
-  NTH_RAW_TEST_ASSERT(s == "12");
+  NTH_RAW_TEST_ASSERT(s == "(10, 20)");
   s.clear();
 
-  nth::interpolate<"{pair}">(p, pt);
-  NTH_RAW_TEST_ASSERT(s == "12");
+  nth::interpolate<"{({}, {})}">(p, pt);
+  NTH_RAW_TEST_ASSERT(s == "(10, 20)");
+  s.clear();
+
+  nth::interpolate<"{({}, {x})}">(p, pt);
+  NTH_RAW_TEST_ASSERT(s == "(10, 14)");
+  s.clear();
+
+  nth::interpolate<"{({x}, {})}">(p, pt);
+  NTH_RAW_TEST_ASSERT(s == "(a, 20)");
   s.clear();
 }
 
@@ -148,7 +121,6 @@ int main() {
   Number();
   NoArguments();
   MultipleArguments();
-  NoArguments();
   Unicode();
   NonDefaultFormatSpec();
   Bool();

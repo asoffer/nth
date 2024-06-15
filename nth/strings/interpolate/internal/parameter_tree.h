@@ -3,17 +3,12 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <span>
 
+#include "nth/strings/interpolate/internal/parameter_range.h"
 #include "nth/strings/interpolate/string.h"
 
 namespace nth::internal_interpolate {
-struct interpolation_parameter_range {
-  int32_t start;
-  int32_t length;
-  int32_t width;
-
-  constexpr size_t end() const { return start + length; }
-};
 
 template <size_t N>
 struct interpolation_parameter_tree {
@@ -22,7 +17,7 @@ struct interpolation_parameter_tree {
     int32_t workspace[L / 2];
     int32_t* ptr = &workspace[0];
 
-    interpolation_parameter_range* range_ptr = &ranges_[N];
+    parameter_range* range_ptr = &ranges_[N];
     for (int32_t i = l.size() - 1; i >= 0; --i) {
       switch (l[i]) {
         case '}': *ptr++ = i; break;
@@ -43,11 +38,14 @@ struct interpolation_parameter_tree {
     }
   }
 
+  constexpr std::span<parameter_range const> flat_tree() const {
+    return ranges_;
+  }
+
   template <size_t M>
-  constexpr interpolation_parameter_range top_level_range() const {
+  constexpr parameter_range top_level_range() const {
     if constexpr (M == -1) {
-      return interpolation_parameter_range{
-          .start = -1, .length = 0, .width = 0};
+      return parameter_range{.start = -1, .length = 0, .width = 0};
     } else {
       size_t i = 0;
       for (size_t n = 0; n < M; ++n) { i += ranges_[i].width; }
@@ -56,13 +54,15 @@ struct interpolation_parameter_tree {
   }
 
  private:
-  interpolation_parameter_range ranges_[N];
+  parameter_range ranges_[N];
 };
 
 template <>
 struct interpolation_parameter_tree<0> {
   template <size_t L>
   consteval interpolation_parameter_tree(interpolation_string<L> const&) {}
+
+  constexpr std::span<parameter_range const> flat_tree() const { return {}; }
 };
 
 }  // namespace nth::internal_interpolate

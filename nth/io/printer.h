@@ -5,9 +5,11 @@
 #include <string_view>
 
 #include "nth/io/format/format.h"
+#include "nth/io/format/interpolation_spec.h"
 #include "nth/meta/concepts/core.h"
 #include "nth/meta/type.h"
 #include "nth/strings/interpolate/string.h"
+#include "nth/strings/interpolate/types.h"
 
 namespace nth {
 namespace io {
@@ -20,8 +22,13 @@ concept printable_with = requires(P p, T const &t) {
 template <typename P>
 struct printer {
   template <printable_with<P> T>
-  static auto print(P p, format_spec<T> spec, T const &value) {
-    return NthFormat(p, spec, value);
+  static auto print(P p, auto spec, T const &value) {
+    if constexpr (nth::type<decltype(spec)> ==
+                  nth::type<nth::io::interpolation_spec>) {
+      return NthFormat(p, ::nth::format_spec_from<T>(spec), value);
+    } else {
+      return NthFormat(p, std::move(spec), value);
+    }
   }
 };
 
@@ -31,8 +38,8 @@ concept printer_type = std::derived_from<P, printer<P>> and requires(P p) {
 };
 
 template <int &..., printer_type P>
-void print(P p, auto const &value) {
-  P::print(std::move(p), value);
+void print(P p, auto spec, auto const &value) {
+  P::print(std::move(p), std::move(spec), value);
 }
 
 // `minimal_printer` is the most trivial type satisfying the `printer_type`

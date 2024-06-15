@@ -8,8 +8,8 @@ cc_library(
         ":types",
         "//nth/base:attributes",
         "//nth/strings/interpolate/internal:interpolate",
-        "//nth/strings/interpolate/internal:parameter_tree",
         "//nth/io:printer",
+        "//nth/io/format:interpolation_spec",
     ],
 )
 
@@ -29,6 +29,7 @@ cc_library(
     deps = [
         "//nth/base:attributes",
         "//nth/meta:compile_time_string",
+        "//nth/strings/interpolate/internal:parameter_range",
         "//nth/strings/interpolate/internal:validate",
     ],
 )
@@ -38,8 +39,9 @@ cc_library(
     hdrs = ["types.h"],
     deps = [
         ":string",
-        "//nth/meta:type",
         "//nth/io/format",
+        "//nth/meta:type",
+        "//nth/meta/concepts:convertible",
     ],
 )
 

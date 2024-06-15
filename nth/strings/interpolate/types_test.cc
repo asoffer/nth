@@ -5,19 +5,15 @@
 #include "nth/meta/type.h"
 
 struct GlobalStruct {
-  friend consteval auto NthDefaultFormatSpec(
-      decltype(nth::type<GlobalStruct>)) {
-    enum class E { A, B, C } s = E::A;
-    return s;
-  }
+  enum class nth_io_format_spec { A, B, C };
 
-  template <nth::interpolation_string S>
-  consteval friend auto NthFormatSpec(decltype(nth::type<GlobalStruct>)) {
-    if constexpr (S == "A") {
+  friend constexpr auto NthFormatSpec(nth::interpolation_string_view s,
+                                      decltype(nth::type<GlobalStruct>)) {
+    if (s == "A") {
       return nth::io::format_spec<GlobalStruct>::A;
-    } else if constexpr (S == "B") {
+    } else if (s == "B") {
       return nth::io::format_spec<GlobalStruct>::B;
-    } else if constexpr (S == "C") {
+    } else if (s == "C") {
       return nth::io::format_spec<GlobalStruct>::C;
     } else {
       std::abort();
@@ -28,19 +24,15 @@ struct GlobalStruct {
 namespace ns {
 
 struct NamespacedStruct {
-  friend consteval auto NthDefaultFormatSpec(
-      decltype(nth::type<NamespacedStruct>)) {
-    enum class E { A, B, C } s = E::A;
-    return s;
-  }
+  enum class nth_io_format_spec { A, B, C };
 
-  template <nth::interpolation_string S>
-  consteval friend auto NthFormatSpec(decltype(nth::type<NamespacedStruct>)) {
-    if constexpr (S == "A") {
+  friend constexpr auto NthFormatSpec(nth::interpolation_string_view s,
+                                      decltype(nth::type<NamespacedStruct>)) {
+    if (s == "A") {
       return nth::io::format_spec<NamespacedStruct>::A;
-    } else if constexpr (S == "B") {
+    } else if (s == "B") {
       return nth::io::format_spec<NamespacedStruct>::B;
-    } else if constexpr (S == "C") {
+    } else if (s == "C") {
       return nth::io::format_spec<NamespacedStruct>::C;
     } else {
       std::abort();
@@ -50,57 +42,60 @@ struct NamespacedStruct {
 
 }  // namespace ns
 
-static_assert(nth::format_spec_from<"", bool>() ==
-              nth::io::default_format_spec<bool>());
-static_assert(nth::format_spec_from<"d", bool>() ==
+static_assert(nth::format_spec_from<bool>(nth::interpolation_string("")) ==
+              nth::io::format_spec<bool>());
+static_assert(nth::format_spec_from<bool>(nth::interpolation_string("d")) ==
               nth::io::format_spec<bool>::decimal);
-static_assert(nth::format_spec_from<"b", bool>() ==
+static_assert(nth::format_spec_from<bool>(nth::interpolation_string("b")) ==
               nth::io::format_spec<bool>::word);
-static_assert(nth::format_spec_from<"B", bool>() ==
+static_assert(nth::format_spec_from<bool>(nth::interpolation_string("B")) ==
               nth::io::format_spec<bool>::Word);
-static_assert(nth::format_spec_from<"B!", bool>() ==
+static_assert(nth::format_spec_from<bool>(nth::interpolation_string("B!")) ==
               nth::io::format_spec<bool>::WORD);
 
-static_assert(nth::format_spec_from<"", int>() ==
-              nth::io::default_format_spec<int>());
-static_assert(nth::format_spec_from<"d", int>() ==
-              nth::io::format_spec<int>::decimal);
-static_assert(nth::format_spec_from<"x", int>() ==
-              nth::io::format_spec<int>::hexadecimal);
+static_assert(nth::format_spec_from<int>(nth::interpolation_string("")) ==
+              nth::io::format_spec<int>());
+static_assert(nth::format_spec_from<int>(nth::interpolation_string("d")) ==
+              nth::io::format_spec<int>::decimal());
+static_assert(nth::format_spec_from<int>(nth::interpolation_string("x")) ==
+              nth::io::format_spec<int>::hexadecimal());
 
-static_assert(nth::format_spec_from<"", char>() ==
-              nth::io::default_format_spec<char>());
-static_assert(nth::format_spec_from<"d", char>() ==
+static_assert(nth::format_spec_from<char>(nth::interpolation_string("")) ==
+              nth::io::format_spec<char>());
+static_assert(nth::format_spec_from<char>(nth::interpolation_string("d")) ==
               nth::io::format_spec<char>::decimal);
-static_assert(nth::format_spec_from<"x", char>() ==
+static_assert(nth::format_spec_from<char>(nth::interpolation_string("x")) ==
               nth::io::format_spec<char>::hexadecimal);
-static_assert(nth::format_spec_from<"X", char>() ==
+static_assert(nth::format_spec_from<char>(nth::interpolation_string("X")) ==
               nth::io::format_spec<char>::Hexadecimal);
 
-static_assert(nth::format_spec_from<"", signed char>() ==
-              nth::io::default_format_spec<signed char>());
-static_assert(nth::format_spec_from<"d", signed char>() ==
-              nth::io::format_spec<signed char>::decimal);
-static_assert(nth::format_spec_from<"x", signed char>() ==
-              nth::io::format_spec<signed char>::hexadecimal);
+static_assert(nth::format_spec_from<signed char>(nth::interpolation_string(
+                  "")) == nth::io::format_spec<signed char>());
+static_assert(nth::format_spec_from<signed char>(nth::interpolation_string(
+                  "d")) == nth::io::format_spec<signed char>::decimal());
+static_assert(nth::format_spec_from<signed char>(nth::interpolation_string(
+                  "x")) == nth::io::format_spec<signed char>::hexadecimal());
 
-static_assert(nth::format_spec_from<"", GlobalStruct>() ==
-              nth::io::default_format_spec<GlobalStruct>());
-static_assert(nth::format_spec_from<"A", GlobalStruct>() ==
-              nth::io::format_spec<GlobalStruct>::A);
-static_assert(nth::format_spec_from<"B", GlobalStruct>() ==
-              nth::io::format_spec<GlobalStruct>::B);
-static_assert(nth::format_spec_from<"C", GlobalStruct>() ==
-              nth::io::format_spec<GlobalStruct>::C);
+static_assert(nth::format_spec_from<GlobalStruct>(nth::interpolation_string(
+                  "")) == nth::io::format_spec<GlobalStruct>());
+static_assert(nth::format_spec_from<GlobalStruct>(nth::interpolation_string(
+                  "A")) == nth::io::format_spec<GlobalStruct>::A);
+static_assert(nth::format_spec_from<GlobalStruct>(nth::interpolation_string(
+                  "B")) == nth::io::format_spec<GlobalStruct>::B);
+static_assert(nth::format_spec_from<GlobalStruct>(nth::interpolation_string(
+                  "C")) == nth::io::format_spec<GlobalStruct>::C);
 
-
-static_assert(nth::format_spec_from<"", ns::NamespacedStruct>() ==
-              nth::io::default_format_spec<ns::NamespacedStruct>());
-static_assert(nth::format_spec_from<"A", ns::NamespacedStruct>() ==
+static_assert(nth::format_spec_from<ns::NamespacedStruct>(
+                  nth::interpolation_string("")) ==
+              nth::io::format_spec<ns::NamespacedStruct>());
+static_assert(nth::format_spec_from<ns::NamespacedStruct>(
+                  nth::interpolation_string("A")) ==
               nth::io::format_spec<ns::NamespacedStruct>::A);
-static_assert(nth::format_spec_from<"B", ns::NamespacedStruct>() ==
+static_assert(nth::format_spec_from<ns::NamespacedStruct>(
+                  nth::interpolation_string("B")) ==
               nth::io::format_spec<ns::NamespacedStruct>::B);
-static_assert(nth::format_spec_from<"C", ns::NamespacedStruct>() ==
+static_assert(nth::format_spec_from<ns::NamespacedStruct>(
+                  nth::interpolation_string("C")) ==
               nth::io::format_spec<ns::NamespacedStruct>::C);
 
 int main() {}

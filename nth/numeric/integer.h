@@ -110,6 +110,13 @@ struct integer {
     }
   }
 
+  struct nth_io_format_spec {};
+
+  friend nth::io::format_spec<integer> NthFormatSpec(
+      nth::interpolation_string_view, decltype(nth::type<integer>)) {
+    return {};
+  }
+
   friend void NthFormat(nth::io::printer_type auto p, io::format_spec<integer>,
                         integer const &n) {
     if (n.size_ == 0) {

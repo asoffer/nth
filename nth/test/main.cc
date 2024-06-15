@@ -66,7 +66,16 @@ struct BenchmarkResultHolder {
 nth::NoDestructor<ExpectationResultHolder> expectation_results;
 nth::NoDestructor<BenchmarkResultHolder> benchmark_results;
 
+struct TrivialFormatSpec {};
+
 struct CharSpacer {
+  using nth_io_format_spec = TrivialFormatSpec;
+
+  friend nth::io::format_spec<CharSpacer> NthFormatSpec(
+      nth::interpolation_string_view, decltype(nth::type<CharSpacer>)) {
+    return {};
+  }
+
   friend void NthFormat(auto p, nth::io::format_spec<CharSpacer>,
                         CharSpacer s) {
     p.write(std::string(s.count, s.content));
@@ -76,6 +85,13 @@ struct CharSpacer {
 };
 
 struct Spacer {
+  using nth_io_format_spec = TrivialFormatSpec;
+
+  friend nth::io::format_spec<Spacer> NthFormatSpec(
+      nth::interpolation_string_view, decltype(nth::type<Spacer>)) {
+    return {};
+  }
+
   friend void NthFormat(auto p, nth::io::format_spec<Spacer>, Spacer s) {
     for (size_t i = 0; i < s.count; ++i) { p.write(s.content); }
   }

@@ -6,6 +6,7 @@
 #include <cstddef>
 #include <string_view>
 
+#include "nth/io/format/interpolation_spec.h"
 #include "nth/meta/type.h"
 
 // This header file defines a mechanism by which one can register format
@@ -13,39 +14,55 @@
 // serializing values of a type to configure how the value is written.
 
 namespace nth {
-
-inline constexpr auto NthDefaultFormatSpec(
-    decltype(nth::type<decltype(nullptr)>)) {
-  enum class E { decimal, hexadecimal, word };
-  return E::word;
-}
-
-inline constexpr auto NthDefaultFormatSpec(decltype(nth::type<bool>)) {
-  enum class E { word, Word, WORD, decimal };
-  return E::word;
-}
-
-inline constexpr auto NthDefaultFormatSpec(decltype(nth::type<char>)) {
-  enum class E { ascii, decimal, hexadecimal, Hexadecimal };
-  return E::ascii;
-}
-
-inline constexpr auto NthDefaultFormatSpec(decltype(nth::type<std::byte>)) {
-  enum class E { decimal, hexadecimal, Hexadecimal };
-  return E::hexadecimal;
-}
-
-constexpr auto NthDefaultFormatSpec(
-    auto t) requires std::integral<nth::type_t<t>> {
-  enum class E { decimal = 10, hexadecimal = 16 };
-  return E::decimal;
-}
-
 namespace io {
+namespace internal_format {
 
-// By default, a type's format specification is `nth::io::trivial_format_spec`,
-// an empty type.
-struct trivial_format_spec {};
+template <typename>
+struct format_spec {
+  using type = interpolation_spec;
+};
+
+template <>
+struct format_spec<decltype(nullptr)> {
+  enum class type { decimal, hexadecimal, word };
+};
+
+template <>
+struct format_spec<bool> {
+  enum class type { word, Word, WORD, decimal };
+};
+
+template <>
+struct format_spec<char> {
+  enum class type { ascii, decimal, hexadecimal, Hexadecimal };
+};
+
+template <>
+struct format_spec<std::byte> : format_spec<char> {};
+
+struct base_spec {
+  constexpr base_spec(uint8_t b = 10) : base_(b) {}
+
+  constexpr operator int() const { return base_; }
+
+  static constexpr base_spec decimal() { return base_spec(10); }
+  static constexpr base_spec hexadecimal() { return base_spec(16); }
+
+ private:
+  uint8_t base_;
+};
+
+template <std::integral I>
+struct format_spec<I> {
+  using type = base_spec;
+};
+
+template <typename T>
+requires(requires { typename T::nth_io_format_spec; }) struct format_spec<T> {
+  using type = T::nth_io_format_spec;
+};
+
+}  // namespace internal_format
 
 // If a type author wishes to provide a custom format specification type for
 // their type, they must implement a function findable via argument-dependent
@@ -54,16 +71,16 @@ struct trivial_format_spec {};
 // `nth::io::format_spec<T>`, and the returned value is the format spec to be
 // used when no format spec is otherwise provided.
 template <typename T>
-constexpr auto default_format_spec() {
+using format_spec = internal_format::format_spec<T>::type;
+
+template <typename T>
+::nth::io::format_spec<T> default_format_spec() {
   if constexpr (requires { NthDefaultFormatSpec(nth::type<T>); }) {
     return NthDefaultFormatSpec(nth::type<T>);
   } else {
-    return trivial_format_spec{};
+    return {};
   }
 }
-
-template <typename T>
-using format_spec = decltype(default_format_spec<T>());
 
 }  // namespace io
 

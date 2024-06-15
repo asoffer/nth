@@ -68,7 +68,6 @@ void MultipleParameters() {
 void MultipleParametersWithNesting() {
   auto tree = nth::internal_interpolate::interpolation_parameter_tree<8>(
       nth::interpolation_string("{x{}y{{}}z}{{}}{{}}"));
-
   auto param = tree.top_level_range<0>();
   NTH_RAW_TEST_ASSERT(param.start == 1);
   NTH_RAW_TEST_ASSERT(param.length == 9);
