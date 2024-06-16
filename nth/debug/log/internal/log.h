@@ -68,8 +68,7 @@
   NTH_REQUIRE_EXPANSION_TO_PREFIX_SUBEXPRESSION(                               \
       NTH_DEBUG_INTERNAL_VERBOSITY_DISABLED(verbosity)                         \
           ? disabled_action                                                    \
-          : enabled_voidifier <<=                                              \
-            ::nth::internal_log::location_injector<__FILE__, __LINE__,         \
-                                                   interpolation_string>())
+          : enabled_voidifier <<= ::nth::internal_log::location_injector<      \
+                __FILE__, __LINE__, __FUNCTION__, interpolation_string>())
 
 #endif  // NTH_DEBUG_LOG_INTERNAL_DEBUG_H

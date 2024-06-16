@@ -29,12 +29,17 @@ struct log_line_base {
       return source_location_;
     }
 
+    friend io::format_spec<metadata> NthFormatSpec(interpolation_string_view s,
+                                                   type_tag<metadata>) {
+      return io::format_spec<metadata>(s);
+    }
+
     template <io::printer_type P>
-    friend void NthFormat(P printer, io::format_spec<metadata>,
-                          metadata const& metadata) {
-      P::print(printer, {}, metadata.source_location().file_name());
-      P::print(printer, {}, metadata.source_location().function_name());
-      P::print(printer, {}, metadata.source_location().line());
+    friend void NthFormat(P p, io::format_spec<metadata> spec,
+                          metadata const& m) {
+      interpolate(p, spec, m.source_location().file_name(),
+                  m.source_location().function_name(),
+                  m.source_location().line());
     }
 
    private:
@@ -47,23 +52,28 @@ struct log_line_base {
     return metadata_;
   }
 
+  constexpr interpolation_string_view interpolation_string() const {
+    return str_;
+  }
+
  protected:
   friend struct log_line_id;
 
-  explicit log_line_base(source_location location)
-      : metadata_(std::move(location)) {}
+  explicit log_line_base(source_location location, interpolation_string_view s)
+      : metadata_(std::move(location)), str_(s) {}
 
   size_t id_;
   struct metadata metadata_;
+  interpolation_string_view str_;
 
   static std::atomic<log_line_base const*> head_;
   static log_line_base const stub_;
 };
 
 // `log_line_id` uniquely identifies an instantiation of a logging line. Two
-// invocations of the same `NTH_LOG` will have the same `log_line_id`. Notably,
-// within a template, instantiations with different template arguments will
-// compare unequal.
+// invocations of the same `NTH_LOG` will have the same `log_line_id`.
+// Notably, within a template, instantiations with different template
+// arguments will compare unequal.
 struct log_line_id {
   constexpr size_t value() const;
 
@@ -83,12 +93,12 @@ struct log_line_id {
 template <interpolation_string S>
 struct log_line : log_line_base {
   // The interpolation string to which log arguments are passed.
-  constexpr std::string_view interpolation_string() const { return S; }
+  constexpr interpolation_string_view interpolation_string() const { return S; }
 
   friend log_line_id;
 
   explicit log_line(source_location location = source_location::current())
-      : log_line_base(std::move(location)) {}
+      : log_line_base(std::move(location), S) {}
 };
 
 constexpr size_t log_line_id::value() const { return line_->id_; }

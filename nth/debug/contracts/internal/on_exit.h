@@ -12,7 +12,8 @@ struct Logger {
   template <::nth::interpolation_string S>
   void Log(auto const &...arguments) requires(sizeof...(arguments) ==
                                               S.placeholders()) {
-    internal_log::location_injector<__FILE__, __LINE__, S>() <<= {arguments...};
+    internal_log::location_injector<__FILE__, __LINE__, __FUNCTION__, S>() <<=
+        {arguments...};
   }
 };
 

@@ -1,13 +1,6 @@
 package(default_visibility = ["//nth/debug/log:__subpackages__"])
 
 cc_library(
-    name = "component_iterator",
-    hdrs = ["component_iterator.h"],
-    srcs = ["component_iterator.cc"],
-    deps = [],
-)
-
-cc_library(
     name = "arguments",
     hdrs = ["arguments.h"],
     deps = [

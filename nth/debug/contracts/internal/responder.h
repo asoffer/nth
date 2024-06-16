@@ -91,8 +91,8 @@ void MakeTraversal(P const &property,
 struct ResponderBase {
   void RecordExpectationResult(bool result);
 
-  static void WriteExpression(bounded_string_printer &printer,
-                              log_entry &entry, char const *expression);
+  static void WriteExpression(bounded_string_printer &printer, log_entry &entry,
+                              char const *expression);
   void Send(log_entry const &entry);
   ~ResponderBase();
 
@@ -115,8 +115,8 @@ struct AbortingResponder : ResponderBase {
     if (not value_) {
       log_entry entry(line_->id());
 
-      bounded_string_printer printer(entry.data(),
-                                     nth::config::trace_print_bound);
+      std::string s;  // TODO
+      bounded_string_printer printer(s, nth::config::trace_print_bound);
 
       {
         std::vector<internal_trace::TraversalAction> stack;
@@ -155,8 +155,8 @@ struct AbortingResponder : ResponderBase {
     if (not value_) {
       log_entry entry(line_->id());
 
-      bounded_string_printer printer(entry.data(),
-                                     nth::config::trace_print_bound);
+      std::string s;  // TODO
+      bounded_string_printer printer(s, nth::config::trace_print_bound);
 
       WriteExpression(printer, entry, expression);
 
@@ -207,8 +207,8 @@ struct NoOpResponder : ResponderBase {
     if (not value_) {
       log_entry entry(line_->id());
 
-      bounded_string_printer printer(entry.data(),
-                                     nth::config::trace_print_bound);
+      std::string s;  // TODO
+      bounded_string_printer printer(s, nth::config::trace_print_bound);
 
       {
         std::vector<internal_trace::TraversalAction> stack;
@@ -247,8 +247,8 @@ struct NoOpResponder : ResponderBase {
     if (not value_) {
       log_entry entry(line_->id());
 
-      bounded_string_printer printer(entry.data(),
-                                     nth::config::trace_print_bound);
+      std::string s;  // TODO
+      bounded_string_printer printer(s, nth::config::trace_print_bound);
 
       WriteExpression(printer, entry, expression);
 

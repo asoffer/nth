@@ -1,5 +1,14 @@
 package(default_visibility = ["//visibility:public"])
 
+cc_binary(
+    name = "blah",
+    srcs = ["blah.cc"],
+    deps = [
+        ":log",
+        ":stderr_log_sink",
+    ],
+)
+
 cc_library(
     name = "entry",
     visibility = ["//nth/debug/log:__subpackages__"],

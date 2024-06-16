@@ -107,6 +107,21 @@ requires std::integral<nth::type_t<t>> {
   }
 }
 
+constexpr auto NthFormatSpec(nth::interpolation_string_view s,
+                             nth::type_tag<nth::type_id>)
+    -> nth::io::format_spec<nth::type_id> {
+  if (not s.empty()) { std::abort(); }
+  return {};
+}
+
+template <typename T>
+constexpr auto NthFormatSpec(nth::interpolation_string_view s,
+                             nth::type_tag<nth::type_tag<T>>)
+    -> nth::io::format_spec<nth::type_tag<T>> {
+  if (not s.empty()) { std::abort(); }
+  return {};
+}
+
 template <typename T>
 constexpr nth::io::format_spec<T> format_spec_from(
     nth::interpolation_string_view s) {

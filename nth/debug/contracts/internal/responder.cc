@@ -38,8 +38,8 @@ bool ResponderBase::set_impl(char const *expression, bool b) {
   if (not value_) {
     log_entry entry(line_->id());
 
-    bounded_string_printer printer(entry.data(),
-                                   nth::config::trace_print_bound);
+    std::string s;  // TODO
+    bounded_string_printer printer(s, nth::config::trace_print_bound);
 
     WriteExpression(printer, entry, expression);
 

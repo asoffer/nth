@@ -52,12 +52,6 @@ struct minimal_printer : printer<minimal_printer> {
   void write(nth::precisely<std::string_view> auto);
 };
 
-template <typename P>
-concept structural_printer_type = printer_type<P> and requires(P p) {
-  p.start_substructure();
-  { p.complete_substructure(p.start_substructure()) } -> nth::precisely<void>;
-};
-
 }  // namespace io
 }  // namespace nth
 
