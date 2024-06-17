@@ -5,6 +5,7 @@
 #include <cstdio>
 #include <cstring>
 #include <string>
+#include <vector>
 
 #include "nth/configuration/log.h"
 #include "nth/debug/log/line.h"
@@ -17,6 +18,10 @@ namespace nth {
 // arguments.
 struct log_entry {
   struct builder : nth::io::printer<builder> {
+    using cursor_type = uint16_t;
+
+    builder(builder const&) = delete;
+
     explicit builder(log_entry& entry NTH_ATTRIBUTE(lifetimebound))
         : entry_(entry) {}
 
@@ -31,41 +36,9 @@ struct log_entry {
     return io::format_spec<log_entry>(s);
   }
 
-  friend void NthFormat(io::printer_type auto p, io::format_spec<log_entry>,
+  friend void NthFormat(io::printer_type auto& p, io::format_spec<log_entry>,
                         log_entry const& entry) {
-    io::interpolation_spec child;
-    io::interpolation_spec spec(entry.id().line().interpolation_string());
-    p.write(spec.next_chunk(child));
-    std::string_view s = entry.data_;
-    s.remove_prefix(2);
-    p.write(s);
-    p.write(spec.last_chunk());
-  }
-
-  struct const_iterator {
-    std::string_view operator*() const;
-
-    friend bool operator==(const_iterator, const_iterator) = default;
-
-    const_iterator& operator++();
-
-    const_iterator operator++(int) {
-      auto copy = *this;
-      ++*this;
-      return copy;
-    }
-
-   private:
-    explicit const_iterator(char const* ptr) : ptr_(ptr) {}
-    friend log_entry;
-    char const* ptr_;
-  };
-
-  const_iterator component_begin() const {
-    return const_iterator(data_.data());
-  }
-  const_iterator component_end() const {
-    return const_iterator(data_.data() + data_.size());
+    p.write(entry.data_);
   }
 
   log_line_id id() const { return id_; }
@@ -89,6 +62,7 @@ struct log_entry {
   // the number of bytes in the subtree is two more than the number of bytes
   // in the element itself.
   std::string data_;
+  std::string interp_;
 };
 
 }  // namespace nth

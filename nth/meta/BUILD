@@ -75,6 +75,7 @@ cc_library(
     name = "sequence",
     hdrs = ["sequence.h"],
     deps = [
+        "//nth/meta/concepts:comparable",
         "//nth/meta/concepts:invocable",
     ],
 )

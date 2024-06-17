@@ -7,6 +7,7 @@ cc_library(
         ":string",
         ":types",
         "//nth/base:attributes",
+        "//nth/base:core",
         "//nth/strings/interpolate/internal:interpolate",
         "//nth/io:printer",
         "//nth/io/format:interpolation_spec",

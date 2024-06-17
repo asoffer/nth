@@ -15,15 +15,6 @@ cc_library(
     deps = [],
 )
 
-# cc_test(
-#     name = "parameter_tree_test",
-#     srcs = ["parameter_tree_test.cc"],
-#     deps = [
-#         ":parameter_tree",
-#         "//nth/test/raw:test",
-#     ],
-# )
-
 cc_library(
     name = "validate",
     hdrs = ["validate.h"],

@@ -7,29 +7,14 @@
 #include <type_traits>
 #include <utility>
 
+#include "nth/meta/concepts/comparable.h"
+
 namespace nth {
 namespace internal_meta {
 
 template <auto V>
 struct TypeWrap {
   static constexpr auto value = V;
-};
-
-template <typename T>
-concept EqualityComparable = requires(T t) {
-  { t == t } -> std::same_as<bool>;
-};
-
-template <typename T, T... Vs>
-struct Ordered {
-  static constexpr bool value = [] {
-    constexpr int N    = sizeof...(Vs);
-    constexpr T data[] = {Vs...};
-    for (int i = 0; i + 1 < N; ++i) {
-      if (data[i] > data[i + 1]) return false;
-      return true;
-    }
-  }();
 };
 
 template <bool B, typename T, typename F>
@@ -185,7 +170,7 @@ struct Sequence {
 
   template <auto... Rs>
   constexpr bool operator==(Sequence<Rs...>) const
-      requires((EqualityComparable<decltype(Rs)> and ...)) {
+      requires((nth::equality_comparable<decltype(Rs)> and ...)) {
     if constexpr (sizeof...(Vs) == sizeof...(Rs) and
                   ((std::is_same_v<decltype(Vs), decltype(Rs)>)and...)) {
       return ((Vs == Rs) and ...);
@@ -196,7 +181,7 @@ struct Sequence {
 
   template <auto... Rs>
   constexpr bool operator!=(Sequence<Rs...> m) const
-      requires((EqualityComparable<decltype(Rs)> and ...)) {
+      requires((nth::equality_comparable<decltype(Rs)> and ...)) {
     return not operator==(m);
   }
 

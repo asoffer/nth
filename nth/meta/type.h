@@ -85,7 +85,7 @@ struct type_id final {
 
   // TODO: We cannot name `io::format_spec` because that header depends on this
   // one.
-  friend void NthFormat(auto p, auto, type_id id) { p.write(id.id_()); }
+  friend void NthFormat(auto& p, auto, type_id id) { p.write(id.id_()); }
 
  private:
   template <typename T>

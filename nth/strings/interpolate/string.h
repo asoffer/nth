@@ -5,6 +5,7 @@
 #include <string_view>
 
 #include "nth/base/attributes.h"
+#include "nth/meta/type.h"
 #include "nth/strings/interpolate/internal/parameter_range.h"
 #include "nth/strings/interpolate/internal/validate.h"
 
@@ -30,6 +31,42 @@ struct interpolation_string {
         workspace_ptr);
   }
 
+  consteval interpolation_string(std::string_view buffer) {
+    size_t brace_count = 0;
+    for (unsigned i = 0; i < Length + 1; ++i) {
+      if (buffer[i] == '{') { ++brace_count; }
+      NthInternalInterpolationStringDataMember[i] = buffer[i];
+    }
+
+    int32_t workspace[Length < 2 ? 1 : Length / 2];
+    int32_t* workspace_ptr = &workspace[0];
+
+    internal_interpolate::populate_tree(
+        std::string_view(NthInternalInterpolationStringDataMember, Length),
+        NthInternalInterpolationStringParameterTreeMember + brace_count,
+        workspace_ptr);
+  }
+
+  consteval interpolation_string<Length + 2> wrap() const {
+    interpolation_string<Length + 2> result;
+    result.NthInternalInterpolationStringDataMember[0] = '{';
+    for (unsigned i = 0; i < Length; ++i) {
+      result.NthInternalInterpolationStringDataMember[i + 1] =
+          NthInternalInterpolationStringDataMember[i];
+    }
+    result.NthInternalInterpolationStringDataMember[Length + 1] = '}';
+    result.NthInternalInterpolationStringDataMember[Length + 2] = '\0';
+    auto* ptr = &result.NthInternalInterpolationStringParameterTreeMember[0];
+    *ptr++    = {.start = 0, .length = Length, .width = 0};
+    for (size_t i = 0; i < Length / 2; ++i) {
+      auto& entry =
+          result.NthInternalInterpolationStringParameterTreeMember[i + 1];
+      entry = NthInternalInterpolationStringParameterTreeMember[i];
+      ++entry.start;
+    }
+    return result;
+  }
+
   // The number of characters (UTF-8 code units) in the interpolation string.
   static constexpr size_t size() { return Length; }
   static constexpr size_t length() { return Length; }
@@ -44,6 +81,10 @@ struct interpolation_string {
     return NthInternalInterpolationStringDataMember[n];
   }
 
+  template <size_t L, size_t R>
+  friend constexpr auto operator+(interpolation_string<L> const&,
+                                  interpolation_string<R> const&);
+
   constexpr size_t count(char x) const {
     size_t n = 0;
     for (char c : std::string_view(*this)) {
@@ -53,12 +94,6 @@ struct interpolation_string {
   }
 
   constexpr auto operator<=>(interpolation_string const&) const = default;
-
-  template <size_t N>
-  requires(N != Length) constexpr bool operator==(
-      interpolation_string<N> const&) const {
-    return false;
-  }
 
   constexpr bool operator==(std::string_view s) const {
     return static_cast<std::string_view>(*this) == s;
@@ -78,9 +113,15 @@ struct interpolation_string {
                                                             ? 1
                                                             : Length / 2] = {};
 
+  template <size_t L, size_t R>
+  friend constexpr auto operator+(interpolation_string<L> const& lhs,
+                                  interpolation_string<R> const& rhs);
+
  private:
   template <size_t>
   friend struct interpolation_string;
+
+  consteval interpolation_string() = default;
 
   constexpr interpolation_string(char const* ptr, int) {
     for (unsigned i = 0; i < Length; ++i) {
@@ -88,7 +129,7 @@ struct interpolation_string {
     }
     NthInternalInterpolationStringDataMember[Length] = 0;
 
-    int32_t workspace[Length / 2];
+    int32_t workspace[Length < 2 ? 1 : Length / 2];
     int32_t* workspace_ptr = &workspace[0];
 
     internal_interpolate::populate_tree(
@@ -101,6 +142,31 @@ struct interpolation_string {
     return NthInternalInterpolationStringDataMember;
   }
 };
+
+template <size_t L, size_t R>
+constexpr auto operator+(interpolation_string<L> const& lhs,
+                         interpolation_string<R> const& rhs) {
+  interpolation_string<L + R> s;
+  for (unsigned i = 0; i < L; ++i) {
+    s.NthInternalInterpolationStringDataMember[i] = lhs[i];
+  }
+  for (unsigned i = 0; i < R; ++i) {
+    s.NthInternalInterpolationStringDataMember[L + i] = rhs[i];
+  }
+  s.NthInternalInterpolationStringDataMember[L + R] = '\0';
+  return s;
+}
+
+template <size_t M, size_t N>
+constexpr bool operator==(interpolation_string<M> const& lhs,
+                          interpolation_string<N> const& rhs) {
+  if constexpr (M != N) {
+    return false;
+  } else {
+    return static_cast<std::string_view>(lhs) ==
+           static_cast<std::string_view>(rhs);
+  }
+}
 
 template <size_t N>
 interpolation_string(char const (&)[N]) -> interpolation_string<N - 1>;
@@ -162,7 +228,7 @@ struct interpolation_string_view {
     return lhs == static_cast<std::string_view>(rhs);
   }
 
-  internal_interpolate::parameter_range const* range_ptr() const {
+  constexpr internal_interpolate::parameter_range const* range_ptr() const {
     return range_;
   }
 

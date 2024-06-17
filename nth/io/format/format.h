@@ -84,16 +84,16 @@ template <typename T>
 
 }  // namespace io
 
-void NthFormat(auto p, io::format_spec<std::string_view>, std::string_view s) {
+void NthFormat(auto& p, io::format_spec<std::string_view>, std::string_view s) {
   p.write(s);
 }
 
 template <int N>
-void NthFormat(auto p, io::format_spec<std::string_view>, char const (&s)[N]) {
+void NthFormat(auto& p, io::format_spec<std::string_view>, char const (&s)[N]) {
   p.write(std::string_view(s));
 }
 
-void NthFormat(auto p, io::format_spec<decltype(nullptr)> spec,
+void NthFormat(auto& p, io::format_spec<decltype(nullptr)> spec,
                decltype(nullptr)) {
   using spec_type = io::format_spec<decltype(nullptr)>;
   switch (spec) {
@@ -104,7 +104,7 @@ void NthFormat(auto p, io::format_spec<decltype(nullptr)> spec,
   }
 }
 
-void NthFormat(auto p, io::format_spec<bool> spec, bool b) {
+void NthFormat(auto& p, io::format_spec<bool> spec, bool b) {
   using spec_type = io::format_spec<bool>;
   switch (spec) {
     case spec_type::word: p.write(b ? "true" : "false"); break;
@@ -115,7 +115,7 @@ void NthFormat(auto p, io::format_spec<bool> spec, bool b) {
   }
 }
 
-void NthFormat(auto p, io::format_spec<char> spec, char c) {
+void NthFormat(auto& p, io::format_spec<char> spec, char c) {
   using spec_type = io::format_spec<char>;
   switch (spec) {
     case spec_type::ascii: {
@@ -131,7 +131,7 @@ void NthFormat(auto p, io::format_spec<char> spec, char c) {
   }
 }
 
-void NthFormat(auto p, io::format_spec<std::byte> spec, std::byte b) {
+void NthFormat(auto& p, io::format_spec<std::byte> spec, std::byte b) {
   using spec_type = io::format_spec<std::byte>;
   switch (spec) {
     case spec_type::hexadecimal: {
@@ -156,7 +156,7 @@ void NthFormat(auto p, io::format_spec<std::byte> spec, std::byte b) {
 }
 
 template <std::integral I>
-void NthFormat(auto p, io::format_spec<I> spec, I n) {
+void NthFormat(auto& p, io::format_spec<I> spec, I n) {
   int base                     = static_cast<int>(spec);
   constexpr size_t buffer_size = 1 + static_cast<int>(sizeof(n) * 8);
   char buffer[buffer_size]     = {};

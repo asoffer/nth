@@ -50,12 +50,13 @@ struct compile_time_string {
 
   char NthInternalCompileTimeStringDataMember[Length + 1];
 
- private:
-  template <unsigned>
-  friend struct compile_time_string;
   template <unsigned L, unsigned R>
   friend constexpr auto operator+(compile_time_string<L> const&,
                                   compile_time_string<R> const&);
+
+ private:
+  template <unsigned>
+  friend struct compile_time_string;
 
   constexpr compile_time_string() {}
   constexpr compile_time_string(char const* ptr, int) {

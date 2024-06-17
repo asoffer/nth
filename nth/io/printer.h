@@ -22,7 +22,7 @@ concept printable_with = requires(P p, T const &t) {
 template <typename P>
 struct printer {
   template <printable_with<P> T>
-  static auto print(P p, auto spec, T const &value) {
+  static auto print(P &p, auto spec, T const &value) {
     if constexpr (nth::type<decltype(spec)> ==
                   nth::type<nth::io::interpolation_spec>) {
       return NthFormat(p, ::nth::format_spec_from<T>(spec), value);
@@ -38,8 +38,8 @@ concept printer_type = std::derived_from<P, printer<P>> and requires(P p) {
 };
 
 template <int &..., printer_type P>
-void print(P p, auto spec, auto const &value) {
-  P::print(std::move(p), std::move(spec), value);
+void print(P &p, auto spec, auto const &value) {
+  P::print(p, std::move(spec), value);
 }
 
 // `minimal_printer` is the most trivial type satisfying the `printer_type`

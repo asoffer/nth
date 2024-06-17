@@ -33,7 +33,7 @@ struct arguments {
     auto const& log_line = line<File, Line, Function, S>;
     log_entry e(log_line.id());
     log_entry::builder builder(e);
-    nth::print_structure(builder, io::interpolation_spec(S), values...);
+    nth::interpolate(builder, io::interpolation_spec(S), values...);
 
     for (auto* sink : internal_debug::registered_log_sinks()) {
       sink->send(log_line, e);
