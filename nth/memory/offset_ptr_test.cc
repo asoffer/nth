@@ -1,4 +1,4 @@
-#include "nth/utility/offset_ptr.h"
+#include "nth/memory/offset_ptr.h"
 
 #include "nth/test/test.h"
 

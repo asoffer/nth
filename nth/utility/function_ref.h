@@ -1,8 +1,7 @@
 #ifndef NTH_UTILITY_FUNCTION_REF_H
 #define NTH_UTILITY_FUNCTION_REF_H
 
-#include <memory>
-
+#include "nth/memory/address.h"
 #include "nth/meta/concepts/core.h"
 #include "nth/meta/concepts/invocable.h"
 
@@ -20,7 +19,7 @@ struct function_ref;
 template <typename Ret, typename... Args>
 struct function_ref<Ret(Args...)> {
   function_ref() = default;
-  function_ref(std::nullptr_t) : function_ref() {}
+  function_ref(decltype(nullptr)) : function_ref() {}
 
   function_ref(Ret (*f)(Args...))
       : data_(nullptr),
@@ -30,7 +29,7 @@ struct function_ref<Ret(Args...)> {
   function_ref(F &&f NTH_ATTRIBUTE(lifetimebound)) requires(
       nth::invocable<F, Args...>
           and nth::precisely<nth::return_type<F, Args...>, Ret>)
-      : data_(std::addressof(f)), invoker_(internal_function_ref::Invoker<F>) {}
+      : data_(nth::address(f)), invoker_(internal_function_ref::Invoker<F>) {}
 
   explicit operator bool() const { return invoker_ != nullptr; }
 

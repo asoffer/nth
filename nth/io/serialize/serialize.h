@@ -12,7 +12,6 @@
 #include "nth/io/serialize/internal/serialize.h"
 #include "nth/io/writer/writer.h"
 #include "nth/meta/type.h"
-#include "nth/utility/bytes.h"
 
 namespace nth::io {
 

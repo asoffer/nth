@@ -4,34 +4,9 @@ cc_library(
     name = "any_invocable",
     hdrs = ["any_invocable.h"],
     deps = [
+        "//nth/base:core",
         "//nth/meta/concepts:core",
         "//nth/meta/concepts:invocable",
-    ],
-)
-
-cc_library(
-    name = "bytes",
-    hdrs = ["bytes.h"],
-    deps = [
-        "//nth/base:attributes",
-    ],
-)
-
-cc_library(
-    name = "buffer",
-    hdrs = ["buffer.h"],
-    deps = [
-        "//nth/base:core",
-    ],
-)
-
-cc_test(
-    name = "buffer_test",
-    srcs = ["buffer_test.cc"],
-    deps = [
-        ":buffer",
-        "//nth/meta:type",
-        "//nth/test:main",
     ],
 )
 
@@ -39,6 +14,7 @@ cc_library(
     name = "function_ref",
     hdrs = ["function_ref.h"],
     deps = [
+        "//nth/memory:address",
         "//nth/meta/concepts:core",
         "//nth/meta/concepts:invocable",
     ],
@@ -48,7 +24,9 @@ cc_library(
     name = "iterator_range",
     hdrs = ["iterator_range.h"],
     deps = [
+        "//nth/base:core",
         "//nth/debug",
+        "//nth/meta/concepts:core",
     ],
 )
 
@@ -67,6 +45,7 @@ cc_library(
     name = "lazy",
     hdrs = ["lazy.h"],
     deps = [
+        "//nth/base:core",
         "//nth/meta/concepts:invocable",
     ],
 )
@@ -76,21 +55,6 @@ cc_test(
     srcs = ["lazy_test.cc"],
     deps = [
         ":lazy",
-        "//nth/test:main",
-    ],
-)
-
-cc_library(
-    name = "offset_ptr",
-    hdrs = ["offset_ptr.h"],
-    deps = [],
-)
-
-cc_test(
-    name = "offset_ptr_test",
-    srcs = ["offset_ptr_test.cc"],
-    deps = [
-        ":offset_ptr",
         "//nth/test:main",
     ],
 )

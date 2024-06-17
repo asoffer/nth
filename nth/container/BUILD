@@ -24,6 +24,7 @@ cc_library(
     deps = [
         ":flyweight_map",
         "//nth/debug",
+        "//nth/memory:buffer",
     ],
 )
 

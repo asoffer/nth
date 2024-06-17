@@ -1,9 +1,8 @@
-#ifndef NTH_UTILITY_OFFSET_PTR_H
-#define NTH_UTILITY_OFFSET_PTR_H
+#ifndef NTH_MEMORY_OFFSET_PTR_H
+#define NTH_MEMORY_OFFSET_PTR_H
 
 #include <cstdint>
 #include <type_traits>
-#include <utility>
 
 #include "nth/base/attributes.h"
 
@@ -57,7 +56,7 @@ struct NTH_ATTRIBUTE(trivial_abi) offset_ptr {
 
   template <typename H>
   H AbslHashValue(H h, offset_ptr const &p) {
-    return H::combine(std::move(h), p.get());
+    return H::combine(NTH_MOVE(h), p.get());
   }
 
   pointer get() const { return to_ptr(to_int(this) - offset_); }
@@ -81,4 +80,4 @@ struct NTH_ATTRIBUTE(trivial_abi) offset_ptr {
 
 }  // namespace nth
 
-#endif  // NTH_UTILITY_OFFSET_PTR_H
+#endif  // NTH_MEMORY_OFFSET_PTR_H

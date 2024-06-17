@@ -1,18 +1,16 @@
 #ifndef NTH_UTILITY_ITERATOR_RANGE_H
 #define NTH_UTILITY_ITERATOR_RANGE_H
 
-#include <type_traits>
-#include <utility>
-
+#include "nth/base/core.h"
 #include "nth/debug/debug.h"
+#include "nth/meta/concepts/core.h"
 
 namespace nth {
 namespace internal_iterator_range {
 
-template <typename Iterator, int Tag>
+template <typename Iterator, int>
 struct Base : private Iterator {
-  explicit constexpr Base(Iterator&& iterator)
-      : Iterator(std::move(iterator)) {}
+  explicit constexpr Base(Iterator&& iterator) : Iterator(NTH_MOVE(iterator)) {}
   explicit constexpr Base(Iterator const& iterator) : Iterator(iterator) {}
 
   constexpr Iterator const& iterator() const {
@@ -25,14 +23,14 @@ struct Base : private Iterator {
 template <typename B, typename E>
 struct iterator_range : private internal_iterator_range::Base<B, 0>,
                         private internal_iterator_range::Base<E, 1> {
-  using value_type     = std::decay_t<decltype(*std::declval<B>())>;
+  using value_type     = nth::decayed<decltype(*nth::value<B>())>;
   using const_iterator = B;
 
   iterator_range() = default;
 
   iterator_range(B b, E e)
-      : internal_iterator_range::Base<B, 0>(std::move(b)),
-        internal_iterator_range::Base<E, 1>(std::move(e)) {}
+      : internal_iterator_range::Base<B, 0>(NTH_MOVE(b)),
+        internal_iterator_range::Base<E, 1>(NTH_MOVE(e)) {}
 
   auto size() const requires requires(B b, E e) { e - b; }
   { return end() - begin(); }

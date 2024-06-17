@@ -7,7 +7,7 @@
 
 #include "nth/container/flyweight_map.h"
 #include "nth/debug/debug.h"
-#include "nth/utility/buffer.h"
+#include "nth/memory/buffer.h"
 
 namespace nth {
 

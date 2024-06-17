@@ -7,7 +7,9 @@
 #include <optional>
 #include <span>
 
-#include "nth/utility/bytes.h"
+#include "nth/memory/bytes.h"
+#include "nth/meta/concepts/comparable.h"
+#include "nth/meta/concepts/core.h"
 
 namespace nth::io {
 
@@ -16,7 +18,7 @@ namespace nth::io {
 // equality-comparable and must be subtractable from itself, yielding a
 // `ptrdiff_t`.
 template <typename C>
-concept write_cursor = std::equality_comparable<C> and requires(C const& c) {
+concept write_cursor = nth::equality_comparable<C> and requires(C const& c) {
   { c - c } -> std::same_as<ptrdiff_t>;
 };
 
@@ -55,8 +57,8 @@ concept writer = requires(W mutable_writer, W const& const_writer) {
     // writer. If the function returns `true`, we say the write was
     // "successful", the bytes contained in the passed-in `span` must be
     // written. The cursor must not be moved.
-    mutable_writer.write_at(std::declval<typename W::cursor_type>(),
-                            std::declval<std::span<std::byte const>>())
+    mutable_writer.write_at(nth::value<typename W::cursor_type>(),
+                            nth::value<std::span<std::byte const>>())
     } -> std::same_as<bool>;
 
   {
@@ -67,7 +69,7 @@ concept writer = requires(W mutable_writer, W const& const_writer) {
     // `true`, we say the write was "successful" and the span contains the
     // contents of the passed-in `span` are written. The cursor must be moved
     // forward by the size of the span argument.
-    mutable_writer.write(std::declval<std::span<std::byte const>>())
+    mutable_writer.write(nth::value<std::span<std::byte const>>())
     } -> std::same_as<bool>;
 };
 

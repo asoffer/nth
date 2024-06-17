@@ -10,7 +10,6 @@ cc_library(
         "//nth/io/reader",
         "//nth/meta:concepts",
         "//nth/meta:type",
-        "//nth/utility:bytes",
     ],
 )
 

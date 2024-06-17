@@ -1,9 +1,9 @@
 #ifndef NTH_UTILITY_ANY_INVOCABLE_H
 #define NTH_UTILITY_ANY_INVOCABLE_H
 
-#include <memory>
 #include <utility>
 
+#include "nth/base/core.h"
 #include "nth/meta/concepts/core.h"
 #include "nth/meta/concepts/invocable.h"
 
@@ -29,7 +29,7 @@ struct any_invocable;
 template <typename Ret, typename... Args>
 struct any_invocable<Ret(Args...)> {
   any_invocable() = default;
-  any_invocable(std::nullptr_t) : any_invocable() {}
+  any_invocable(decltype(nullptr)) : any_invocable() {}
 
   any_invocable(Ret (*f)(Args...))
       : data_(nullptr),
@@ -55,7 +55,7 @@ struct any_invocable<Ret(Args...)> {
   any_invocable(F &&f) requires(
       nth::invocable<F, Args...>
           and nth::precisely<nth::return_type<F, Args...>, Ret>)
-      : data_(new nth::decayed<F>(std::forward<F>(f))),
+      : data_(new nth::decayed<F>(NTH_FWD(f))),
         invoker_(internal_any_invocable::Invoker<nth::decayed<F>>),
         destroy_(internal_any_invocable::Destroy<nth::decayed<F>>) {}
 

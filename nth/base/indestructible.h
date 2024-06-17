@@ -3,7 +3,7 @@
 
 #include <memory>
 
-#include "nth/utility/buffer.h"
+#include "nth/memory/buffer.h"
 
 namespace nth {
 

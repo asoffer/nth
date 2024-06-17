@@ -62,6 +62,8 @@ cc_library(
     name = "writer",
     hdrs = ["writer.h"],
     deps = [
-        "//nth/utility:bytes",
+        "//nth/memory:bytes",
+        "//nth/meta/concepts:comparable",
+        "//nth/meta/concepts:core",
     ],
 )

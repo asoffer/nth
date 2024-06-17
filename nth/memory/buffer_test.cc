@@ -1,4 +1,4 @@
-#include "nth/utility/buffer.h"
+#include "nth/memory/buffer.h"
 
 #include "nth/meta/type.h"
 #include "nth/test/test.h"
@@ -17,7 +17,7 @@ struct Counter {
   int *dtor_count_;
 };
 
-NTH_TEST("Buffer/PrimitiveType") {
+NTH_TEST("buffer/primitive") {
   int n = 1234;
 
   nth::buffer<sizeof(int), alignof(int)> buffer(nth::buffer_construct<int>, n);
@@ -28,7 +28,7 @@ NTH_TEST("Buffer/PrimitiveType") {
   buffer.destroy<int>();
 }
 
-NTH_TEST("Buffer/Manual") {
+NTH_TEST("buffer/manual") {
   int ctor_count = 0, dtor_count = 0;
 
   nth::buffer<sizeof(Counter), alignof(Counter)> counter(
@@ -54,7 +54,7 @@ struct S {
   int n;
 };
 
-NTH_TEST("Buffer/Access") {
+NTH_TEST("buffer/access") {
   nth::buffer<sizeof(S), alignof(S)> buffer(nth::buffer_construct<S>, 17);
   NTH_EXPECT(buffer.as<S>().n == 17);
   std::exchange(buffer.as<S>().n, 100);

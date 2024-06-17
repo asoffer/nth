@@ -34,7 +34,6 @@ cc_library(
         "//nth/io/serialize/internal:serialize",
         "//nth/io/writer",
         "//nth/container:free_functions",
-        "//nth/utility:bytes",
     ],
 )
 

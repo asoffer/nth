@@ -28,7 +28,9 @@ cc_library(
     name = "reader",
     hdrs = ["reader.h"],
     deps = [
-        "//nth/utility:bytes",
+        "//nth/memory:bytes",
+        "//nth/meta/concepts:comparable",
+        "//nth/meta/concepts:core",
     ],
 )
 

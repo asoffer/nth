@@ -1,27 +1,26 @@
-#ifndef NTH_UTILITY_BYTES_H
-#define NTH_UTILITY_BYTES_H
+#ifndef NTH_MEMORY_BYTES_H
+#define NTH_MEMORY_BYTES_H
 
 #include <concepts>
 #include <cstddef>
-#include <memory>
 #include <span>
 
 #include "nth/base/attributes.h"
+#include "nth/memory/address.h"
 
 namespace nth {
 
 // Returns a `std::span<std::byte const>` over the bytes of the object `t`.
 template <typename T>
-std::span<std::byte const, sizeof(T)> bytes(T const& t NTH_ATTRIBUTE(lifetimebound)) {
-  return std::span<std::byte const, sizeof(T)>(
-      reinterpret_cast<std::byte const*>(std::addressof(t)), sizeof(T));
+std::span<std::byte const, sizeof(T)> bytes(
+    T const& t NTH_ATTRIBUTE(lifetimebound)) {
+  return std::span<std::byte const, sizeof(T)>(nth::raw_address(t), sizeof(T));
 }
 
 // Returns a `std::span<std::byte>` over the bytes of the object `t`.
 template <typename T>
 std::span<std::byte, sizeof(T)> bytes(T& t NTH_ATTRIBUTE(lifetimebound)) {
-  return std::span<std::byte, sizeof(T)>(
-      reinterpret_cast<std::byte*>(std::addressof(t)), sizeof(T));
+  return std::span<std::byte, sizeof(T)>(nth::raw_address(t), sizeof(T));
 }
 
 // Returns a `std::span<std::byte const>` over the bytes ranging from
@@ -32,9 +31,8 @@ std::span<std::byte const> byte_range(
   { t.begin() } -> std::contiguous_iterator;
   { t.end() } -> std::contiguous_iterator;
 }) {
-  return std::span<std::byte const>(
-      reinterpret_cast<std::byte const*>(std::addressof(*t.begin())),
-      reinterpret_cast<std::byte const*>(std::addressof(*t.end())));
+  return std::span<std::byte const>(nth::raw_address(*t.begin()),
+                                    nth::raw_address(*t.end()));
 }
 
 // Returns a `std::span<std::byte>` over the bytes ranging from`t.begin()` to
@@ -45,11 +43,10 @@ std::span<std::byte> byte_range(T& t NTH_ATTRIBUTE(lifetimebound)) requires(
       { t.begin() } -> std::contiguous_iterator;
       { t.end() } -> std::contiguous_iterator;
     }) {
-  return std::span<std::byte>(
-      reinterpret_cast<std::byte*>(std::addressof(*t.begin())),
-      reinterpret_cast<std::byte*>(std::addressof(*t.end())));
+  return std::span<std::byte>(nth::raw_address(*t.begin()),
+                              nth::raw_address(*t.end()));
 }
 
 }  // namespace nth
 
-#endif  // NTH_UTILITY_BYTES_H
+#endif  // NTH_MEMORY_BYTES_H

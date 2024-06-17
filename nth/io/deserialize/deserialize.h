@@ -16,7 +16,6 @@
 #include "nth/io/reader/reader.h"
 #include "nth/meta/concepts.h"
 #include "nth/meta/type.h"
-#include "nth/utility/bytes.h"
 
 namespace nth::io {
 

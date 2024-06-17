@@ -9,7 +9,9 @@
 #include <optional>
 #include <span>
 
-#include "nth/utility/bytes.h"
+#include "nth/memory/bytes.h"
+#include "nth/meta/concepts/comparable.h"
+#include "nth/meta/concepts/core.h"
 
 namespace nth::io {
 
@@ -18,8 +20,8 @@ namespace nth::io {
 // equality-comparable and must be subtractable from itself, yielding a
 // `ptrdiff_t`.
 template <typename C>
-concept read_cursor = std::equality_comparable<C> and requires(C const& c) {
-  { c - c } -> std::same_as<ptrdiff_t>;
+concept read_cursor = nth::equality_comparable<C> and requires(C const& c) {
+  { c - c } -> nth::precisely<ptrdiff_t>;
 };
 
 // Concept defining a `reader`, representing an object from which one can
@@ -39,9 +41,9 @@ concept reader = requires(R mutable_reader, R const& const_reader) {
     // If the function returns `true`, we say the read was "successful" and the
     // span contains the "contents that were read," a notion that must be
     // defined by the implementation of the `reader`.
-    const_reader.read_at(std::declval<typename R::cursor_type>(),
-                         std::declval<std::span<std::byte>>())
-    } -> std::same_as<bool>;
+    const_reader.read_at(nth::value<typename R::cursor_type>(),
+                         nth::value<std::span<std::byte>>())
+    } -> nth::precisely<bool>;
 
   {
     // There must be an overload of `read` which reads from current cursor (as
@@ -52,8 +54,8 @@ concept reader = requires(R mutable_reader, R const& const_reader) {
     // span contains the "contents that were read," a notion that must be
     // defined by the implementation of the `reader`. The cursor must be moved
     // forward by the size of the span argument.
-    mutable_reader.read(std::declval<std::span<std::byte>>())
-    } -> std::same_as<bool>;
+    mutable_reader.read(nth::value<std::span<std::byte>>())
+    } -> nth::precisely<bool>;
 
   {
     // If the function returns `false`, we say the skip was "unsuccessful", and
@@ -62,17 +64,17 @@ concept reader = requires(R mutable_reader, R const& const_reader) {
     // situation, the cursor must be moved forward by the size given by the
     // argument.
     mutable_reader.skip(size_t{})
-    } -> std::same_as<bool>;
+    } -> nth::precisely<bool>;
 
   {
     // Must return the number of bytes left to be read.
     const_reader.size()
-    } -> std::same_as<size_t>;
+    } -> nth::precisely<size_t>;
 
   {
     // Must return the current location of the cursor.
     const_reader.cursor()
-    } -> std::same_as<typename R::cursor_type>;
+    } -> nth::precisely<typename R::cursor_type>;
 };
 
 // Reads `sizeof(x)` bytes from `r` interpreting them as a `T`. If reading is
