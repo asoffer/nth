@@ -36,6 +36,6 @@ cc_library(
       "//nth/debug/trace/internal:implementation",
       "//nth/meta:stateful",
       "//nth/strings:glob",
-      "//nth/utility:registration",
+      "//nth/registration:static",
     ],
 )

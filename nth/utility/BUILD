@@ -20,7 +20,9 @@ cc_library(
 cc_library(
     name = "buffer",
     hdrs = ["buffer.h"],
-    deps = [],
+    deps = [
+        "//nth/base:core",
+    ],
 )
 
 cc_test(
@@ -79,37 +81,6 @@ cc_test(
 )
 
 cc_library(
-    name = "move",
-    hdrs = ["move.h"],
-    deps = [],
-)
-
-cc_test(
-    name = "move_test",
-    srcs = ["move_test.cc"],
-    deps = [
-        ":move",
-    ],
-)
-
-cc_library(
-    name = "no_destructor",
-    hdrs = ["no_destructor.h"],
-    deps = [
-      ":buffer",
-    ],
-)
-
-cc_test(
-    name = "no_destructor_test",
-    srcs = ["no_destructor_test.cc"],
-    deps = [
-        ":no_destructor",
-        "//nth/test:main",
-    ],
-)
-
-cc_library(
     name = "offset_ptr",
     hdrs = ["offset_ptr.h"],
     deps = [],
@@ -157,12 +128,6 @@ cc_test(
         ":ptr_union",
         "//nth/test:main",
     ],
-)
-
-cc_library(
-    name = "registration",
-    hdrs = ["registration.h"],
-    deps = [],
 )
 
 cc_library(

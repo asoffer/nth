@@ -1,4 +1,4 @@
-#include "nth/utility/move.h"
+#include "nth/base/core.h"
 
 namespace {
 
@@ -25,7 +25,7 @@ int main() {
   int copy = 0;
   int move = 0;
   CtorCounter counter(copy, move);
-  CtorCounter moved(nth::move(counter));
+  CtorCounter moved(NTH_MOVE(counter));
   if (move != 1) { return 0; }
   if (copy != 0) { return 0; }
 

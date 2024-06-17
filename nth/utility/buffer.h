@@ -2,8 +2,10 @@
 #define NTH_UTILITY_BUFFER_H
 
 #include <algorithm>
+#include <concepts>
 #include <cstddef>
-#include <utility>
+
+#include "nth/base/core.h"
 
 namespace nth {
 namespace internal_buffer {
@@ -33,7 +35,7 @@ struct alignas(Alignment) buffer : internal_buffer::BufferBase {
   // Constructs `T` in the buffer with the given arguments.
   template <internal_buffer::FitsInBuffer<Size, Alignment> T, typename... Args>
   constexpr buffer(buffer_construct_t<T>, Args &&...args) {
-    new (buf_) T(std::forward<Args>(args)...);
+    new (buf_) T(NTH_FWD(args)...);
   }
 
   // Constructs `T` in the buffer with the given arguments. No object may be
@@ -41,7 +43,7 @@ struct alignas(Alignment) buffer : internal_buffer::BufferBase {
   template <internal_buffer::FitsInBuffer<Size, Alignment> T, int &...,
             typename... Args>
   T &construct(Args &&...args) {
-    return *new (buf_) T(std::forward<Args>(args)...);
+    return *new (buf_) T(NTH_FWD(args)...);
   }
 
   // Destroys the object of type `T` present in the buffer. Behavior is
@@ -70,14 +72,14 @@ struct alignas(Alignment) buffer : internal_buffer::BufferBase {
   // is undefined in no object an object of another type is present.
   template <internal_buffer::FitsInBuffer<Size, Alignment> T>
   T const &&as() const && {
-    return std::move(*get<T>());
+    return NTH_MOVE(*get<T>());
   }
 
   // Returns a reference to the object of type `T` held in the buffer. Behavior
   // is undefined in no object an object of another type is present.
   template <internal_buffer::FitsInBuffer<Size, Alignment> T>
   T &&as() && {
-    return std::move(*get<T>());
+    return NTH_MOVE(*get<T>());
   }
 
  private:

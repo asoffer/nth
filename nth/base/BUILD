@@ -23,6 +23,37 @@ cc_library(
 )
 
 cc_library(
+    name = "core",
+    hdrs = ["core.h"],
+    deps = [],
+)
+
+cc_test(
+    name = "core_test",
+    srcs = ["core_test.cc"],
+    deps = [
+        ":core",
+    ],
+)
+
+cc_library(
+    name = "indestructible",
+    hdrs = ["indestructible.h"],
+    deps = [
+      "//nth/utility:buffer",
+    ],
+)
+
+cc_test(
+    name = "indestructible_test",
+    srcs = ["indestructible_test.cc"],
+    deps = [
+        ":indestructible",
+        "//nth/test/raw:test",
+    ],
+)
+
+cc_library(
     name = "macros",
     hdrs = ["macros.h"],
     deps = [

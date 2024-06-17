@@ -1,21 +1,23 @@
 #include "nth/test/benchmark_result.h"
 
+#include "nth/base/indestructible.h"
+#include "nth/registration/registrar.h"
+
 namespace nth::test {
 namespace {
 
 using handler_type = void (*)(BenchmarkResult const &);
-using Registrar = internal_base::Registrar<struct Key, handler_type>;
+indestructible<registrar<handler_type>> registrar_;
 
 }  // namespace
 
-
 void RegisterBenchmarkResultHandler(handler_type handler) {
-  Registrar::Register(handler);
+  registrar_->insert(handler);
 }
 
-internal_base::RegistrarImpl<void (*)(BenchmarkResult const &)>::Range
+registrar<void (*)(BenchmarkResult const &)>::range_type
 RegisteredBenchmarkResultHandlers() {
-  return Registrar::Registry();
+  return registrar_->registry();
 }
 
 }  // namespace nth::test

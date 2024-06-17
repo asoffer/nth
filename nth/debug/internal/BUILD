@@ -5,8 +5,7 @@ cc_library(
     hdrs = ["raw_check.h"],
     deps = [],
     visibility = [
-        "//nth/debug:__subpackages__",
-        "//nth/base/internal:__pkg__",
+        "//nth:__subpackages__",
     ],
 )
 

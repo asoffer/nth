@@ -1,15 +1,18 @@
 #include "nth/debug/expectation_result.h"
 
+#include "nth/base/indestructible.h"
+#include "nth/registration/registrar.h"
+
 namespace nth::debug {
 namespace {
 
 using handler_type = void (*)(ExpectationResult const &);
-using Registrar = internal_base::Registrar<struct Key, handler_type>;
+indestructible<registrar<handler_type>> registrar_;
 
 }  // namespace
 
 void RegisterExpectationResultHandler(handler_type handler) {
-  Registrar::Register(handler);
+  registrar_->insert(handler);
 }
 
 ExpectationResult::ExpectationResult(nth::source_location location,
@@ -24,9 +27,9 @@ ExpectationResult ExpectationResult::Failure(nth::source_location location) {
   return ExpectationResult(location, false);
 }
 
-internal_base::RegistrarImpl<void (*)(ExpectationResult const &)>::Range
+registrar<void (*)(ExpectationResult const &)>::range_type
 RegisteredExpectationResultHandlers() {
-  return Registrar::Registry();
+  return registrar_->registry();
 }
 
 }  // namespace nth::debug

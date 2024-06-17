@@ -2,16 +2,16 @@
 
 #include <cstdio>
 
+#include "nth/base/indestructible.h"
 #include "nth/debug/contracts/contracts.h"
-#include "nth/utility/no_destructor.h"
 
 namespace nth {
 namespace internal_file {
 namespace {
 
-static NoDestructor<file> std_out(stdout);
-static NoDestructor<file> std_err(stderr);
-static NoDestructor<file> std_in(stdin);
+static indestructible<file> std_out(stdout);
+static indestructible<file> std_err(stderr);
+static indestructible<file> std_in(stdin);
 
 }  // namespace
 }  // namespace internal_file

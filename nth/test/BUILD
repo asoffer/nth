@@ -34,7 +34,8 @@ cc_library(
     hdrs = ["benchmark_result.h"],
     srcs = ["benchmark_result.cc"],
     deps = [
-        "//nth/base/internal:global_registry",
+        "//nth/base:indestructible",
+        "//nth/registration:registrar",
     ],
 )
 
@@ -94,8 +95,8 @@ cc_library(
         ":benchmark",
         ":benchmark_result",
         ":test",
+        "//nth/base:indestructible",
         "//nth/io:file_printer",
-        "//nth/utility:no_destructor",
         "@abseil-cpp//absl/synchronization",
     ],
 )

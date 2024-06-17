@@ -1,14 +1,5 @@
 package(default_visibility = ["//visibility:public"])
 
-cc_binary(
-    name = "blah",
-    srcs = ["blah.cc"],
-    deps = [
-        ":log",
-        ":stderr_log_sink",
-    ],
-)
-
 cc_library(
     name = "entry",
     visibility = ["//nth/debug/log:__subpackages__"],
@@ -65,7 +56,8 @@ cc_library(
     hdrs = ["sink.h"],
     srcs = ["sink.cc"],
     deps = [
-      "//nth/base/internal:global_registry",
+        "//nth/base:indestructible",
+        "//nth/registration:registrar",
     ],
 )
 

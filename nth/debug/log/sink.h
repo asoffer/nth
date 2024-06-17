@@ -1,7 +1,7 @@
 #ifndef NTH_DEBUG_LOG_SINK_H
 #define NTH_DEBUG_LOG_SINK_H
 
-#include "nth/base/internal/global_registry.h"
+#include "nth/registration/registrar.h"
 
 namespace nth {
 
@@ -14,7 +14,7 @@ struct log_sink {
 
 namespace internal_debug {
 
-internal_base::RegistrarImpl<log_sink*>::Range registered_log_sinks();
+registrar<log_sink*>::range_type registered_log_sinks();
 
 }  // namespace internal_debug
 

@@ -8,10 +8,10 @@
 #include "nth/debug/trace/internal/implementation.h"
 #include "nth/debug/verbosity/verbosity.h"
 #include "nth/meta/stateful.h"
+#include "nth/registration/static.h"
 #include "nth/strings/glob.h"
 #include "nth/test/internal/arguments.h"
 #include "nth/test/internal/invocation.h"
-#include "nth/utility/registration.h"
 
 // The stateful compile-time sequence of types which will be appended to once
 // for each parameterized test encountered. Despite not being in an internal
@@ -105,11 +105,11 @@ void RegisterInvocationsMatching(nth::Sequence auto seq) {
     static void InvokeTest();                                                  \
                                                                                \
    private:                                                                    \
-    static nth::RegistrationToken const registration_token;                    \
-    [[maybe_unused]] static constexpr ::nth::OdrUse<&registration_token>       \
+    static nth::registration_token const registration_token;                   \
+    [[maybe_unused]] static constexpr ::nth::odr_use<&registration_token>      \
         RegisterTokenUse;                                                      \
   };                                                                           \
-  inline nth::RegistrationToken const test_name::registration_token = [] {     \
+  inline nth::registration_token const test_name::registration_token = [] {    \
     ::nth::test::RegisterTestInvocation(categorization(),                      \
                                         &test_name::InvokeTest);               \
   };                                                                           \
@@ -122,11 +122,11 @@ void RegisterInvocationsMatching(nth::Sequence auto seq) {
     static void InvokeTest(__VA_ARGS__);                                       \
                                                                                \
    private:                                                                    \
-    static nth::RegistrationToken const registration_token;                    \
-    [[maybe_unused]] static constexpr ::nth::OdrUse<&registration_token>       \
+    static nth::registration_token const registration_token;                   \
+    [[maybe_unused]] static constexpr ::nth::odr_use<&registration_token>      \
         RegisterTokenUse;                                                      \
   };                                                                           \
-  inline nth::RegistrationToken const test_name::registration_token = [] {     \
+  inline nth::registration_token const test_name::registration_token = [] {    \
     ::nth::test::internal_test::RegisterInvocationsMatching<test_name>(        \
         *::NthInternalParameterizedTestInvocationSequence);                    \
     ::NthInternalParameterizedTestSequence.append<nth::type<test_name>>();     \
@@ -141,11 +141,11 @@ void RegisterInvocationsMatching(nth::Sequence auto seq) {
     static ::nth::test::internal_invocation::TestInvocation<T> Invocation();   \
                                                                                \
    private:                                                                    \
-    static nth::RegistrationToken const registration_token;                    \
-    [[maybe_unused]] static constexpr ::nth::OdrUse<&registration_token>       \
+    static nth::registration_token const registration_token;                   \
+    [[maybe_unused]] static constexpr ::nth::odr_use<&registration_token>      \
         RegisterTokenUse;                                                      \
   };                                                                           \
-  inline nth::RegistrationToken const invocation_name::registration_token =    \
+  inline nth::registration_token const invocation_name::registration_token =   \
       [] {                                                                     \
         ::NthInternalParameterizedTestInvocationSequence                       \
             .append<nth::type<invocation_name>.decayed()>();                   \

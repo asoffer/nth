@@ -21,7 +21,8 @@ cc_library(
     srcs = ["expectation_result.cc"],
     deps = [
         ":source_location",
-        "//nth/base/internal:global_registry",
+        "//nth/base:indestructible",
+        "//nth/registration:registrar",
     ],
 )
 

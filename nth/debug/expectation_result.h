@@ -3,8 +3,8 @@
 
 #include <cstdint>
 
-#include "nth/base/internal/global_registry.h"
 #include "nth/debug/source_location.h"
+#include "nth/registration/registrar.h"
 
 namespace nth::debug {
 
@@ -45,7 +45,7 @@ void RegisterExpectationResultHandler(
 // registration happens after the function returns, the returned
 // `ExpectationResultHandlerRange` will not contain the newly registered
 // handler.
-internal_base::RegistrarImpl<void (*)(ExpectationResult const&)>::Range
+registrar<void (*)(ExpectationResult const&)>::range_type
 RegisteredExpectationResultHandlers();
 
 }  // namespace nth::debug

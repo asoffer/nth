@@ -5,7 +5,7 @@
 #include <cstdint>
 #include <string_view>
 
-#include "nth/base/internal/global_registry.h"
+#include "nth/registration/registrar.h"
 
 namespace nth::test {
 
@@ -34,7 +34,7 @@ void RegisterBenchmarkResultHandler(void (*handler)(BenchmarkResult const&));
 // registration happens after the function returns, the returned
 // `BenchmarkResultHandlerRange` will not contain the newly registered
 // handler.
-internal_base::RegistrarImpl<void (*)(BenchmarkResult const&)>::Range
+registrar<void (*)(BenchmarkResult const&)>::range_type
 RegisteredBenchmarkResultHandlers();
 
 }  // namespace nth::test

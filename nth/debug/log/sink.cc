@@ -1,20 +1,23 @@
 #include "nth/debug/log/sink.h"
 
+#include "nth/base/indestructible.h"
+#include "nth/registration/registrar.h"
+
 namespace nth {
 namespace {
 
-using registrar = internal_base::Registrar<struct log_sink_key, log_sink*>;
+indestructible<registrar<log_sink*>> registrar_;
 
 }  // namespace
 
 namespace internal_debug {
 
-internal_base::RegistrarImpl<log_sink*>::Range registered_log_sinks() {
-  return registrar::Registry();
+registrar<log_sink*>::range_type registered_log_sinks() {
+  return registrar_->registry();
 }
 
 }  // namespace internal_debug
 
-void register_log_sink(log_sink& sink) { registrar::Register(&sink); }
+void register_log_sink(log_sink& sink) { registrar_->insert(&sink); }
 
 }  // namespace nth

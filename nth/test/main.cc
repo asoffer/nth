@@ -6,12 +6,12 @@
 
 #include "absl/strings/str_cat.h"
 #include "absl/synchronization/mutex.h"
+#include "nth/base/indestructible.h"
 #include "nth/debug/expectation_result.h"
 #include "nth/io/file_printer.h"
 #include "nth/io/format/format.h"
 #include "nth/test/benchmark_result.h"
 #include "nth/test/test.h"
-#include "nth/utility/no_destructor.h"
 
 namespace {
 
@@ -63,8 +63,8 @@ struct BenchmarkResultHolder {
   std::vector<nth::test::BenchmarkResult> results_;
 };
 
-nth::NoDestructor<ExpectationResultHolder> expectation_results;
-nth::NoDestructor<BenchmarkResultHolder> benchmark_results;
+nth::indestructible<ExpectationResultHolder> expectation_results;
+nth::indestructible<BenchmarkResultHolder> benchmark_results;
 
 struct TrivialFormatSpec {};
 
