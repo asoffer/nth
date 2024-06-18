@@ -16,7 +16,6 @@
 
 #include "nth/base/attributes.h"
 #include "nth/debug/debug.h"
-#include "nth/io/printer.h"
 #include "nth/meta/type.h"
 #include "nth/process/exit_code.h"
 #include "nth/strings/text.h"

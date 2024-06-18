@@ -27,10 +27,11 @@ file_writer::cursor_type file_writer::cursor() const {
   return result;
 }
 
-bool file_writer::write(std::span<std::byte const> data) {
-  if (data.empty()) { return true; }
+file_writer::write_result_type file_writer::write(
+    std::span<std::byte const> data) {
+  if (data.empty()) { return write_result_type(0); }
   ssize_t result = nth::sys::write(file_descriptor_, data.data(), data.size());
-  return result != -1;
+  return write_result_type(result == -1 ? 0 : result);
 }
 
 bool file_writer::write_at(cursor_type, std::span<std::byte const>) {

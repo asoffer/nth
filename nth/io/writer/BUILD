@@ -21,15 +21,16 @@ cc_library(
     ],
 )
 
-cc_test(
-    name = "file_test",
-    srcs = ["file_test.cc"],
-    deps = [
-        ":file",
-        ":test",
-        "//nth/test:main",
-    ]
-)
+# TODO: This shouldn't rely on //nth/test
+# cc_test(
+#     name = "file_test",
+#     srcs = ["file_test.cc"],
+#     deps = [
+#         ":file",
+#         ":test",
+#         "//nth/test:main",
+#     ]
+# )
 
 cc_library(
     name = "string",
@@ -62,8 +63,21 @@ cc_library(
     name = "writer",
     hdrs = ["writer.h"],
     deps = [
+        "//nth/base:core",
+        "//nth/io/format",
+        "//nth/io/format:interpolation_spec",
         "//nth/memory:bytes",
         "//nth/meta/concepts:comparable",
         "//nth/meta/concepts:core",
+        "//nth/meta:type",
+        "//nth/strings/interpolate:types",
+    ],
+)
+
+cc_test(
+    name = "writer_test",
+    srcs = ["writer_test.cc"],
+    deps = [
+        ":writer",
     ],
 )

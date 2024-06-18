@@ -38,11 +38,11 @@ std::span<std::byte const> byte_range(
 // Returns a `std::span<std::byte>` over the bytes ranging from`t.begin()` to
 // `t.end()`.
 template <typename T>
-std::span<std::byte> byte_range(T& t NTH_ATTRIBUTE(lifetimebound)) requires(
-    requires {
-      { t.begin() } -> std::contiguous_iterator;
-      { t.end() } -> std::contiguous_iterator;
-    }) {
+std::span<std::byte> byte_range(
+    T& t NTH_ATTRIBUTE(lifetimebound)) requires(requires {
+  { t.begin() } -> std::contiguous_iterator;
+  { t.end() } -> std::contiguous_iterator;
+} and not std::is_const_v<std::remove_reference_t<decltype(*t.begin())>>) {
   return std::span<std::byte>(nth::raw_address(*t.begin()),
                               nth::raw_address(*t.end()));
 }

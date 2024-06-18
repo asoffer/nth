@@ -5,11 +5,11 @@
 #include <cstdio>
 #include <cstring>
 #include <string>
-#include <vector>
 
 #include "nth/configuration/log.h"
 #include "nth/debug/log/line.h"
 #include "nth/debug/log/sink.h"
+#include "nth/io/writer/writer.h"
 #include "nth/strings/interpolate/interpolate.h"
 
 namespace nth {
@@ -17,15 +17,22 @@ namespace nth {
 // A particular invocation of an `NTH_LOG` statement along with encoded
 // arguments.
 struct log_entry {
-  struct builder : nth::io::printer<builder> {
-    using cursor_type = uint16_t;
+  struct builder : io::implements_forward_writer<builder> {
+    struct write_result_type {
+      explicit constexpr write_result_type(size_t n) : written_(n) {}
+
+      constexpr size_t written() const { return written_; }
+
+     private:
+      size_t written_;
+    };
 
     builder(builder const&) = delete;
 
     explicit builder(log_entry& entry NTH_ATTRIBUTE(lifetimebound))
         : entry_(entry) {}
 
-    void write(std::string_view s);
+    write_result_type write(std::span<std::byte const> bytes);
 
    private:
     log_entry& entry_;
@@ -36,9 +43,9 @@ struct log_entry {
     return io::format_spec<log_entry>(s);
   }
 
-  friend void NthFormat(io::printer_type auto& p, io::format_spec<log_entry>,
+  friend void NthFormat(io::forward_writer auto& w, io::format_spec<log_entry>,
                         log_entry const& entry) {
-    p.write(entry.data_);
+    w.write(nth::byte_range(entry.data_));
   }
 
   log_line_id id() const { return id_; }
@@ -62,7 +69,6 @@ struct log_entry {
   // the number of bytes in the subtree is two more than the number of bytes
   // in the element itself.
   std::string data_;
-  std::string interp_;
 };
 
 }  // namespace nth

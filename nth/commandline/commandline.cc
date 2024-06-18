@@ -5,16 +5,16 @@
 #include "nth/commandline/internal/invoke.h"
 #include "nth/commandline/internal/parse.h"
 #include "nth/debug/debug.h"
-#include "nth/io/printer.h"
-#include "nth/io/file_printer.h"
+#include "nth/io/writer/file.h"
+#include "nth/memory/bytes.h"
 
 namespace nth {
 namespace internal_commandline {
 namespace {
 
-void WriteHelpMessage(Usage const &usage, nth::io::printer_type auto &p) {
-  p.write(usage.description);
-  p.write("\n\n");
+void WriteHelpMessage(Usage const &usage, nth::io::forward_writer auto &w) {
+  w.write(nth::byte_range(usage.description));
+  w.write(nth::byte_range(std::string_view("\n\n")));
   size_t max_length =
       std::max_element(usage.commands.begin(), usage.commands.end(),
                        [](auto const &l, auto const &r) {
@@ -23,18 +23,21 @@ void WriteHelpMessage(Usage const &usage, nth::io::printer_type auto &p) {
           ->name.size();
 
   for (auto const &cmd : usage.commands) {
-    p.write(max_length + 2 - cmd.name.size(), ' ');
-    p.write(cmd.name);
-    p.write("  ");
+    w.write(
+        nth::byte_range(std::string(max_length + 2 - cmd.name.size(), ' ')));
+    w.write(nth::byte_range(cmd.name));
+    w.write(nth::byte_range(std::string_view("  ")));
     std::string_view s = cmd.description;
 
     size_t d = 0;
     while (not s.empty()) {
-      p.write(std::exchange(d, max_length + 4), ' ');
-      p.write(GreedyLineBreak(s, 76 - max_length, text_encoding::ascii));
-      p.write("\n");
+      w.write(
+          nth::byte_range(std::string(std::exchange(d, max_length + 4), ' ')));
+      w.write(nth::byte_range(
+          GreedyLineBreak(s, 76 - max_length, text_encoding::ascii)));
+      w.write(nth::byte_range(std::string_view("\n")));
     }
-    p.write("\n");
+    w.write(nth::byte_range(std::string_view("\n")));
   }
 }
 
@@ -46,7 +49,7 @@ struct FlagComparator {
   bool operator()(Flag::Value const &lhs, Flag::Value const &rhs) const {
     return lhs.flag().name.full_name() < rhs.flag().name.full_name();
   }
-}; 
+};
 constexpr FlagComparator compare_flag_values;
 
 }  // namespace
@@ -74,7 +77,7 @@ Command HelpCommand() {
           .description = "Prints a program usage information to the terminal.",
           .execute     = +[](FlagValueSet, std::span<std::string_view const>) {
             internal_commandline::WriteHelpMessage(
-                    *internal_commandline::current_usage, nth::stderr_printer);
+                    *internal_commandline::current_usage, nth::io::stderr_writer);
             return exit_code::success;
           }};
 }

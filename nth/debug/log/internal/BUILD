@@ -7,7 +7,6 @@ cc_library(
         ":voidifier",
         "//nth/debug/log:line",
         "//nth/debug/log:entry",
-        "//nth/io:string_printer",
     ],
 )
 

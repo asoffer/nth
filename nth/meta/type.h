@@ -4,6 +4,7 @@
 #include <memory>
 #include <type_traits>
 
+#include "nth/memory/bytes.h"
 #include "nth/meta/compile_time_string.h"
 #include "nth/meta/concepts/convertible.h"
 #include "nth/meta/sequence.h"
@@ -85,7 +86,9 @@ struct type_id final {
 
   // TODO: We cannot name `io::format_spec` because that header depends on this
   // one.
-  friend void NthFormat(auto& p, auto, type_id id) { p.write(id.id_()); }
+  friend void NthFormat(auto& p, auto, type_id id) {
+    p.write(nth::byte_range(id.id_()));
+  }
 
  private:
   template <typename T>

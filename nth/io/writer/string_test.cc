@@ -39,10 +39,10 @@ NTH_TEST("string_writer/allocate") {
 NTH_TEST("string_writer/write") {
   std::string s;
   string_writer w(s);
-  NTH_ASSERT(w.write(to_bytes("abcd")));
+  NTH_ASSERT(w.write(to_bytes("abcd")).written() == 4u);
   NTH_EXPECT(s.size() == 4u);
   NTH_EXPECT(s == "abcd");
-  NTH_ASSERT(w.write(to_bytes("efgh")));
+  NTH_ASSERT(w.write(to_bytes("efgh")).written() == 4u);
   NTH_EXPECT(s == "abcdefgh");
 }
 

@@ -7,8 +7,6 @@
 #include "nth/debug/log/internal/voidifier.h"
 #include "nth/debug/log/line.h"
 #include "nth/io/format/interpolation_spec.h"
-#include "nth/io/printer.h"
-#include "nth/io/string_printer.h"
 #include "nth/strings/interpolate/interpolate.h"
 #include "nth/strings/interpolate/string.h"
 

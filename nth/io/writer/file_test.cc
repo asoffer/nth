@@ -64,7 +64,7 @@ NTH_TEST("file_writer/write/succeeds") {
 
   std::optional r = try_open("file.txt");
   NTH_ASSERT(r.has_value());
-  NTH_ASSERT(r->write(data));
+  NTH_ASSERT(r->write(data).written() == data.size());
   NTH_EXPECT(content == "abcdefghij");
 }
 
@@ -78,7 +78,7 @@ NTH_TEST("file_writer/write/empty") {
   NTH_ASSERT(r.has_value());
 
   std::array<std::byte, 0> data;
-  NTH_EXPECT(r->write(data));
+  NTH_EXPECT(r->write(data).written() == data.size());
 }
 
 NTH_TEST("file_writer/write/partial-write") {
@@ -98,7 +98,7 @@ NTH_TEST("file_writer/write/partial-write") {
       });
   std::optional r = try_open("file.txt");
   NTH_ASSERT(r.has_value());
-  NTH_ASSERT(r->write(data));
+  NTH_ASSERT(r->write(data).written() == data.size());
   NTH_EXPECT(content == "abcd");
 }
 

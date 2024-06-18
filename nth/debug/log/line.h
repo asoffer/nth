@@ -6,8 +6,8 @@
 
 #include "nth/debug/source_location.h"
 #include "nth/io/format/format.h"
-#include "nth/io/printer.h"
-#include "nth/strings/interpolate/string.h"
+#include "nth/io/writer/writer.h"
+#include "nth/strings/interpolate/interpolate.h"
 
 namespace nth {
 
@@ -34,10 +34,9 @@ struct log_line_base {
       return io::format_spec<metadata>(s);
     }
 
-    template <io::printer_type P>
-    friend void NthFormat(P p, io::format_spec<metadata> spec,
-                          metadata const& m) {
-      interpolate(p, spec, m.source_location().file_name(),
+    friend void NthFormat(io::forward_writer auto& w,
+                          io::format_spec<metadata> spec, metadata const& m) {
+      interpolate(w, spec, m.source_location().file_name(),
                   m.source_location().function_name(),
                   m.source_location().line());
     }

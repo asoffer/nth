@@ -8,8 +8,8 @@
 #include "absl/synchronization/mutex.h"
 #include "nth/base/indestructible.h"
 #include "nth/debug/expectation_result.h"
-#include "nth/io/file_printer.h"
 #include "nth/io/format/format.h"
+#include "nth/io/writer/file.h"
 #include "nth/test/benchmark_result.h"
 #include "nth/test/test.h"
 
@@ -76,9 +76,9 @@ struct CharSpacer {
     return {};
   }
 
-  friend void NthFormat(auto p, nth::io::format_spec<CharSpacer>,
+  friend void NthFormat(auto& w, nth::io::format_spec<CharSpacer>,
                         CharSpacer s) {
-    p.write(std::string(s.count, s.content));
+    w.write(nth::byte_range(std::string(s.count, s.content)));
   }
   char content;
   size_t count;
@@ -92,8 +92,10 @@ struct Spacer {
     return {};
   }
 
-  friend void NthFormat(auto p, nth::io::format_spec<Spacer>, Spacer s) {
-    for (size_t i = 0; i < s.count; ++i) { p.write(s.content); }
+  friend void NthFormat(auto& w, nth::io::format_spec<Spacer>, Spacer s) {
+    for (size_t i = 0; i < s.count; ++i) {
+      w.write(nth::byte_range(s.content));
+    }
   }
   std::string_view content;
   size_t count;
@@ -126,7 +128,7 @@ int main() {
   for (auto const& [name, test] : nth::test::RegisteredTests()) {
     int before = expectation_results->failure_count();
     nth::interpolate<"\x1b[96m[ {} {} TEST ]\x1b[0m\n">(
-        nth::stderr_printer, name,
+        nth::io::stderr_writer, name,
         CharSpacer{.content = '.', .count = width - 10 - name.size()});
     test();
     int after    = expectation_results->failure_count();
@@ -137,9 +139,9 @@ int main() {
     if (bm_results.size() != benchmark_count) {
       std::span bm_span = std::span(bm_results).subspan(benchmark_count);
 
-      nth::stderr_printer.write(
+      nth::io::stderr_writer.write(nth::byte_range(std::string_view(
           "  \x1b[96mBENCHMARKS:                          Samples      Mean    "
-          "          Std. Dev\n");
+          "          Std. Dev\n")));
 
       size_t max_name_length = 0;
       for (auto const& benchmark_result : bm_span) {
@@ -163,7 +165,7 @@ int main() {
         }
 
         nth::interpolate<"    [ {} ]{}{}{}{}{}{}{}\n">(
-            nth::stderr_printer, benchmark_result.name,
+            nth::io::stderr_writer, benchmark_result.name,
             std::string_view(max_name_length > 35 ? "\n" : ""),
             CharSpacer{.content = ' ',
                        .count   = (max_name_length > 35
@@ -178,11 +180,12 @@ int main() {
                                 stddev_decimal_pos},
             stddev_str);
       }
-      nth::stderr_printer.write("\x1b[0m\n");
+      nth::io::stderr_writer.write(
+          nth::byte_range(std::string_view("\x1b[0m\n")));
     }
     benchmark_count = bm_results.size();
     nth::interpolate<"\x1b[{}m[ {} {} {} TEST ]\x1b[0m\n">(
-        nth::stderr_printer, success ? "96" : "91", name,
+        nth::io::stderr_writer, success ? "96" : "91", name,
         CharSpacer{.content = '.', .count = TerminalWidth() - 17 - name.size()},
         success ? "PASSED" : "FAILED");
   }
@@ -200,7 +203,7 @@ int main() {
       "    \u2502   Tests:        {} passed / {} executed{}\u2502\n"
       "    \u2502   Expectations: {} passed / {} executed{}\u2502\n"
       "    \u2570{}\u256f\n\n">(
-      nth::stderr_printer,
+      nth::io::stderr_writer,
       Spacer{.content = "\u2500", .count = digit_width + 37},
       CharSpacer{.content = ' ', .count = 13 + digit_width}, passed, tests,
       CharSpacer{.content = ' ', .count = digit_width - digit_width_tests + 1},

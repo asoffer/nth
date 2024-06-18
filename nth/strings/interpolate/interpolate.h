@@ -5,30 +5,31 @@
 
 #include "nth/base/core.h"
 #include "nth/io/format/interpolation_spec.h"
-#include "nth/io/printer.h"
+#include "nth/io/writer/writer.h"
+#include "nth/memory/bytes.h"
 #include "nth/strings/interpolate/string.h"
 #include "nth/strings/interpolate/types.h"
 
 namespace nth {
 
-template <int &..., io::printer_type P>
-void interpolate(P &p, io::interpolation_spec spec, auto const &...values) {
+template <int &..., io::forward_writer W>
+void interpolate(W &w, io::interpolation_spec spec, auto const &...values) {
   io::interpolation_spec child;
-  ((p.write(spec.next_chunk(child)),
+  ((w.write(nth::byte_range(spec.next_chunk(child))),
     (child.empty()
-         ? (void)P::print(p,
-                          nth::io::default_format_spec<
-                              std::remove_cvref_t<decltype(values)>>(),
-                          values)
-         : (void)P::print(p, child, values))),
+         ? (void)W::format(w,
+                           nth::io::default_format_spec<
+                               std::remove_cvref_t<decltype(values)>>(),
+                           values)
+         : (void)W::format(w, child, values))),
    ...);
-  p.write(spec.last_chunk());
+  w.write(nth::byte_range(spec.last_chunk()));
 }
 
-template <interpolation_string S, int &..., io::printer_type P>
-void interpolate(P &p, auto const &...values) requires(sizeof...(values) ==
+template <interpolation_string S, int &..., io::forward_writer W>
+void interpolate(W &w, auto const &...values) requires(sizeof...(values) ==
                                                        S.placeholders()) {
-  interpolate(p, io::interpolation_spec::from<S>(), values...);
+  interpolate(w, io::interpolation_spec::from<S>(), values...);
 }
 
 }  // namespace nth

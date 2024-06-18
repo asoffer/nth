@@ -8,9 +8,10 @@ cc_library(
         ":types",
         "//nth/base:attributes",
         "//nth/base:core",
-        "//nth/strings/interpolate/internal:interpolate",
-        "//nth/io:printer",
         "//nth/io/format:interpolation_spec",
+        "//nth/io/writer",
+        "//nth/memory:bytes",
+        "//nth/strings/interpolate/internal:interpolate",
     ],
 )
 
@@ -19,7 +20,7 @@ cc_test(
     srcs = ["interpolate_test.cc"],
     deps = [
         ":interpolate",
-        "//nth/io:string_printer",
+        "//nth/io/writer:string",
         "//nth/test/raw:test",
     ],
 )

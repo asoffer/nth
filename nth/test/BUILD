@@ -96,7 +96,7 @@ cc_library(
         ":benchmark_result",
         ":test",
         "//nth/base:indestructible",
-        "//nth/io:file_printer",
+        "//nth/io/writer:file",
         "@abseil-cpp//absl/synchronization",
     ],
 )

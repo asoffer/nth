@@ -69,7 +69,6 @@ cc_library(
     deps = [
         ":traced_expr_base",
         "//nth/base:attributes",
-        "//nth/io:string_printer",
     ],
 )
 
@@ -78,7 +77,8 @@ cc_library(
     hdrs = ["traversal_action.h"],
     srcs = ["traversal_action.cc"],
     deps = [
+        "//nth/base:attributes",
         "//nth/configuration:trace",
-        "//nth/io:string_printer",
+        "//nth/io/writer:string",
     ],
 )

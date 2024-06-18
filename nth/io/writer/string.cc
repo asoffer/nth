@@ -8,10 +8,11 @@
 
 namespace nth::io {
 
-bool string_writer::write(std::span<std::byte const> data) {
+string_writer::write_result_type string_writer::write(
+    std::span<std::byte const> data) {
   auto const* p = reinterpret_cast<char const*>(data.data());
   s_.insert(s_.end(), p, p + data.size());
-  return true;
+  return write_result_type(data.size());
 }
 
 std::optional<string_writer::cursor_type> string_writer::allocate(size_t n) {

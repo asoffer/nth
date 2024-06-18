@@ -4,9 +4,11 @@
 #include <charconv>
 #include <concepts>
 #include <cstddef>
+#include <span>
 #include <string_view>
 
 #include "nth/io/format/interpolation_spec.h"
+#include "nth/memory/bytes.h"
 #include "nth/meta/type.h"
 
 // This header file defines a mechanism by which one can register format
@@ -84,84 +86,104 @@ template <typename T>
 
 }  // namespace io
 
-void NthFormat(auto& p, io::format_spec<std::string_view>, std::string_view s) {
-  p.write(s);
+void NthFormat(auto& w, io::format_spec<std::string_view>, std::string_view s) {
+  w.write(nth::byte_range(s));
 }
 
 template <int N>
-void NthFormat(auto& p, io::format_spec<std::string_view>, char const (&s)[N]) {
-  p.write(std::string_view(s));
+void NthFormat(auto& w, io::format_spec<std::string_view>, char const (&s)[N]) {
+  w.write(nth::byte_range(std::string_view(s)));
 }
 
-void NthFormat(auto& p, io::format_spec<decltype(nullptr)> spec,
+void NthFormat(auto& w, io::format_spec<decltype(nullptr)> spec,
                decltype(nullptr)) {
   using spec_type = io::format_spec<decltype(nullptr)>;
   switch (spec) {
-    case spec_type::hexadecimal: p.write("0x0"); break;
-    case spec_type::word: p.write("nullptr"); break;
-    case spec_type::decimal: p.write("0"); break;
+    case spec_type::hexadecimal:
+      w.write(nth::byte_range(std::string_view("0x0")));
+      break;
+    case spec_type::word:
+      w.write(nth::byte_range(std::string_view("nullptr")));
+      break;
+    case spec_type::decimal:
+      w.write(nth::byte_range(std::string_view("0")));
+      break;
     default: std::abort();
   }
 }
 
-void NthFormat(auto& p, io::format_spec<bool> spec, bool b) {
+void NthFormat(auto& w, io::format_spec<bool> spec, bool b) {
   using spec_type = io::format_spec<bool>;
   switch (spec) {
-    case spec_type::word: p.write(b ? "true" : "false"); break;
-    case spec_type::Word: p.write(b ? "True" : "False"); break;
-    case spec_type::WORD: p.write(b ? "TRUE" : "FALSE"); break;
-    case spec_type::decimal: p.write(b ? "1" : "0"); break;
+    case spec_type::word:
+      w.write(nth::byte_range(std::string_view(b ? "true" : "false")));
+      break;
+    case spec_type::Word:
+      w.write(nth::byte_range(std::string_view(b ? "True" : "False")));
+      break;
+    case spec_type::WORD:
+      w.write(nth::byte_range(std::string_view(b ? "TRUE" : "FALSE")));
+      break;
+    case spec_type::decimal:
+      w.write(nth::byte_range(std::string_view(b ? "1" : "0")));
+      break;
     default: std::abort();
   }
 }
 
-void NthFormat(auto& p, io::format_spec<char> spec, char c) {
+void NthFormat(auto& w, io::format_spec<char> spec, char c) {
   using spec_type = io::format_spec<char>;
   switch (spec) {
     case spec_type::ascii: {
       char buffer[2] = {c, '\0'};
-      p.write(std::string_view(buffer));
+      w.write(nth::byte_range(std::string_view(buffer)));
     } break;
     case spec_type::decimal: {
       char buffer[3] = {};
       auto result = std::to_chars(&buffer[0], &buffer[3], static_cast<int>(c));
-      p.write(std::string_view(&buffer[0], result.ptr));
+      w.write(std::span<std::byte const>(
+          reinterpret_cast<std::byte const*>(&buffer[0]),
+          reinterpret_cast<std::byte const*>(result.ptr)));
     } break;
     default: std::abort();
   }
 }
 
-void NthFormat(auto& p, io::format_spec<std::byte> spec, std::byte b) {
+void NthFormat(auto& w, io::format_spec<std::byte> spec, std::byte b) {
   using spec_type = io::format_spec<std::byte>;
   switch (spec) {
     case spec_type::hexadecimal: {
       constexpr char const Hex[] = "0123456789abcdef";
       char buffer[3]             = {Hex[static_cast<uint8_t>(b) >> 4],
                                     Hex[static_cast<uint8_t>(b) & 0x0f], '\0'};
-      p.write(std::string_view(buffer));
+      w.write(nth::byte_range(std::string_view(buffer)));
     } break;
     case spec_type::Hexadecimal: {
       constexpr char const Hex[] = "0123456789ABCDEF";
       char buffer[3]             = {Hex[static_cast<uint8_t>(b) >> 4],
                                     Hex[static_cast<uint8_t>(b) & 0x0f], '\0'};
-      p.write(std::string_view(buffer));
+      w.write(nth::byte_range(std::string_view(buffer)));
     } break;
     case spec_type::decimal: {
       char buffer[3] = {};
       auto result = std::to_chars(&buffer[0], &buffer[3], static_cast<int>(b));
-      p.write(std::string_view(&buffer[0], result.ptr));
+      w.write(std::span<std::byte const>(
+          reinterpret_cast<std::byte const*>(&buffer[0]),
+          reinterpret_cast<std::byte const*>(result.ptr)));
     } break;
     default: std::abort();
   }
 }
 
 template <std::integral I>
-void NthFormat(auto& p, io::format_spec<I> spec, I n) {
+void NthFormat(auto& w, io::format_spec<I> spec, I n) {
   int base                     = static_cast<int>(spec);
   constexpr size_t buffer_size = 1 + static_cast<int>(sizeof(n) * 8);
   char buffer[buffer_size]     = {};
   auto result = std::to_chars(&buffer[0], &buffer[buffer_size], n, base);
-  p.write(std::string_view(&buffer[0], result.ptr));
+  w.write(std::span<std::byte const>(
+      reinterpret_cast<std::byte const*>(&buffer[0]),
+      reinterpret_cast<std::byte const*>(result.ptr)));
 }
 
 }  // namespace nth

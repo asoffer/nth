@@ -1,13 +1,13 @@
 #ifndef NTH_IO_FILE_PATH_H
 #define NTH_IO_FILE_PATH_H
 
-#include <iomanip>
 #include <optional>
-#include <sstream>
 #include <string>
 #include <string_view>
 
-#include "nth/io/printer.h"
+#include "nth/base/core.h"
+#include "nth/io/format/format.h"
+#include "nth/io/writer/writer.h"
 
 namespace nth {
 
@@ -23,7 +23,7 @@ struct file_path {
 
   friend bool NthCommandlineParse(std::string_view s, file_path &path, auto) {
     std::optional p = file_path::try_construct(s);
-    if (p.has_value()) { path = std::move(*p); }
+    if (p.has_value()) { path = NTH_MOVE(*p); }
     return p.has_value();
   }
 
@@ -31,11 +31,10 @@ struct file_path {
   // path.
   std::string const &path() const { return name_; }
 
-  template <io::printer_type P>
-  friend void NthFormat(P p, file_path const &path) {
-    std::stringstream ss;
-    ss << std::quoted(path.name_);
-    return P::print(std::move(p), ss.str());
+  template <io::writer W>
+  friend void NthFormat(W &w, io::format_spec<file_path> const &,
+                        file_path const &path) {
+    return W::write(NTH_MOVE(w), path.name_);
   }
 
   friend bool operator==(file_path const &, file_path const &) = default;

@@ -13,8 +13,8 @@ cc_library(
     deps = [
         "//nth/debug",
         "//nth/debug/log",
-        "//nth/io:file_printer",
-        "//nth/io:printer",
+        "//nth/io/writer:file",
+        "//nth/memory:bytes",
         "//nth/process:exit_code",
         "//nth/strings:text",
         "//nth/utility:required",

@@ -11,7 +11,6 @@
 #include "nth/debug/trace/internal/traced_expr_base.h"
 #include "nth/debug/trace/internal/traced_value.h"
 #include "nth/debug/trace/internal/traversal_action.h"
-#include "nth/io/string_printer.h"
 #include "nth/meta/type.h"
 
 namespace nth::debug::internal_trace {

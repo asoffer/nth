@@ -406,7 +406,8 @@ uint64_t *&integer::unchecked_data() {
   return *reinterpret_cast<uint64_t **>(&data_[0]);
 }
 
-std::string_view integer::PrintUsingBuffer(std::span<char> buffer) const {
+std::span<std::byte const> integer::PrintUsingBuffer(
+    std::span<char> buffer) const {
   static constexpr std::string_view HexChars = "0123456789abcdef";
 
   auto end  = words().rend();
@@ -423,7 +424,8 @@ std::string_view integer::PrintUsingBuffer(std::span<char> buffer) const {
       *ptr++ = HexChars[(*iter >> (60 - 4 * i)) & 0xf];
     }
   }
-  return std::string_view(buffer.data(), ptr - buffer.data());
+  return std::span<std::byte const>(
+      reinterpret_cast<std::byte const *>(buffer.data()), ptr - buffer.data());
 }
 
 integer operator*(integer const &lhs, unsigned long long rhs) {

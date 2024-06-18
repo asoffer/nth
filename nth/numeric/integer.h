@@ -11,6 +11,7 @@
 #include "nth/debug/debug.h"
 #include "nth/io/reader/reader.h"
 #include "nth/io/writer/writer.h"
+#include "nth/memory/bytes.h"
 #include "nth/meta/concepts/core.h"
 #include "nth/strings/interpolate/string.h"
 
@@ -117,15 +118,15 @@ struct integer {
     return {};
   }
 
-  friend void NthFormat(nth::io::printer_type auto p, io::format_spec<integer>,
-                        integer const &n) {
+  friend void NthFormat(nth::io::forward_writer auto &w,
+                        io::format_spec<integer>, integer const &n) {
     if (n.size_ == 0) {
-      p.write("0");
+      w.write(nth::byte_range(std::string_view("0")));
       return;
     }
-    p.write(negative(n) ? "-0x" : "0x");
+    w.write(nth::byte_range(std::string_view(negative(n) ? "-0x" : "0x")));
     std::unique_ptr<char[]> buffer(new char[16 * n.size_]);
-    p.write(n.PrintUsingBuffer(std::span(buffer.get(), 16 * n.size_)));
+    w.write(n.PrintUsingBuffer(std::span(buffer.get(), 16 * n.size_)));
   }
 
   template <typename H>
@@ -181,7 +182,7 @@ struct integer {
   std::span<uint64_t const> words() const;
   std::span<uint64_t> words();
 
-  std::string_view PrintUsingBuffer(std::span<char> buffer) const;
+  std::span<std::byte const> PrintUsingBuffer(std::span<char> buffer) const;
 
   void SlowMul(unsigned long long);
 

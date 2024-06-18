@@ -6,6 +6,7 @@
 #include <string_view>
 #include <vector>
 
+#include "nth/base/attributes.h"
 #include "nth/configuration/trace.h"
 #include "nth/debug/log/log.h"
 #include "nth/debug/property/internal/concepts.h"
@@ -15,8 +16,10 @@
 namespace nth::debug::internal_contracts {
 
 struct TraversalPrinterContext : internal_trace::TraversalContext {
-  explicit TraversalPrinterContext(bounded_string_printer &printer)
-      : internal_trace::TraversalContext(printer) {}
+  // TODO: bounded_string_writer?
+  explicit TraversalPrinterContext(
+      io::string_writer &writer NTH_ATTRIBUTE(lifetimebound))
+      : internal_trace::TraversalContext(writer) {}
 
   void Enter() override {
     if (not chunks.empty()) {
@@ -29,10 +32,14 @@ struct TraversalPrinterContext : internal_trace::TraversalContext {
   void Exit() override { chunks.pop_back(); }
 
   void SelfBeforeAction() override {
-    printer().write("    ");
-    for (std::string_view chunk : chunks) { printer().write(chunk); }
+    writer().write(nth::byte_range(std::string_view("    ")));
+    for (std::string_view chunk : chunks) {
+      writer().write(nth::byte_range(chunk));
+    }
   }
-  void SelfAfterAction() override { printer().write("\n"); }
+  void SelfAfterAction() override {
+    writer().write(nth::byte_range(std::string_view("\n")));
+  }
 
   std::vector<std::string_view> chunks;
 };
@@ -91,7 +98,8 @@ void MakeTraversal(P const &property,
 struct ResponderBase {
   void RecordExpectationResult(bool result);
 
-  static void WriteExpression(bounded_string_printer &printer, log_entry &entry,
+  // TODO: bounded_string_writer?
+  static void WriteExpression(io::string_writer &writer, log_entry &entry,
                               char const *expression);
   void Send(log_entry const &entry);
   ~ResponderBase();
@@ -116,28 +124,23 @@ struct AbortingResponder : ResponderBase {
       log_entry entry(line_->id());
 
       std::string s;  // TODO
-      bounded_string_printer printer(s, nth::config::trace_print_bound);
+      io::string_writer writer(s/*, nth::config::trace_print_bound*/);
 
       {
         std::vector<internal_trace::TraversalAction> stack;
         internal_trace::VTable(w.value).traverse(std::addressof(w.value),
                                                  stack);
-        TraversalPrinterContext context(printer);
+        TraversalPrinterContext context(writer);
         context.Traverse(std::move(stack));
-        // entry.demarcate();
       }
 
-      {
-        printer.write("Property");
-        // entry.demarcate();
-      }
+      { writer.write(nth::byte_range(std::string_view("Property"))); }
 
       {
         std::vector<internal_trace::TraversalAction> stack;
         MakeTraversal(w.property, stack);
-        TraversalPrinterContext context(printer);
+        TraversalPrinterContext context(writer);
         context.Traverse(std::move(stack));
-        // entry.demarcate();
       }
 
       Send(entry);
@@ -155,19 +158,18 @@ struct AbortingResponder : ResponderBase {
     if (not value_) {
       log_entry entry(line_->id());
 
+      // TODO: bounded_string_writer?
       std::string s;  // TODO
-      bounded_string_printer printer(s, nth::config::trace_print_bound);
+      io::string_writer writer(s/*, nth::config::trace_print_bound*/);
 
-      WriteExpression(printer, entry, expression);
+      WriteExpression(writer, entry, expression);
 
-      printer.write("Tree");
-      // entry.demarcate();
+      writer.write(nth::byte_range(std::string_view("Tree")));
 
       std::vector<internal_trace::TraversalAction> stack;
       internal_trace::VTable(b).traverse(std::addressof(b), stack);
-      TraversalPrinterContext context(printer);
+      TraversalPrinterContext context(writer);
       context.Traverse(std::move(stack));
-      // entry.demarcate();
 
       Send(entry);
     }
@@ -207,29 +209,27 @@ struct NoOpResponder : ResponderBase {
     if (not value_) {
       log_entry entry(line_->id());
 
+      // TODO: bounded_string_writer?
       std::string s;  // TODO
-      bounded_string_printer printer(s, nth::config::trace_print_bound);
+      io::string_writer writer(s/*, nth::config::trace_print_bound*/);
 
       {
         std::vector<internal_trace::TraversalAction> stack;
         internal_trace::VTable(w.value).traverse(std::addressof(w.value),
                                                  stack);
-        TraversalPrinterContext context(printer);
+        TraversalPrinterContext context(writer);
         context.Traverse(std::move(stack));
-        // entry.demarcate();
       }
 
       {
-        printer.write("Property");
-        // entry.demarcate();
+        writer.write(nth::byte_range(std::string_view("Property")));
       }
 
       {
         std::vector<internal_trace::TraversalAction> stack;
         MakeTraversal(w.property, stack);
-        TraversalPrinterContext context(printer);
+        TraversalPrinterContext context(writer);
         context.Traverse(std::move(stack));
-        // entry.demarcate();
       }
 
       Send(entry);
@@ -247,19 +247,18 @@ struct NoOpResponder : ResponderBase {
     if (not value_) {
       log_entry entry(line_->id());
 
+      // TODO: bounded_string_writer?
       std::string s;  // TODO
-      bounded_string_printer printer(s, nth::config::trace_print_bound);
+      io::string_writer writer(s/*, nth::config::trace_print_bound*/);
 
-      WriteExpression(printer, entry, expression);
+      WriteExpression(writer, entry, expression);
 
-      printer.write("Tree");
-      // entry.demarcate();
+      writer.write(nth::byte_range(std::string_view("Tree")));
 
       std::vector<internal_trace::TraversalAction> stack;
       internal_trace::VTable(b).traverse(std::addressof(b), stack);
-      TraversalPrinterContext context(printer);
+      TraversalPrinterContext context(writer);
       context.Traverse(std::move(stack));
-      // entry.demarcate();
 
       Send(entry);
     }

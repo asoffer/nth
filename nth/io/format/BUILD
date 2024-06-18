@@ -5,6 +5,7 @@ cc_library(
     hdrs = ["format.h"],
     deps = [
       ":interpolation_spec",
+      "//nth/memory:bytes",
       "//nth/meta:type",
     ],
 )

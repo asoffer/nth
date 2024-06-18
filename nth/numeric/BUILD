@@ -6,6 +6,7 @@ cc_library(
     srcs = ["integer.cc"],
     deps = [
         "//nth/debug",
+        "//nth/memory:bytes",
         "//nth/meta/concepts:core",
         "//nth/io/reader",
         "//nth/io/writer",

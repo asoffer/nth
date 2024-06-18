@@ -5,7 +5,8 @@
 #include <string_view>
 #include <vector>
 
-#include "nth/io/string_printer.h"
+#include "nth/base/attributes.h"
+#include "nth/io/writer/string.h"
 
 namespace nth::debug::internal_trace {
 
@@ -54,7 +55,9 @@ struct TraversalAction {
 
  private:
   explicit TraversalAction(expand_type expand, void const *ptr)
-      : expand_(expand), data_(reinterpret_cast<uintptr_t>(ptr)), is_expand_(true) {}
+      : expand_(expand),
+        data_(reinterpret_cast<uintptr_t>(ptr)),
+        is_expand_(true) {}
   explicit TraversalAction(action_type act, uintptr_t data)
       : act_(act), data_(data), is_expand_(false) {}
   // TODO: There's wasted space here. Find a spare bit to encode whether you
@@ -67,25 +70,29 @@ struct TraversalAction {
   bool is_expand_;
 };
 
+// TODO: bounded_string_writer?
 struct TraversalContext {
-  explicit TraversalContext(bounded_string_printer &printer)
-      : printer_(printer) {}
+  explicit TraversalContext(
+      io::string_writer &writer NTH_ATTRIBUTE(lifetimebound))
+      : writer_(writer) {}
 
-  virtual void Enter()                = 0;
-  virtual void Last()                 = 0;
-  virtual void Exit()                 = 0;
-  virtual void SelfBeforeAction()     = 0;
-  virtual void SelfAfterAction()      = 0;
+  virtual void Enter()            = 0;
+  virtual void Last()             = 0;
+  virtual void Exit()             = 0;
+  virtual void SelfBeforeAction() = 0;
+  virtual void SelfAfterAction()  = 0;
 
   void Traverse(std::vector<TraversalAction> &&stack);
 
-  void write(auto const &) { /*printer_, v);*/ }
+  void write(auto const &) {
+    // TODO
+  }
 
  protected:
-  bounded_string_printer &printer() { return printer_; }
+  io::string_writer &writer() { return writer_; }
 
  private:
-  bounded_string_printer &printer_;
+  io::string_writer &writer_;
 };
 
 }  // namespace nth::debug::internal_trace
