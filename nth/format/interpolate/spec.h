@@ -1,17 +1,51 @@
-#ifndef NTH_STRINGS_INTERPOLATE_TYPES_H
-#define NTH_STRINGS_INTERPOLATE_TYPES_H
+#ifndef NTH_FORMAT_INTERPOLATE_SPEC_H
+#define NTH_FORMAT_INTERPOLATE_SPEC_H
 
 #include <charconv>
 #include <cstddef>
-#include <string_view>
+#include <span>
 
-#include "nth/io/format/format.h"
+#include "nth/format/format.h"
+#include "nth/format/interpolate/string.h"
+#include "nth/format/interpolate/string_view.h"
+#include "nth/memory/bytes.h"
 #include "nth/meta/concepts/convertible.h"
 #include "nth/meta/type.h"
-#include "nth/strings/interpolate/string.h"
 
 namespace nth {
-namespace internal_strings {
+
+struct interpolation_spec {
+  interpolation_spec() = default;
+
+  explicit interpolation_spec(interpolation_string_view s)
+      : interpolation_string_(s) {}
+
+  template <interpolation_string S>
+  static constexpr interpolation_spec from() {
+    return interpolation_spec(S);
+  }
+
+  std::span<std::byte const> next_chunk(interpolation_spec &child) {
+    auto [leading_text, first_field] = interpolation_string_.extract_first();
+    child.interpolation_string_      = first_field;
+    return nth::byte_range(leading_text);
+  }
+
+  bool empty() const { return interpolation_string_.empty(); }
+
+  constexpr operator nth::interpolation_string_view() const {
+    return interpolation_string_;
+  }
+
+  std::span<std::byte const> last_chunk() const {
+    return nth::byte_range(interpolation_string_);
+  }
+
+ private:
+  ::nth::interpolation_string_view interpolation_string_;
+};
+
+namespace internal_interpolate {
 
 template <typename>
 struct is_interpolation_string_impl {
@@ -26,11 +60,11 @@ struct is_interpolation_string_impl<nth::interpolation_string<N>> {
 template <typename T>
 concept is_interpolation_string = is_interpolation_string_impl<T>::value;
 
-}  // namespace internal_strings
+}  // namespace internal_interpolate
 
-inline constexpr nth::io::format_spec<decltype(nullptr)> NthFormatSpec(
+inline constexpr format_spec<decltype(nullptr)> NthFormatSpec(
     nth::interpolation_string_view s, nth::type_tag<decltype(nullptr)>) {
-  using spec_type = io::format_spec<decltype(nullptr)>;
+  using spec_type = format_spec<decltype(nullptr)>;
   if (s == "x") {
     return spec_type::hexadecimal;
   } else if (s == "s") {
@@ -42,9 +76,9 @@ inline constexpr nth::io::format_spec<decltype(nullptr)> NthFormatSpec(
   }
 }
 
-inline constexpr nth::io::format_spec<bool> NthFormatSpec(
+inline constexpr format_spec<bool> NthFormatSpec(
     nth::interpolation_string_view s, nth::type_tag<bool>) {
-  using spec_type = io::format_spec<bool>;
+  using spec_type = format_spec<bool>;
   if (s == "b") {
     return spec_type::word;
   } else if (s == "B") {
@@ -58,9 +92,9 @@ inline constexpr nth::io::format_spec<bool> NthFormatSpec(
   }
 }
 
-inline constexpr nth::io::format_spec<char> NthFormatSpec(
+inline constexpr format_spec<char> NthFormatSpec(
     nth::interpolation_string_view s, nth::type_tag<char>) {
-  using spec_type = io::format_spec<char>;
+  using spec_type = format_spec<char>;
   if (s == "c") {
     return spec_type::ascii;
   } else if (s == "d") {
@@ -74,9 +108,9 @@ inline constexpr nth::io::format_spec<char> NthFormatSpec(
   }
 }
 
-inline constexpr nth::io::format_spec<std::byte> NthFormatSpec(
+inline constexpr format_spec<std::byte> NthFormatSpec(
     nth::interpolation_string_view s, nth::type_tag<std::byte>) {
-  using spec_type = io::format_spec<std::byte>;
+  using spec_type = format_spec<std::byte>;
   if (s == "d") {
     return spec_type::decimal;
   } else if (s == "x") {
@@ -89,15 +123,15 @@ inline constexpr nth::io::format_spec<std::byte> NthFormatSpec(
 }
 
 inline constexpr auto NthFormatSpec(nth::interpolation_string_view, auto t)
-    -> nth::io::format_spec<nth::type_t<t>>
+    -> format_spec<nth::type_t<t>>
 requires nth::explicitly_convertible_to<nth::type_t<t>, std::string_view> {
   return {};
 }
 
 constexpr auto NthFormatSpec(nth::interpolation_string_view s, auto t)
-    -> nth::io::format_spec<nth::type_t<t>>
+    -> format_spec<nth::type_t<t>>
 requires std::integral<nth::type_t<t>> {
-  using spec_type = io::format_spec<nth::type_t<t>>;
+  using spec_type = format_spec<nth::type_t<t>>;
   if (s == "d") {
     return spec_type(10);
   } else if (s == "x") {
@@ -109,7 +143,7 @@ requires std::integral<nth::type_t<t>> {
 
 constexpr auto NthFormatSpec(nth::interpolation_string_view s,
                              nth::type_tag<nth::type_id>)
-    -> nth::io::format_spec<nth::type_id> {
+    -> format_spec<nth::type_id> {
   if (not s.empty()) { std::abort(); }
   return {};
 }
@@ -117,16 +151,15 @@ constexpr auto NthFormatSpec(nth::interpolation_string_view s,
 template <typename T>
 constexpr auto NthFormatSpec(nth::interpolation_string_view s,
                              nth::type_tag<nth::type_tag<T>>)
-    -> nth::io::format_spec<nth::type_tag<T>> {
+    -> format_spec<nth::type_tag<T>> {
   if (not s.empty()) { std::abort(); }
   return {};
 }
 
 template <typename T>
-constexpr nth::io::format_spec<T> format_spec_from(
-    nth::interpolation_string_view s) {
+constexpr format_spec<T> format_spec_from(nth::interpolation_string_view s) {
   if (s.empty()) {
-    return nth::io::format_spec<T>();
+    return format_spec<T>();
   } else {
     return NthFormatSpec(s, nth::type<T>);
   }
@@ -134,4 +167,4 @@ constexpr nth::io::format_spec<T> format_spec_from(
 
 }  // namespace nth
 
-#endif  // NTH_STRINGS_INTERPOLATE_TYPES_H
+#endif  // NTH_FORMAT_INTERPOLATE_SPEC_H

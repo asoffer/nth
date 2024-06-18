@@ -64,13 +64,10 @@ cc_library(
     hdrs = ["writer.h"],
     deps = [
         "//nth/base:core",
-        "//nth/io/format",
-        "//nth/io/format:interpolation_spec",
         "//nth/memory:bytes",
         "//nth/meta/concepts:comparable",
         "//nth/meta/concepts:core",
         "//nth/meta:type",
-        "//nth/strings/interpolate:types",
     ],
 )
 

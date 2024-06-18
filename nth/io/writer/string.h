@@ -9,7 +9,7 @@
 namespace nth::io {
 
 // Writes data to a string referenced by the writer.
-struct string_writer : implements_forward_writer<string_writer> {
+struct string_writer {
   struct write_result_type {
     explicit constexpr write_result_type(size_t n) : written_(n) {}
 

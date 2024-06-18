@@ -6,11 +6,11 @@ cc_library(
     srcs = ["integer.cc"],
     deps = [
         "//nth/debug",
+        "//nth/format/interpolate",
         "//nth/memory:bytes",
         "//nth/meta/concepts:core",
         "//nth/io/reader",
         "//nth/io/writer",
-        "//nth/strings/interpolate",
     ],
 )
 

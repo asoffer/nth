@@ -1,4 +1,4 @@
-#include "nth/strings/interpolate/interpolate.h"
+#include "nth/format/interpolate/interpolate.h"
 
 #include "nth/io/writer/string.h"
 #include "nth/meta/type.h"
@@ -73,19 +73,20 @@ void Bool() {
 }
 
 struct point {
-  friend constexpr nth::io::interpolation_spec NthDefaultFormatSpec(
+  using nth_format_spec = nth::interpolation_spec;
+
+  friend constexpr nth::interpolation_spec NthDefaultFormatSpec(
       nth::type_tag<point>) {
-    return nth::io::interpolation_spec::from<"({}, {})">();
+    return nth::interpolation_spec::from<"({}, {})">();
   }
 
-  friend nth::io::interpolation_spec NthFormatSpec(
-      nth::interpolation_string_view s, nth::type_tag<point>) {
-    return nth::io::interpolation_spec(s);
+  friend nth::interpolation_spec NthFormatSpec(nth::interpolation_string_view s,
+                                               nth::type_tag<point>) {
+    return nth::interpolation_spec(s);
   }
 
   template <nth::io::forward_writer W>
-  friend void NthFormat(W w, nth::io::format_spec<point> spec,
-                        point const &pt) {
+  friend void NthFormat(W w, nth::format_spec<point> spec, point const &pt) {
     nth::interpolate(w, spec, pt.x, pt.y);
   }
   int x = 10;

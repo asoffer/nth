@@ -1,4 +1,4 @@
-#include "nth/strings/interpolate/types.h"
+#include "nth/format/interpolate/spec.h"
 
 #include <cstdlib>
 

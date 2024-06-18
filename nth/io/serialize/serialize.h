@@ -8,6 +8,7 @@
 #include <span>
 #include <type_traits>
 
+#include "nth/format/format.h"
 #include "nth/io/internal/sequence.h"
 #include "nth/io/serialize/internal/serialize.h"
 #include "nth/io/writer/writer.h"
@@ -53,7 +54,7 @@ serializer_result_type<S> serialize(
 template <typename S, typename Seq>
 serializer_result_type<S> NthSerialize(S& s, as_sequence<Seq> sequence) {
   auto const& seq = sequence.ref();
-  if (not nth::io::write_integer(s, std::size(seq))) { return false; }
+  if (not nth::format_integer(s, std::size(seq))) { return false; }
   for (auto const& elem : seq) {
     if (not nth::io::serialize(s, elem)) { return false; }
   }

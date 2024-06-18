@@ -3,7 +3,7 @@
 
 #include "nth/debug/log/log.h"
 #include "nth/debug/source_location.h"
-#include "nth/strings/interpolate/string.h"
+#include "nth/format/interpolate/string.h"
 
 namespace nth::debug::internal_contracts {
 

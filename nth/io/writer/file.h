@@ -20,7 +20,7 @@ file_writer make_file_writer(int file_descriptor);
 }  // namespace internal_writer
 
 // Writes data to a file referenced by the writer.
-struct file_writer : implements_forward_writer<file_writer> {
+struct file_writer {
   struct write_result_type {
     explicit constexpr write_result_type(size_t n) : written_(n) {}
 

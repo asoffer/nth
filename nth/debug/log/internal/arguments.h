@@ -6,9 +6,9 @@
 #include "nth/debug/log/entry.h"
 #include "nth/debug/log/internal/voidifier.h"
 #include "nth/debug/log/line.h"
-#include "nth/io/format/interpolation_spec.h"
-#include "nth/strings/interpolate/interpolate.h"
-#include "nth/strings/interpolate/string.h"
+#include "nth/format/interpolate/interpolate.h"
+#include "nth/format/interpolate/spec.h"
+#include "nth/format/interpolate/string.h"
 
 namespace nth::internal_log {
 
@@ -31,7 +31,7 @@ struct arguments {
     auto const& log_line = line<File, Line, Function, S>;
     log_entry e(log_line.id());
     log_entry::builder builder(e);
-    nth::interpolate(builder, io::interpolation_spec(S), values...);
+    nth::interpolate(builder, interpolation_spec(S), values...);
 
     for (auto* sink : internal_debug::registered_log_sinks()) {
       sink->send(log_line, e);

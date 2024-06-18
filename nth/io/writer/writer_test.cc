@@ -8,7 +8,7 @@ namespace {
 
 struct not_a_forward_writer {};
 
-struct a_forward_writer : implements_forward_writer<a_forward_writer> {
+struct a_forward_writer {
   struct write_result_type {
     size_t written() const;
   };

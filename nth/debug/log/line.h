@@ -5,9 +5,9 @@
 #include <string_view>
 
 #include "nth/debug/source_location.h"
-#include "nth/io/format/format.h"
+#include "nth/format/format.h"
+#include "nth/format/interpolate/interpolate.h"
 #include "nth/io/writer/writer.h"
-#include "nth/strings/interpolate/interpolate.h"
 
 namespace nth {
 
@@ -29,13 +29,15 @@ struct log_line_base {
       return source_location_;
     }
 
-    friend io::format_spec<metadata> NthFormatSpec(interpolation_string_view s,
-                                                   type_tag<metadata>) {
-      return io::format_spec<metadata>(s);
+    using nth_format_spec = nth::interpolation_spec;
+
+    friend format_spec<metadata> NthFormatSpec(interpolation_string_view s,
+                                               type_tag<metadata>) {
+      return format_spec<metadata>(s);
     }
 
     friend void NthFormat(io::forward_writer auto& w,
-                          io::format_spec<metadata> spec, metadata const& m) {
+                          format_spec<metadata> spec, metadata const& m) {
       interpolate(w, spec, m.source_location().file_name(),
                   m.source_location().function_name(),
                   m.source_location().line());

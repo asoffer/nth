@@ -9,15 +9,15 @@
 #include "nth/configuration/log.h"
 #include "nth/debug/log/line.h"
 #include "nth/debug/log/sink.h"
+#include "nth/format/interpolate/interpolate.h"
 #include "nth/io/writer/writer.h"
-#include "nth/strings/interpolate/interpolate.h"
 
 namespace nth {
 
 // A particular invocation of an `NTH_LOG` statement along with encoded
 // arguments.
 struct log_entry {
-  struct builder : io::implements_forward_writer<builder> {
+  struct builder {
     struct write_result_type {
       explicit constexpr write_result_type(size_t n) : written_(n) {}
 
@@ -38,12 +38,14 @@ struct log_entry {
     log_entry& entry_;
   };
 
-  friend io::format_spec<log_entry> NthFormatSpec(interpolation_string_view s,
-                                                  type_tag<log_entry>) {
-    return io::format_spec<log_entry>(s);
+  using nth_format_spec = nth::interpolation_spec;
+
+  friend format_spec<log_entry> NthFormatSpec(interpolation_string_view s,
+                                              type_tag<log_entry>) {
+    return format_spec<log_entry>(s);
   }
 
-  friend void NthFormat(io::forward_writer auto& w, io::format_spec<log_entry>,
+  friend void NthFormat(io::forward_writer auto& w, format_spec<log_entry>,
                         log_entry const& entry) {
     w.write(nth::byte_range(entry.data_));
   }

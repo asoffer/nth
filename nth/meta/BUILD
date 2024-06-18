@@ -118,7 +118,6 @@ cc_library(
         ":sequence",
         "//nth/memory:bytes",
         "//nth/meta/concepts:convertible",
-        "//nth/strings/interpolate:string",
     ],
 )
 

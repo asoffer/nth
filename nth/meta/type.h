@@ -84,8 +84,7 @@ struct type_id final {
   friend constexpr bool operator==(type_id lhs, type_id rhs) = default;
   friend constexpr bool operator!=(type_id lhs, type_id rhs) = default;
 
-  // TODO: We cannot name `io::format_spec` because that header depends on this
-  // one.
+  // TODO: We cannot name `format_spec` because that header depends on this one.
   friend void NthFormat(auto& p, auto, type_id id) {
     p.write(nth::byte_range(id.id_()));
   }

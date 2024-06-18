@@ -7,7 +7,7 @@
 #include <string_view>
 #include <type_traits>
 
-namespace nth::internal_strings {
+namespace nth::internal_format {
 
 [[maybe_unused]] void validation_failed();
 
@@ -78,6 +78,6 @@ inline constexpr void validate_interpolation_string(
   if (brace_depth != 0) { validation_failed(/* mismatched braces. */); }
 }
 
-}  // namespace nth::internal_strings
+}  // namespace nth::internal_format
 
 #endif  // NTH_STRINGS_INTERPOLATE_INTERNAL_VALIDATE_H

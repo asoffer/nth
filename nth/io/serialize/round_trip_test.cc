@@ -17,7 +17,7 @@ NTH_TEST("round-trip/integer", auto n) {
   std::string s;
 
   string_writer w(s);
-  NTH_ASSERT(write_integer(w, n));
+  NTH_ASSERT(format_integer(w, n));
 
   string_reader r(s);
   NTH_ASSERT(read_integer(r, m));
@@ -82,7 +82,7 @@ NTH_INVOKE_TEST("round-trip/integer") {
 struct Thing {
   int n;
   friend bool NthSerialize(auto &s, Thing const &t) {
-    return write_integer(s, t.n);
+    return format_integer(s, t.n);
   }
   friend bool NthDeserialize(auto &d, Thing &t) {
     return read_integer(d, t.n);

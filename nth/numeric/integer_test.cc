@@ -2,7 +2,7 @@
 
 #include "nth/io/serialize/round_trip.h"
 #include "nth/numeric/test_traits.h"
-#include "nth/strings/interpolate/interpolate.h"
+#include "nth/format/interpolate/interpolate.h"
 #include "nth/test/test.h"
 
 namespace nth {

@@ -6,7 +6,7 @@
 #include <string_view>
 
 #include "nth/base/core.h"
-#include "nth/io/format/format.h"
+#include "nth/format/format.h"
 #include "nth/io/writer/writer.h"
 
 namespace nth {
@@ -31,10 +31,9 @@ struct file_path {
   // path.
   std::string const &path() const { return name_; }
 
-  template <io::writer W>
-  friend void NthFormat(W &w, io::format_spec<file_path> const &,
+  friend void NthFormat(io::writer auto &w, format_spec<file_path> const &,
                         file_path const &path) {
-    return W::write(NTH_MOVE(w), path.name_);
+    return nth::format(w, {}, path.name_);
   }
 
   friend bool operator==(file_path const &, file_path const &) = default;

@@ -9,11 +9,11 @@
 #include <string_view>
 
 #include "nth/debug/debug.h"
+#include "nth/format/interpolate/string.h"
 #include "nth/io/reader/reader.h"
 #include "nth/io/writer/writer.h"
 #include "nth/memory/bytes.h"
 #include "nth/meta/concepts/core.h"
-#include "nth/strings/interpolate/string.h"
 
 namespace nth {
 
@@ -111,15 +111,15 @@ struct integer {
     }
   }
 
-  struct nth_io_format_spec {};
+  struct nth_format_spec {};
 
-  friend nth::io::format_spec<integer> NthFormatSpec(
-      nth::interpolation_string_view, nth::type_tag<integer>) {
+  friend nth::format_spec<integer> NthFormatSpec(nth::interpolation_string_view,
+                                                 nth::type_tag<integer>) {
     return {};
   }
 
-  friend void NthFormat(nth::io::forward_writer auto &w,
-                        io::format_spec<integer>, integer const &n) {
+  friend void NthFormat(nth::io::forward_writer auto &w, format_spec<integer>,
+                        integer const &n) {
     if (n.size_ == 0) {
       w.write(nth::byte_range(std::string_view("0")));
       return;
@@ -137,12 +137,14 @@ struct integer {
   }
 
   friend bool NthSerialize(auto &s, integer const &n) {
-    if (not nth::io::write_fixed(s, static_cast<bool>(n.sign_)) or
-        not nth::io::write_integer(s, n.size_)) {
+    if (nth::format_fixed(s, static_cast<bool>(n.sign_)).written() != 1 or
+        not nth::format_integer(s, n.size_)) {
       return false;
     }
     for (uintptr_t w : n.words()) {
-      if (not nth::io::write_fixed(s, w)) { return false; }
+      if (nth::format_fixed(s, w).written() != sizeof(uintptr_t)) {
+        return false;
+      }
     }
     return true;
   }

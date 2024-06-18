@@ -9,8 +9,8 @@ cc_library(
         ":line",
         ":sink",
         "//nth/configuration:log",
+        "//nth/format/interpolate",
         "//nth/io/writer",
-        "//nth/strings/interpolate",
     ],
 )
 
@@ -22,9 +22,9 @@ cc_library(
     deps = [
         "//nth/debug/log/internal:voidifier",
         "//nth/debug:source_location",
-        "//nth/io/format",
+        "//nth/format",
+        "//nth/format/interpolate",
         "//nth/io/writer",
-        "//nth/strings/interpolate",
     ],
 )
 

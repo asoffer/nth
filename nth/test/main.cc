@@ -8,7 +8,7 @@
 #include "absl/synchronization/mutex.h"
 #include "nth/base/indestructible.h"
 #include "nth/debug/expectation_result.h"
-#include "nth/io/format/format.h"
+#include "nth/format/format.h"
 #include "nth/io/writer/file.h"
 #include "nth/test/benchmark_result.h"
 #include "nth/test/test.h"
@@ -66,18 +66,15 @@ struct BenchmarkResultHolder {
 nth::indestructible<ExpectationResultHolder> expectation_results;
 nth::indestructible<BenchmarkResultHolder> benchmark_results;
 
-struct TrivialFormatSpec {};
-
 struct CharSpacer {
-  using nth_io_format_spec = TrivialFormatSpec;
+  using nth_format_spec = nth::trivial_format_spec;
 
-  friend nth::io::format_spec<CharSpacer> NthFormatSpec(
+  friend nth::format_spec<CharSpacer> NthFormatSpec(
       nth::interpolation_string_view, nth::type_tag<CharSpacer>) {
     return {};
   }
 
-  friend void NthFormat(auto& w, nth::io::format_spec<CharSpacer>,
-                        CharSpacer s) {
+  friend void NthFormat(auto& w, nth::format_spec<CharSpacer>, CharSpacer s) {
     w.write(nth::byte_range(std::string(s.count, s.content)));
   }
   char content;
@@ -85,14 +82,14 @@ struct CharSpacer {
 };
 
 struct Spacer {
-  using nth_io_format_spec = TrivialFormatSpec;
+  using nth_format_spec = nth::trivial_format_spec;
 
-  friend nth::io::format_spec<Spacer> NthFormatSpec(
-      nth::interpolation_string_view, nth::type_tag<Spacer>) {
+  friend nth::format_spec<Spacer> NthFormatSpec(nth::interpolation_string_view,
+                                                nth::type_tag<Spacer>) {
     return {};
   }
 
-  friend void NthFormat(auto& w, nth::io::format_spec<Spacer>, Spacer s) {
+  friend void NthFormat(auto& w, nth::format_spec<Spacer>, Spacer s) {
     for (size_t i = 0; i < s.count; ++i) {
       w.write(nth::byte_range(s.content));
     }
