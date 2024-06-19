@@ -31,6 +31,10 @@ struct log_line_base {
 
     using nth_format_spec = nth::interpolation_spec;
 
+    friend constexpr auto NthDefaultFormatSpec(nth::type_tag<metadata>) {
+      return nth::interpolation_spec::from<"{} {}:{}">();
+    }
+
     friend format_spec<metadata> NthFormatSpec(interpolation_string_view s,
                                                type_tag<metadata>) {
       return format_spec<metadata>(s);
@@ -38,9 +42,8 @@ struct log_line_base {
 
     friend void NthFormat(io::forward_writer auto& w,
                           format_spec<metadata> spec, metadata const& m) {
-      interpolate(w, spec, m.source_location().file_name(),
-                  m.source_location().function_name(),
-                  m.source_location().line());
+      interpolate(w, spec, m.source_location().function_name(),
+                  m.source_location().file_name(), m.source_location().line());
     }
 
    private:

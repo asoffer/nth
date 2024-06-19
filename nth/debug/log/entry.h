@@ -38,11 +38,15 @@ struct log_entry {
     log_entry& entry_;
   };
 
-  using nth_format_spec = nth::interpolation_spec;
+  using nth_format_spec = nth::trivial_format_spec;
 
-  friend format_spec<log_entry> NthFormatSpec(interpolation_string_view s,
+  friend constexpr auto NthDefaultFormatSpec(nth::type_tag<log_entry>) {
+    return nth::trivial_format_spec{};
+  }
+
+  friend format_spec<log_entry> NthFormatSpec(interpolation_string_view,
                                               type_tag<log_entry>) {
-    return format_spec<log_entry>(s);
+    return format_spec<log_entry>();
   }
 
   friend void NthFormat(io::forward_writer auto& w, format_spec<log_entry>,

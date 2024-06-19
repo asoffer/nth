@@ -69,6 +69,10 @@ nth::indestructible<BenchmarkResultHolder> benchmark_results;
 struct CharSpacer {
   using nth_format_spec = nth::trivial_format_spec;
 
+  friend constexpr auto NthDefaultFormatSpec(nth::type_tag<CharSpacer>) {
+    return nth::trivial_format_spec{};
+  }
+
   friend nth::format_spec<CharSpacer> NthFormatSpec(
       nth::interpolation_string_view, nth::type_tag<CharSpacer>) {
     return {};
@@ -83,6 +87,10 @@ struct CharSpacer {
 
 struct Spacer {
   using nth_format_spec = nth::trivial_format_spec;
+
+  friend constexpr auto NthDefaultFormatSpec(nth::type_tag<Spacer>) {
+    return nth::trivial_format_spec{};
+  }
 
   friend nth::format_spec<Spacer> NthFormatSpec(nth::interpolation_string_view,
                                                 nth::type_tag<Spacer>) {
