@@ -16,7 +16,7 @@
 #define NTH_DEBUG_INTERNAL_UNIMPLEMENTED_WITH_VERBOSITY(verbosity,             \
                                                         interpolation_string)  \
   NTH_DEBUG_INTERNAL_LOG_AND_ACT(                                              \
-      verbosity,                                                               \
+      __LINE__,                                                                \
       "This code-path has not yet been implemented.\n" interpolation_string,   \
       std::abort(),                                                            \
       ::nth::internal_log::non_returning_voidifier<std::abort>())

@@ -3,15 +3,12 @@
 
 #include <concepts>
 
-namespace nth {
-
-struct log_line_base;
-
-namespace internal_log {
+namespace nth::internal_log {
 
 struct voidifier {
   template <typename T>
   friend void operator<<=(voidifier, T const&) {
+#if 0
     constexpr bool MissingInterpolationArguments =
         not std::derived_from<T, log_line_base>;
     // clang-format off
@@ -36,6 +33,7 @@ struct voidifier {
         "        <<= {\"not braces\"};\n"
         "    ```\n");
     // clang-format on
+#endif
   }
 };
 
@@ -49,7 +47,6 @@ struct non_returning_voidifier : voidifier {
   [[noreturn]] ~non_returning_voidifier() { F(); }
 };
 
-}  // namespace internal_log
-}  // namespace nth
+}  // namespace nth::internal_log
 
 #endif  // NTH_DEBUG_LOG_INTERNAL_VOIDIFIER_H

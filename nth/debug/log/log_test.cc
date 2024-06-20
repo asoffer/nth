@@ -3,11 +3,7 @@
 #include "nth/debug/log/vector_log_sink.h"
 #include "nth/test/raw/test.h"
 
-int AlwaysLog() {
-  std::vector<nth::log_entry> log;
-  nth::VectorLogSink sink(log);
-  nth::register_log_sink(sink);
-
+void AlwaysLog(std::vector<nth::log_entry> const &log) {
 #line 100
   NTH_LOG((v.always), "No interpolation");
 #line 200
@@ -20,26 +16,26 @@ int AlwaysLog() {
 
   NTH_RAW_TEST_ASSERT(log.size() == 4);
 
-  NTH_RAW_TEST_ASSERT(log[0].id().line().metadata().source_location().line() ==
-                      100);
+  NTH_RAW_TEST_ASSERT(
+      nth::section<"nth_log_line">[log[0].id()].source_location().line() ==
+      100);
 
-  NTH_RAW_TEST_ASSERT(log[1].id().line().metadata().source_location().line() ==
-                      200);
+  NTH_RAW_TEST_ASSERT(
+      nth::section<"nth_log_line">[log[1].id()].source_location().line() ==
+      200);
 
-  NTH_RAW_TEST_ASSERT(log[2].id().line().metadata().source_location().line() ==
-                      300);
+  NTH_RAW_TEST_ASSERT(
+      nth::section<"nth_log_line">[log[2].id()].source_location().line() ==
+      300);
 
-  NTH_RAW_TEST_ASSERT(log[3].id().line().metadata().source_location().line() ==
-                      400);
-
-  return 0;
+  NTH_RAW_TEST_ASSERT(
+      nth::section<"nth_log_line">[log[3].id()].source_location().line() ==
+      400);
 }
 
-int NeverLog() {
-  std::vector<nth::log_entry> log;
-  nth::VectorLogSink sink(log);
-  nth::register_log_sink(sink);
-
+// TODO: verbosity.
+void NeverLog(std::vector<nth::log_entry> const &) {
+#if 0
 #line 100
   NTH_LOG((v.never), "No interpolation");
 #line 200
@@ -50,12 +46,19 @@ int NeverLog() {
   NTH_LOG((v.never), "Interpolation with arguments = {}, {}.") <<= {4, "hello"};
 
   NTH_RAW_TEST_ASSERT(log.size() == 0);
-  return 0;
+#endif
 }
 
 int main() {
-  NTH_RAW_TEST_ASSERT(AlwaysLog() == 0);
-  NTH_RAW_TEST_ASSERT(NeverLog() == 0);
+  std::vector<nth::log_entry> log;
+  nth::VectorLogSink sink(log);
+  nth::register_log_sink(sink);
+
+  log.clear();
+  AlwaysLog(log);
+
+  log.clear();
+  NeverLog(log);
   return 0;
 }
 

@@ -6,16 +6,12 @@
 #include "nth/debug/log/entry.h"
 #include "nth/debug/log/internal/voidifier.h"
 #include "nth/debug/log/line.h"
+#include "nth/debug/log/sink.h"
 #include "nth/format/interpolate/interpolate.h"
 #include "nth/format/interpolate/spec.h"
 #include "nth/format/interpolate/string.h"
 
 namespace nth::internal_log {
-
-template <compile_time_string File, int Line, compile_time_string Function,
-          interpolation_string S>
-inline log_line<S> line(source_location::unchecked(File.data(), Function,
-                                                   Line));
 
 // Arguments passed directly to a log macro as in the example:
 //
@@ -23,46 +19,29 @@ inline log_line<S> line(source_location::unchecked(File.data(), Function,
 // NTH_LOG((v.always), "{} + {} == {}") <<= {2, 3, 5};
 // ```
 //
-template <compile_time_string File, int Line, compile_time_string Function,
-          interpolation_string S>
+template <log_line const& Line>
 struct arguments {
   template <typename... Ts>
   arguments(Ts const&... values) {
-    auto const& log_line = line<File, Line, Function, S>;
-    log_entry e(log_line.id());
+    log_entry e(Line.id());
     log_entry::builder builder(e);
-    nth::interpolate(builder, interpolation_spec(S), values...);
+    nth::interpolate(builder, interpolation_spec(Line.interpolation_string()),
+                     values...);
 
-    for (auto* sink : internal_debug::registered_log_sinks()) {
-      sink->send(log_line, e);
-    }
+    for (auto* sink : registered_log_sinks()) { sink->send(Line, e); }
   }
 };
 
 struct argument_ignorer {};
 
-template <compile_time_string File, int Line, compile_time_string Function,
-          interpolation_string S>
-struct location_injector {
-  location_injector() requires(S.placeholders() != 0) = default;
+template <unsigned N, log_line const& Line>
+struct line_injector {
+  voidifier operator<<=(arguments<Line> const&) { return {}; }
+};
 
-  location_injector() requires(S.placeholders() == 0) {
-    auto const& log_line = line<File, Line, Function, S>;
-    log_entry e(log_line.id());
-
-    for (auto* sink : internal_debug::registered_log_sinks()) {
-      sink->send(log_line, e);
-    }
-  }
-
-  voidifier operator<<=(argument_ignorer) requires(S.placeholders() == 0) {
-    return voidifier{};
-  }
-
-  voidifier operator<<=(arguments<File, Line, Function, S>) requires(
-      S.placeholders() != 0) {
-    return voidifier{};
-  }
+template <log_line const& Line>
+struct line_injector<0, Line> : arguments<Line> {
+  voidifier operator<<=(argument_ignorer) { return {}; }
 };
 
 }  // namespace nth::internal_log

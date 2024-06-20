@@ -14,9 +14,9 @@
 namespace nth {
 
 struct StdErrLogSink : log_sink {
-  void send(log_line_base const& line, log_entry const& entry) override {
-    nth::interpolate<"{\x1b[0;36m{} {}:{}]\x1b[0m} {}">(io::stderr_writer,
-                                                        line.metadata(), entry);
+  void send(log_line const&, log_entry const&) override {
+    // TODO: nth::interpolate<"{\x1b[0;36m{} {}:{}]\x1b[0m} {}">(io::stderr_writer,
+    // TODO:                                                     line.metadata(), entry);
     io::stderr_writer.write(nth::byte_range(std::string_view("\n")));
   }
 };

@@ -41,6 +41,8 @@ requires(S.size() <= 16) inline section_type<S> section;
       return &internal_section::__stop_##name;                                 \
     }                                                                          \
     static constexpr auto size() { return end() - begin(); }                   \
+                                                                               \
+    static value_type const& operator[](unsigned n) { return *(begin() + n); } \
   };                                                                           \
   }                                                                            \
   static_assert(true, "Needs trailing semicolon")

@@ -36,8 +36,7 @@ inline constexpr char const EnsureLogLine[] =
                  (#__VA_ARGS__),                                               \
                  NTH_DEBUG_INTERNAL_TRACE_INJECTED_EXPR(__VA_ARGS__)))) {      \
   } else                                                                       \
-    NTH_REQUIRE_EXPANSION_TO_PREFIX_SUBEXPRESSION(action_prefix(               \
-        void)::nth::debug::internal_contracts::Logger<__FILE__, __LINE__>())
+    NTH_REQUIRE_EXPANSION_TO_PREFIX_SUBEXPRESSION(action_prefix)
 
 #define NTH_DEBUG_INTERNAL_REQUIRE_WITH_VERBOSITY(verbosity, ...)              \
   NTH_DEBUG_INTERNAL_CONTRACT_CHECK(                                           \

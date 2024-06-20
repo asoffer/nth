@@ -6,6 +6,7 @@
 
 #include "nth/base/attributes.h"
 #include "nth/format/interpolate/internal/parameter_range.h"
+#include "nth/format/interpolate/string.h"
 
 namespace nth {
 

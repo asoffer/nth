@@ -8,7 +8,6 @@
 
 #include "nth/configuration/log.h"
 #include "nth/debug/log/line.h"
-#include "nth/debug/log/sink.h"
 #include "nth/format/interpolate/interpolate.h"
 #include "nth/io/writer/writer.h"
 
@@ -54,18 +53,17 @@ struct log_entry {
     w.write(nth::byte_range(entry.data_));
   }
 
-  log_line_id id() const { return id_; }
+  size_t id() const { return id_; }
 
-  template <interpolation_string>
   friend struct log_line;
 
   log_entry() = delete;
-  explicit log_entry(log_line_id id);
+  explicit log_entry(size_t id);
 
  private:
   friend builder;
 
-  log_line_id id_;
+  size_t id_;
   // Log data is stored structurally as a tree with all the data needed to
   // traverse it in a preorder traversal stored inline. Each entry is prefixed
   // with four bytes. The first two bytes indicate the the number of bytes in

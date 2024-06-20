@@ -7,16 +7,6 @@
 
 namespace nth::debug::internal_contracts {
 
-template <compile_time_string File, int Line>
-struct Logger {
-  template <::nth::interpolation_string S>
-  void Log(auto const &...arguments) requires(sizeof...(arguments) ==
-                                              S.placeholders()) {
-    internal_log::location_injector<__FILE__, __LINE__, __FUNCTION__, S>() <<=
-        {arguments...};
-  }
-};
-
 template <typename Fn>
 // Requires `Fn&&` is invocable with `source_location`. This requirement is not
 // specified as a concept because all instantiations of this type are created

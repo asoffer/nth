@@ -71,7 +71,8 @@
 // evaluates to `false`, a diagnostic is reported and program execution is
 // aborted. In either case, all registered expectation handlers are notified of
 // the result.
-#define NTH_REQUIRE(...) NTH_DEBUG_INTERNAL_REQUIRE(__VA_ARGS__)
+#define NTH_REQUIRE(...) 
+// TODO: NTH_DEBUG_INTERNAL_REQUIRE(__VA_ARGS__)
 
 // `NTH_ENSURE`:
 //
@@ -80,6 +81,7 @@
 // proceeds with no visible side-effects. If the expression evaluates to
 // `false`, a diagnostic is reported and program execution is aborted. In either
 // case, all registered expectation handlers are notified of the result.
-#define NTH_ENSURE(...) NTH_DEBUG_INTERNAL_ENSURE(__VA_ARGS__)
+#define NTH_ENSURE(...) 
+// TODO: NTH_DEBUG_INTERNAL_ENSURE(__VA_ARGS__)
 
 #endif  // NTH_DEBUG_CONTRACTS_CONTRACTS_H

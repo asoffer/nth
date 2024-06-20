@@ -59,7 +59,7 @@ namespace nth::debug::internal_unreachable {
     ::nth::debug::internal_unreachable::unreachable();                         \
   } else                                                                       \
     NTH_DEBUG_INTERNAL_LOG_AND_ACT(                                            \
-        verbosity,                                                             \
+        __LINE__,                                                              \
         "Program execution has reached a state believed to be unreachable. "   \
         "This is a bug.\n" interpolation_str,                                  \
         NTH_DEBUG_INTERNAL_UNREACHABLE_HANDLER(),                              \

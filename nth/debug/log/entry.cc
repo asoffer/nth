@@ -11,6 +11,6 @@ log_entry::builder::write_result_type log_entry::builder::write(
   return write_result_type(bytes.size());
 }
 
-log_entry::log_entry(log_line_id id) : id_(id) {}
+log_entry::log_entry(size_t id) : id_(id) {}
 
 }  // namespace nth

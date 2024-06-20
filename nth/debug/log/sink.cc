@@ -10,13 +10,13 @@ indestructible<registrar<log_sink*>> registrar_;
 
 }  // namespace
 
-namespace internal_debug {
+namespace internal_log {
 
 registrar<log_sink*>::range_type registered_log_sinks() {
   return registrar_->registry();
 }
 
-}  // namespace internal_debug
+}  // namespace internal_log
 
 void register_log_sink(log_sink& sink) { registrar_->insert(&sink); }
 

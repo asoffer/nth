@@ -2,9 +2,11 @@
 #define NTH_DEBUG_LOG_INTERNAL_LOG_H
 
 #include "nth/base/macros.h"
+#include "nth/base/section.h"
 #include "nth/configuration/verbosity.h"
 #include "nth/debug/log/internal/arguments.h"
 #include "nth/debug/log/internal/voidifier.h"
+#include "nth/debug/log/line.h"
 #include "nth/debug/source_location.h"
 #include "nth/debug/verbosity/verbosity.h"
 
@@ -32,7 +34,7 @@
 
 // Dispatches to the macro containing the actual logging logic.
 #define NTH_DEBUG_INTERNAL_LOG_WITH_VERBOSITY(verbosity, interpolation_string) \
-  NTH_DEBUG_INTERNAL_LOG_AND_ACT(verbosity, interpolation_string, (void)0,     \
+  NTH_DEBUG_INTERNAL_LOG_AND_ACT(__LINE__, interpolation_string, (void)0,      \
                                  ::nth::internal_log::voidifier{})
 
 // If the verbosity requirement (either explicitly specified or inferred)
@@ -63,12 +65,30 @@
 // detect this scenario, do the work early, but still allow for (and ignore)
 // arguments being injected via `operator<<=`.
 //
-#define NTH_DEBUG_INTERNAL_LOG_AND_ACT(verbosity, interpolation_string,        \
+
+#define NTH_DEBUG_INTERNAL_LOG_AND_ACT(line_number, interp_str,                \
                                        disabled_action, enabled_voidifier)     \
-  NTH_REQUIRE_EXPANSION_TO_PREFIX_SUBEXPRESSION(                               \
-      NTH_DEBUG_INTERNAL_VERBOSITY_DISABLED(verbosity)                         \
+  NTH_DEBUG_INTERNAL_LOG_AND_ACT_IMPL(line_number, interp_str,                 \
+                                      disabled_action, enabled_voidifier)
+
+#define NTH_DEBUG_INTERNAL_LOG_AND_ACT_IMPL(                                   \
+    line_number, interp_str, disabled_action, enabled_voidifier)               \
+  if (static constexpr nth::interpolation_string                               \
+          NthInternalLogInterpolationString##line_number{interp_str};          \
+      false) {                                                                 \
+  } else if (NTH_PLACE_IN_SECTION(                                             \
+                 nth_log_line) static constinit ::nth::log_line                \
+                 NthInternalLogLine##line_number{                              \
+                     NthInternalLogInterpolationString##line_number};          \
+             false) {                                                          \
+  } else                                                                       \
+    switch (0)                                                                 \
+    default:                                                                   \
+      (not NthInternalLogLine##line_number.enabled())                          \
           ? disabled_action                                                    \
-          : enabled_voidifier <<= ::nth::internal_log::location_injector<      \
-                __FILE__, __LINE__, __FUNCTION__, interpolation_string>())
+          : ::nth::internal_log::voidifier{} <<=                               \
+            ::nth::internal_log::line_injector<                                \
+                NthInternalLogInterpolationString##line_number.placeholders(), \
+                NthInternalLogLine##line_number> {}
 
 #endif  // NTH_DEBUG_LOG_INTERNAL_DEBUG_H

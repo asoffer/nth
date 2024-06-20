@@ -10,10 +10,9 @@ void ResponderBase::RecordExpectationResult(bool result) {
   set_   = true;
   value_ = result;
 
-  auto expectation_result = value_ ? debug::ExpectationResult::Success(
-                                         line_->metadata().source_location())
-                                   : debug::ExpectationResult::Failure(
-                                         line_->metadata().source_location());
+  auto expectation_result =
+      value_ ? debug::ExpectationResult::Success(line_->source_location())
+             : debug::ExpectationResult::Failure(line_->source_location());
   for (auto handler : RegisteredExpectationResultHandlers()) {
     handler(expectation_result);
   }
@@ -27,7 +26,7 @@ void ResponderBase::WriteExpression(io::string_writer &writer, log_entry &,
 }
 
 void ResponderBase::Send(log_entry const &entry) {
-  for (auto *sink : nth::internal_debug::registered_log_sinks()) {
+  for (auto *sink : nth::internal_log::registered_log_sinks()) {
     sink->send(*line_, entry);
   }
 }
@@ -54,7 +53,7 @@ bool ResponderBase::set_impl(char const *expression, bool b) {
 
     writer.write(nth::byte_range(std::string_view("Tree")));
 
-    for (auto *sink : nth::internal_debug::registered_log_sinks()) {
+    for (auto *sink : nth::internal_log::registered_log_sinks()) {
       sink->send(*line_, entry);
     }
     internal_trace::bool_value_stash.clear();

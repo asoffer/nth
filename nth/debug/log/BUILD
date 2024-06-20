@@ -7,7 +7,6 @@ cc_library(
     srcs = ["entry.cc"],
     deps = [
         ":line",
-        ":sink",
         "//nth/configuration:log",
         "//nth/format/interpolate",
         "//nth/io/writer",
@@ -16,17 +15,14 @@ cc_library(
 
 cc_library(
     name = "line",
-    visibility = ["//nth/debug/log:__subpackages__"],
     hdrs = ["line.h"],
-    srcs = ["line.cc"],
     deps = [
-        "//nth/debug/log/internal:voidifier",
+        "//nth/base:section",
         "//nth/debug:source_location",
-        "//nth/format",
-        "//nth/format/interpolate",
-        "//nth/io/writer",
+        "//nth/format/interpolate:string_view",
     ],
 )
+
 
 cc_library(
     name = "log",
@@ -57,6 +53,8 @@ cc_library(
     hdrs = ["sink.h"],
     srcs = ["sink.cc"],
     deps = [
+        ":entry",
+        ":line",
         "//nth/base:indestructible",
         "//nth/registration:registrar",
     ],

@@ -104,14 +104,17 @@ struct ResponderBase {
   void Send(log_entry const &entry);
   ~ResponderBase();
 
-  constexpr void set_log_line(nth::log_line_base const &line) { line_ = &line; }
+  constexpr void set_log_line(
+      nth::log_line const &line NTH_ATTRIBUTE(lifetimebound)) {
+    line_ = &line;
+  }
 
  protected:
   bool set_impl(char const *expression, bool b);
 
   bool value_ : 1;
-  bool set_ : 1                   = false;
-  nth::log_line_base const *line_ = nullptr;
+  bool set_ : 1              = false;
+  nth::log_line const *line_ = nullptr;
 };
 
 struct AbortingResponder : ResponderBase {

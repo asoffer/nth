@@ -7,10 +7,10 @@ int main() {
   using ::nth::debug::GreaterThan;
   using ::nth::debug::LessThan;
 
-  constexpr auto AlwaysTrue = nth::debug::MakeProperty<"always-true">(
-      [](auto const &) { return true; });
-  constexpr auto AlwaysFalse = nth::debug::MakeProperty<"always-false">(
-      [](auto const &) { return false; });
+  // TODO: constexpr auto AlwaysTrue = nth::debug::MakeProperty<"always-true">(
+  // TODO:     [](auto const &) { return true; });
+  // TODO: constexpr auto AlwaysFalse = nth::debug::MakeProperty<"always-false">(
+  // TODO:     [](auto const &) { return false; });
 
   nth::debug::RegisterExpectationResultHandler(
       [](nth::debug::ExpectationResult const &result) {
