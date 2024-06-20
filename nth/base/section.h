@@ -54,12 +54,12 @@ requires(S.size() <= 16) inline section_type<S> section;
 #elif NTH_EXECUTABLE_FORMAT(macho)
 
 #define NTH_INTERNAL_SECTION_START_PLATFORM_SPECIFIC(name)                     \
-  __asm("section$start$__DATA$" #name)
+  __asm("section$start$__DATA$" name)
 #define NTH_INTERNAL_SECTION_STOP_PLATFORM_SPECIFIC(name)                      \
-  __asm("section$stop$__DATA$" #name)
+  __asm("section$end$__DATA$" name)
 
 #define NTH_PLACE_IN_SECTION(name)                                             \
-  __attribute__((section("__DATA," name), disable_sanitizer_instrumentation))
+  __attribute__((section("__DATA," #name), disable_sanitizer_instrumentation))
 
 #else
 
