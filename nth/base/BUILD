@@ -90,3 +90,24 @@ cc_library(
     hdrs = ["platform.h"],
     deps = [],
 )
+
+cc_library(
+    name = "section",
+    hdrs = ["section.h"],
+    deps = [
+        ":macros",
+        "//nth/meta:compile_time_string",
+    ],
+)
+
+cc_test(
+    name = "section_test",
+    srcs = [
+        "section_test.cc",
+        "internal/external_section.cc",
+    ],
+    deps = [
+        ":section",
+        "//nth/test/raw:test",
+    ],
+)

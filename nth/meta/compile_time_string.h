@@ -1,6 +1,8 @@
 #ifndef NTH_META_COMPILE_TIME_STRING_H
 #define NTH_META_COMPILE_TIME_STRING_H
 
+#include <compare>
+
 #include "nth/meta/concepts/constructible.h"
 
 namespace nth {
