@@ -3,6 +3,7 @@
 
 #include <concepts>
 #include <cstddef>
+#include <cstdlib>
 
 #include "nth/memory/bytes.h"
 
