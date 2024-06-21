@@ -86,9 +86,9 @@ struct Flag {
 
     bool store(std::string_view s, std::any &a) const {
       if (type_ == nth::type<void>) {
-        NTH_LOG((v.always),
-                "Attempting to store a value in a flag that does not have a "
-                "value.");
+        NTH_LOG(
+            "Attempting to store a value in a flag that does not have a "
+            "value.");
         return false;
       }
       return store_(s, a);
@@ -118,8 +118,7 @@ struct FlagValueSet {
   T const *try_get(std::string_view name) const {
     auto *f = get_impl(name);
     if (not f) { return nullptr; }
-    NTH_REQUIRE((v.always),
-                f->flag().type.type_ == nth::type<std::remove_cvref_t<T>>);
+    NTH_REQUIRE(f->flag().type.type_ == nth::type<std::remove_cvref_t<T>>);
     return std::addressof(
         std::any_cast<std::remove_cvref_t<T> const &>(f->value_));
   }
@@ -127,7 +126,7 @@ struct FlagValueSet {
   template <typename T>
   T const &get(std::string_view name) const {
     T const *ptr = try_get<T>(name);
-    NTH_REQUIRE((v.always), ptr != nullptr);
+    NTH_REQUIRE(ptr != nullptr);
     return *ptr;
   }
 
@@ -181,9 +180,7 @@ struct Executor {
  private:
   friend Flag::Type;
   struct ParseErrorReporter {
-    void operator()(std::string_view message) {
-      NTH_LOG((v.always), "{}") <<= {message};
-    }
+    void operator()(std::string_view message) { NTH_LOG("{}") <<= {message}; }
   };
 
  public:
@@ -313,7 +310,7 @@ Flag::Type::Type(nth::Type auto t) requires(t != nth::type<void>)
           a = std::move(object);
           return true;
         } else {
-          NTH_LOG((v.always), "Failed to parse flag with value \"{}\"") <<= {s};
+          NTH_LOG("Failed to parse flag with value \"{}\"") <<= {s};
           return false;
         }
       }) {}

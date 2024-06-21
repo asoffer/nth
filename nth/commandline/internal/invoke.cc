@@ -32,7 +32,7 @@ exit_code InvokeCommandline(std::span<Command const> commands, Executor exec,
     if (arguments.empty()) {
       if (not ok) { return exit_code::usage; }
       if (not exec) {
-        NTH_LOG((v.always), "No arguments provided.");
+        NTH_LOG("No arguments provided.");
         return exit_code::usage;
       } else {
         return exec(std::move(state).flags(), positional_arguments);
@@ -70,7 +70,7 @@ exit_code InvokeCommandline(std::span<Command const> commands, Executor exec,
         if (not ok) { return exit_code::usage; }
         return exec(std::move(state).flags(), positional_arguments);
       } else {
-        NTH_LOG((v.always), "Invalid command.");
+        NTH_LOG("Invalid command.");
         return exit_code::usage;
       }
     }

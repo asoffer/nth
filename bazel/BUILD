@@ -96,7 +96,5 @@ cc_toolchain_config(
         "-Wno-c++2b-extensions",
         "-Wno-gcc-compat",
         "-Wno-gnu-statement-expression-from-macro-expansion",
-        #TODO
-        "-Wno-return-type",
     ]
 )

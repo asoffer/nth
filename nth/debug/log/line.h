@@ -2,10 +2,15 @@
 #define NTH_DEBUG_LOG_LINE_H
 
 #include <atomic>
+#include <string_view>
 
 #include "nth/base/section.h"
 #include "nth/debug/source_location.h"
+#include "nth/format/interpolate/interpolate.h"
+#include "nth/format/interpolate/spec.h"
 #include "nth/format/interpolate/string_view.h"
+#include "nth/io/writer/writer.h"
+#include "nth/memory/bytes.h"
 
 namespace nth {
 
@@ -16,6 +21,28 @@ struct log_line {
   consteval log_line(interpolation_string_view str,
                      nth::source_location loc = nth::source_location::current())
       : str_(str), source_location_(loc) {}
+  consteval log_line(std::string_view verbosity_path,
+                     interpolation_string_view str,
+                     nth::source_location loc = nth::source_location::current())
+      : verbosity_path_(verbosity_path), str_(str), source_location_(loc) {}
+
+  using nth_format_spec = nth::interpolation_spec;
+
+  friend constexpr auto NthDefaultFormatSpec(nth::type_tag<log_line>) {
+    return nth::interpolation_spec{};
+  }
+
+  friend format_spec<log_line> NthFormatSpec(interpolation_string_view s,
+                                             type_tag<log_line>) {
+    return format_spec<log_line>(s);
+  }
+
+  friend void NthFormat(io::forward_writer auto& w, format_spec<log_line> spec,
+                        log_line const& line) {
+    nth::interpolate(w, spec, line.source_location().file_name(),
+                     line.source_location().line(),
+                     line.source_location().function_name());
+  }
 
   [[nodiscard]] constexpr size_t id() const;
 
@@ -28,19 +55,24 @@ struct log_line {
     return source_location_;
   }
 
+  [[nodiscard]] constexpr std::string_view verbosity_path() const {
+    return verbosity_path_;
+  }
+
   constexpr bool enabled() const {
     return enabled_.load(std::memory_order::relaxed);
   }
 
   constexpr void enable(bool b = true) {
-    return enabled_.store(b, std::memory_order::relaxed);
+    enabled_.store(b, std::memory_order::relaxed);
   }
 
   constexpr void disable() {
-    return enabled_.store(false, std::memory_order::relaxed);
+    enabled_.store(false, std::memory_order::relaxed);
   }
 
  private:
+  std::string_view verbosity_path_;
   interpolation_string_view str_;
   struct source_location source_location_;
   std::atomic<bool> enabled_ = true;

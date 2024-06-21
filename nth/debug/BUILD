@@ -67,6 +67,16 @@ cc_test(
     ],
 )
 
+cc_test(
+    name = "unimplemented_test",
+    srcs = ["unimplemented_test.cc"],
+    deps = [
+        ":unimplemented",
+        "//nth/debug/log:vector_log_sink",
+        "//nth/test/raw:test",
+    ],
+)
+
 cc_library(
     name = "unreachable",
     hdrs = ["unreachable.h"],
@@ -89,5 +99,6 @@ cc_test(
     deps = [
         ":unreachable",
         "//nth/debug/log:vector_log_sink",
+        "//nth/test/raw:test",
     ],
 )

@@ -1,36 +1,27 @@
 #include "nth/debug/log/vector_log_sink.h"
-
+#include "nth/test/raw/test.h"
 static int unreachable_count = 0;
 #define NTH_DEBUG_INTERNAL_TEST_UNREACHABLE (+[] { ++unreachable_count; })
 
 #include "nth/debug/unreachable.h"
 
 void no_logging() { NTH_UNREACHABLE(); }
-void logging_without_verbosity() { NTH_UNREACHABLE("{}") <<= {3}; }
-void log_with_verbosity_off() { NTH_UNREACHABLE((v.never), "{}") <<= {3}; }
-void log_with_verbosity_on() { NTH_UNREACHABLE((v.always), ""); }
+void logging() { NTH_UNREACHABLE("{}") <<= {3}; }
 
 int main() {
-  std::vector<nth::log_entry> log;
-  nth::VectorLogSink sink(log);
-  nth::register_log_sink(sink);
+  // If the build mode is optimized then the behavior of `NTH_UNREACHABLE` is
+  // undefined and thus untestable.
+  if constexpr (nth::build_mode != nth::build::optimize) {
+    std::vector<nth::log_entry> log;
+    nth::vector_log_sink sink(log);
+    nth::register_log_sink(sink);
 
-  no_logging();
-  if (unreachable_count != 1) { return 1; }
-  if (log.size() != 0) { return 1; }
+    no_logging();
+    NTH_RAW_TEST_ASSERT(unreachable_count == 1);
+    NTH_RAW_TEST_ASSERT(log.size() == 0);
 
-  // TODO: Finish implementation.
-  logging_without_verbosity();
-  // if (unreachable_count != 2) { return 1; }
-  // if (log.size() != 1) { return 1; }
-
-  log_with_verbosity_off();
-  // if (unreachable_count != 3) { return 1; }
-  // if (log.size() != 1) { return 1; }
-
-  log_with_verbosity_on();
-  // if (unreachable_count != 4) { return 1; }
-  // if (log.size() != 2) { return 1; }
-
-  return 0;
+    logging();
+    NTH_RAW_TEST_ASSERT(unreachable_count == 2);
+    NTH_RAW_TEST_ASSERT(log.size() == 1);
+  }
 }

@@ -2,6 +2,7 @@
 #define NTH_DEBUG_UNREACHABLE_H
 
 #include "nth/debug/internal/unreachable.h"
+#include "nth/debug/log/log.h"
 
 namespace nth::debug {
 
@@ -15,9 +16,7 @@ namespace nth::debug {
 //
 // For all other build modes, the program is guaranteed to abort execution.
 // If any argumenst are passed to the macro, they are interpretted as arguments
-// to `NTH_LOG`. Specifically, if a verbosity is provided, that logging
-// verbosity will be used. Otherwise, if no verbosity is provided, a default
-// verbosity of `always` will be used.
+// to `NTH_LOG`.
 #define NTH_UNREACHABLE(...) NTH_DEBUG_INTERNAL_UNREACHABLE(__VA_ARGS__)
 
 }  // namespace nth::debug

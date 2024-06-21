@@ -1,9 +1,6 @@
 #ifndef NTH_DEBUG_LOG_STDERR_LOG_SINK_H
 #define NTH_DEBUG_LOG_STDERR_LOG_SINK_H
 
-#include <iostream>
-
-#include "nth/configuration/log.h"
 #include "nth/debug/log/entry.h"
 #include "nth/debug/log/line.h"
 #include "nth/debug/log/sink.h"
@@ -13,14 +10,13 @@
 
 namespace nth {
 
-struct StdErrLogSink : log_sink {
-  void send(log_line const&, log_entry const&) override {
-    // TODO: nth::interpolate<"{\x1b[0;36m{} {}:{}]\x1b[0m} {}">(io::stderr_writer,
-    // TODO:                                                     line.metadata(), entry);
-    io::stderr_writer.write(nth::byte_range(std::string_view("\n")));
+struct stderr_log_sink : log_sink {
+  void send(log_line const& line, log_entry const& entry) override {
+    nth::interpolate<"{\x1b[0;36m{}:{} {}]\x1b[0m} {}\n">(io::stderr_writer,
+                                                          line, entry);
   }
 };
-inline StdErrLogSink stderr_log_sink;
+inline struct stderr_log_sink stderr_log_sink;
 
 }  // namespace nth
 

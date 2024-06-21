@@ -37,16 +37,6 @@ struct voidifier {
   }
 };
 
-template <auto F>
-struct invoking_voidifier : voidifier {
-  ~invoking_voidifier() { F(); }
-};
-
-template <auto F>
-struct non_returning_voidifier : voidifier {
-  [[noreturn]] ~non_returning_voidifier() { F(); }
-};
-
 }  // namespace nth::internal_log
 
 #endif  // NTH_DEBUG_LOG_INTERNAL_VOIDIFIER_H

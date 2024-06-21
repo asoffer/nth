@@ -34,15 +34,21 @@ requires(S.size() <= 16) inline section_type<S> section;
   template <>                                                                  \
   struct section_type<#name> {                                                 \
     using value_type = __VA_ARGS__;                                            \
-    static constexpr value_type const* begin() {                               \
+    static constexpr value_type* begin() {                                     \
       return &internal_section::__start_##name;                                \
     }                                                                          \
-    static constexpr value_type const* end() {                                 \
+    static constexpr value_type const* cbegin() {                              \
+      return &internal_section::__start_##name;                                \
+    }                                                                          \
+    static constexpr value_type* end() {                                       \
+      return &internal_section::__stop_##name;                                 \
+    }                                                                          \
+    static constexpr value_type const* cend() {                                \
       return &internal_section::__stop_##name;                                 \
     }                                                                          \
     static constexpr auto size() { return end() - begin(); }                   \
                                                                                \
-    static value_type const& operator[](unsigned n) { return *(begin() + n); } \
+    static value_type& operator[](unsigned n) { return *(begin() + n); }       \
   };                                                                           \
   }                                                                            \
   static_assert(true, "Needs trailing semicolon")

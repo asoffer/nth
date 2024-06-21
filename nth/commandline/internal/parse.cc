@@ -27,14 +27,14 @@ Flag const *FlagParsingState::find(std::string_view name) {
 bool FlagParsingState::parse(char short_flag) {
   if (Flag const *flag = find(short_flag)) {
     if (flag->type.type_ != nth::type<void>) {
-      NTH_LOG((v.always), "'-{}' accepts and argument of type '{}'.") <<=
+      NTH_LOG("'-{}' accepts and argument of type '{}'.") <<=
           {short_flag, flag->type.type_};
       return false;
     }
     flags_.insert(Flag::Value(*flag));
     return true;
   } else {
-    NTH_LOG((v.always), "'-{}' is not valid flag.") <<= {short_flag};
+    NTH_LOG("'-{}' is not valid flag.") <<= {short_flag};
     return false;
   }
 }
@@ -43,22 +43,22 @@ bool FlagParsingState::parse(size_t position, std::string_view argument) {
   if (size_t eq_pos = argument.find('='); eq_pos == std::string_view::npos) {
     if (Flag const *flag = find(argument)) {
       if (flag->type.type_ != nth::type<void>) {
-        NTH_LOG((v.always), "'--{}' accepts and argument of type '{}'.") <<=
+        NTH_LOG("'--{}' accepts and argument of type '{}'.") <<=
             {argument, flag->type.type_};
 
         return false;
       }
       flags_.insert(Flag::Value(*flag));
     } else {
-      NTH_LOG((v.always), "'--{}' is not valid flag name.") <<= {argument};
+      NTH_LOG("'--{}' is not valid flag name.") <<= {argument};
       return false;
     }
   } else {
     if (eq_pos == 2) {
-      NTH_LOG((v.always),
-              "Argument provided in position {} has no name. All "
-              "arguments must be named with a non-zero number of "
-              "characters.") <<= {position};
+      NTH_LOG(
+          "Argument provided in position {} has no name. All "
+          "arguments must be named with a non-zero number of "
+          "characters.") <<= {position};
       return false;
     } else {
       std::string_view argument_name  = argument.substr(0, eq_pos);
@@ -66,8 +66,7 @@ bool FlagParsingState::parse(size_t position, std::string_view argument) {
       if (Flag const *flag = find(argument_name)) {
         flags_.insert(Flag::Value(*flag, argument_value));
       } else {
-        NTH_LOG((v.always), "'--{}' is not valid flag name.") <<=
-            {argument_name};
+        NTH_LOG("'--{}' is not valid flag name.") <<= {argument_name};
         return false;
       }
     }
@@ -81,15 +80,14 @@ bool FlagParsingState::ParseFlag(size_t position, std::string_view argument) {
       return false;
     } break;
     case 1: {
-      NTH_LOG((v.always),
-              "Argument '{}' found at position {} is not valid. Did you "
-              "mean to type a short-flag?") <<= {argument, position};
+      NTH_LOG(
+          "Argument '{}' found at position {} is not valid. Did you "
+          "mean to type a short-flag?") <<= {argument, position};
       return false;
     } break;
     case 2: {
       if (argument[1] == '-') {
-        NTH_LOG((v.always),
-                "Argument '{}' found at position {} is not valid.") <<=
+        NTH_LOG("Argument '{}' found at position {} is not valid.") <<=
             {argument, position};
         return false;
       } else {
@@ -108,22 +106,22 @@ bool FlagParsingState::ParseFlag(size_t position, std::string_view argument) {
         } else {
           if (eq_pos == 2) {
             if (Flag const *arg = find(argument[1])) {
-              NTH_LOG((v.always),
-                      "Argument '{}' found at position {} is not valid. Short "
-                      "arguments may not be assigned values. Use the full name "
-                      "(--{}) if this is intended.") <<=
+              NTH_LOG(
+                  "Argument '{}' found at position {} is not valid. Short "
+                  "arguments may not be assigned values. Use the full name "
+                  "(--{}) if this is intended.") <<=
                   {argument, position, arg->name.full_name()};
             } else {
-              NTH_LOG((v.always),
-                      "Argument '{}' found at position {} is not valid. Short "
-                      "arguments may not be assigned values. Use the full name "
-                      "if this is intended.") <<= {argument, position};
+              NTH_LOG(
+                  "Argument '{}' found at position {} is not valid. Short "
+                  "arguments may not be assigned values. Use the full name "
+                  "if this is intended.") <<= {argument, position};
             }
           } else {
-            NTH_LOG((v.always),
-                    "Arguments '{}' found at position {} are not valid. Short "
-                    "arguments may not be assigned values. Use their full "
-                    "names if this is intended.") <<= {argument, position};
+            NTH_LOG(
+                "Arguments '{}' found at position {} are not valid. Short "
+                "arguments may not be assigned values. Use their full "
+                "names if this is intended.") <<= {argument, position};
           }
           return false;
         }

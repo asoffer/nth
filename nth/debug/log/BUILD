@@ -27,13 +27,16 @@ cc_library(
 cc_library(
     name = "log",
     hdrs = ["log.h"],
+    srcs = ["log.cc"],
     deps = [
         ":entry",
         ":line",
         ":sink",
         "//nth/base:macros",
+        "//nth/base:section",
         "//nth/debug/log/internal:log",
         "//nth/debug/verbosity",
+        "//nth/strings:glob",
     ],
 )
 
@@ -43,6 +46,7 @@ cc_test(
     deps = [
         ":log",
         ":vector_log_sink",
+        ":stderr_log_sink",
         "//nth/test/raw:test",
     ],
 )

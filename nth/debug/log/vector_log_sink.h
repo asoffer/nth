@@ -9,8 +9,8 @@
 
 namespace nth {
 
-struct VectorLogSink : log_sink {
-  explicit VectorLogSink(std::vector<log_entry>& log) : log_(log) {}
+struct vector_log_sink : log_sink {
+  explicit vector_log_sink(std::vector<log_entry>& log) : log_(log) {}
 
   void send(log_line const&, log_entry const& entry) override {
     log_.push_back(entry);
