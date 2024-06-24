@@ -4,16 +4,16 @@
 #include "nth/configuration/trace.h"
 #include "nth/debug/expectation_result.h"
 
-namespace nth::debug::internal_contracts {
+namespace nth::internal_contracts {
 
 void ResponderBase::RecordExpectationResult(bool result) {
   set_   = true;
   value_ = result;
 
   auto expectation_result =
-      value_ ? debug::ExpectationResult::Success(line_->source_location())
-             : debug::ExpectationResult::Failure(line_->source_location());
-  for (auto handler : RegisteredExpectationResultHandlers()) {
+      value_ ? expectation_result::success(line_->source_location())
+             : expectation_result::failure(line_->source_location());
+  for (auto handler : registered_expectation_result_handlers()) {
     handler(expectation_result);
   }
 }
@@ -43,10 +43,10 @@ bool ResponderBase::set_impl(char const *expression, bool b) {
 
     WriteExpression(writer, entry, expression);
 
-    std::vector<internal_trace::TraversalAction> stack;
-    for (auto const *element : internal_trace::bool_value_stash) {
+    std::vector<debug::internal_trace::TraversalAction> stack;
+    for (auto const *element : debug::internal_trace::bool_value_stash) {
       stack.clear();
-      internal_trace::VTable(*element).traverse(element, stack);
+      debug::internal_trace::VTable(*element).traverse(element, stack);
       TraversalPrinterContext context(writer);
       context.Traverse(std::move(stack));
     }
@@ -56,11 +56,13 @@ bool ResponderBase::set_impl(char const *expression, bool b) {
     for (auto *sink : nth::internal_log::registered_log_sinks()) {
       sink->send(*line_, entry);
     }
-    internal_trace::bool_value_stash.clear();
+    debug::internal_trace::bool_value_stash.clear();
   }
   return value_;
 }
 
-ResponderBase::~ResponderBase() { internal_trace::bool_value_stash.clear(); }
+ResponderBase::~ResponderBase() {
+  debug::internal_trace::bool_value_stash.clear();
+}
 
-}  // namespace nth::debug::internal_contracts
+}  // namespace nth::internal_contracts

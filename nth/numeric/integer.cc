@@ -21,7 +21,7 @@ bool AddWord(std::span<uint64_t> words, uint64_t carry) {
 // Subtracts `borrow` from `words`, and returns a pointer just passed the last
 // word in `words` which is non-zero.
 uint64_t *SubWord(std::span<uint64_t> words, uint64_t borrow) {
-  NTH_REQUIRE((v.debug), words.empty() or words.back() != 0u);
+  NTH_REQUIRE((debug), words.empty() or words.back() != 0u);
   uint64_t *last = words.data();
   uint64_t *end  = words.data() + words.size();
   for (uint64_t *ptr = words.data(); ptr != end; ++ptr) {
@@ -61,7 +61,7 @@ bool AddWords(std::span<uint64_t const> words, std::span<uint64_t> out) {
 // Subtracts `words` from `out` and returns a pointer just passed the last
 // non-zero word in `out`. Assumse that `words`
 uint64_t *SubWords(std::span<uint64_t const> words, std::span<uint64_t> out) {
-  NTH_REQUIRE((v.debug), words.size() <= out.size());
+  NTH_REQUIRE((debug), words.size() <= out.size());
   auto out_iter    = out.begin();
   uint64_t borrow  = 0;
   uint64_t *result = &*out_iter;
@@ -392,17 +392,17 @@ bool operator>(integer const &lhs, integer const &rhs) {
 bool operator>=(integer const &lhs, integer const &rhs) { return rhs <= lhs; }
 
 uint64_t integer::unchecked_capacity() const {
-  NTH_REQUIRE((v.debug), size_ > 2u);
+  NTH_REQUIRE((debug), size_ > 2u);
   return data_[1];
 }
 
 uint64_t const *integer::unchecked_data() const {
-  NTH_REQUIRE((v.debug), size_ > 2u);
+  NTH_REQUIRE((debug), size_ > 2u);
   return reinterpret_cast<uint64_t const *>(data_[0]);
 }
 
 uint64_t *&integer::unchecked_data() {
-  NTH_REQUIRE((v.debug), size_ > 2u);
+  NTH_REQUIRE((debug), size_ > 2u);
   return *reinterpret_cast<uint64_t **>(&data_[0]);
 }
 

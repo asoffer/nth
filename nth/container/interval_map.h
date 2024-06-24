@@ -248,7 +248,7 @@ template <std::totally_ordered K, std::equality_comparable M>
 ::nth::interval<K> const* interval_map<K, M>::key_range(
     key_type const& k) const {
   interval_type const* result;
-  NTH_ENSURE((v.debug), not result or result->contains(k));
+  NTH_ENSURE((debug), not result or result->contains(k));
   auto iter     = RangeContaining(intervals_.begin(), intervals_.end(), k);
   return result = (iter == intervals_.end()) ? nullptr : &iter->first;
 }
@@ -256,7 +256,7 @@ template <std::totally_ordered K, std::equality_comparable M>
 template <std::totally_ordered K, std::equality_comparable M>
 M const& interval_map<K, M>::at(key_type const& k) const {
   auto iter = RangeContaining(intervals_.begin(), intervals_.end(), k);
-  NTH_REQUIRE((v.harden), iter != intervals_.end());
+  NTH_REQUIRE((harden), iter != intervals_.end());
   return iter->second;
 }
 
@@ -264,7 +264,7 @@ template <std::totally_ordered K, std::equality_comparable M>
 std::pair<::nth::interval<K> const, M> const* interval_map<K, M>::mapped_range(
     key_type const& k) const {
   std::pair<interval_type const, mapped_type> const* result;
-  NTH_ENSURE((v.debug), not result or result->first.contains(k));
+  NTH_ENSURE((debug), not result or result->first.contains(k));
   auto iter     = RangeContaining(intervals_.begin(), intervals_.end(), k);
   return result = (iter == intervals_.end()) ? nullptr : &*iter;
 }

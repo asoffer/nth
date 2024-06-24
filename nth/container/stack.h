@@ -53,21 +53,21 @@ struct stack {
 
   // Returns a span over the top `n` elements in the stack.
   std::span<value_type> top_span(size_type n) {
-    NTH_REQUIRE((v.debug), size() >= n);
+    NTH_REQUIRE((debug), size() >= n);
     return std::span(next_ - n, n);
   }
   std::span<value_type const> top_span(size_type n) const {
-    NTH_REQUIRE((v.debug), size() >= n);
+    NTH_REQUIRE((debug), size() >= n);
     return std::span(next_ - n, n);
   }
   template <size_type N>
   std::span<value_type, N> top_span() {
-    NTH_REQUIRE((v.debug), size() >= N);
+    NTH_REQUIRE((debug), size() >= N);
     return std::span<value_type, N>(next_ - N, N);
   }
   template <size_type N>
   std::span<value_type const, N> top_span() const {
-    NTH_REQUIRE((v.debug), size() >= N);
+    NTH_REQUIRE((debug), size() >= N);
     return std::span<value_type const, N>(next_ - N, N);
   }
 
@@ -222,7 +222,7 @@ decltype(auto) stack<T>::emplace(Args&&... args) {
 
 template <typename T>
 void stack<T>::pop() {
-  NTH_REQUIRE((v.debug), not empty());
+  NTH_REQUIRE((debug), not empty());
   if constexpr (std::is_trivially_destructible_v<value_type>) {
     --next_;
   } else {
@@ -233,7 +233,7 @@ void stack<T>::pop() {
 
 template <typename T>
 void stack<T>::pop(size_t n) {
-  NTH_REQUIRE((v.debug), size() >= n);
+  NTH_REQUIRE((debug), size() >= n);
   if constexpr (std::is_trivially_destructible_v<value_type>) {
     next_ -= n;
   } else {

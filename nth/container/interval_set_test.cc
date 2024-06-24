@@ -11,7 +11,7 @@ using ::nth::debug::ElementsAreSequentially;
 
 NTH_TEST("interval_set/default", auto type) {
   interval_set<nth::type_t<type>> interval_set;
-  auto set = nth::debug::Trace<"set">(interval_set);
+  auto set = nth::trace<"set">(interval_set);
   NTH_EXPECT(set.empty());
 }
 
@@ -24,7 +24,7 @@ NTH_INVOKE_TEST("interval_set/default") {
 NTH_TEST("interval_set/basic/construction/interval", auto const& low,
          auto const& hi) {
   interval_set interval_set(interval(low, hi));
-  auto set = nth::debug::Trace<"set">(interval_set);
+  auto set = nth::trace<"set">(interval_set);
   NTH_EXPECT(not set.empty());
   NTH_EXPECT(set.length() == hi - low);
   NTH_EXPECT(set.intervals() >>= ElementsAreSequentially(interval(low, hi)));
@@ -32,7 +32,7 @@ NTH_TEST("interval_set/basic/construction/interval", auto const& low,
 
 NTH_TEST("interval_set/basic/containment", auto const& low, auto const& hi) {
   interval_set interval_set(interval(low, hi));
-  auto set = nth::debug::Trace<"set">(interval_set);
+  auto set = nth::trace<"set">(interval_set);
   NTH_EXPECT(not set.contains(low - 1));
   NTH_EXPECT(set.contains(low));
   NTH_EXPECT(set.contains(low + 1));

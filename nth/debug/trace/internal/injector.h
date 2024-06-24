@@ -6,7 +6,7 @@
 #include "nth/debug/trace/internal/actions.h"
 #include "nth/debug/trace/internal/implementation.h"
 
-#define NTH_DEBUG_INTERNAL_TRACE_INJECTED_EXPR(...)                            \
+#define NTH_TRACE_INTERNAL_INJECTED_EXPR(...)                                  \
   (::nth::debug::internal_trace::TraceInjector{}                               \
        ->*__VA_ARGS__->*::nth::debug::internal_trace::TraceInjector{})
 

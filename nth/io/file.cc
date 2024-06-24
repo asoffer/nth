@@ -42,16 +42,16 @@ bool file::close() {
 }
 
 file& file::operator=(file&& f) {
-  NTH_REQUIRE((v.harden), file_ptr_ == nullptr);
+  NTH_REQUIRE((harden), file_ptr_ == nullptr);
   file_ptr_ = std::exchange(f.file_ptr_, nullptr);
   return *this;
 }
 
-file::~file() { NTH_REQUIRE((v.harden), file_ptr_ == nullptr); }
+file::~file() { NTH_REQUIRE((harden), file_ptr_ == nullptr); }
 
 file TemporaryFile() {
   std::FILE* f = std::tmpfile();
-  NTH_REQUIRE((v.harden), f != nullptr);
+  NTH_REQUIRE((harden), f != nullptr);
   return file(f);
 }
 

@@ -53,7 +53,6 @@ cc_test(
 
 cc_library(
     name = "sink",
-    visibility = ["//nth/debug/log:__subpackages__"],
     hdrs = ["sink.h"],
     srcs = ["sink.cc"],
     deps = [

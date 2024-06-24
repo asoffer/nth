@@ -16,7 +16,7 @@ namespace nth::internal_log {
 // Arguments passed directly to a log macro as in the example:
 //
 // ```
-// NTH_LOG((v.always), "{} + {} == {}") <<= {2, 3, 5};
+// NTH_LOG(("verbosity/path"), "{} + {} == {}") <<= {2, 3, 5};
 // ```
 //
 template <log_line const& Line>

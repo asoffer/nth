@@ -5,6 +5,7 @@ cc_library(
     hdrs = ["trace.h"],
     deps = [
         "//nth/base:attributes",
+        "//nth/base:macros",
         "//nth/debug/trace/internal:trace",
         "//nth/meta:compile_time_string",
     ],

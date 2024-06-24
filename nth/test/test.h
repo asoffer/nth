@@ -1,8 +1,7 @@
 #ifndef NTH_TEST_TEST_H
 #define NTH_TEST_TEST_H
 
-#include <concepts>
-#include <coroutine>
+#include <string_view>
 #include <functional>
 #include <span>
 
@@ -33,8 +32,8 @@
 // `NTH_TEST` macro must be a convertible to `std::string_view` at compile-time,
 // and should be a '/'-separated path unique to this test. Any further arguments
 // are parameters to the test, and may be treated as function (or function
-// template) parameters. The macro is then followed by a compound statement,
-// which consists of the code to be executed as part of the test. For example,
+// template) parameters. The macro is then followed by the test body to be
+// executed as part of the test. For example,
 //
 // ```
 // // An un-parameterized test, evaluating small values of the `Factorial`
@@ -66,8 +65,9 @@
 // If you wish to parameterize a test based purely on a type, consider accepting
 // a value and using `nth::type`.
 //
-// Unparameterized tests will be automatically registered. Parameterized must be
-// registered via the `NTH_INVOKE_TEST` macro defined below.
+// Unparameterized tests will be automatically invoked. Parameterized must be
+// invoked via the `NTH_INVOKE_TEST` macro defined below.
+//
 #define NTH_TEST(categorization, ...)                                          \
   NTH_INTERNAL_TEST_IMPL(                                                      \
       NTH_CONCATENATE(NthInternal_Test_On_Line_, __LINE__),                    \
@@ -79,12 +79,9 @@
 // `NTH_INVOKE_TEST` defines invocations for parameterized tests. The macro
 // argument must be convertible to a `std::string_view` at compile-time and must
 // represent a glob. Any parameterized test whose path matches the glob will be
-// invoked according to the body of the invocation. Specifically, any value
-// `co_yield`-ed from the test invocation will be used to invoke each test that
-// matches the glob. When tests accept multiple parameters, the `co_yield`ed
-// values should be wrapped in `nth::TestArguments` to indicate that the
-// arguments should be expanded into the test parameters (see
-// "nth/test/arguments.h" for details).
+// invoked according to the body of the invocation. Specifically, any values
+// passed to `nth::test::invoke` will be used to invoke each test that matches
+// the glob.
 //
 // The example below registers twenty tests, ten for
 // "factorial/adjacent-values", and ten for "fibonacci/adjacent-values":
@@ -99,9 +96,15 @@
 // }
 //
 // NTH_INVOKE_TEST("*/adjacent-values") {
-//   for (int i = 0; i < 10; ++i) { co_yield i; }
+//   for (int i = 0; i < 10; ++i) { nth::test::invoke(i); }
 // }
 // ```
+//
+// Note that even when multiple tests are invoked via `NTH_INVOKE_TEST`, runs
+// are not interleaved within the same execution of `NTH_INVOKE_TEST`. That is,
+// each `nth::test::invoke` invocation will execute exactly one `NTH_TEST`. Thus
+// it is safe move values into an `NTH_TEST`.
+//
 #define NTH_INVOKE_TEST(categorization)                                        \
   NTH_INTERNAL_INVOKE_TEST_IMPL(                                               \
       NTH_CONCATENATE(NthInternal_Test_Invocation_On_Line_, __LINE__),         \

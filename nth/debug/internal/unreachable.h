@@ -3,6 +3,7 @@
 
 #include <cstdlib>
 
+#include "nth/base/configuration.h"
 #include "nth/base/macros.h"
 #include "nth/base/platform.h"
 #include "nth/debug/log/log.h"

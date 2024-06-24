@@ -17,7 +17,7 @@ namespace nth {
 struct interpolation_spec {
   interpolation_spec() = default;
 
-  explicit interpolation_spec(interpolation_string_view s)
+  explicit constexpr interpolation_spec(interpolation_string_view s)
       : interpolation_string_(s) {}
 
   template <interpolation_string S>

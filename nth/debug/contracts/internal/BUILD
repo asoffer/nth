@@ -4,13 +4,50 @@ package(default_visibility = [
 ])
 
 cc_library(
+    name = "macros",
+    hdrs = ["macros.h"],
+    deps = [
+        "//nth/base:configuration",
+        "//nth/base:macros",
+    ],
+)
+
+cc_library(
+    name = "checker",
+    hdrs = ["checker.h"],
+    deps = [
+        "//nth/format",
+        "//nth/format/interpolate",
+        "//nth/format/interpolate:spec",
+        "//nth/format/interpolate:string_view",
+        "//nth/io/writer",
+        "//nth/meta:type",
+    ],
+)
+
+cc_library(
     name = "contracts",
     hdrs = ["contracts.h"],
     deps = [
+        ":checker",
+        ":enabler",
+        ":macros",
         ":on_exit",
         ":responder",
-        "//nth/base:macros",
+        "//nth/debug/log",
         "//nth/debug/trace/internal:injector",
+        "//nth/format",
+        "//nth/format/interpolate",
+        "//nth/io/writer",
+    ],
+)
+
+cc_library(
+    name = "enabler",
+    hdrs = ["enabler.h"],
+    deps = [
+        "//nth/base:section",
+        "//nth/debug:source_location",
     ],
 )
 

@@ -4,8 +4,11 @@ cc_library(
     name = "contracts",
     hdrs = ["contracts.h"],
     deps = [
+        "//nth/base:section",
+        "//nth/debug/contracts/internal:enabler",
+        "//nth/debug/contracts/internal:contracts",
         "//nth/debug/trace",
-        "//nth/debug/contracts/internal:contracts"
+        "//nth/strings:glob",
     ],
 )
 
@@ -18,5 +21,8 @@ cc_test(
     deps = [
         ":contracts",
         "//nth/debug/internal:raw_check",
+        "//nth/debug/log",
+        "//nth/debug/log:sink",
+        "//nth/debug/log:stderr_log_sink",
     ],
 )

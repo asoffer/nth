@@ -63,7 +63,7 @@ struct disjoint_set {
     // Returns a reference to the underlying element referred to by this handle.
     // Behavior is undefined if the handle is unpopulated.
     value_type const &operator*() const {
-      NTH_REQUIRE((v.debug), ptr_ != nullptr);
+      NTH_REQUIRE((debug), ptr_ != nullptr);
       return ptr_->first;
     }
 

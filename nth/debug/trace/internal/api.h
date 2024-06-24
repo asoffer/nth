@@ -33,7 +33,7 @@ requires(requires {
 
 }  // namespace nth::debug::internal_trace
 
-#define NTH_DEBUG_INTERNAL_BODY(memfn)                                         \
+#define NTH_TRACE_INTERNAL_BODY(memfn)                                         \
  private:                                                                      \
   template <>                                                                  \
   struct Impl<Fnv1a(#memfn)> {                                                 \
@@ -58,26 +58,25 @@ requires(requires {
         ::nth::debug::internal_trace::Evaluate(*this), ts...);                 \
   }
 
-#define NTH_DEBUG_INTERNAL_EXPAND_A(x)                                         \
-  NTH_DEBUG_INTERNAL_BODY(x) NTH_DEBUG_INTERNAL_EXPAND_B
-#define NTH_DEBUG_INTERNAL_EXPAND_B(x)                                         \
-  NTH_DEBUG_INTERNAL_BODY(x) NTH_DEBUG_INTERNAL_EXPAND_A
-#define NTH_DEBUG_INTERNAL_EXPAND_A_END
-#define NTH_DEBUG_INTERNAL_EXPAND_B_END
-#define NTH_DEBUG_INTERNAL_END(...) NTH_DEBUG_INTERNAL_END_IMPL(__VA_ARGS__)
-#define NTH_DEBUG_INTERNAL_END_IMPL(...) __VA_ARGS__##_END
+#define NTH_TRACE_INTERNAL_EXPAND_A(x)                                         \
+  NTH_TRACE_INTERNAL_BODY(x) NTH_TRACE_INTERNAL_EXPAND_B
+#define NTH_TRACE_INTERNAL_EXPAND_B(x)                                         \
+  NTH_TRACE_INTERNAL_BODY(x) NTH_TRACE_INTERNAL_EXPAND_A
+#define NTH_TRACE_INTERNAL_EXPAND_A_END
+#define NTH_TRACE_INTERNAL_EXPAND_B_END
+#define NTH_TRACE_INTERNAL_END(...) NTH_TRACE_INTERNAL_END_IMPL(__VA_ARGS__)
+#define NTH_TRACE_INTERNAL_END_IMPL(...) __VA_ARGS__##_END
 
-#define NTH_DEBUG_INTERNAL_TRACE_DECLARE_API(type, member_function_names)      \
+#define NTH_TRACE_INTERNAL_DECLARE_API(type, member_function_names)            \
   template <>                                                                  \
-  NTH_DEBUG_INTERNAL_TRACE_DECLARE_API_IMPL(NTH_IGNORE_PARENTHESES(type),      \
-                                            member_function_names)
+  NTH_TRACE_INTERNAL_DECLARE_API_IMPL(NTH_IGNORE_PARENTHESES(type),            \
+                                      member_function_names)
 
-#define NTH_DEBUG_INTERNAL_TRACE_DECLARE_API_TEMPLATE(type,                    \
-                                                      member_function_names)   \
-  NTH_DEBUG_INTERNAL_TRACE_DECLARE_API_IMPL(NTH_IGNORE_PARENTHESES(type),      \
-                                            member_function_names)
+#define NTH_TRACE_INTERNAL_DECLARE_API_TEMPLATE(type, member_function_names)   \
+  NTH_TRACE_INTERNAL_DECLARE_API_IMPL(NTH_IGNORE_PARENTHESES(type),            \
+                                      member_function_names)
 
-#define NTH_DEBUG_INTERNAL_TRACE_DECLARE_API_IMPL(t, member_function_names)    \
+#define NTH_TRACE_INTERNAL_DECLARE_API_IMPL(t, member_function_names)          \
   struct ::nth::debug::internal_trace::Api<t>                                  \
       : ::nth::debug::internal_trace::TracedValue<t> {                         \
    private:                                                                    \
@@ -89,7 +88,7 @@ requires(requires {
     using type                        = t;                                     \
     constexpr Api(auto f)                                                      \
         : ::nth::debug::internal_trace::TracedValue<type>(f) {}                \
-    NTH_DEBUG_INTERNAL_END(NTH_DEBUG_INTERNAL_EXPAND_A member_function_names)  \
+    NTH_TRACE_INTERNAL_END(NTH_TRACE_INTERNAL_EXPAND_A member_function_names)  \
   };                                                                           \
   NTH_REQUIRE_EXPANSION_IN_GLOBAL_NAMESPACE
 

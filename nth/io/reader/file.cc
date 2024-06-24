@@ -33,10 +33,10 @@ bool file_reader::read_at(cursor_type c, std::span<std::byte> buffer) const {
   auto original = cursor();
   [[maybe_unused]] off_t result =
       nth::sys::lseek(file_descriptor_, c, SEEK_SET);
-  NTH_REQUIRE((v.debug), result != off_t{-1});
+  NTH_REQUIRE((debug), result != off_t{-1});
   bool success = read_impl(file_descriptor_, buffer);
   result       = nth::sys::lseek(file_descriptor_, original, SEEK_SET);
-  NTH_REQUIRE((v.debug), result != off_t{-1});
+  NTH_REQUIRE((debug), result != off_t{-1});
   return success;
 }
 
@@ -51,13 +51,13 @@ bool file_reader::skip(size_t n) {
 size_t file_reader::size() const {
   struct ::stat buffer;
   [[maybe_unused]] int result = nth::sys::fstat(file_descriptor_, &buffer);
-  NTH_REQUIRE((v.debug), result == 0);
+  NTH_REQUIRE((debug), result == 0);
   return buffer.st_size;
 }
 
 typename file_reader::cursor_type file_reader::cursor() const {
   off_t result = nth::sys::lseek(file_descriptor_, 0, SEEK_CUR);
-  NTH_REQUIRE((v.debug), result != off_t{-1});
+  NTH_REQUIRE((debug), result != off_t{-1});
   return result;
 }
 

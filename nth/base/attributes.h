@@ -16,8 +16,13 @@
 
 #define NTH_SUPPORTS_ATTRIBUTE(attribute_name)                                 \
   NTH_CONCATENATE(NTH_BASE_ATTRIBUTES_INTERNAL_SUPPORTS_, attribute_name)
+
 #define NTH_ATTRIBUTE(attribute_name)                                          \
   NTH_CONCATENATE(NTH_BASE_ATTRIBUTES_INTERNAL_, attribute_name)
+
+#define NTH_ATTRIBUTE_TRY(attribute_name)                                      \
+  NTH_IF(NTH_SUPPORTS_ATTRIBUTE(attribute_name), NTH_ATTRIBUTE, NTH_IGNORE)    \
+  (attribute_name)
 
 // NTH_ATTRIBUTE(lifetimebound)
 // Defines an attribute consistent with the proposed wg21.link/p0936r0. When
@@ -83,6 +88,22 @@
 #else
 #define NTH_BASE_ATTRIBUTES_INTERNAL_SUPPORTS_inline_always false
 #define NTH_BASE_ATTRIBUTES_INTERNAL_inline_always                             \
+  static_assert(false, "The compiler does not support force-inlining");
+#endif
+
+// NTH_ATTRIBUTE(inline_never)
+// Defines an attribute indicating that the annotated function must not be
+// inlined by the compiler. Note that this attribute refers to how the compiler
+// generates executable code, not the `inline` attribute in C++.
+#if defined(__GNUC__) || defined(__clang__)
+#define NTH_BASE_ATTRIBUTES_INTERNAL_SUPPORTS_inline_never true
+#define NTH_BASE_ATTRIBUTES_INTERNAL_inline_never __attribute__((noinline))
+#elif defined(_MSC_VER) && !defined(__clang__)
+#define NTH_BASE_ATTRIBUTES_INTERNAL_SUPPORTS_inline_never true
+#define NTH_BASE_ATTRIBUTES_INTERNAL_inline_never __declspec(noinline)
+#else
+#define NTH_BASE_ATTRIBUTES_INTERNAL_SUPPORTS_inline_never false
+#define NTH_BASE_ATTRIBUTES_INTERNAL_inline_never                              \
   static_assert(false, "The compiler does not support force-inlining");
 #endif
 

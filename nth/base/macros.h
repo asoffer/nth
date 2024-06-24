@@ -110,6 +110,11 @@ struct NthRequireExpansionInGlobalNamespace {};
 #define NTH_INTERNAL_IS_PARENTHESIZED_PREFIXED_NTH_INTERNAL_IS_PARENTHESIZED_REMOVE \
   false,
 
+// NTH_IGNORE
+//
+// Expands to nothing.
+#define NTH_IGNORE(...)
+
 // NTH_IGNORE_PARENTHESES
 //
 // Expands either to its argument, if it is not parenthesesized, or to it

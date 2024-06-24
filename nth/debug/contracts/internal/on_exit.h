@@ -5,7 +5,7 @@
 #include "nth/debug/source_location.h"
 #include "nth/format/interpolate/string.h"
 
-namespace nth::debug::internal_contracts {
+namespace nth::internal_contracts {
 
 template <typename Fn>
 // Requires `Fn&&` is invocable with `source_location`. This requirement is not
@@ -13,7 +13,8 @@ template <typename Fn>
 // internal to this library, meaning that we can avoid unnecessary `#include`s
 // with no loss of user-visible safety.
 struct OnExit {
-  explicit constexpr OnExit(Fn f, source_location loc)
+  explicit constexpr OnExit(
+      Fn f, source_location loc = nth::source_location::current())
       : f_(static_cast<Fn &&>(f)), loc_(loc) {}
   OnExit(OnExit const &)            = delete;
   OnExit(OnExit &&)                 = delete;
@@ -29,6 +30,6 @@ struct OnExit {
 template <typename Fn>
 OnExit(Fn, source_location) -> OnExit<Fn>;
 
-}  // namespace nth::debug::internal_contracts
+}  // namespace nth::internal_contracts
 
 #endif  // NTH_DEBUG_CONTRACTS_INTERNAL_ON_EXIT_H

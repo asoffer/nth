@@ -109,7 +109,7 @@ bool buffered_writer<W>::flush() {
 
 template <nth::io::writer W>
 buffered_writer<W>::~buffered_writer() {
-  NTH_REQUIRE((v.harden), buffer_.get() == head_);
+  NTH_REQUIRE((harden), buffer_.get() == head_);
 }
 
 }  // namespace nth::io

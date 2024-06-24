@@ -140,7 +140,7 @@ template <typename... Args>
 flat_forest<T>::index_type flat_forest<T>::append_ancestor(
     index_type index,
     Args &&...args) requires std::constructible_from<T, Args...> {
-  NTH_REQUIRE((v.debug), IsValidCutpoint(index.index_));
+  NTH_REQUIRE((debug), IsValidCutpoint(index.index_));
   index_type return_index(nodes_.size());
   nodes_.emplace_back(nodes_.size() - index.index_ + 1,
                       std::forward<Args>(args)...);
@@ -459,7 +459,7 @@ flat_forest<T>::const_entry_type flat_forest<T>::centry(
 
 template <typename T>
 bool flat_forest<T>::IsValidCutpoint(size_t index) const {
-  NTH_REQUIRE((v.debug), not empty());
+  NTH_REQUIRE((debug), not empty());
   size_t loc = nodes_.size();
   while (loc > index) { loc -= nodes_[loc - 1].subtree_size_; }
   return loc == index;

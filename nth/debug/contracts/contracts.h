@@ -1,6 +1,8 @@
 #ifndef NTH_DEBUG_CONTRACTS_CONTRACTS_H
 #define NTH_DEBUG_CONTRACTS_CONTRACTS_H
 
+#include <string_view>
+
 #include "nth/debug/contracts/internal/contracts.h"
 #include "nth/debug/trace/trace.h"
 
@@ -10,7 +12,7 @@
 // `NTH_ENSURE` macros used for validating preconditions and postconditions
 // respectively.
 //
-// Details descriptions may be found below, but roughly speaking,
+// Detailed descriptions may be found below, but roughly speaking,
 // `NTH_REQUIRE(<expression>)` asserts that `<expression>`, when contextually
 // converted to `bool`, evaluates to `true`. Similarly,
 // `NTH_ENSURE(<expression>)` provides the same assertion but at the *end* of
@@ -43,8 +45,8 @@
 // Debug assertions are not free, and in many build environments prohibitively
 // expensive to turn on for production code. This library provides several
 // mechanisms to give users fine-grained control over when assertions should be
-// evaulated and what the cost of evaluation is, using the same verbosity hooks
-// as other libraries provided in "//nth/debug".
+// evaulated and what the cost of evaluation is, using the same verbosity paths
+// used for logging in the `//nth/log` library.
 //
 // On a best-effort basis, these macros attempt to peer into the contents of the
 // boolean expression so as to provide improved error messages regarding the
@@ -71,8 +73,7 @@
 // evaluates to `false`, a diagnostic is reported and program execution is
 // aborted. In either case, all registered expectation handlers are notified of
 // the result.
-#define NTH_REQUIRE(...) 
-// TODO: NTH_DEBUG_INTERNAL_REQUIRE(__VA_ARGS__)
+#define NTH_REQUIRE(...) NTH_INTERNAL_CONTRACTS_DO(REQUIRE, __VA_ARGS__)
 
 // `NTH_ENSURE`:
 //
@@ -81,7 +82,16 @@
 // proceeds with no visible side-effects. If the expression evaluates to
 // `false`, a diagnostic is reported and program execution is aborted. In either
 // case, all registered expectation handlers are notified of the result.
-#define NTH_ENSURE(...) 
-// TODO: NTH_DEBUG_INTERNAL_ENSURE(__VA_ARGS__)
+#define NTH_ENSURE(...) NTH_INTERNAL_CONTRACTS_DO(ENSURE, __VA_ARGS__)
+
+namespace nth {
+
+void contract_check_off(std::string_view glob);
+
+void contract_check_on(std::string_view glob);
+
+void contract_check_if(std::string_view glob);
+
+}  // namespace nth
 
 #endif  // NTH_DEBUG_CONTRACTS_CONTRACTS_H

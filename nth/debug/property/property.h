@@ -124,7 +124,7 @@ inline constexpr auto ElementsAreSequentially =
         [](auto const& value, auto const&... elements) {
           using std::begin;
           using std::end;
-          auto&& v    = nth::debug::EvaluateTraced(value);
+          auto&& v    = nth::traced_value(value);
           auto&& iter = begin(v);
           auto&& e    = end(v);
           return ((iter != e and nth::debug::Matches(elements, *iter++)) and

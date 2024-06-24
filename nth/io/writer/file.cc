@@ -23,7 +23,7 @@ std::optional<file_writer::cursor_type> file_writer::allocate(size_t) {
 
 file_writer::cursor_type file_writer::cursor() const {
   off_t result = nth::sys::lseek(file_descriptor_, 0, SEEK_CUR);
-  NTH_REQUIRE((v.debug), result != off_t{-1});
+  NTH_REQUIRE(result != off_t{-1});
   return result;
 }
 

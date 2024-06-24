@@ -2,6 +2,7 @@
 #define NTH_DEBUG_TRACE_TRACE_H
 
 #include "nth/base/attributes.h"
+#include "nth/base/macros.h"
 #include "nth/debug/trace/internal/trace.h"
 #include "nth/meta/compile_time_string.h"
 
@@ -20,16 +21,16 @@
 // `NTH_REQUIRE(a == b * c + d)` will be able to report the values of `a`, `d`,
 // and `b * c`, but it will not be able to decompose `b * c` into the values of
 // `b` and `c`. In order to improve debugging, users may wrap any value in a
-// call to `nth::Trace`. This takes a compile-time string template argument
+// call to `nth::trace`. This takes a compile-time string template argument
 // representing the name of the traced value, so typical usage would look like
-// `nth::Trace<"b">(b)`. Then, any expression using operators containing `b` as
+// `nth::trace<"b">(b)`. Then, any expression using operators containing `b` as
 // a sub-expression will have proper tracing enabled. One may also use the
 // `NTH_TRACE` macro to generate the compile-time string from the text of the
 // traced expression.
 //
 // Another limitation is that free functions and function templates cannot have
 // traced values passed into them. Thus `NTH_REQUIRE(std::max(a, b) == a)`
-// cannot provide improved tracing support by wrapping `b` in `nth::Trace`.
+// cannot provide improved tracing support by wrapping `b` in `nth::trace`.
 //
 // Member functions can support expression tracing provided the underlying
 // object is traced. Support for tracing is added via the
@@ -62,35 +63,53 @@
 //                                (operator[])(rfind)(size)(starts_with));
 // ```
 
-namespace nth::debug {
+namespace nth {
 
-// `Trace`:
-//
-// Returns an object representing the tracing of the evaluated
-// expression passed-in as `value`. The expression `value` must outlive the
-// return value.
+// // `trace`:
+// //
+// // Returns an object representing the tracing of the evaluated
+// // expression passed-in as `value`. The expression `value` must outlive the
+// // return value.
+// template <compile_time_string S, int &..., typename T>
+// constexpr auto trace(NTH_ATTRIBUTE(lifetimebound) T const &value) {
+//   return internal_trace::TracedExpr<internal_trace::IdentityAction<S>,
+//                                     T const &>(value);
+// }
+// 
+// // `traced_value`:
+// //
+// // Returns the value represented by the traced object.
+// constexpr decltype(auto) traced_value(auto const &value) {
+//   return internal_trace::traced_value(value);
+// }
+
+namespace {
+
 template <compile_time_string S, int &..., typename T>
-constexpr auto Trace(NTH_ATTRIBUTE(lifetimebound) T const &value) {
-  return internal_trace::TracedExpr<internal_trace::IdentityAction<S>,
-                                    T const &>(value);
+constexpr decltype(auto) trace(T const &value NTH_ATTRIBUTE(lifetimebound)) {
+  return internal_trace::traced_expression<T, 1>::template construct<
+      internal_trace::identity<S>>(value);
 }
 
-// `EvaluateTraced`:
+}  // namespace debug
+
+// `traced_value`:
 //
 // Returns the value represented by the traced object.
-constexpr decltype(auto) EvaluateTraced(auto const &value) {
-  return internal_trace::Evaluate(value);
+constexpr decltype(auto) traced_value(
+    auto const &value NTH_ATTRIBUTE(lifetimebound)) {
+  return nth::internal_trace::traced_value(value);
 }
 
-}  // namespace nth::debug
+}  // namespace nth
 
 // `NTH_TRACE`:
 //
 // A shorthand for expression tracing, where the compile-time string that would
-// be passed to `nth::Trace` is the stringification of the expression itself.
-// That is, rather than `nth::debug::Trace<"var">(var)`, one could
+// be passed to `nth::trace` is the stringification of the expression itself.
+// That is, rather than `nth::trace_value<"var">(var)`, one could
 // `NTH_TRACE(var)`.
-#define NTH_TRACE(expression) (::nth::debug::Trace<#expression>(expression))
+#define NTH_TRACE(expression) (expression)
 
 // `NTH_TRACE_DECLARE_API` and `NTH_TRACE_DECLARE_API_TEMPLATE`:
 //
@@ -107,8 +126,8 @@ constexpr decltype(auto) EvaluateTraced(auto const &value) {
 // ```
 //
 #define NTH_TRACE_DECLARE_API(type, member_function_names)                     \
-  NTH_DEBUG_INTERNAL_TRACE_DECLARE_API(type, member_function_names)
+  NTH_TRACE_INTERNAL_DECLARE_API(type, member_function_names)
 #define NTH_TRACE_DECLARE_API_TEMPLATE(type, member_function_names)            \
-  NTH_DEBUG_INTERNAL_TRACE_DECLARE_API_TEMPLATE(type, member_function_names)
+  NTH_TRACE_INTERNAL_DECLARE_API_TEMPLATE(type, member_function_names)
 
 #endif  // NTH_DEBUG_TRACE_TRACE_H

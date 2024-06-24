@@ -105,6 +105,7 @@ cc_test(
     name = "test_test",
     srcs = ["test_test.cc"],
     deps = [
-        ":test"
+        ":test",
+        "//nth/test/raw:test",
     ],
 )

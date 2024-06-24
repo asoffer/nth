@@ -25,7 +25,7 @@ int TerminalWidth() {
 }
 
 struct ExpectationResultHolder {
-  void add(nth::debug::ExpectationResult const& result) {
+  void add(nth::expectation_result const& result) {
     auto& counter = result.success() ? success_count_ : failure_count_;
     absl::MutexLock lock(&mutex_);
     results_.push_back(result);
@@ -38,7 +38,7 @@ struct ExpectationResultHolder {
 
  private:
   mutable absl::Mutex mutex_;
-  std::vector<nth::debug::ExpectationResult> results_;
+  std::vector<nth::expectation_result> results_;
   int32_t success_count_ = 0;
   int32_t failure_count_ = 0;
 };
@@ -119,8 +119,8 @@ size_t DigitCount(size_t n) {
 
 int main() {
   size_t width = TerminalWidth();
-  nth::debug::RegisterExpectationResultHandler(
-      [](nth::debug::ExpectationResult const& result) {
+  nth::register_expectation_result_handler(
+      [](nth::expectation_result const& result) {
         expectation_results->add(result);
       });
   nth::test::RegisterBenchmarkResultHandler(

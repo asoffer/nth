@@ -18,7 +18,6 @@ cc_library(
         ":voidifier",
         "//nth/base:macros",
         "//nth/base:section",
-        "//nth/configuration:verbosity",
         "//nth/debug/log:line",
         "//nth/debug/log:entry",
         "//nth/debug:source_location",

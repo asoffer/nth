@@ -16,8 +16,9 @@
 #define NTH_RTTI_ENABLED 1
 #endif
 
-// `NTH_BUILD_MODE` is a function-like macro that expands to either `1` or `0`,
-// to indicate that a particular build mode is specified. Build modes can be
+// `NTH_BUILD_MODE` is a function-like macro that expands to either `true` or
+// `false`, to indicate that a particular build mode is specified. Build modes
+// can be
 //
 // `optimize`: Indicates that runtime execution speed is the primary concern.
 //             Other potential priorities such as debuggability or safety are
@@ -48,6 +49,11 @@
 #if not defined(NTH_COMMANDLINE_BUILD_MODE)
 #define NTH_COMMANDLINE_BUILD_MODE fast
 #endif  // not defined(NTH_COMMANDLINE_BUILD_MODE)
+
+#define NTH_INTERNAL_BUILD_MODE_optimize false
+#define NTH_INTERNAL_BUILD_MODE_harden false
+#define NTH_INTERNAL_BUILD_MODE_debug false
+#define NTH_INTERNAL_BUILD_MODE_fast true
 
 namespace nth {
 namespace internal_configuration {

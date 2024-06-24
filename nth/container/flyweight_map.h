@@ -103,22 +103,22 @@ struct flyweight_map {
   // Returns a reference to the first inserted object. Behavior is undefiend if
   // the container is empty.
   const_reference front() const {
-    NTH_REQUIRE((v.harden), not empty());
+    NTH_REQUIRE((harden), not empty());
     return values_.front();
   }
   reference front() {
-    NTH_REQUIRE((v.harden), not empty());
+    NTH_REQUIRE((harden), not empty());
     return values_.front();
   }
 
   // Returns a reference to the most recently inserted object. Behavior is
   // undefined if the container is empty.
   const_reference back() const {
-    NTH_REQUIRE((v.harden), not empty());
+    NTH_REQUIRE((harden), not empty());
     return values_.back();
   }
   reference back() {
-    NTH_REQUIRE((v.harden), not empty());
+    NTH_REQUIRE((harden), not empty());
     return values_.back();
   }
 
@@ -166,11 +166,11 @@ struct flyweight_map {
   // Returns a reference to the element indexed by `n` if one exists. Behavior
   // is undefined if no such element exists.
   value_type const& from_index(size_t n) const {
-    NTH_REQUIRE((v.harden), n < size());
+    NTH_REQUIRE((harden), n < size());
     return values_[n];
   }
   value_type& from_index(size_t n) {
-    NTH_REQUIRE((v.harden), n < size());
+    NTH_REQUIRE((harden), n < size());
     return values_[n];
   }
 

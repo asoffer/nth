@@ -49,9 +49,23 @@ cc_library(
     name = "trace",
     hdrs = ["trace.h"],
     deps = [
-        ":actions",
-        ":api",
-        ":implementation",
+        "//nth/base:attributes",
+        "//nth/base:core",
+        "//nth/hash:fnv1a",
+        "//nth/meta:compile_time_string",
+        "//nth/meta/concepts:core",
+        "//nth/meta/concepts:invocable",
+        "//nth/memory:address",
+    ],
+)
+
+cc_test(
+    name = "trace_test",
+    srcs = ["trace_test.cc"],
+    deps = [
+        ":trace",
+        "//nth/memory:address",
+        "//nth/test/raw:test",
     ],
 )
 

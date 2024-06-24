@@ -9,9 +9,9 @@
 namespace nth {
 
 // A `stable_container<T>` is a container that can hold elements of type `T`, in
-// such a way that all each object inserted is given a stable address in memory
-// that will never change for as long as that object resides in the container.
-// The address is guaranteed to be stable even if the container is moved. If two
+// such a way that each object inserted is given a stable address in memory that
+// will never change for as long as that object resides in the container. The
+// address is guaranteed to be stable even if the container is moved. If two
 // objects are inserted that compare equal, two insertions will occur and each
 // object will be placed in a separate location. There are no guarantees on the
 // ordering of elements or their relative addresses, or even that addresses are
