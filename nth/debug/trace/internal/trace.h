@@ -195,7 +195,7 @@ struct traced_expression : traced_value_holder<T> {
   std::string_view name_;
   traced_expression_base const *dependents_[DependentCount];
 
-  static void erased_write(tree_writer &w, traced_expression_base const &) {}
+  static void erased_write(tree_writer &, traced_expression_base const &) {}
 };
 
 template <std::derived_from<traced_expression_base> T>

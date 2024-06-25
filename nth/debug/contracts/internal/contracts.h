@@ -8,7 +8,6 @@
 #include "nth/debug/contracts/internal/enabler.h"
 #include "nth/debug/contracts/internal/macros.h"
 #include "nth/debug/contracts/internal/on_exit.h"
-#include "nth/debug/contracts/internal/responder.h"
 #include "nth/debug/trace/internal/trace.h"
 
 #define NTH_INTERNAL_CONTRACTS_CHECK(name, verbosity_path, ...)                \

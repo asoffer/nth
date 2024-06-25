@@ -8,7 +8,6 @@
 #include "nth/base/macros.h"
 #include "nth/debug/contracts/contracts.h"
 #include "nth/debug/property/property.h"
-#include "nth/debug/trace/internal/implementation.h"
 #include "nth/test/arguments.h"
 #include "nth/test/fakeable_function.h"
 #include "nth/test/fuzz.h"

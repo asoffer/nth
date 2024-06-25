@@ -33,8 +33,8 @@ cc_library(
         ":enabler",
         ":macros",
         ":on_exit",
-        ":responder",
         "//nth/debug/log",
+        "//nth/debug:expectation_result",
         "//nth/debug/trace/internal:trace",
         "//nth/format",
         "//nth/format/interpolate",
@@ -57,20 +57,5 @@ cc_library(
     deps = [
         "//nth/debug/log",
         "//nth/debug:source_location",
-    ],
-)
-
-cc_library(
-    name = "responder",
-    hdrs = ["responder.h"],
-    srcs = ["responder.cc"],
-    deps = [
-        "//nth/configuration:trace",
-        "//nth/debug/log",
-        "//nth/debug:expectation_result",
-        "//nth/debug/property/internal:concepts",
-        "//nth/debug/property/internal:implementation",
-        "//nth/debug/trace/internal:implementation",
-        "@abseil-cpp//absl/synchronization",
     ],
 )

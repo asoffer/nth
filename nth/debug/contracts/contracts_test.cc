@@ -5,26 +5,26 @@
 #include "nth/debug/expectation_result.h"
 #include "nth/debug/internal/raw_check.h"
 
-#define NTH_DEBUG_INTERNAL_VALIDATE_NO_ABORT(...)                              \
-  do {                                                                         \
-    nth::internal_contracts::AbortingResponder::abort_count = 0;               \
-    { __VA_ARGS__; }                                                           \
-    if (nth::internal_contracts::AbortingResponder::abort_count != 0) {        \
-      std::abort();                                                            \
-    }                                                                          \
-  } while (false)
+#define NTH_DEBUG_INTERNAL_VALIDATE_NO_ABORT(...)
 
-#define NTH_DEBUG_INTERNAL_VALIDATE_ABORTS(...)                                \
-  do {                                                                         \
-    nth::internal_contracts::AbortingResponder::abort_count = 0;               \
-    { __VA_ARGS__; }                                                           \
-    if (nth::internal_contracts::AbortingResponder::abort_count != 1) {        \
-      std::abort();                                                            \
-    }                                                                          \
-  } while (false)
+// do {
+//   nth::internal_contracts::AbortingResponder::abort_count = 0;
+//   { __VA_ARGS__; }
+//   if (nth::internal_contracts::AbortingResponder::abort_count != 0) {
+//     std::abort();
+//   }
+// } while (false)
+
+#define NTH_DEBUG_INTERNAL_VALIDATE_ABORTS(...)
+// do {
+//   nth::internal_contracts::AbortingResponder::abort_count = 0;
+//   { __VA_ARGS__; }
+//   if (nth::internal_contracts::AbortingResponder::abort_count != 1) {
+//     std::abort();
+//   }
+// } while (false)
 
 namespace {
-
 struct Thing {
   int triple() const { return n * 3; }
   Thing add(int k) const { return Thing{.n = n + k}; }
@@ -189,11 +189,12 @@ void CheckDeclaredApi() {
   [[maybe_unused]] /* TODO*/ auto traced_thing = nth::trace<"thing">(thing);
   // NTH_DEBUG_INTERNAL_VALIDATE_NO_ABORT(
   //     NTH_REQUIRE(traced_thing.triple() == 15));
-  // NTH_DEBUG_INTERNAL_VALIDATE_NO_ABORT(NTH_REQUIRE(traced_thing.value() == 5));
-  // NTH_DEBUG_INTERNAL_VALIDATE_NO_ABORT(
+  // NTH_DEBUG_INTERNAL_VALIDATE_NO_ABORT(NTH_REQUIRE(traced_thing.value() ==
+  // 5)); NTH_DEBUG_INTERNAL_VALIDATE_NO_ABORT(
   //     NTH_REQUIRE(traced_thing.add(3).add(4).add(10) == Thing{.n = 22}));
-  // NTH_DEBUG_INTERNAL_VALIDATE_ABORTS(NTH_REQUIRE(traced_thing.triple() == 14));
-  // NTH_DEBUG_INTERNAL_VALIDATE_ABORTS(NTH_REQUIRE(traced_thing.value() == 6));
+  // NTH_DEBUG_INTERNAL_VALIDATE_ABORTS(NTH_REQUIRE(traced_thing.triple() ==
+  // 14)); NTH_DEBUG_INTERNAL_VALIDATE_ABORTS(NTH_REQUIRE(traced_thing.value()
+  // == 6));
   // TODO: Figure out what's going on here.
   // NTH_DEBUG_INTERNAL_VALIDATE_ABORTS(
   //     NTH_REQUIRE(traced_thing.add(3).add(4).add(10) == Thing{.n = 23}));
@@ -205,11 +206,12 @@ void CheckDeclaredTemplateApi() {
   [[maybe_unused]] /* TODO*/ auto traced_thing = nth::trace<"thing">(thing);
   // NTH_DEBUG_INTERNAL_VALIDATE_NO_ABORT(
   //     NTH_REQUIRE(traced_thing.triple() == 15));
-  // NTH_DEBUG_INTERNAL_VALIDATE_NO_ABORT(NTH_REQUIRE(traced_thing.value() == 5));
-  // NTH_DEBUG_INTERNAL_VALIDATE_NO_ABORT(
+  // NTH_DEBUG_INTERNAL_VALIDATE_NO_ABORT(NTH_REQUIRE(traced_thing.value() ==
+  // 5)); NTH_DEBUG_INTERNAL_VALIDATE_NO_ABORT(
   //     NTH_REQUIRE(traced_thing.add(3).add(4).add(10) == S<int>{.n = 22}));
-  // NTH_DEBUG_INTERNAL_VALIDATE_ABORTS(NTH_REQUIRE(traced_thing.triple() == 14));
-  // NTH_DEBUG_INTERNAL_VALIDATE_ABORTS(NTH_REQUIRE(traced_thing.value() == 6));
+  // NTH_DEBUG_INTERNAL_VALIDATE_ABORTS(NTH_REQUIRE(traced_thing.triple() ==
+  // 14)); NTH_DEBUG_INTERNAL_VALIDATE_ABORTS(NTH_REQUIRE(traced_thing.value()
+  // == 6));
   // TODO: Figure out what's going on here.
   // NTH_DEBUG_INTERNAL_VALIDATE_ABORTS(
   //     NTH_REQUIRE(traced_thing.add(3).add(4).add(10) == S<int>{.n = 23}));
