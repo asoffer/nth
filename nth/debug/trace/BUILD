@@ -10,3 +10,16 @@ cc_library(
         "//nth/meta:compile_time_string",
     ],
 )
+
+cc_test(
+    name = "trace_test",
+    srcs = ["trace_test.cc"],
+    deps = [
+        ":trace",
+        "//nth/memory:address",
+        "//nth/test/raw:test",
+        "//nth/debug/log",
+        "//nth/debug/log:sink",
+        "//nth/debug/log:stderr_log_sink",
+    ],
+)

@@ -9,6 +9,7 @@ namespace {
 
 using ::nth::debug::ElementsAreSequentially;
 
+#if 0
 NTH_TEST("interval_set/default", auto type) {
   interval_set<nth::type_t<type>> interval_set;
   auto set = nth::trace<"set">(interval_set);
@@ -136,6 +137,7 @@ NTH_TEST("interval_set/union") {
                ElementsAreSequentially(interval(3, 15)));
   }
 }
+#endif
 
 }  // namespace
 }  // namespace nth

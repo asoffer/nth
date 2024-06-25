@@ -3,15 +3,50 @@
 
 #include "nth/base/attributes.h"
 #include "nth/base/core.h"
+#include "nth/debug/property/internal/concepts.h"
+#include "nth/format/format.h"
+#include "nth/format/interpolate/interpolate.h"
 #include "nth/hash/fnv1a.h"
+#include "nth/io/writer/writer.h"
 #include "nth/memory/address.h"
+#include "nth/memory/bytes.h"
 #include "nth/meta/compile_time_string.h"
+#include "nth/meta/concepts/c_array.h"
 #include "nth/meta/concepts/core.h"
 #include "nth/meta/concepts/invocable.h"
 
 namespace nth::internal_trace {
 
-struct alignas(2) traced_expression_base {
+struct tree_writer {
+  struct write_result_type {
+    constexpr write_result_type(size_t n) : written_(n) {}
+    constexpr size_t written() const { return written_; };
+
+   private:
+    size_t written_;
+  };
+
+  write_result_type write(std::span<std::byte const> bytes) {
+    return write_result_type(bytes.size());
+  }
+
+  constexpr void increase_depth() { ++depth_; }
+  constexpr void decrease_depth() { --depth_; }
+  [[nodiscard]] constexpr size_t depth() const { return depth_; }
+
+ private:
+  size_t depth_ = 0;
+};
+
+struct traced_expression_base;
+
+struct traversal_vtable {
+  void (*write)(tree_writer &, traced_expression_base const &);
+};
+
+struct traced_expression_base {
+  traced_expression_base(traversal_vtable vtable) : vtable_(vtable) {}
+
  protected:
   static traced_expression_base const *set_low_bit(
       traced_expression_base const *ptr) {
@@ -23,39 +58,56 @@ struct alignas(2) traced_expression_base {
     return reinterpret_cast<traced_expression_base const *>(
         reinterpret_cast<uintptr_t>(ptr) | uintptr_t{1});
   }
+
+ private:
+  traversal_vtable vtable_;
 };
 
-template <typename>
-struct traced_value_holder;
-
-template <typename T, typename Original = T>
+template <typename T>
 struct traced_members : traced_expression_base {
-  using value_type = Original;
+  constexpr traced_members(traversal_vtable vtable)
+      : traced_expression_base(vtable) {}
+
+  using NthTraceInternalValueType = T;
 };
 
-template <typename T, typename U>
-struct traced_members<T &, U> : traced_members<T, U> {};
+template <typename T>
+struct traced_members<T &> : traced_members<T> {
+  constexpr traced_members(traversal_vtable vtable)
+      : traced_members<T>(vtable) {}
+};
 
-template <typename T, typename U>
-struct traced_members<T const, U> : traced_members<T, U> {};
-
-template <typename T, typename U>
-U const &get_value(traced_members<T, U> const &t) {
-  return static_cast<U const &>(static_cast<traced_value_holder<U> const &>(t));
-}
-
+template <typename T>
+struct traced_members<T const> : traced_members<T> {
+  constexpr traced_members(traversal_vtable vtable)
+      : traced_members<T>(vtable) {}
+};
 
 template <typename T>
 struct traced_value_holder : traced_members<T> {
   traced_value_holder(traced_value_holder const &) = delete;
   traced_value_holder(traced_value_holder &&)      = delete;
 
+  using nth_format_spec = nth::trivial_format_spec;
+
+  friend constexpr auto NthDefaultFormatSpec(
+      nth::type_tag<traced_value_holder>) {
+    return nth::trivial_format_spec{};
+  }
+
+  friend void NthFormat(io::forward_writer auto &w,
+                        format_spec<traced_value_holder>,
+                        traced_value_holder const &t) {
+    nth::interpolate(w, nth::interpolation_spec::from<"{}">(), t.value_);
+  }
+
   constexpr operator T const &() const NTH_ATTRIBUTE(lifetimebound) {
     return value_;
   }
 
   template <typename F>
-  explicit constexpr traced_value_holder(F &&f) : value_(NTH_FWD(f)()) {}
+  explicit constexpr traced_value_holder(traversal_vtable vtable, F &&f)
+      : traced_members<T>(vtable), value_(NTH_FWD(f)()) {}
 
   T value_;
 };
@@ -65,16 +117,39 @@ struct traced_value_holder<T &> : traced_members<T &> {
   traced_value_holder(traced_value_holder const &) = delete;
   traced_value_holder(traced_value_holder &&)      = delete;
 
+  using nth_format_spec = nth::trivial_format_spec;
+
+  friend constexpr auto NthDefaultFormatSpec(
+      nth::type_tag<traced_value_holder>) {
+    return nth::trivial_format_spec{};
+  }
+
+  friend constexpr auto NthFormatSpec(nth::interpolation_string_view,
+                                      nth::type_tag<traced_value_holder>) {
+    return nth::trivial_format_spec{};
+  }
+
+  friend void NthFormat(io::forward_writer auto &w,
+                        format_spec<traced_value_holder>,
+                        traced_value_holder const &t) {
+    nth::interpolate(w, nth::interpolation_spec::from<"{}">(), *t.value_);
+  }
+
   constexpr operator T const &() const NTH_ATTRIBUTE(lifetimebound) {
     return *value_;
   }
 
-  explicit constexpr traced_value_holder(T &value)
-      : value_(nth::address(value)) {}
+  explicit constexpr traced_value_holder(traversal_vtable vtable, T &value)
+      : traced_members<T>(vtable), value_(nth::address(value)) {}
 
  protected:
   T *value_;
 };
+
+template <typename T>
+T const &get_value(traced_members<T> const &t) {
+  return static_cast<T const &>(static_cast<traced_value_holder<T> const &>(t));
+}
 
 template <typename T, int DependentCount>
 struct traced_expression : traced_value_holder<T> {
@@ -83,34 +158,48 @@ struct traced_expression : traced_value_holder<T> {
       auto const &...arguments NTH_ATTRIBUTE(
           lifetimebound)) requires(sizeof...(arguments) == DependentCount) {
     return traced_expression(
-        [&] { return Op::invoke(arguments...); },
+        [&] { return Op::invoke(arguments...); }, Op::name,
         traced_expression_base::set_low_bit(nth::address(arguments))...);
+  }
+
+  using nth_format_spec = nth::trivial_format_spec;
+
+  friend constexpr auto NthDefaultFormatSpec(nth::type_tag<traced_expression>) {
+    return nth::trivial_format_spec{};
+  }
+
+  friend constexpr auto NthFormatSpec(nth::interpolation_string_view,
+                                      nth::type_tag<traced_expression>) {
+    return nth::trivial_format_spec{};
+  }
+
+  friend void NthFormat(tree_writer &w, format_spec<traced_expression> spec,
+                        traced_expression const &t) {
+    w.write(nth::byte_range(t.name_));
+    NthFormat(w, spec, static_cast<traced_value_holder<T> const &>(t));
+    w.increase_depth();
+    for (int i = 0; i < DependentCount; ++i) {
+      NthFormat(w, spec, t.dependents_[i]);
+    }
+    w.decrease_depth();
   }
 
  private:
   template <typename F>
-  explicit constexpr traced_expression(F &&f, auto const *...ptrs)
-      : traced_value_holder<T>(NTH_FWD(f)), dependents_{ptrs...} {}
+  explicit constexpr traced_expression(F &&f, std::string_view name,
+                                       auto const *...ptrs)
+      : traced_value_holder<T>({.write = erased_write}, NTH_FWD(f)),
+        name_(name),
+        dependents_{ptrs...} {}
 
+  std::string_view name_;
   traced_expression_base const *dependents_[DependentCount];
-};
 
-template <typename T>
-struct traced_expression<T, 0> : traced_value_holder<T> {
-  template <typename Op>
-  static constexpr traced_expression construct() {
-    return traced_expression(Op::invoke());
-  }
-
- private:
-  explicit constexpr traced_expression(T const &value)
-      : traced_value_holder<T>(value) {}
-  explicit constexpr traced_expression(T &&value)
-      : traced_value_holder<T>(NTH_MOVE(value)) {}
+  static void erased_write(tree_writer &w, traced_expression_base const &) {}
 };
 
 template <std::derived_from<traced_expression_base> T>
-typename T::value_type const &traced_value(
+typename T::NthTraceInternalValueType const &traced_value(
     T const &value NTH_ATTRIBUTE(lifetimebound)) {
   return value;
 }
@@ -127,7 +216,7 @@ using underlying_type =
 
 template <compile_time_string S>
 struct identity {
-  static constexpr char name[] = S;
+  static constexpr std::string_view name = S;
   template <typename T>
   static constexpr T const &invoke(T const &v NTH_ATTRIBUTE(lifetimebound)) {
     return v;
@@ -135,6 +224,47 @@ struct identity {
   template <typename T>
   using invoke_type = T const &;
 };
+
+struct injector {};
+
+#define NTH_TRACE_INTERNAL_INJECTED_EXPRESSION(...)                            \
+  (::nth::debug::internal_trace::TraceInjector{}                               \
+       ->*__VA_ARGS__->*::nth::debug::internal_trace::TraceInjector{})
+
+template <typename T>
+concept traced_impl =
+    std::derived_from<T, nth::internal_trace::traced_expression_base>;
+
+template <typename T>
+constexpr decltype(auto) operator->*(injector, T const &value) {
+  if constexpr (traced_impl<T>) {
+    return value;
+  } else {
+    if constexpr (nth::c_array<T>) {
+      return traced_expression<decltype(value),
+                               1>::template construct<identity<"">>(value);
+    } else {
+      return traced_expression<T const &, 1>::template construct<identity<"">>(
+          value);
+    }
+  }
+}
+
+template <typename T>
+constexpr decltype(auto) operator->*(T const &value, injector) {
+  if constexpr (nth::debug::internal_property::PropertyType<T> or
+                traced_impl<T>) {
+    return value;
+  } else {
+    if constexpr (nth::c_array<T>) {
+      return traced_expression<decltype(value),
+                               1>::template construct<identity<"">>(value);
+    } else {
+      return traced_expression<T const &, 1>::template construct<identity<"">>(
+          value);
+    }
+  }
+}
 
 #define NTH_TRACE_INTERNAL_DEFINE_TRACED_BINARY_OPERATOR(Op, op)               \
   struct Op {                                                                  \
@@ -237,7 +367,8 @@ NTH_TRACE_INTERNAL_DEFINE_TRACED_UNARY_OPERATOR(Ref, *)
   constexpr auto memfn(NthTypes const &...ts) const {                          \
     return traced_expression<                                                  \
         typename implementation<::nth::fnv1a(#memfn)>::template invoke_type<   \
-            value_type, nth::internal_trace::underlying_type<NthTypes>...>,    \
+            NthTraceInternalValueType,                                         \
+            nth::internal_trace::underlying_type<NthTypes>...>,                \
         1 + sizeof...(ts)>::                                                   \
         template construct<implementation<nth::fnv1a(#memfn)>>(                \
             ::nth::internal_trace::get_value(*this), ts...);                   \
@@ -253,6 +384,7 @@ NTH_TRACE_INTERNAL_DEFINE_TRACED_UNARY_OPERATOR(Ref, *)
 #define NTH_TRACE_INTERNAL_END_IMPL(...) __VA_ARGS__##_END
 
 #define NTH_TRACE_INTERNAL_DECLARE_API(type, member_function_names)            \
+  template <>                                                                  \
   NTH_TRACE_INTERNAL_DECLARE_API_IMPL(NTH_IGNORE_PARENTHESES(type),            \
                                       member_function_names)
 
@@ -261,16 +393,12 @@ NTH_TRACE_INTERNAL_DEFINE_TRACED_UNARY_OPERATOR(Ref, *)
                                       member_function_names)
 
 #define NTH_TRACE_INTERNAL_DECLARE_API_IMPL(t, member_function_names)          \
-  template <typename NthInternalTemplateParameter>                             \
-  struct ::nth::internal_trace::traced_members<t,                              \
-                                               NthInternalTemplateParameter>   \
-      : traced_expression_base {                                               \
-    using value_type = t;                                                      \
+  struct ::nth::internal_trace::traced_members<t> : traced_expression_base {   \
+    using NthTraceInternalValueType = t;                                       \
                                                                                \
    private:                                                                    \
     template <uint64_t>                                                        \
     struct implementation;                                                     \
-    using NthValueType = t;                                                    \
                                                                                \
    public:                                                                     \
     NTH_TRACE_INTERNAL_END(NTH_TRACE_INTERNAL_EXPAND_A member_function_names)  \

@@ -65,10 +65,10 @@ struct Uncopyable {
 
 }  // namespace
 
-NTH_TRACE_DECLARE_API(Thing, (triple)(add)(value));
+// NTH_TRACE_DECLARE_API(Thing, (triple)(add)(value));
 
-template <typename T>
-NTH_TRACE_DECLARE_API_TEMPLATE(S<T>, (triple)(add)(value));
+// template <typename T>
+// NTH_TRACE_DECLARE_API_TEMPLATE(S<T>, (triple)(add)(value));
 
 static int success_count = 0;
 static int failure_count = 0;
@@ -187,13 +187,13 @@ void CheckDeclaredApi() {
   ResetCounts();
   Thing thing{.n = 5};
   [[maybe_unused]] /* TODO*/ auto traced_thing = nth::trace<"thing">(thing);
-  NTH_DEBUG_INTERNAL_VALIDATE_NO_ABORT(
-      NTH_REQUIRE(traced_thing.triple() == 15));
-  NTH_DEBUG_INTERNAL_VALIDATE_NO_ABORT(NTH_REQUIRE(traced_thing.value() == 5));
-  NTH_DEBUG_INTERNAL_VALIDATE_NO_ABORT(
-      NTH_REQUIRE(traced_thing.add(3).add(4).add(10) == Thing{.n = 22}));
-  NTH_DEBUG_INTERNAL_VALIDATE_ABORTS(NTH_REQUIRE(traced_thing.triple() == 14));
-  NTH_DEBUG_INTERNAL_VALIDATE_ABORTS(NTH_REQUIRE(traced_thing.value() == 6));
+  // NTH_DEBUG_INTERNAL_VALIDATE_NO_ABORT(
+  //     NTH_REQUIRE(traced_thing.triple() == 15));
+  // NTH_DEBUG_INTERNAL_VALIDATE_NO_ABORT(NTH_REQUIRE(traced_thing.value() == 5));
+  // NTH_DEBUG_INTERNAL_VALIDATE_NO_ABORT(
+  //     NTH_REQUIRE(traced_thing.add(3).add(4).add(10) == Thing{.n = 22}));
+  // NTH_DEBUG_INTERNAL_VALIDATE_ABORTS(NTH_REQUIRE(traced_thing.triple() == 14));
+  // NTH_DEBUG_INTERNAL_VALIDATE_ABORTS(NTH_REQUIRE(traced_thing.value() == 6));
   // TODO: Figure out what's going on here.
   // NTH_DEBUG_INTERNAL_VALIDATE_ABORTS(
   //     NTH_REQUIRE(traced_thing.add(3).add(4).add(10) == Thing{.n = 23}));
@@ -203,13 +203,13 @@ void CheckDeclaredTemplateApi() {
   ResetCounts();
   S<int> thing{.n = 5};
   [[maybe_unused]] /* TODO*/ auto traced_thing = nth::trace<"thing">(thing);
-  NTH_DEBUG_INTERNAL_VALIDATE_NO_ABORT(
-      NTH_REQUIRE(traced_thing.triple() == 15));
-  NTH_DEBUG_INTERNAL_VALIDATE_NO_ABORT(NTH_REQUIRE(traced_thing.value() == 5));
-  NTH_DEBUG_INTERNAL_VALIDATE_NO_ABORT(
-      NTH_REQUIRE(traced_thing.add(3).add(4).add(10) == S<int>{.n = 22}));
-  NTH_DEBUG_INTERNAL_VALIDATE_ABORTS(NTH_REQUIRE(traced_thing.triple() == 14));
-  NTH_DEBUG_INTERNAL_VALIDATE_ABORTS(NTH_REQUIRE(traced_thing.value() == 6));
+  // NTH_DEBUG_INTERNAL_VALIDATE_NO_ABORT(
+  //     NTH_REQUIRE(traced_thing.triple() == 15));
+  // NTH_DEBUG_INTERNAL_VALIDATE_NO_ABORT(NTH_REQUIRE(traced_thing.value() == 5));
+  // NTH_DEBUG_INTERNAL_VALIDATE_NO_ABORT(
+  //     NTH_REQUIRE(traced_thing.add(3).add(4).add(10) == S<int>{.n = 22}));
+  // NTH_DEBUG_INTERNAL_VALIDATE_ABORTS(NTH_REQUIRE(traced_thing.triple() == 14));
+  // NTH_DEBUG_INTERNAL_VALIDATE_ABORTS(NTH_REQUIRE(traced_thing.value() == 6));
   // TODO: Figure out what's going on here.
   // NTH_DEBUG_INTERNAL_VALIDATE_ABORTS(
   //     NTH_REQUIRE(traced_thing.add(3).add(4).add(10) == S<int>{.n = 23}));

@@ -35,7 +35,7 @@ cc_library(
         ":on_exit",
         ":responder",
         "//nth/debug/log",
-        "//nth/debug/trace/internal:injector",
+        "//nth/debug/trace/internal:trace",
         "//nth/format",
         "//nth/format/interpolate",
         "//nth/io/writer",

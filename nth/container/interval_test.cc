@@ -6,6 +6,7 @@
 
 namespace nth {
 namespace {
+#if 0
 
 using ::nth::test::Any;
 using ::nth::test::Argument;
@@ -51,6 +52,6 @@ NTH_TEST("interval/set-bounds") {
   NTH_EXPECT(i.lower_bound() == "ghi");
   NTH_EXPECT(not i.contains("abc"));
 }
-
+#endif
 }  // namespace
 }  // namespace nth

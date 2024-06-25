@@ -33,7 +33,6 @@ cc_library(
       ":arguments",
       ":invocation",
       "//nth/base:macros",
-      "//nth/debug/trace/internal:implementation",
       "//nth/meta:stateful",
       "//nth/strings:glob",
       "//nth/registration:static",

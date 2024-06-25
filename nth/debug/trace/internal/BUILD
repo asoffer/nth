@@ -13,25 +13,6 @@ cc_library(
 )
 
 cc_library(
-    name = "api",
-    hdrs = ["api.h"],
-    deps = [
-        ":implementation",
-        "//nth/hash:fnv1a",
-    ],
-)
-
-cc_library(
-    name = "injector",
-    hdrs = ["injector.h"],
-    deps = [
-        ":actions",
-        ":implementation",
-        "//nth/meta/concepts:c_array",
-    ],
-)
-
-cc_library(
     name = "implementation",
     hdrs = ["implementation.h"],
     deps = [
@@ -51,21 +32,17 @@ cc_library(
     deps = [
         "//nth/base:attributes",
         "//nth/base:core",
+        "//nth/debug/property/internal:concepts",
+        "//nth/format",
+        "//nth/format/interpolate",
         "//nth/hash:fnv1a",
+        "//nth/io/writer",
         "//nth/meta:compile_time_string",
+        "//nth/meta/concepts:c_array",
         "//nth/meta/concepts:core",
         "//nth/meta/concepts:invocable",
         "//nth/memory:address",
-    ],
-)
-
-cc_test(
-    name = "trace_test",
-    srcs = ["trace_test.cc"],
-    deps = [
-        ":trace",
-        "//nth/memory:address",
-        "//nth/test/raw:test",
+        "//nth/memory:bytes",
     ],
 )
 

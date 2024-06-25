@@ -34,64 +34,38 @@
 //
 // Member functions can support expression tracing provided the underlying
 // object is traced. Support for tracing is added via the
-// `NTH_TRACE_DECLARE_API` macro. This macro takes two arguments. The first
-// argument is the name of the type to which you wish to add tracing support.
-// The second argument is a parenthetical list (of the form "(a)(b)(c)") of the
-// names of all const member functions. It is okay if a member function is part
-// of an overload set consisting of both const and non-const overloads; only the
-// const overloads will be traced. It is not possible to add tracing support for
-// some but not all of the const members of an overload set.
+// `NTH_TRACE_DECLARE_API` macro. This macro must be added somewhere in the body
+// of your struct/class (or struct/class template). It accepts a single argument
+// that is a parenthetical list (of the form "(a)(b)(c)") of the names of all
+// const member functions. It is okay if a member function is part of an
+// overload set consisting of both const and non-const overloads; only the const
+// overloads will be traced. It is not possible to add tracing support for some
+// but not all of the const members of an overload set.
 //
-// For example,
+// For example, one could add into the body of `std::string`:
 // ```
-// NTH_TRACE_DECLARE_API(std::string,
-//                       (at)(back)(c_str)(capacity)(compare)(data)(ends_with)
-//                       (find)(find_first_not_of)(find_first_of)
-//                       (find_last_not_of)(find_last_of)(front)(length)
-//                       (max_size)(operator[])(rfind)(size)(starts_with));
+// template <typename CharType, typename AllocatorType>
+// class basic_string {
+//   NTH_TRACE_DECLARE_API((at)(back)(c_str)(capacity)(compare)(data)(ends_with)
+//                         (find)(find_first_not_of)(find_first_of)
+//                         (find_last_not_of)(find_last_of)(front)(length)
+//                         (max_size)(operator[])(rfind)(size)(starts_with));
+//   ...
+// };
 // ```
 //
-// Moreover, by appending `_TEMPLATE` to the macro, the same syntax allows us to
-// work with class templates.
-// ```
-// template <typename T>
-// NTH_TRACE_DECLARE_API_TEMPLATE(std::basic_string<T>,
-//                                (at)(back)(c_str)(capacity)(compare)(data)
-//                                (ends_with)(find)(find_first_not_of)
-//                                (find_first_of)(find_last_not_of)
-//                                (find_last_of)(front)(length)(max_size)
-//                                (operator[])(rfind)(size)(starts_with));
-// ```
-
 namespace nth {
 
-// // `trace`:
-// //
-// // Returns an object representing the tracing of the evaluated
-// // expression passed-in as `value`. The expression `value` must outlive the
-// // return value.
-// template <compile_time_string S, int &..., typename T>
-// constexpr auto trace(NTH_ATTRIBUTE(lifetimebound) T const &value) {
-//   return internal_trace::TracedExpr<internal_trace::IdentityAction<S>,
-//                                     T const &>(value);
-// }
-// 
-// // `traced_value`:
-// //
-// // Returns the value represented by the traced object.
-// constexpr decltype(auto) traced_value(auto const &value) {
-//   return internal_trace::traced_value(value);
-// }
-
-namespace {
-
+// `trace`:
+//
+// Returns an object representing the tracing of the evaluated
+// expression passed-in as `value`. The expression `value` must outlive the
+// return value.
 template <compile_time_string S, int &..., typename T>
 constexpr decltype(auto) trace(T const &value NTH_ATTRIBUTE(lifetimebound)) {
   return internal_trace::traced_expression<T, 1>::template construct<
       internal_trace::identity<S>>(value);
 }
-
-}  // namespace debug
 
 // `traced_value`:
 //
@@ -127,6 +101,7 @@ constexpr decltype(auto) traced_value(
 //
 #define NTH_TRACE_DECLARE_API(type, member_function_names)                     \
   NTH_TRACE_INTERNAL_DECLARE_API(type, member_function_names)
+
 #define NTH_TRACE_DECLARE_API_TEMPLATE(type, member_function_names)            \
   NTH_TRACE_INTERNAL_DECLARE_API_TEMPLATE(type, member_function_names)
 
