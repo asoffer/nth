@@ -27,7 +27,6 @@ void ConstructReference() {
 void UnaryOperator() {
   int n  = 3;
   auto r = nth::trace<"n">(n);
-  NTH_LOG("Hello! {}") <<= {-r};
   NTH_RAW_TEST_ASSERT(static_cast<int const &>(-r) == -2);
   NTH_RAW_TEST_ASSERT(static_cast<int const &>(-nth::trace<"5">(5)) == -5);
   NTH_RAW_TEST_ASSERT(static_cast<int const &>(-(-nth::trace<"5">(5))) == 5);
@@ -37,6 +36,7 @@ void BinaryOperator() {
   int n  = 3;
   auto r = nth::trace<"n">(n);
   NTH_RAW_TEST_ASSERT(static_cast<int const &>(r + r * r) == 12);
+  NTH_LOG("{}") <<= {r + r * r};
 }
 
 struct S {
@@ -89,9 +89,9 @@ void MembersOfTemplates() {
 
 int main() {
   nth::register_log_sink(nth::stderr_log_sink);
+  BinaryOperator();
   ConstructReference();
   UnaryOperator();
-  BinaryOperator();
   Members();
   MembersOfTemplates();
 }

@@ -1,14 +1,14 @@
 #ifndef NTH_ALGORITHM_TREE_H
 #define NTH_ALGORITHM_TREE_H
 
-#include <iostream>
 #include <cstddef>
+#include <iostream>
 #include <span>
 #include <variant>
+#include <vector>
 
 #include "nth/algorithm/internal/tree.h"
 #include "nth/base/core.h"
-#include "nth/container/stack.h"
 #include "nth/debug/unreachable.h"
 
 namespace nth {
@@ -60,10 +60,10 @@ struct tree_traversal_stack {
 
   [[nodiscard]] constexpr bool empty() const { return stack_.empty(); }
 
-  void push(value_type const& v) { stack_.emplace(v); }
-  void push(value_type&& v) { stack_.emplace(NTH_MOVE(v)); }
+  void push(value_type const& v) { stack_.emplace_back(v); }
+  void push(value_type&& v) { stack_.emplace_back(NTH_MOVE(v)); }
   void emplace(auto&&... args) {
-    stack_.emplace(std::in_place_index<0>, NTH_FWD(args)...);
+    stack_.emplace_back(std::in_place_index<0>, NTH_FWD(args)...);
   }
 
  private:
@@ -71,9 +71,9 @@ struct tree_traversal_stack {
   friend void traverse_tree(preorder_traversal_tag, Traverser&,
                             tree_traversal_stack<NodeType>);
 
-  stack<std::variant<internal_algorithm::enter_subtree_tag,
-                     internal_algorithm::enter_last_child_tag,
-                     internal_algorithm::exit_subtree_tag, value_type>>
+  std::vector<std::variant<internal_algorithm::enter_subtree_tag,
+                           internal_algorithm::enter_last_child_tag,
+                           internal_algorithm::exit_subtree_tag, value_type>>
       stack_;
 };
 
@@ -91,11 +91,11 @@ void traverse_tree(preorder_traversal_tag, Traverser& traverser,
   };
 
   while (not stack.empty()) {
-    auto const& entry = stack.stack_.top();
+    auto const& entry = stack.stack_.back();
     switch (entry.index()) {
       case 0:
         if constexpr (HasEnterSubtree) {
-          stack.stack_.pop();
+          stack.stack_.pop_back();
           NthTraverseTreeEnterSubtree(traverser);
           break;
         } else {
@@ -103,7 +103,7 @@ void traverse_tree(preorder_traversal_tag, Traverser& traverser,
         }
       case 1:
         if constexpr (HasEnterLastChild) {
-          stack.stack_.pop();
+          stack.stack_.pop_back();
           NthTraverseTreeEnterLastChild(traverser);
         } else {
           NTH_UNREACHABLE();
@@ -111,40 +111,41 @@ void traverse_tree(preorder_traversal_tag, Traverser& traverser,
         break;
       case 2:
         if constexpr (HasExitSubtree) {
-          stack.stack_.pop();
+          stack.stack_.pop_back();
           NthTraverseTreeExitSubtree(traverser);
           break;
         } else {
           NTH_UNREACHABLE();
         }
       default: {
-        NodeType node = NTH_MOVE(std::get<3>(stack.stack_.top()));
+        NodeType node = NTH_MOVE(std::get<3>(stack.stack_.back()));
         if constexpr (HasExitSubtree) {
-          stack.stack_.top() = internal_algorithm::exit_subtree_tag{};
+          stack.stack_.back() = internal_algorithm::exit_subtree_tag{};
           if constexpr (HasEnterLastChild) {
-            stack.stack_.push(internal_algorithm::enter_last_child_tag{});
+            stack.stack_.push_back(internal_algorithm::enter_last_child_tag{});
           }
         } else if constexpr (HasEnterLastChild) {
-          stack.stack_.top() = internal_algorithm::enter_last_child_tag{};
+          stack.stack_.back() = internal_algorithm::enter_last_child_tag{};
         } else {
-          stack.stack_.pop();
+          stack.stack_.pop_back();
         }
 
         size_t previous_size = stack.stack_.size();
         NthTraverseTreeNode(traverser, node, stack);
         size_t child_count = stack.stack_.size() - previous_size;
         if (child_count == 0) {
-          stack.stack_.pop(HasExitSubtree + HasEnterLastChild);
+          stack.stack_.resize(stack.stack_.size() -
+                              (HasExitSubtree + HasEnterLastChild));
         } else {
           if constexpr (HasEnterLastChild) {
-            std::span prefixed_children =
-                stack.stack_.top_span(child_count + 1);
+            std::span prefixed_children(&stack.stack_.back() - child_count,
+                                        child_count + 1);
             auto temp            = NTH_MOVE(prefixed_children[0]);
             prefixed_children[0] = NTH_MOVE(prefixed_children[1]);
             prefixed_children[1] = NTH_MOVE(temp);
           }
           if constexpr (HasEnterSubtree) {
-            stack.stack_.push(internal_algorithm::enter_subtree_tag{});
+            stack.stack_.push_back(internal_algorithm::enter_subtree_tag{});
           }
         }
       } break;

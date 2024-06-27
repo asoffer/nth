@@ -6,7 +6,6 @@ cc_library(
     deps = [
         "//nth/algorithm/internal:tree",
         "//nth/base:core",
-        "//nth/container:stack",
         "//nth/debug:unreachable",
     ],
 )

@@ -7,6 +7,7 @@ cc_library(
     name = "trace",
     hdrs = ["trace.h"],
     deps = [
+        "//nth/algorithm:tree",
         "//nth/base:attributes",
         "//nth/base:core",
         "//nth/debug/property/internal:concepts",

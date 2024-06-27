@@ -1,6 +1,5 @@
 #include "nth/algorithm/tree.h"
 
-#include <iostream>
 #include <vector>
 
 #include "nth/test/raw/test.h"
