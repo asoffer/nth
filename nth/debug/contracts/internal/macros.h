@@ -7,7 +7,7 @@
 // Macros implementing the contract behavior. The first parameter to
 // `NTH_INTERNAL_CONTRACTS_DO` gets appended to `NTH_INTERNAL_IMPLEMENT_`,
 // naming a new macro which callers must implement. The remaining arguments are
-// inspected and conditionally pased to the macro
+// inspected and conditionally passed to the macro
 // `NTH_INTERNAL_IMPLEMENT_<first_parameter>` based on the build mode.
 //
 #define NTH_INTERNAL_CONTRACTS_DO(action, ...)                                 \

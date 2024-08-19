@@ -97,6 +97,8 @@ cc_library(
         ":test",
         "//nth/base:indestructible",
         "//nth/debug:expectation_result",
+        "//nth/debug/log:sink",
+        "//nth/debug/log:stderr_log_sink",
         "//nth/io/writer:file",
         "@abseil-cpp//absl/synchronization",
     ],

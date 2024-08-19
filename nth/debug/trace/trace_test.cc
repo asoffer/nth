@@ -15,27 +15,25 @@ struct OverloadOperatorAmpersand {
 void ConstructReference() {
   int n  = 0;
   auto r = nth::trace<"n">(n);
-  NTH_RAW_TEST_ASSERT(&n == &static_cast<int const &>(r));
+  NTH_RAW_TEST_ASSERT(&n == &nth::traced_value(r));
 
   OverloadOperatorAmpersand x;
   auto y = nth::trace<"y">(x);
-  NTH_RAW_TEST_ASSERT(
-      nth::address(x) ==
-      nth::address(static_cast<OverloadOperatorAmpersand const &>(y)));
+  NTH_RAW_TEST_ASSERT(nth::address(x) == nth::address(nth::traced_value(y)));
 }
 
 void UnaryOperator() {
   int n  = 3;
   auto r = nth::trace<"n">(n);
-  NTH_RAW_TEST_ASSERT(static_cast<int const &>(-r) == -2);
-  NTH_RAW_TEST_ASSERT(static_cast<int const &>(-nth::trace<"5">(5)) == -5);
-  NTH_RAW_TEST_ASSERT(static_cast<int const &>(-(-nth::trace<"5">(5))) == 5);
+  NTH_RAW_TEST_ASSERT(nth::traced_value(-r) == -2);
+  NTH_RAW_TEST_ASSERT(nth::traced_value(-nth::trace<"5">(5)) == -5);
+  NTH_RAW_TEST_ASSERT(nth::traced_value(-(-nth::trace<"5">(5))) == 5);
 }
 
 void BinaryOperator() {
   int n  = 3;
   auto r = nth::trace<"n">(n);
-  NTH_RAW_TEST_ASSERT(static_cast<int const &>(r + r * r) == 12);
+  NTH_RAW_TEST_ASSERT(nth::traced_value(r + r * r) == 12);
   NTH_LOG("{}") <<= {r + r * r};
 }
 
@@ -72,17 +70,17 @@ namespace {
 void Members() {
   S s(3);
   auto r = nth::trace<"s">(s);
-  NTH_RAW_TEST_ASSERT(static_cast<int>(r.value()) == 3);
-  NTH_RAW_TEST_ASSERT(static_cast<int>(r.triple()) == 9);
-  NTH_RAW_TEST_ASSERT(static_cast<int>(r(-1).triple()) == -9);
+  NTH_RAW_TEST_ASSERT(nth::traced_value(r.value()) == 3);
+  NTH_RAW_TEST_ASSERT(nth::traced_value(r.triple()) == 9);
+  NTH_RAW_TEST_ASSERT(nth::traced_value(r(-1).triple()) == -9);
 }
 
 void MembersOfTemplates() {
   S2<3> s(3);
   auto r = nth::trace<"s">(s);
-  NTH_RAW_TEST_ASSERT(static_cast<int>(r.value()) == 3);
-  NTH_RAW_TEST_ASSERT(static_cast<int>(r.triple()) == 9);
-  NTH_RAW_TEST_ASSERT(static_cast<int>(r(-1).triple()) == -9);
+  NTH_RAW_TEST_ASSERT(nth::traced_value(r.value()) == 3);
+  NTH_RAW_TEST_ASSERT(nth::traced_value(r.triple()) == 9);
+  NTH_RAW_TEST_ASSERT(nth::traced_value(r(-1).triple()) == -9);
 }
 
 }  // namespace

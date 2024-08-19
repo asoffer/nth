@@ -8,6 +8,8 @@
 #include "absl/synchronization/mutex.h"
 #include "nth/base/indestructible.h"
 #include "nth/debug/expectation_result.h"
+#include "nth/debug/log/sink.h"
+#include "nth/debug/log/stderr_log_sink.h"
 #include "nth/format/format.h"
 #include "nth/io/writer/file.h"
 #include "nth/test/benchmark_result.h"
@@ -119,6 +121,7 @@ size_t DigitCount(size_t n) {
 
 int main() {
   size_t width = TerminalWidth();
+  nth::register_log_sink(nth::stderr_log_sink);
   nth::register_expectation_result_handler(
       [](nth::expectation_result const& result) {
         expectation_results->add(result);

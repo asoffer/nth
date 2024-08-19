@@ -80,13 +80,6 @@ inline constexpr tree_formatter_config ascii = {
     .extender    = " |",
 };
 
-// Example
-//──┬─ operator+
-//  ├─── r
-//  ╰─┬─ operator*
-//    ├─── r
-//    ╰─── r
-
 template <nth::io::forward_writer W>
 struct tree_formatter {
   explicit constexpr tree_formatter(W &w, tree_formatter_config c)
@@ -169,7 +162,8 @@ struct traced_value_holder : traced_members<T> {
     nth::interpolate(w, nth::interpolation_spec::from<"{}">(), t.value_);
   }
 
-  constexpr operator T const &() const NTH_ATTRIBUTE(lifetimebound) {
+  explicit constexpr operator bool() const
+      NTH_ATTRIBUTE(lifetimebound) requires(std::convertible_to<T, bool>) {
     return value_;
   }
 
@@ -180,45 +174,6 @@ struct traced_value_holder : traced_members<T> {
   T value_;
 };
 
-template <typename T>
-struct traced_value_holder<T &> : traced_members<T &> {
-  traced_value_holder(traced_value_holder const &) = delete;
-  traced_value_holder(traced_value_holder &&)      = delete;
-
-  using nth_format_spec = nth::trivial_format_spec;
-
-  friend constexpr auto NthDefaultFormatSpec(
-      nth::type_tag<traced_value_holder>) {
-    return nth::trivial_format_spec{};
-  }
-
-  friend constexpr auto NthFormatSpec(nth::interpolation_string_view,
-                                      nth::type_tag<traced_value_holder>) {
-    return nth::trivial_format_spec{};
-  }
-
-  friend void NthFormat(io::forward_writer auto &w,
-                        format_spec<traced_value_holder>,
-                        traced_value_holder const &t) {
-    nth::interpolate(w, nth::interpolation_spec::from<"{}">(), *t.value_);
-  }
-
-  constexpr operator T const &() const NTH_ATTRIBUTE(lifetimebound) {
-    return *value_;
-  }
-
-  explicit constexpr traced_value_holder(traversal_vtable vtable, T &value)
-      : traced_members<T>(vtable), value_(nth::address(value)) {}
-
- protected:
-  T *value_;
-};
-
-template <typename T>
-T const &get_value(traced_members<T> const &t) {
-  return static_cast<T const &>(static_cast<traced_value_holder<T> const &>(t));
-}
-
 template <typename T, int DependentCount>
 struct traced_expression : traced_value_holder<T> {
   template <typename Op>
@@ -226,7 +181,7 @@ struct traced_expression : traced_value_holder<T> {
       auto const &...arguments NTH_ATTRIBUTE(
           lifetimebound)) requires(sizeof...(arguments) == DependentCount) {
     return traced_expression(
-        [&] { return Op::invoke(arguments...); }, Op::name,
+        [&]() -> decltype(auto) { return Op::invoke(arguments...); }, Op::name,
         traced_expression_base::set_low_bit(nth::address(arguments))...);
   }
 
@@ -254,8 +209,9 @@ struct traced_expression : traced_value_holder<T> {
   template <typename F>
   explicit constexpr traced_expression(F &&f, std::string_view name,
                                        auto const *...ptrs)
-      : traced_value_holder<T>({.children = erased_children, .name = name},
-                               NTH_FWD(f)),
+      : traced_value_holder<T>(
+            traversal_vtable{.children = erased_children, .name = name},
+            NTH_FWD(f)),
         dependents_{ptrs...} {}
 
   traced_expression_base const *dependents_[DependentCount];
@@ -269,13 +225,19 @@ struct traced_expression : traced_value_holder<T> {
 template <std::derived_from<traced_expression_base> T>
 typename T::NthTraceInternalValueType const &traced_value(
     T const &value NTH_ATTRIBUTE(lifetimebound)) {
-  return value;
+  return value.value_;
 }
 
 template <typename T>
 requires(not std::derived_from<T, traced_expression_base>)
     T const &traced_value(T const &value NTH_ATTRIBUTE(lifetimebound)) {
   return value;
+}
+
+template <typename T>
+T const &get_value(traced_members<T> const &t) {
+  return ::nth::internal_trace::traced_value(
+      static_cast<traced_value_holder<T> const &>(t));
 }
 
 template <typename T>
@@ -293,30 +255,26 @@ struct identity {
   using invoke_type = T const &;
 };
 
-struct injector {};
-
-#define NTH_TRACE_INTERNAL_INJECTED_EXPRESSION(...)                            \
-  (::nth::debug::internal_trace::TraceInjector{}                               \
-       ->*__VA_ARGS__->*::nth::debug::internal_trace::TraceInjector{})
-
 template <typename T>
 concept traced_impl =
     std::derived_from<T, nth::internal_trace::traced_expression_base>;
 
-template <typename T>
-constexpr decltype(auto) operator->*(injector, T const &value) {
-  if constexpr (traced_impl<T>) {
-    return value;
-  } else {
-    if constexpr (nth::c_array<T>) {
-      return traced_expression<decltype(value),
-                               1>::template construct<identity<"">>(value);
+struct injector {
+  template <typename T>
+  constexpr decltype(auto) operator->*(T const &value) const {
+    if constexpr (traced_impl<T>) {
+      return value;
     } else {
-      return traced_expression<T const &, 1>::template construct<identity<"">>(
-          value);
+      if constexpr (nth::c_array<T>) {
+        return traced_expression<decltype(value),
+                                 1>::template construct<identity<"">>(value);
+      } else {
+        return traced_expression<T const &,
+                                 1>::template construct<identity<"">>(value);
+      }
     }
   }
-}
+};
 
 template <typename T>
 constexpr decltype(auto) operator->*(T const &value, injector) {

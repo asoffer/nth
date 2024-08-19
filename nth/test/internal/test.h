@@ -15,7 +15,7 @@
 // The stateful compile-time sequence of types which will be appended to once
 // for each parameterized test encountered. Despite not being in an internal
 // namespace, this object is for internal use only and must not be used directly
-// outside of this library..
+// outside of this library.
 NTH_DEFINE_MUTABLE_COMPILE_TIME_SEQUENCE(NthInternalParameterizedTestSequence);
 
 // The stateful compile-time sequence of types which will be appended to once
@@ -25,20 +25,13 @@ NTH_DEFINE_MUTABLE_COMPILE_TIME_SEQUENCE(NthInternalParameterizedTestSequence);
 NTH_DEFINE_MUTABLE_COMPILE_TIME_SEQUENCE(
     NthInternalParameterizedTestInvocationSequence);
 
-#define NTH_DEBUG_INTERNAL_TRACE_EXPECT(...)                                   \
-  NTH_DEBUG_INTERNAL_TRACE_EXPECT_WITH_VERBOSITY((always), __VA_ARGS__)
+#define NTH_INTERNAL_IMPLEMENT_ASSERT(verbosity_path, ...)                     \
+  NTH_INTERNAL_CONTRACTS_CHECK("NTH_ASSERT", verbosity_path, return,           \
+                               __VA_ARGS__)
 
-#define NTH_DEBUG_INTERNAL_TRACE_EXPECT_WITH_VERBOSITY(verbosity, ...)         \
-  NTH_DEBUG_INTERNAL_CONTRACT_CHECK(::nth::test::internal_test::ExpectLogLine, \
-                                    verbosity, NoOpResponder, , __VA_ARGS__)
-
-#define NTH_DEBUG_INTERNAL_TRACE_ASSERT(...)                                   \
-  NTH_DEBUG_INTERNAL_TRACE_ASSERT_WITH_VERBOSITY((always), __VA_ARGS__)
-
-#define NTH_DEBUG_INTERNAL_TRACE_ASSERT_WITH_VERBOSITY(verbosity, ...)         \
-  NTH_DEBUG_INTERNAL_CONTRACT_CHECK(::nth::test::internal_test::AssertLogLine, \
-                                    verbosity, NoOpResponder, return,          \
-                                    __VA_ARGS__)
+#define NTH_INTERNAL_IMPLEMENT_EXPECT(verbosity_path, ...)                     \
+  NTH_INTERNAL_CONTRACTS_CHECK("NTH_EXPECT", verbosity_path, std::abort(),     \
+                               __VA_ARGS__)
 
 namespace nth::test {
 
@@ -46,17 +39,6 @@ void RegisterTestInvocation(std::string_view categorization,
                             std::function<void()> f);
 
 namespace internal_test {
-
-inline constexpr char const ExpectLogLine[] =
-    "\033[31;1mNTH_EXPECT failed.\n"
-    "  \033[37;1mExpression:\033[0m\n{}\n\n"
-    "  \033[37;1m{}:\033[0m\n"
-    "{}\n";
-inline constexpr char const AssertLogLine[] =
-    "\033[31;1mNTH_ASSERT failed.\n"
-    "  \033[37;1mExpression:\033[0m\n{}\n\n"
-    "  \033[37;1m{}:\033[0m\n"
-    "{}\n";
 
 // Accepts an invocation type as a template argument and a sequence of all test
 // types seen so far during compilation. For each test, if the test's category
