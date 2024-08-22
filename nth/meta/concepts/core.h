@@ -20,6 +20,7 @@ template <typename T >
 struct decay_impl {
   using type = T;
 };
+
 template <typename T>
 struct decay_impl<T const> : decay_impl<T> {};
 
@@ -37,6 +38,15 @@ struct decay_impl<R(Args...)> : decay_impl<R (*)(Args...)> {};
 
 template <typename T, int N>
 struct decay_impl<T[N]> : decay_impl<T *> {};
+
+template <typename T, int N>
+struct decay_impl<T const[N]> : decay_impl<T const *> {};
+
+template <typename T, int N>
+struct decay_impl<T volatile[N]> : decay_impl<T volatile *> {};
+
+template <typename T, int N>
+struct decay_impl<T const volatile[N]> : decay_impl<T const volatile *> {};
 
 template <typename T>
 struct reference_category {

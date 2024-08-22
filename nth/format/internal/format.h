@@ -61,6 +61,9 @@ requires(requires { typename T::nth_format_spec; }) struct format_spec<T> {
 }  // namespace internal_format
 }  // namespace nth
 
+void NthFormat(auto& w, auto const&...) {
+  w.write(nth::byte_range(std::string_view("Unknown")));
+}
 void NthFormat(auto& w, nth::trivial_format_spec, std::string_view s) {
   w.write(nth::byte_range(s));
 }

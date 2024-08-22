@@ -31,6 +31,8 @@ static_assert(nth::decays_to<int&, int>);
 static_assert(nth::decays_to<int const volatile&, int>);
 static_assert(nth::decays_to<void(), void (*)()>);
 static_assert(nth::decays_to<int[3], int*>);
+static_assert(nth::decays_to<int const (&)[3], int const *>);
+static_assert(nth::decays_to<int volatile (&)[3], int volatile *>);
 
 static_assert(nth::lvalue_reference<int &>);
 static_assert(not nth::rvalue_reference<int &>);

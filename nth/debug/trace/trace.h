@@ -63,7 +63,7 @@ namespace nth {
 // return value.
 template <compile_time_string S, int &..., typename T>
 constexpr decltype(auto) trace(T const &value NTH_ATTRIBUTE(lifetimebound)) {
-  return internal_trace::traced_expression<T, 1>::template construct<
+  return internal_trace::traced_expression<T const &, 1>::template construct<
       internal_trace::identity<S>>(value);
 }
 
@@ -81,9 +81,8 @@ constexpr decltype(auto) traced_value(
 //
 // A shorthand for expression tracing, where the compile-time string that would
 // be passed to `nth::trace` is the stringification of the expression itself.
-// That is, rather than `nth::trace_value<"var">(var)`, one could
-// `NTH_TRACE(var)`.
-#define NTH_TRACE(expression) (expression)
+// That is, rather than `nth::trace<"var">(var)`, one could `NTH_TRACE(var)`.
+#define NTH_TRACE(expression) ::nth::trace<#expression>(expression)
 
 // `NTH_TRACE_DECLARE_API` and `NTH_TRACE_DECLARE_API_TEMPLATE`:
 //

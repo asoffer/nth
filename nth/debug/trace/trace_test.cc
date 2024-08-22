@@ -23,7 +23,7 @@ void ConstructReference() {
 }
 
 void UnaryOperator() {
-  int n  = 3;
+  int n  = 2;
   auto r = nth::trace<"n">(n);
   NTH_RAW_TEST_ASSERT(nth::traced_value(-r) == -2);
   NTH_RAW_TEST_ASSERT(nth::traced_value(-nth::trace<"5">(5)) == -5);
@@ -34,22 +34,21 @@ void BinaryOperator() {
   int n  = 3;
   auto r = nth::trace<"n">(n);
   NTH_RAW_TEST_ASSERT(nth::traced_value(r + r * r) == 12);
-  NTH_LOG("{}") <<= {r + r * r};
 }
 
 struct S {
-  explicit constexpr S(int n) : n_(n){};
+  explicit constexpr S(int n) : n_(n) {}
   constexpr int value() const { return n_; }
   constexpr int triple() const { return 3 * n_; }
   constexpr S operator()(int n) const { return S(n * n_); }
 
- private:
+  private:
   int n_;
 };
 
 template <int>
 struct S2 {
-  explicit constexpr S2(int n) : n_(n){};
+  explicit constexpr S2(int n) : n_(n) {}
   constexpr int value() const { return n_; }
   constexpr int triple() const { return 3 * n_; }
   constexpr S2 operator()(int n) const { return S2(n * n_); }

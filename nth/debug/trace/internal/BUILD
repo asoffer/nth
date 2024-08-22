@@ -15,6 +15,7 @@ cc_library(
         "//nth/format/interpolate",
         "//nth/hash:fnv1a",
         "//nth/io/writer",
+        "//nth/io/writer:string",
         "//nth/meta:compile_time_string",
         "//nth/meta/concepts:c_array",
         "//nth/meta/concepts:core",

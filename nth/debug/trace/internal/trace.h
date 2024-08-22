@@ -10,118 +10,164 @@
 #include "nth/format/format.h"
 #include "nth/format/interpolate/interpolate.h"
 #include "nth/hash/fnv1a.h"
+#include "nth/io/writer/string.h"
 #include "nth/io/writer/writer.h"
 #include "nth/memory/address.h"
 #include "nth/memory/bytes.h"
 #include "nth/meta/compile_time_string.h"
 #include "nth/meta/concepts/c_array.h"
+#include "nth/meta/concepts/convertible.h"
 #include "nth/meta/concepts/core.h"
 #include "nth/meta/concepts/invocable.h"
 
 namespace nth::internal_trace {
 
 struct traced_expression_base;
+struct writable_ref;
 
 struct traversal_vtable {
-  static std::span<traced_expression_base const *const> default_children(
-      traced_expression_base const &) {
-    return std::span<traced_expression_base const *const>(
-        static_cast<traced_expression_base const **>(nullptr), 0);
-  }
+  static std::span<writable_ref const> default_children(
+      traced_expression_base const &);
 
-  std::span<traced_expression_base const *const> (*children)(
-      traced_expression_base const &) = default_children;
+  std::span<writable_ref const> (*children)(traced_expression_base const &) =
+      default_children;
   std::string_view name;
 };
 
 struct traced_expression_base {
   traced_expression_base(traversal_vtable vtable) : vtable_(vtable) {}
 
-  std::span<traced_expression_base const *const> children() const {
+  std::span<writable_ref const> children() const {
     return vtable_.children(*this);
   }
 
   std::string_view name() const { return vtable_.name; }
 
- protected:
-  static traced_expression_base const *set_low_bit(
-      traced_expression_base const *ptr) {
-    return ptr;
-  }
-  template <typename T>
-  requires(not std::derived_from<T, traced_expression_base>)  //
-      static traced_expression_base const *set_low_bit(T const *ptr) {
-    return reinterpret_cast<traced_expression_base const *>(
-        reinterpret_cast<uintptr_t>(ptr) | uintptr_t{1});
-  }
-
  private:
   traversal_vtable vtable_;
 };
 
+struct writable_ref {
+  template <typename T>
+  requires(not std::derived_from<T, traced_expression_base>)  //
+      explicit writable_ref(T const &value NTH_ATTRIBUTE(lifetimebound))
+      : ptr_(reinterpret_cast<traced_expression_base const *>(
+            reinterpret_cast<uintptr_t>(nth::address(value)) | uintptr_t{1})),
+        write_(write_action<T>) {}
+
+  explicit writable_ref(
+      std::derived_from<traced_expression_base> auto const &ref)
+      : ptr_(nth::address(ref)), write_(nullptr) {}
+
+  std::span<writable_ref const> children() const {
+    if (reinterpret_cast<uintptr_t>(ptr_) & uintptr_t{1}) {
+      return std::span<writable_ref const>(
+          static_cast<writable_ref const *>(nullptr), 0);
+    } else {
+      return ptr_->children();
+    }
+  }
+  std::string_view name() const { return ptr_->name(); }
+  std::string str() const { return write_(ptr_); }
+
+ private:
+  template <typename T>
+  static std::string write_action(traced_expression_base const *ptr) {
+    std::string s;
+    io::string_writer sw(s);
+    nth::format(
+        sw, {},
+        *reinterpret_cast<T const *>(reinterpret_cast<uintptr_t>(ptr) - 1));
+    return s;
+  }
+
+  traced_expression_base const *ptr_;
+  std::string (*write_)(traced_expression_base const *);
+};
+
+inline std::span<writable_ref const> traversal_vtable::default_children(
+    traced_expression_base const &) {
+  return std::span<writable_ref const>(
+      static_cast<writable_ref const *>(nullptr), 0);
+}
+
 struct tree_formatter_config {
-  std::string_view first_child;
   std::string_view child;
   std::string_view last_child;
   std::string_view extender;
+  std::string_view space;
 };
 
 inline constexpr tree_formatter_config utf8 = {
-    .first_child = "──",
-    .child       = "──",
-    .last_child  = "──",
-    .extender    = " │",
+    .child       = "├─ ",
+    .last_child  = "╰─ ",
+    .extender    = "│  ",
+    .space       = "   ",
 };
 
 inline constexpr tree_formatter_config ascii = {
-    .first_child = "+-",
-    .child       = "|-",
-    .last_child  = "`─",
-    .extender    = " |",
+    .child       = "|- ",
+    .last_child  = "`- ",
+    .extender    = "|  ",
+    .space       = "   ",
 };
 
 template <nth::io::forward_writer W>
 struct tree_formatter {
   explicit constexpr tree_formatter(W &w, tree_formatter_config c)
-      : writer_(w), config_(c) {}
+      : writer_(w), config_(c), prefix_(config_.last_child) {}
 
   friend void NthTraverseTreeEnterSubtree(tree_formatter &t) {
-    t.prefix_.append("  ");
-    t.first_node_in_subtree_ = true;
+    if (not t.last_node_in_subtree_) {
+      t.prefix_.resize(t.prefix_.size() - t.config_.child.size());
+      t.prefix_.append(t.config_.extender);
+    }
+    t.prefix_.append(t.config_.child);
+    t.last_node_in_subtree_ = false;
   }
 
   friend void NthTraverseTreeExitSubtree(tree_formatter &t) {
-    t.prefix_.resize(t.prefix_.size() - std::string_view("  ").size());
+    t.prefix_.resize(t.prefix_.size() - t.config_.space.size());
+  }
+
+  friend void NthTraverseTreeEnterLastChild(tree_formatter &t) {
+    if (t.prefix_.ends_with(t.config_.child)) {
+      t.prefix_.resize(t.prefix_.size() - t.config_.child.size());
+    } else {
+      t.prefix_.resize(t.prefix_.size() - t.config_.extender.size());
+    }
+    t.prefix_.append(t.config_.last_child);
+    t.last_node_in_subtree_ = true;
   }
 
   friend void NthTraverseTreeNode(
-      tree_formatter &t, traced_expression_base const *node,
-      nth::tree_traversal_stack<traced_expression_base const *> &stack) {
+      tree_formatter &t, writable_ref node,
+      nth::tree_traversal_stack<writable_ref> &stack) {
     t.writer_.write(nth::byte_range(t.prefix_));
-    t.writer_.write(nth::byte_range(std::string_view("  ")));
-    if (reinterpret_cast<uintptr_t>(node) & uintptr_t{1}) {
-      nth::format(t.writer_, {}, reinterpret_cast<uintptr_t>(node));
+    if (t.last_node_in_subtree_) {
+      t.prefix_.resize(t.prefix_.size() - t.config_.last_child.size());
+      t.prefix_.append(t.config_.space);
+    }
+
+    if (std::span children = node.children(); children.empty()) {
+      t.writer_.write(nth::byte_range(node.str()));
+    } else if (node.name().empty()) {
+      t.writer_.write(nth::byte_range(children[0].str()));
     } else {
-      t.writer_.write(nth::byte_range(node->name()));
-    }
+      t.writer_.write(nth::byte_range(node.name()));
 
-    if (t.first_node_in_subtree_) {
-      t.first_node_in_subtree_ = false;
-    }
-
-    if ((reinterpret_cast<uintptr_t>(node) & uintptr_t{1}) == 0) {
-      std::span children = node->children();
       for (auto iter = children.rbegin(); iter != children.rend(); ++iter) {
         stack.push(*iter);
       }
     }
+    t.writer_.write(nth::byte_range(std::string_view("\n")));
   }
 
  private:
   W &writer_;
   tree_formatter_config config_;
-  std::string prefix_ = "\n    ";
-  bool first_node_in_subtree_ = true;
+  std::string prefix_;
+  bool last_node_in_subtree_ = true;
 };
 
 template <typename T>
@@ -159,11 +205,11 @@ struct traced_value_holder : traced_members<T> {
   friend void NthFormat(io::forward_writer auto &w,
                         format_spec<traced_value_holder>,
                         traced_value_holder const &t) {
-    nth::interpolate(w, nth::interpolation_spec::from<"{}">(), t.value_);
+    nth::format(w, {}, t.value_);
   }
 
-  explicit constexpr operator bool() const
-      NTH_ATTRIBUTE(lifetimebound) requires(std::convertible_to<T, bool>) {
+  explicit constexpr operator bool() const NTH_ATTRIBUTE(
+      lifetimebound) requires(nth::explicitly_convertible_to<T, bool>) {
     return value_;
   }
 
@@ -177,12 +223,11 @@ struct traced_value_holder : traced_members<T> {
 template <typename T, int DependentCount>
 struct traced_expression : traced_value_holder<T> {
   template <typename Op>
-  static constexpr traced_expression construct(
-      auto const &...arguments NTH_ATTRIBUTE(
-          lifetimebound)) requires(sizeof...(arguments) == DependentCount) {
+  static traced_expression construct(auto const &...arguments NTH_ATTRIBUTE(
+      lifetimebound)) requires(sizeof...(arguments) == DependentCount) {
     return traced_expression(
         [&]() -> decltype(auto) { return Op::invoke(arguments...); }, Op::name,
-        traced_expression_base::set_low_bit(nth::address(arguments))...);
+        writable_ref(arguments)...);
   }
 
   using nth_format_spec = nth::trivial_format_spec;
@@ -200,23 +245,23 @@ struct traced_expression : traced_value_holder<T> {
   friend void NthFormat(W &w, format_spec<traced_expression>,
                         traced_expression const &t) {
     tree_formatter<W> formatter(w, utf8);
-    nth::tree_traversal_stack<traced_expression_base const *> stack;
-    stack.push(nth::address(t));
+    nth::tree_traversal_stack<writable_ref> stack;
+    stack.push(writable_ref(t));
     nth::traverse_tree(nth::preorder, formatter, NTH_MOVE(stack));
   }
 
  private:
   template <typename F>
-  explicit constexpr traced_expression(F &&f, std::string_view name,
-                                       auto const *...ptrs)
+  explicit constexpr traced_expression(
+      F &&f, std::string_view name, nth::precisely<writable_ref> auto... refs)
       : traced_value_holder<T>(
             traversal_vtable{.children = erased_children, .name = name},
             NTH_FWD(f)),
-        dependents_{ptrs...} {}
+        dependents_{refs...} {}
 
-  traced_expression_base const *dependents_[DependentCount];
+  writable_ref dependents_[DependentCount];
 
-  static std::span<traced_expression_base const *const> erased_children(
+  static std::span<writable_ref const> erased_children(
       traced_expression_base const &self) {
     return static_cast<traced_expression const &>(self).dependents_;
   }
@@ -235,12 +280,6 @@ requires(not std::derived_from<T, traced_expression_base>)
 }
 
 template <typename T>
-T const &get_value(traced_members<T> const &t) {
-  return ::nth::internal_trace::traced_value(
-      static_cast<traced_value_holder<T> const &>(t));
-}
-
-template <typename T>
 using underlying_type =
     decltype(nth::internal_trace::traced_value(nth::value<T>()));
 
@@ -251,6 +290,7 @@ struct identity {
   static constexpr T const &invoke(T const &v NTH_ATTRIBUTE(lifetimebound)) {
     return v;
   }
+
   template <typename T>
   using invoke_type = T const &;
 };
@@ -261,7 +301,7 @@ concept traced_impl =
 
 struct injector {
   template <typename T>
-  constexpr decltype(auto) operator->*(T const &value) const {
+  decltype(auto) operator->*(T const &value) const {
     if constexpr (traced_impl<T>) {
       return value;
     } else {
@@ -277,7 +317,7 @@ struct injector {
 };
 
 template <typename T>
-constexpr decltype(auto) operator->*(T const &value, injector) {
+decltype(auto) operator->*(T const &value, injector) {
   if constexpr (nth::debug::internal_property::PropertyType<T> or
                 traced_impl<T>) {
     return value;
@@ -390,14 +430,30 @@ NTH_TRACE_INTERNAL_DEFINE_TRACED_UNARY_OPERATOR(Ref, *)
                                                                                \
  public:                                                                       \
   template <int &..., typename... NthTypes>                                    \
-  constexpr auto memfn(NthTypes const &...ts) const {                          \
+  constexpr auto memfn(NthTypes const &...ts) const & {                        \
     return traced_expression<                                                  \
         typename implementation<::nth::fnv1a(#memfn)>::template invoke_type<   \
             NthTraceInternalValueType,                                         \
             nth::internal_trace::underlying_type<NthTypes>...>,                \
         1 + sizeof...(ts)>::                                                   \
         template construct<implementation<nth::fnv1a(#memfn)>>(                \
-            ::nth::internal_trace::get_value(*this), ts...);                   \
+            static_cast<traced_value_holder<                                   \
+                NthTraceInternalValueType const &> const &>(*this)             \
+                .value_,                                                       \
+            ts...);                                                            \
+  }                                                                            \
+  template <int &..., typename... NthTypes>                                    \
+  constexpr auto memfn(NthTypes const &...ts) const && {                       \
+    return traced_expression<                                                  \
+        typename implementation<::nth::fnv1a(#memfn)>::template invoke_type<   \
+            NthTraceInternalValueType,                                         \
+            nth::internal_trace::underlying_type<NthTypes>...>,                \
+        1 + sizeof...(ts)>::                                                   \
+        template construct<implementation<nth::fnv1a(#memfn)>>(                \
+            static_cast<                                                       \
+                traced_value_holder<NthTraceInternalValueType> const &>(*this) \
+                .value_,                                                       \
+            ts...);                                                            \
   }
 
 #define NTH_TRACE_INTERNAL_EXPAND_A(x)                                         \
@@ -419,7 +475,8 @@ NTH_TRACE_INTERNAL_DEFINE_TRACED_UNARY_OPERATOR(Ref, *)
                                       member_function_names)
 
 #define NTH_TRACE_INTERNAL_DECLARE_API_IMPL(t, member_function_names)          \
-  struct ::nth::internal_trace::traced_members<t> : traced_expression_base {   \
+  struct ::nth::internal_trace::traced_members<t>                              \
+      : ::nth::internal_trace::traced_expression_base {                        \
     using NthTraceInternalValueType = t;                                       \
                                                                                \
    private:                                                                    \

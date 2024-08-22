@@ -30,7 +30,6 @@ struct checker {
 
   friend void NthFormat(io::forward_writer auto& w, format_spec<checker> spec,
                         checker const& c) {
-    nth::interpolate<"{}">(w, nth::type<T>.name());
     nth::interpolate(w, spec, c.result_);
   }
 
@@ -57,7 +56,6 @@ struct checker<T> {
 
   friend void NthFormat(io::forward_writer auto& w, format_spec<checker>,
                         checker const& c) {
-    nth::interpolate<"{}: ">(w, nth::type<T>.name());
     nth::format(w, {}, c.result_);
   }
 
