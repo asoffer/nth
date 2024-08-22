@@ -12,10 +12,6 @@ int main() {
   constexpr auto AlwaysFalse = nth::debug::MakeProperty<"always-false">(
       [](auto const &) { return false; });
 
-  nth::register_contract_violation_handler(
-      [](nth::contract_violation const &result) {
-        if (not result.success()) { std::abort(); }
-      });
   NTH_REQUIRE(3 >>= not AlwaysFalse());
   NTH_REQUIRE(3 >>= AlwaysTrue());
   NTH_REQUIRE(3 >>= LessThan(5) and GreaterThan(2));

@@ -35,6 +35,13 @@ std::span<std::byte const> byte_range(
                                     nth::raw_address(*t.end()));
 }
 
+template <typename T, int N>
+std::span<std::byte const, N * sizeof(T)> byte_range(
+    T const (&buffer)[N] NTH_ATTRIBUTE(lifetimebound)) {
+  return std::span<std::byte const, N * sizeof(T)>(nth::raw_address(buffer),
+                                                   N * sizeof(T));
+}
+
 // Returns a `std::span<std::byte>` over the bytes ranging from`t.begin()` to
 // `t.end()`.
 template <typename T>
@@ -45,6 +52,13 @@ std::span<std::byte> byte_range(
 } and not std::is_const_v<std::remove_reference_t<decltype(*t.begin())>>) {
   return std::span<std::byte>(nth::raw_address(*t.begin()),
                               nth::raw_address(*t.end()));
+}
+
+template <typename T, int N>
+std::span<std::byte, N * sizeof(T)> byte_range(
+    T (&buffer)[N] NTH_ATTRIBUTE(lifetimebound)) {
+  return std::span<std::byte, N * sizeof(T)>(nth::raw_address(buffer),
+                                             N * sizeof(T));
 }
 
 }  // namespace nth

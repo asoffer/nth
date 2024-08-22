@@ -12,7 +12,6 @@
 #include "nth/debug/log/stderr_log_sink.h"
 #include "nth/format/format.h"
 #include "nth/io/writer/file.h"
-#include "nth/test/benchmark_result.h"
 #include "nth/test/test.h"
 
 namespace {
@@ -26,17 +25,14 @@ int TerminalWidth() {
   return w.ws_col;
 }
 
-struct ExpectationResultHolder {
+struct contract_violation_holder {
   void add(nth::contract_violation const& result) {
-    auto& counter = result.success() ? success_count_ : failure_count_;
     absl::MutexLock lock(&mutex_);
     results_.push_back(result);
-    ++counter;
+    ++failure_count_;
   }
 
   int32_t failure_count() const { return failure_count_; }
-  int32_t success_count() const { return success_count_; }
-  int32_t total_count() const { return success_count() + failure_count(); }
 
  private:
   mutable absl::Mutex mutex_;
@@ -45,61 +41,47 @@ struct ExpectationResultHolder {
   int32_t failure_count_ = 0;
 };
 
-struct BenchmarkResultHolder {
-  void add(nth::test::BenchmarkResult const& result) {
-    absl::MutexLock lock(&mutex_);
-    results_.push_back(result);
-  }
+nth::indestructible<contract_violation_holder> contract_violations;
 
-  std::vector<nth::test::BenchmarkResult> results() {
-    std::vector<nth::test::BenchmarkResult> results;
-    {
-      absl::MutexLock lock(&mutex_);
-      results = results_;
-    }
-    return results;
-  }
-
- private:
-  mutable absl::Mutex mutex_;
-  std::vector<nth::test::BenchmarkResult> results_;
-};
-
-nth::indestructible<ExpectationResultHolder> contract_violations;
-nth::indestructible<BenchmarkResultHolder> benchmark_results;
-
-struct CharSpacer {
+struct char_spacer {
   using nth_format_spec = nth::trivial_format_spec;
 
-  friend constexpr auto NthDefaultFormatSpec(nth::type_tag<CharSpacer>) {
+  friend constexpr auto NthDefaultFormatSpec(nth::type_tag<char_spacer>) {
     return nth::trivial_format_spec{};
   }
 
-  friend nth::format_spec<CharSpacer> NthFormatSpec(
-      nth::interpolation_string_view, nth::type_tag<CharSpacer>) {
+  friend nth::format_spec<char_spacer> NthFormatSpec(
+      nth::interpolation_string_view, nth::type_tag<char_spacer>) {
     return {};
   }
 
-  friend void NthFormat(auto& w, nth::format_spec<CharSpacer>, CharSpacer s) {
-    w.write(nth::byte_range(std::string(s.count, s.content)));
+  friend void NthFormat(auto& w, nth::format_spec<char_spacer>, char_spacer s) {
+    char buffer[256];
+    std::memset(buffer, s.content, s.count < 256 ? s.count : size_t{256});
+
+    size_t iters = s.count >> 8;
+    for (size_t i = 0; i < iters; ++i) { w.write(nth::byte_range(buffer)); }
+    w.write(nth::byte_range(buffer).subspan(0, s.count - (iters << 8)));
   }
   char content;
   size_t count;
 };
 
-struct Spacer {
+struct string_view_spacer {
   using nth_format_spec = nth::trivial_format_spec;
 
-  friend constexpr auto NthDefaultFormatSpec(nth::type_tag<Spacer>) {
+  friend constexpr auto NthDefaultFormatSpec(
+      nth::type_tag<string_view_spacer>) {
     return nth::trivial_format_spec{};
   }
 
-  friend nth::format_spec<Spacer> NthFormatSpec(nth::interpolation_string_view,
-                                                nth::type_tag<Spacer>) {
+  friend nth::format_spec<string_view_spacer> NthFormatSpec(
+      nth::interpolation_string_view, nth::type_tag<string_view_spacer>) {
     return {};
   }
 
-  friend void NthFormat(auto& w, nth::format_spec<Spacer>, Spacer s) {
+  friend void NthFormat(auto& w, nth::format_spec<string_view_spacer>,
+                        string_view_spacer s) {
     for (size_t i = 0; i < s.count; ++i) {
       w.write(nth::byte_range(s.content));
     }
@@ -126,98 +108,35 @@ int main() {
       [](nth::contract_violation const& result) {
         contract_violations->add(result);
       });
-  nth::test::RegisterBenchmarkResultHandler(
-      [](nth::test::BenchmarkResult const& result) {
-        benchmark_results->add(result);
-      });
-  int32_t tests          = 0;
-  int32_t passed         = 0;
-  size_t benchmark_count = 0;
+  int32_t tests        = 0;
+  int32_t tests_passed = 0;
   for (auto const& [name, test] : nth::test::RegisteredTests()) {
     int before = contract_violations->failure_count();
     nth::interpolate<"\x1b[96m[ {} {} TEST ]\x1b[0m\n">(
         nth::io::stderr_writer, name,
-        CharSpacer{.content = '.', .count = width - 10 - name.size()});
+        char_spacer{.content = '.', .count = width - 10 - name.size()});
     test();
     int after    = contract_violations->failure_count();
     bool success = (before == after);
     ++tests;
-    passed += success ? 1 : 0;
-    auto bm_results = benchmark_results->results();
-    if (bm_results.size() != benchmark_count) {
-      std::span bm_span = std::span(bm_results).subspan(benchmark_count);
-
-      nth::io::stderr_writer.write(nth::byte_range(std::string_view(
-          "  \x1b[96mBENCHMARKS:                          Samples      Mean    "
-          "          Std. Dev\n")));
-
-      size_t max_name_length = 0;
-      for (auto const& benchmark_result : bm_span) {
-        if (benchmark_result.name.size() > max_name_length) {
-          max_name_length = benchmark_result.name.size();
-        }
-      }
-      for (auto const& benchmark_result : bm_span) {
-        std::string mean_str    = absl::StrCat(benchmark_result.mean);
-        size_t mean_decimal_pos = mean_str.find('.');
-        if (mean_decimal_pos == std::string::npos) {
-          mean_str.push_back('.');
-          mean_decimal_pos = mean_str.size() - 1;
-        }
-        std::string stddev_str =
-            absl::StrCat(std::sqrt(benchmark_result.variance));
-        size_t stddev_decimal_pos = stddev_str.find('.');
-        if (stddev_decimal_pos == std::string::npos) {
-          stddev_str.push_back('.');
-          stddev_decimal_pos = stddev_str.size() - 1;
-        }
-
-        nth::interpolate<"    [ {} ]{}{}{}{}{}{}{}\n">(
-            nth::io::stderr_writer, benchmark_result.name,
-            std::string_view(max_name_length > 35 ? "\n" : ""),
-            CharSpacer{.content = ' ',
-                       .count   = (max_name_length > 35
-                                       ? 46
-                                       : (38 - benchmark_result.name.size())) -
-                                DigitCount(benchmark_result.samples)},
-            benchmark_result.samples,
-            CharSpacer{.content = ' ', .count = 10 - mean_decimal_pos},
-            mean_str,
-            CharSpacer{.content = ' ',
-                       .count   = mean_decimal_pos + 15 - mean_str.size() -
-                                stddev_decimal_pos},
-            stddev_str);
-      }
-      nth::io::stderr_writer.write(
-          nth::byte_range(std::string_view("\x1b[0m\n")));
-    }
-    benchmark_count = bm_results.size();
     nth::interpolate<"\x1b[{}m[ {} {} {} TEST ]\x1b[0m\n">(
         nth::io::stderr_writer, success ? "96" : "91", name,
-        CharSpacer{.content = '.', .count = TerminalWidth() - 17 - name.size()},
+        char_spacer{.content = '.',
+                    .count   = TerminalWidth() - 17 - name.size()},
         success ? "PASSED" : "FAILED");
   }
 
-  size_t digit_width_tests = DigitCount(passed) + DigitCount(tests);
-  size_t digit_width_expectations =
-      DigitCount(contract_violations->success_count()) +
-      DigitCount(contract_violations->total_count());
-  size_t digit_width = std::max(digit_width_tests, digit_width_expectations);
+  size_t digit_width = DigitCount(tests_passed) + DigitCount(tests);
 
   nth::interpolate<
       "\n"
       "    \u256d{}\u256e\n"
-      "    \u2502 Test Execution Summary:{}\u2502\n"
-      "    \u2502   Tests:        {} passed / {} executed{}\u2502\n"
-      "    \u2502   Expectations: {} passed / {} executed{}\u2502\n"
+      "    \u2502   Tests:          {} passed / {} executed {}\u2502\n"
       "    \u2570{}\u256f\n\n">(
       nth::io::stderr_writer,
-      Spacer{.content = "\u2500", .count = digit_width + 37},
-      CharSpacer{.content = ' ', .count = 13 + digit_width}, passed, tests,
-      CharSpacer{.content = ' ', .count = digit_width - digit_width_tests + 1},
-      contract_violations->success_count(), contract_violations->total_count(),
-      CharSpacer{.content = ' ',
-                 .count   = digit_width - digit_width_expectations + 1},
-      Spacer{.content = "\u2500", .count = digit_width + 37});
+      string_view_spacer{.content = "\u2500", .count = digit_width + 37},
+      tests_passed, tests,
+      char_spacer{.content = ' ', .count = 13 + digit_width},
+      string_view_spacer{.content = "\u2500", .count = digit_width + 37});
   return contract_violations->failure_count() == 0 ? 0 : 1;
 }

@@ -13,15 +13,12 @@ namespace nth {
 struct contract_violation {
   static contract_violation failure(source_location location);
 
-  // TODO: Remove
-  [[nodiscard]] constexpr bool success() const { return false; }
-
   [[nodiscard]] constexpr struct source_location source_location() const {
     return location_;
   }
 
  private:
-  contract_violation(struct source_location location, bool success);
+  contract_violation(struct source_location location);
 
   struct source_location location_;
 };
