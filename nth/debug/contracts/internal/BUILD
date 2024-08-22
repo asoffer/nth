@@ -28,13 +28,14 @@ cc_library(
 cc_library(
     name = "contracts",
     hdrs = ["contracts.h"],
+    srcs = ["contracts.cc"],
     deps = [
         ":checker",
         ":enabler",
         ":macros",
         ":on_exit",
+        "//nth/debug/contracts:violation",
         "//nth/debug/log",
-        "//nth/debug:expectation_result",
         "//nth/format",
         "//nth/format/interpolate",
         "//nth/io/writer",

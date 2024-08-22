@@ -1,7 +1,7 @@
 #include "nth/debug/property/property.h"
 
 #include "nth/debug/contracts/contracts.h"
-#include "nth/debug/expectation_result.h"
+#include "nth/debug/contracts/violation.h"
 
 int main() {
   using ::nth::debug::GreaterThan;
@@ -12,8 +12,8 @@ int main() {
   constexpr auto AlwaysFalse = nth::debug::MakeProperty<"always-false">(
       [](auto const &) { return false; });
 
-  nth::register_expectation_result_handler(
-      [](nth::expectation_result const &result) {
+  nth::register_contract_violation_handler(
+      [](nth::contract_violation const &result) {
         if (not result.success()) { std::abort(); }
       });
   NTH_REQUIRE(3 >>= not AlwaysFalse());

@@ -16,7 +16,6 @@ cc_test(
     srcs = ["property_test.cc"],
     deps = [
         ":property",
-        "//nth/debug:expectation_result",
         "//nth/debug/contracts",
     ],
 )

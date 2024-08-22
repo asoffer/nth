@@ -1,9 +1,21 @@
 package(default_visibility = ["//visibility:public"])
 
 cc_library(
+    name = "violation",
+    hdrs = ["violation.h"],
+    srcs = ["violation.cc"],
+    deps = [
+        "//nth/debug:source_location",
+        "//nth/base:indestructible",
+        "//nth/registration:registrar",
+    ],
+)
+
+cc_library(
     name = "contracts",
     hdrs = ["contracts.h"],
     deps = [
+        ":violation",
         "//nth/base:section",
         "//nth/debug/contracts/internal:enabler",
         "//nth/debug/contracts/internal:contracts",

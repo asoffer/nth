@@ -2,27 +2,28 @@
 
 #include <vector>
 
-#include "nth/debug/expectation_result.h"
+#include "nth/debug/contracts/violation.h"
 #include "nth/debug/internal/raw_check.h"
 
+static int ensure_failed_count  = 0;
+static int require_failed_count = 0;
+static int failure_count        = 0;
+
+static void reset_counts() {
+  ensure_failed_count  = 0;
+  require_failed_count = 0;
+  failure_count        = 0;
+}
+
+namespace nth::internal_contracts {
+
+void ensure_failed() { ++ensure_failed_count; }
+void require_failed() { ++require_failed_count; }
+
+}  // namespace nth::internal_contracts
+
 #define NTH_DEBUG_INTERNAL_VALIDATE_NO_ABORT(...)
-
-// do {
-//   nth::internal_contracts::AbortingResponder::abort_count = 0;
-//   { __VA_ARGS__; }
-//   if (nth::internal_contracts::AbortingResponder::abort_count != 0) {
-//     std::abort();
-//   }
-// } while (false)
-
 #define NTH_DEBUG_INTERNAL_VALIDATE_ABORTS(...)
-// do {
-//   nth::internal_contracts::AbortingResponder::abort_count = 0;
-//   { __VA_ARGS__; }
-//   if (nth::internal_contracts::AbortingResponder::abort_count != 1) {
-//     std::abort();
-//   }
-// } while (false)
 
 namespace {
 struct Thing {
@@ -32,7 +33,7 @@ struct Thing {
   int& value() { return n; }
   int const& value() const { return n; }
 
-  [[maybe_unused]] /* TODO*/ bool operator==(Thing const&) const = default;
+  bool operator==(Thing const&) const = default;
 
   int n;
 };
@@ -45,7 +46,7 @@ struct S {
   T& value() { return n; }
   T const& value() const { return n; }
 
-  [[maybe_unused]] /* TODO*/ bool operator==(S const&) const = default;
+  bool operator==(S const&) const = default;
 
   T n;
 };
@@ -57,183 +58,183 @@ struct Uncopyable {
   Uncopyable& operator=(Uncopyable const&) = delete;
   Uncopyable& operator=(Uncopyable&&)      = default;
 
-  [[maybe_unused]] /* TODO*/ friend bool operator==(Uncopyable const&,
-                                                    Uncopyable const&) {
-    return true;
-  }
+  friend bool operator==(Uncopyable const&, Uncopyable const&) { return true; }
 };
 
 }  // namespace
 
-// NTH_TRACE_DECLARE_API(Thing, (triple)(add)(value));
+NTH_TRACE_DECLARE_API(Thing, (triple)(add)(value));
 
-// template <typename T>
-// NTH_TRACE_DECLARE_API_TEMPLATE(S<T>, (triple)(add)(value));
-
-static int success_count = 0;
-static int failure_count = 0;
-
-void ResetCounts() {
-  success_count = 0;
-  failure_count = 0;
-}
+template <typename T>
+NTH_TRACE_DECLARE_API_TEMPLATE(S<T>, (triple)(add)(value));
 
 void RequireOnlyAbortsOnFalse() {
-  ResetCounts();
-  NTH_DEBUG_INTERNAL_VALIDATE_NO_ABORT(NTH_REQUIRE(true));
-  NTH_DEBUG_INTERNAL_RAW_CHECK(success_count == 1 and failure_count == 0);
-  NTH_DEBUG_INTERNAL_VALIDATE_ABORTS(NTH_REQUIRE(false));
-  NTH_DEBUG_INTERNAL_RAW_CHECK(success_count == 1 and failure_count == 1);
+  reset_counts();
+  NTH_REQUIRE(true);
+  NTH_DEBUG_INTERNAL_RAW_CHECK(failure_count == 0);
+  NTH_DEBUG_INTERNAL_RAW_CHECK(require_failed_count == 0);
+  NTH_DEBUG_INTERNAL_RAW_CHECK(ensure_failed_count == 0);
+  NTH_REQUIRE(false);
+  NTH_DEBUG_INTERNAL_RAW_CHECK(failure_count == 1);
+  NTH_DEBUG_INTERNAL_RAW_CHECK(require_failed_count == 1);
+  NTH_DEBUG_INTERNAL_RAW_CHECK(ensure_failed_count == 0);
 }
 
 void EnsureOnlyAbortsOnFalse() {
-  ResetCounts();
-  NTH_DEBUG_INTERNAL_VALIDATE_NO_ABORT(NTH_ENSURE(true));
-  NTH_DEBUG_INTERNAL_RAW_CHECK(success_count == 1 and failure_count == 0);
-  NTH_DEBUG_INTERNAL_VALIDATE_ABORTS(NTH_ENSURE(false));
-  NTH_DEBUG_INTERNAL_RAW_CHECK(success_count == 1 and failure_count == 1);
+  reset_counts();
+  { NTH_ENSURE(true); }
+  NTH_DEBUG_INTERNAL_RAW_CHECK(failure_count == 0);
+  NTH_DEBUG_INTERNAL_RAW_CHECK(require_failed_count == 0);
+  NTH_DEBUG_INTERNAL_RAW_CHECK(ensure_failed_count == 0);
+  { NTH_ENSURE(false); }
+  NTH_DEBUG_INTERNAL_RAW_CHECK(failure_count == 1);
+  NTH_DEBUG_INTERNAL_RAW_CHECK(require_failed_count == 0);
+  NTH_DEBUG_INTERNAL_RAW_CHECK(ensure_failed_count == 1);
 }
 
 void EnsureEvaluatesAtEndOfScope() {
-  ResetCounts();
-  NTH_DEBUG_INTERNAL_VALIDATE_NO_ABORT({
-    [[maybe_unused]] bool b = false;  // TODO
-    NTH_ENSURE(b);
-    NTH_DEBUG_INTERNAL_RAW_CHECK(success_count == 0 and failure_count == 0);
-    b = true;
-  });
-  NTH_DEBUG_INTERNAL_RAW_CHECK(success_count == 1 and failure_count == 0);
+  reset_counts();
+  {
+    NTH_ENSURE(true);
+    NTH_DEBUG_INTERNAL_RAW_CHECK(failure_count == 0);
+    NTH_DEBUG_INTERNAL_RAW_CHECK(require_failed_count == 0);
+    NTH_DEBUG_INTERNAL_RAW_CHECK(ensure_failed_count == 0);
+  }
+  NTH_DEBUG_INTERNAL_RAW_CHECK(failure_count == 0);
+  NTH_DEBUG_INTERNAL_RAW_CHECK(require_failed_count == 0);
+  NTH_DEBUG_INTERNAL_RAW_CHECK(ensure_failed_count == 0);
 
-  ResetCounts();
-  NTH_DEBUG_INTERNAL_VALIDATE_ABORTS({
-    [[maybe_unused]] bool b = true;  // TODO
-    NTH_ENSURE(b);
-    NTH_DEBUG_INTERNAL_RAW_CHECK(success_count == 0 and failure_count == 0);
-    b = false;
-  });
-  NTH_DEBUG_INTERNAL_RAW_CHECK(success_count == 0 and failure_count == 1);
+  {
+    NTH_DEBUG_INTERNAL_RAW_CHECK(failure_count == 0);
+    NTH_DEBUG_INTERNAL_RAW_CHECK(require_failed_count == 0);
+    NTH_DEBUG_INTERNAL_RAW_CHECK(ensure_failed_count == 0);
+    NTH_ENSURE(false);
+  }
+  NTH_DEBUG_INTERNAL_RAW_CHECK(failure_count == 1);
+  NTH_DEBUG_INTERNAL_RAW_CHECK(require_failed_count == 0);
+  NTH_DEBUG_INTERNAL_RAW_CHECK(ensure_failed_count == 1);
 }
 
 void CheckComparisonOperators() {
-  ResetCounts();
+  reset_counts();
 
-  int n                             = 3;
-  [[maybe_unused]] /* TODO*/ auto t = nth::trace<"n">(n);
+  int n  = 3;
+  auto t = nth::trace<"n">(n);
 
-  NTH_DEBUG_INTERNAL_VALIDATE_NO_ABORT(NTH_REQUIRE(t == 3));
-  NTH_DEBUG_INTERNAL_VALIDATE_NO_ABORT(NTH_REQUIRE(t <= 4));
-  NTH_DEBUG_INTERNAL_VALIDATE_NO_ABORT(NTH_REQUIRE(t < 4));
-  NTH_DEBUG_INTERNAL_VALIDATE_NO_ABORT(NTH_REQUIRE(t >= 2));
-  NTH_DEBUG_INTERNAL_VALIDATE_NO_ABORT(NTH_REQUIRE(t > 2));
-  NTH_DEBUG_INTERNAL_VALIDATE_NO_ABORT(NTH_REQUIRE(t != 2));
-  NTH_DEBUG_INTERNAL_RAW_CHECK(success_count == 6 and failure_count == 0);
+  NTH_REQUIRE(t == 3);
+  NTH_REQUIRE(t <= 4);
+  NTH_REQUIRE(t < 4);
+  NTH_REQUIRE(t >= 2);
+  NTH_REQUIRE(t > 2);
+  NTH_REQUIRE(t != 2);
+  NTH_DEBUG_INTERNAL_RAW_CHECK(failure_count == 0);
+  NTH_DEBUG_INTERNAL_RAW_CHECK(require_failed_count == 0);
+  NTH_DEBUG_INTERNAL_RAW_CHECK(ensure_failed_count == 0);
 
-  NTH_DEBUG_INTERNAL_VALIDATE_ABORTS(NTH_REQUIRE(t == -3));
-  NTH_DEBUG_INTERNAL_VALIDATE_ABORTS(NTH_REQUIRE(t <= -4));
-  NTH_DEBUG_INTERNAL_VALIDATE_ABORTS(NTH_REQUIRE(t < -4));
-  NTH_DEBUG_INTERNAL_VALIDATE_ABORTS(NTH_REQUIRE(t >= 12));
-  NTH_DEBUG_INTERNAL_VALIDATE_ABORTS(NTH_REQUIRE(t > 12));
-  NTH_DEBUG_INTERNAL_VALIDATE_ABORTS(NTH_REQUIRE(t != 3));
-  NTH_DEBUG_INTERNAL_RAW_CHECK(success_count == 6 and failure_count == 6);
+  NTH_REQUIRE(t == -3);
+  NTH_REQUIRE(t <= -4);
+  NTH_REQUIRE(t < -4);
+  NTH_REQUIRE(t >= 12);
+  NTH_REQUIRE(t > 12);
+  NTH_REQUIRE(t != 3);
+  NTH_DEBUG_INTERNAL_RAW_CHECK(failure_count == 6);
+  NTH_DEBUG_INTERNAL_RAW_CHECK(require_failed_count == 6);
+  NTH_DEBUG_INTERNAL_RAW_CHECK(ensure_failed_count == 0);
 }
 
 void CheckComparisonOperatorOverloads() {
-  ResetCounts();
+  reset_counts();
 
-  int n                             = 3;
-  [[maybe_unused]] /* TODO*/ auto t = nth::trace<"n">(n);
+  int n  = 3;
+  auto t = nth::trace<"n">(n);
 
-  NTH_DEBUG_INTERNAL_VALIDATE_NO_ABORT(NTH_REQUIRE(t * 2 == 6));
-  NTH_DEBUG_INTERNAL_VALIDATE_NO_ABORT(NTH_REQUIRE(t * 2 + 1 == 7));
-  NTH_DEBUG_INTERNAL_VALIDATE_NO_ABORT(NTH_REQUIRE((1 + t) * 2 + 1 == 9));
-  NTH_DEBUG_INTERNAL_VALIDATE_NO_ABORT(NTH_REQUIRE(9 == (1 + t) * 2 + 1));
-  NTH_DEBUG_INTERNAL_RAW_CHECK(success_count == 4 and failure_count == 0);
+  NTH_REQUIRE(t * 2 == 6);
+  NTH_REQUIRE(t * 2 + 1 == 7);
+  NTH_REQUIRE((1 + t) * 2 + 1 == 9);
+  NTH_REQUIRE(9 == (1 + t) * 2 + 1);
+  NTH_DEBUG_INTERNAL_RAW_CHECK(failure_count == 0);
+  NTH_DEBUG_INTERNAL_RAW_CHECK(require_failed_count == 0);
+  NTH_DEBUG_INTERNAL_RAW_CHECK(ensure_failed_count == 0);
 
-  NTH_DEBUG_INTERNAL_VALIDATE_ABORTS(NTH_REQUIRE(t * 2 != 6));
-  NTH_DEBUG_INTERNAL_VALIDATE_ABORTS(NTH_REQUIRE(t * 2 + 1 != 7));
-  NTH_DEBUG_INTERNAL_VALIDATE_ABORTS(NTH_REQUIRE((1 + t) * 2 + 1 != 9));
-  NTH_DEBUG_INTERNAL_VALIDATE_ABORTS(NTH_REQUIRE(9 != (1 + t) * 2 + 1));
-  NTH_DEBUG_INTERNAL_RAW_CHECK(success_count == 4 and failure_count == 4);
+  NTH_REQUIRE(t * 2 != 6);
+  NTH_REQUIRE(t * 2 + 1 != 7);
+  NTH_REQUIRE((1 + t) * 2 + 1 != 9);
+  NTH_REQUIRE(9 != (1 + t) * 2 + 1);
+  NTH_DEBUG_INTERNAL_RAW_CHECK(failure_count == 4);
+  NTH_DEBUG_INTERNAL_RAW_CHECK(require_failed_count == 4);
+  NTH_DEBUG_INTERNAL_RAW_CHECK(ensure_failed_count == 0);
 }
 
-// TODO
-#if 0
 void CheckMoveOnly() {
-  ResetCounts();
+  reset_counts();
 
   Uncopyable u;
-  [[maybe_unused]] /* TODO*/ auto t = nth::trace<"u">(u);
+  auto t = nth::trace<"u">(u);
 
-  NTH_DEBUG_INTERNAL_VALIDATE_NO_ABORT(NTH_REQUIRE(t == t));
-  NTH_DEBUG_INTERNAL_RAW_CHECK(success_count == 1 and failure_count == 0);
+  NTH_REQUIRE(t == t);
+  NTH_DEBUG_INTERNAL_RAW_CHECK(failure_count == 0);
+  NTH_DEBUG_INTERNAL_RAW_CHECK(require_failed_count == 0);
+  NTH_DEBUG_INTERNAL_RAW_CHECK(ensure_failed_count == 0);
 }
-#endif
 
 void CheckShortCircuiting() {
-  ResetCounts();
-  int n                             = 3;
-  [[maybe_unused]] /* TODO*/ auto t = nth::trace<"n">(n);
-  NTH_DEBUG_INTERNAL_VALIDATE_NO_ABORT(NTH_REQUIRE(t == 0 or (3 / t) == 1));
-  NTH_DEBUG_INTERNAL_VALIDATE_NO_ABORT(NTH_REQUIRE(t == 2 or t == 3));
-  NTH_DEBUG_INTERNAL_RAW_CHECK(success_count == 2 and failure_count == 0);
+  reset_counts();
+  int n  = 3;
+  auto t = nth::trace<"n">(n);
+  NTH_REQUIRE(t == 0 or (3 / t) == 1);
+  NTH_REQUIRE(t == 2 or t == 3);
+  NTH_DEBUG_INTERNAL_RAW_CHECK(failure_count == 0);
+  NTH_DEBUG_INTERNAL_RAW_CHECK(require_failed_count == 0);
+  NTH_DEBUG_INTERNAL_RAW_CHECK(ensure_failed_count == 0);
 
   n = 0;
-  NTH_DEBUG_INTERNAL_VALIDATE_NO_ABORT(NTH_REQUIRE(t == 0 or (3 / t) == 1));
-  NTH_DEBUG_INTERNAL_VALIDATE_ABORTS(NTH_REQUIRE(t == 2 or t == 3));
-  NTH_DEBUG_INTERNAL_RAW_CHECK(success_count == 3 and failure_count == 1);
+  NTH_REQUIRE(t == 0 or (3 / t) == 1);
+  NTH_REQUIRE(t == 2 or t == 3);
+  NTH_DEBUG_INTERNAL_RAW_CHECK(failure_count == 1);
+  NTH_DEBUG_INTERNAL_RAW_CHECK(require_failed_count == 1);
+  NTH_DEBUG_INTERNAL_RAW_CHECK(ensure_failed_count == 0);
 }
 
 void CheckDeclaredApi() {
-  ResetCounts();
+  reset_counts();
   Thing thing{.n = 5};
-  [[maybe_unused]] /* TODO*/ auto traced_thing = nth::trace<"thing">(thing);
-  // NTH_DEBUG_INTERNAL_VALIDATE_NO_ABORT(
-  //     NTH_REQUIRE(traced_thing.triple() == 15));
-  // NTH_DEBUG_INTERNAL_VALIDATE_NO_ABORT(NTH_REQUIRE(traced_thing.value() ==
-  // 5)); NTH_DEBUG_INTERNAL_VALIDATE_NO_ABORT(
-  //     NTH_REQUIRE(traced_thing.add(3).add(4).add(10) == Thing{.n = 22}));
-  // NTH_DEBUG_INTERNAL_VALIDATE_ABORTS(NTH_REQUIRE(traced_thing.triple() ==
-  // 14)); NTH_DEBUG_INTERNAL_VALIDATE_ABORTS(NTH_REQUIRE(traced_thing.value()
-  // == 6));
-  // TODO: Figure out what's going on here.
-  // NTH_DEBUG_INTERNAL_VALIDATE_ABORTS(
-  //     NTH_REQUIRE(traced_thing.add(3).add(4).add(10) == Thing{.n = 23}));
-  NTH_DEBUG_INTERNAL_RAW_CHECK(success_count == 3 and failure_count == 2);
+  auto traced_thing = nth::trace<"thing">(thing);
+
+  NTH_REQUIRE(traced_thing.triple() == 15);
+  NTH_REQUIRE(traced_thing.value() == 5);
+  NTH_REQUIRE(traced_thing.add(3).add(4).add(10) == Thing{.n = 22});
+  NTH_REQUIRE(traced_thing.triple() == 14);                           // Failure
+  NTH_REQUIRE(traced_thing.value() == 6);                             // Failure
+  NTH_REQUIRE(traced_thing.add(3).add(4).add(10) == Thing{.n = 23});  // Failure
+  NTH_DEBUG_INTERNAL_RAW_CHECK(failure_count == 3);
 }
 void CheckDeclaredTemplateApi() {
-  ResetCounts();
+  reset_counts();
   S<int> thing{.n = 5};
-  [[maybe_unused]] /* TODO*/ auto traced_thing = nth::trace<"thing">(thing);
-  // NTH_DEBUG_INTERNAL_VALIDATE_NO_ABORT(
-  //     NTH_REQUIRE(traced_thing.triple() == 15));
-  // NTH_DEBUG_INTERNAL_VALIDATE_NO_ABORT(NTH_REQUIRE(traced_thing.value() ==
-  // 5)); NTH_DEBUG_INTERNAL_VALIDATE_NO_ABORT(
-  //     NTH_REQUIRE(traced_thing.add(3).add(4).add(10) == S<int>{.n = 22}));
-  // NTH_DEBUG_INTERNAL_VALIDATE_ABORTS(NTH_REQUIRE(traced_thing.triple() ==
-  // 14)); NTH_DEBUG_INTERNAL_VALIDATE_ABORTS(NTH_REQUIRE(traced_thing.value()
-  // == 6));
-  // TODO: Figure out what's going on here.
-  // NTH_DEBUG_INTERNAL_VALIDATE_ABORTS(
-  //     NTH_REQUIRE(traced_thing.add(3).add(4).add(10) == S<int>{.n = 23}));
-  NTH_DEBUG_INTERNAL_RAW_CHECK(success_count == 3 and failure_count == 2);
+  auto traced_thing = nth::trace<"thing">(thing);
+
+  NTH_REQUIRE(traced_thing.triple() == 15);
+  NTH_REQUIRE(traced_thing.value() == 5);
+  NTH_REQUIRE(traced_thing.add(3).add(4).add(10) == S<int>{.n = 22});
+  NTH_REQUIRE(traced_thing.triple() == 14);
+  NTH_REQUIRE(traced_thing.value() == 6);
+  NTH_REQUIRE(traced_thing.add(3).add(4).add(10) == S<int>{.n = 23});
+  NTH_DEBUG_INTERNAL_RAW_CHECK(failure_count == 3);
 }
 
 int main() {
-  nth::register_expectation_result_handler(
-      [](nth::expectation_result const& result) {
-        ++(result.success() ? success_count : failure_count);
-      });
+  nth::register_contract_violation_handler(
+      [](nth::contract_violation const&) { ++failure_count; });
 
-  // TODO: Implement.
-  // RequireOnlyAbortsOnFalse();
-  // EnsureOnlyAbortsOnFalse();
-  // EnsureEvaluatesAtEndOfScope();
-  // CheckComparisonOperators();
-  // CheckComparisonOperatorOverloads();
-  // CheckMoveOnly();
-  // CheckShortCircuiting();
-  // CheckDeclaredApi();
-  // CheckDeclaredTemplateApi();
+  RequireOnlyAbortsOnFalse();
+  EnsureOnlyAbortsOnFalse();
+  EnsureEvaluatesAtEndOfScope();
+  CheckComparisonOperators();
+  CheckComparisonOperatorOverloads();
+  CheckMoveOnly();
+  CheckShortCircuiting();
+  CheckDeclaredApi();
+  CheckDeclaredTemplateApi();
   return 0;
 }
 

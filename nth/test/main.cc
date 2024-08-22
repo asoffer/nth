@@ -7,7 +7,7 @@
 #include "absl/strings/str_cat.h"
 #include "absl/synchronization/mutex.h"
 #include "nth/base/indestructible.h"
-#include "nth/debug/expectation_result.h"
+#include "nth/debug/contracts/violation.h"
 #include "nth/debug/log/sink.h"
 #include "nth/debug/log/stderr_log_sink.h"
 #include "nth/format/format.h"
@@ -27,7 +27,7 @@ int TerminalWidth() {
 }
 
 struct ExpectationResultHolder {
-  void add(nth::expectation_result const& result) {
+  void add(nth::contract_violation const& result) {
     auto& counter = result.success() ? success_count_ : failure_count_;
     absl::MutexLock lock(&mutex_);
     results_.push_back(result);
@@ -40,7 +40,7 @@ struct ExpectationResultHolder {
 
  private:
   mutable absl::Mutex mutex_;
-  std::vector<nth::expectation_result> results_;
+  std::vector<nth::contract_violation> results_;
   int32_t success_count_ = 0;
   int32_t failure_count_ = 0;
 };
@@ -65,7 +65,7 @@ struct BenchmarkResultHolder {
   std::vector<nth::test::BenchmarkResult> results_;
 };
 
-nth::indestructible<ExpectationResultHolder> expectation_results;
+nth::indestructible<ExpectationResultHolder> contract_violations;
 nth::indestructible<BenchmarkResultHolder> benchmark_results;
 
 struct CharSpacer {
@@ -122,9 +122,9 @@ size_t DigitCount(size_t n) {
 int main() {
   size_t width = TerminalWidth();
   nth::register_log_sink(nth::stderr_log_sink);
-  nth::register_expectation_result_handler(
-      [](nth::expectation_result const& result) {
-        expectation_results->add(result);
+  nth::register_contract_violation_handler(
+      [](nth::contract_violation const& result) {
+        contract_violations->add(result);
       });
   nth::test::RegisterBenchmarkResultHandler(
       [](nth::test::BenchmarkResult const& result) {
@@ -134,12 +134,12 @@ int main() {
   int32_t passed         = 0;
   size_t benchmark_count = 0;
   for (auto const& [name, test] : nth::test::RegisteredTests()) {
-    int before = expectation_results->failure_count();
+    int before = contract_violations->failure_count();
     nth::interpolate<"\x1b[96m[ {} {} TEST ]\x1b[0m\n">(
         nth::io::stderr_writer, name,
         CharSpacer{.content = '.', .count = width - 10 - name.size()});
     test();
-    int after    = expectation_results->failure_count();
+    int after    = contract_violations->failure_count();
     bool success = (before == after);
     ++tests;
     passed += success ? 1 : 0;
@@ -200,8 +200,8 @@ int main() {
 
   size_t digit_width_tests = DigitCount(passed) + DigitCount(tests);
   size_t digit_width_expectations =
-      DigitCount(expectation_results->success_count()) +
-      DigitCount(expectation_results->total_count());
+      DigitCount(contract_violations->success_count()) +
+      DigitCount(contract_violations->total_count());
   size_t digit_width = std::max(digit_width_tests, digit_width_expectations);
 
   nth::interpolate<
@@ -215,9 +215,9 @@ int main() {
       Spacer{.content = "\u2500", .count = digit_width + 37},
       CharSpacer{.content = ' ', .count = 13 + digit_width}, passed, tests,
       CharSpacer{.content = ' ', .count = digit_width - digit_width_tests + 1},
-      expectation_results->success_count(), expectation_results->total_count(),
+      contract_violations->success_count(), contract_violations->total_count(),
       CharSpacer{.content = ' ',
                  .count   = digit_width - digit_width_expectations + 1},
       Spacer{.content = "\u2500", .count = digit_width + 37});
-  return expectation_results->failure_count() == 0 ? 0 : 1;
+  return contract_violations->failure_count() == 0 ? 0 : 1;
 }

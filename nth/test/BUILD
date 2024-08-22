@@ -96,7 +96,7 @@ cc_library(
         ":benchmark_result",
         ":test",
         "//nth/base:indestructible",
-        "//nth/debug:expectation_result",
+        "//nth/debug/contracts:violation",
         "//nth/debug/log:sink",
         "//nth/debug/log:stderr_log_sink",
         "//nth/io/writer:file",

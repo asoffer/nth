@@ -16,17 +16,6 @@ cc_library(
 )
 
 cc_library(
-    name = "expectation_result",
-    hdrs = ["expectation_result.h"],
-    srcs = ["expectation_result.cc"],
-    deps = [
-        ":source_location",
-        "//nth/base:indestructible",
-        "//nth/registration:registrar",
-    ],
-)
-
-cc_library(
     name = "fakeable_function",
     hdrs = ["fakeable_function.h"],
     deps = [
