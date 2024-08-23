@@ -15,12 +15,9 @@ void register_contract_violation_handler(handler_type handler) {
   registrar_->insert(handler);
 }
 
-contract_violation::contract_violation(nth::source_location location)
-    : location_(location) {}
-
-contract_violation contract_violation::failure(nth::source_location location) {
-  return contract_violation(location);
-}
+contract_violation::contract_violation(contract const &c,
+                                       any_formattable_ref payload)
+    : contract_(c), payload_(payload) {}
 
 registrar<void (*)(contract_violation const &)>::range_type
 registered_contract_violation_handlers() {

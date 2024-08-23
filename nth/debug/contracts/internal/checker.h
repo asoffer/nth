@@ -15,13 +15,9 @@ template <typename T>
 struct checker {
   explicit constexpr checker(T const& v) : result_(v) {}
 
-  [[nodiscard]] constexpr int get() const { return result_; }
+  [[nodiscard]] constexpr bool ok() const { return result_; }
 
-  using nth_format_spec = nth::interpolation_spec;
-
-  friend constexpr auto NthDefaultFormatSpec(nth::type_tag<checker>) {
-    return nth::interpolation_spec::from<"{}">();
-  }
+  [[nodiscard]] bool trace() const { return result_; }
 
   friend format_spec<checker> NthFormatSpec(interpolation_string_view s,
                                             type_tag<checker>) {
@@ -41,12 +37,12 @@ template <std::derived_from<internal_trace::traced_expression_base> T>
 struct checker<T> {
   explicit constexpr checker(T const& v) : result_(v) {}
 
-  [[nodiscard]] constexpr int get() const { return internal_trace::traced_value(result_); }
+  [[nodiscard]] constexpr bool ok() const {
+    return internal_trace::traced_value(result_);
+  }
 
-  using nth_format_spec = nth::interpolation_spec;
-
-  friend constexpr auto NthDefaultFormatSpec(nth::type_tag<checker>) {
-    return nth::interpolation_spec::from<"{}">();
+  [[nodiscard]] T const& trace() const NTH_ATTRIBUTE(lifetimebound) {
+    return result_;
   }
 
   friend format_spec<checker> NthFormatSpec(interpolation_string_view s,

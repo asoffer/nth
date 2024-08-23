@@ -8,6 +8,7 @@
 #include "absl/synchronization/mutex.h"
 #include "nth/base/indestructible.h"
 #include "nth/debug/contracts/violation.h"
+#include "nth/debug/log/log.h"
 #include "nth/debug/log/sink.h"
 #include "nth/debug/log/stderr_log_sink.h"
 #include "nth/format/format.h"
@@ -105,9 +106,17 @@ int main() {
   size_t width = TerminalWidth();
   nth::register_log_sink(nth::stderr_log_sink);
   nth::register_contract_violation_handler(
-      [](nth::contract_violation const& result) {
-        contract_violations->add(result);
+      [](nth::contract_violation const& v) {
+        NTH_LOG(
+            "\033[31;1m{} failed.\n"
+            "  \033[37;1mExpression:\033[0m"
+            "\n    {}\n\n"
+            "  \033[37;1mExpression tree:\033[0m\n"
+            "{}\n") <<= {v.category(), v.expression(), v.payload()};
+
+        contract_violations->add(v);
       });
+
   int32_t tests        = 0;
   int32_t tests_passed = 0;
   for (auto const& [name, test] : nth::test::RegisteredTests()) {

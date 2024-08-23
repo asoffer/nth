@@ -22,9 +22,6 @@ void require_failed() { ++require_failed_count; }
 
 }  // namespace nth::internal_contracts
 
-#define NTH_DEBUG_INTERNAL_VALIDATE_NO_ABORT(...)
-#define NTH_DEBUG_INTERNAL_VALIDATE_ABORTS(...)
-
 namespace {
 struct Thing {
   int triple() const { return n * 3; }
@@ -237,6 +234,3 @@ int main() {
   CheckDeclaredTemplateApi();
   return 0;
 }
-
-#undef NTH_DEBUG_INTERNAL_VALIDATE_NO_ABORT
-#undef NTH_DEBUG_INTERNAL_VALIDATE_ABORTS

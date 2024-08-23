@@ -115,7 +115,9 @@ inline constexpr tree_formatter_config ascii = {
 template <nth::io::forward_writer W>
 struct tree_formatter {
   explicit constexpr tree_formatter(W &w, tree_formatter_config c)
-      : writer_(w), config_(c), prefix_(config_.last_child) {}
+      : writer_(w), config_(c), prefix_("  ") {
+    prefix_.append(config_.last_child);
+  }
 
   friend void NthTraverseTreeEnterSubtree(tree_formatter &t) {
     if (not t.last_node_in_subtree_) {

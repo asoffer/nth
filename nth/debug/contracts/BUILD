@@ -5,8 +5,13 @@ cc_library(
     hdrs = ["violation.h"],
     srcs = ["violation.cc"],
     deps = [
-        "//nth/debug:source_location",
+        "//nth/base:attributes",
         "//nth/base:indestructible",
+        "//nth/debug:source_location",
+        "//nth/format",
+        "//nth/format/interpolate:string_view",
+        "//nth/io/writer",
+        "//nth/io/writer:string",
         "//nth/registration:registrar",
     ],
 )

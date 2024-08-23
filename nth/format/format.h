@@ -34,9 +34,9 @@ namespace nth {
 template <typename T>
 using format_spec = internal_format::format_spec<T>::type;
 
-// Returns the value default format specifier of type `format_spec<T>`. This is
-// either a default constructed `format_spec<T>`, or, if `NthDefaultFormatSpec`
-// is defined as described above, the result of invoking that function.
+// Returns the default format specifier of type `format_spec<T>`. This is either
+// a default constructed `format_spec<T>`, or, if `NthDefaultFormatSpec` is
+// defined as described above, the result of invoking that function.
 template <typename T>
 constexpr ::nth::format_spec<T> default_format_spec();
 

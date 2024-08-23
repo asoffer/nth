@@ -5,6 +5,7 @@
 
 #include "nth/debug/contracts/internal/contracts.h"
 #include "nth/debug/contracts/violation.h"
+#include "nth/debug/source_location.h"
 #include "nth/debug/trace/trace.h"
 
 // The "//nth/debug/contracts" library is aimed at producing runtime assertions

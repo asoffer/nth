@@ -1,5 +1,5 @@
-#ifndef NTH_IO_WRITER_H
-#define NTH_IO_WRITER_H
+#ifndef NTH_IO_WRITER_WRITER_H
+#define NTH_IO_WRITER_WRITER_H
 
 #include <concepts>
 #include <cstdint>
@@ -120,4 +120,4 @@ concept writer = forward_writer<W> and
 
 }  // namespace nth::io
 
-#endif  // NTH_IO_WRITER_H
+#endif  // NTH_IO_WRITER_WRITER_H

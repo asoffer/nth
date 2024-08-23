@@ -35,7 +35,6 @@ cc_library(
         ":macros",
         ":on_exit",
         "//nth/debug/contracts:violation",
-        "//nth/debug/log",
         "//nth/format",
         "//nth/format/interpolate",
         "//nth/io/writer",
@@ -46,6 +45,7 @@ cc_library(
     name = "enabler",
     hdrs = ["enabler.h"],
     deps = [
+        "//nth/debug/contracts:violation",
         "//nth/base:section",
         "//nth/debug:source_location",
     ],
@@ -55,7 +55,6 @@ cc_library(
     name = "on_exit",
     hdrs = ["on_exit.h"],
     deps = [
-        "//nth/debug/log",
         "//nth/debug:source_location",
     ],
 )
