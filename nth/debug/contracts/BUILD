@@ -1,9 +1,8 @@
 package(default_visibility = ["//visibility:public"])
 
 cc_library(
-    name = "violation",
-    hdrs = ["violation.h"],
-    srcs = ["violation.cc"],
+    name = "contract",
+    hdrs = ["contract.h"],
     deps = [
         "//nth/base:attributes",
         "//nth/base:indestructible",
@@ -41,5 +40,22 @@ cc_test(
         "//nth/debug/log",
         "//nth/debug/log:sink",
         "//nth/debug/log:stderr_log_sink",
+    ],
+)
+
+cc_library(
+    name = "violation",
+    hdrs = ["violation.h"],
+    srcs = ["violation.cc"],
+    deps = [
+        ":contract",
+        "//nth/base:attributes",
+        "//nth/base:indestructible",
+        "//nth/debug:source_location",
+        "//nth/format",
+        "//nth/format/interpolate:string_view",
+        "//nth/io/writer",
+        "//nth/io/writer:string",
+        "//nth/registration:registrar",
     ],
 )

@@ -112,7 +112,8 @@ int main() {
             "  \033[37;1mExpression:\033[0m"
             "\n    {}\n\n"
             "  \033[37;1mExpression tree:\033[0m\n"
-            "{}\n") <<= {v.category(), v.expression(), v.payload()};
+            "{}\n") <<=
+            {v.contract().category(), v.contract().expression(), v.payload()};
 
         contract_violations->add(v);
       });

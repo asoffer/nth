@@ -4,6 +4,7 @@
 #include <string_view>
 
 #include "nth/base/attributes.h"
+#include "nth/debug/contracts/contract.h"
 #include "nth/debug/source_location.h"
 #include "nth/format/format.h"
 #include "nth/format/interpolate/string_view.h"
@@ -13,39 +14,7 @@
 
 namespace nth {
 
-struct contract {
-  consteval contract(
-      std::string_view category, std::string_view mode_path,
-      std::string_view expr_str,
-      struct source_location location = nth::source_location::current())
-      : category_(category),
-        mode_path_(mode_path),
-        expr_str_(expr_str),
-        source_location_(location) {}
-
-  [[nodiscard]] constexpr std::string_view category() const {
-    return category_;
-  }
-
-  [[nodiscard]] constexpr struct source_location source_location() const {
-    return source_location_;
-  }
-
-  [[nodiscard]] constexpr std::string_view mode_path() const {
-    return mode_path_;
-  }
-
-  [[nodiscard]] constexpr std::string_view expression() const {
-    return expr_str_;
-  }
-
- private:
-  std::string_view category_;
-  std::string_view mode_path_;
-  std::string_view expr_str_;
-  struct source_location source_location_;
-};
-
+namespace internal_contracts {
 struct any_formattable_ref {
   struct vtable {
     std::string (*format)(void const*);
@@ -82,31 +51,33 @@ struct any_formattable_ref {
   vtable const* vtable_;
 };
 
+}  // namespace internal_contracts
+
 // `contract_violation`:
 //
 // Represents a failing result of a computation intended as verification during
 // a test or debug-check.
 struct contract_violation {
-  contract_violation(contract const& c NTH_ATTRIBUTE(lifetimebound),
-                     any_formattable_ref payload);
+  contract_violation(contract const& c,
+                     internal_contracts::any_formattable_ref payload);
 
   [[nodiscard]] constexpr struct source_location source_location() const {
     return contract_.source_location();
   }
 
-  // The category of the contract that failed (e.g., "NTH_ASSERT", or
-  // "NTH_REQUIRE").
-  constexpr std::string_view category() const { return contract_.category(); }
-
-  // The stringified expression representing the violated contract.
-  constexpr std::string_view expression() const {
-    return contract_.expression();
+  // The contract which was violated.
+  [[nodiscard]] constexpr struct contract const& contract() const {
+    return contract_;
   }
-  constexpr any_formattable_ref payload() const { return payload_; }
+
+  [[nodiscard]] constexpr internal_contracts::any_formattable_ref payload()
+      const NTH_ATTRIBUTE(lifetimebound) {
+    return payload_;
+  }
 
  private:
-  contract const& contract_;
-  any_formattable_ref payload_;
+  struct contract const& contract_;
+  internal_contracts::any_formattable_ref payload_;
 };
 
 // `register_contract_violation_handler`:

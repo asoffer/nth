@@ -15,8 +15,8 @@ void register_contract_violation_handler(handler_type handler) {
   registrar_->insert(handler);
 }
 
-contract_violation::contract_violation(contract const &c,
-                                       any_formattable_ref payload)
+contract_violation::contract_violation(
+    struct contract const &c, internal_contracts::any_formattable_ref payload)
     : contract_(c), payload_(payload) {}
 
 registrar<void (*)(contract_violation const &)>::range_type
