@@ -4,9 +4,9 @@ cc_library(
     name = "arguments",
     hdrs = ["arguments.h"],
     deps = [
-        ":voidifier",
         "//nth/debug/log:line",
         "//nth/debug/log:entry",
+        "//nth/meta/concepts:core",
     ],
 )
 
@@ -15,17 +15,10 @@ cc_library(
     hdrs = ["log.h"],
     deps = [
         ":arguments",
-        ":voidifier",
         "//nth/base:macros",
         "//nth/base:section",
         "//nth/debug/log:line",
         "//nth/debug/log:entry",
         "//nth/debug:source_location",
     ],
-)
-
-cc_library(
-    name = "voidifier",
-    hdrs = ["voidifier.h"],
-    deps = [],
 )

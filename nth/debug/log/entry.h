@@ -6,7 +6,6 @@
 #include <cstring>
 #include <string>
 
-#include "nth/configuration/log.h"
 #include "nth/debug/log/line.h"
 #include "nth/format/interpolate/interpolate.h"
 #include "nth/io/writer/writer.h"
@@ -37,12 +36,6 @@ struct log_entry {
     log_entry& entry_;
   };
 
-  using nth_format_spec = nth::trivial_format_spec;
-
-  friend constexpr auto NthDefaultFormatSpec(nth::type_tag<log_entry>) {
-    return nth::trivial_format_spec{};
-  }
-
   friend format_spec<log_entry> NthFormatSpec(interpolation_string_view,
                                               type_tag<log_entry>) {
     return format_spec<log_entry>();
@@ -64,14 +57,6 @@ struct log_entry {
   friend builder;
 
   size_t id_;
-  // Log data is stored structurally as a tree with all the data needed to
-  // traverse it in a preorder traversal stored inline. Each entry is prefixed
-  // with four bytes. The first two bytes indicate the the number of bytes in
-  // the subtree rooted at that element (including all prefixes). The next two
-  // bytes indicate the number of bytes in just that element (including the
-  // length prefix). In this way, a leaf can be detected by determining that
-  // the number of bytes in the subtree is two more than the number of bytes
-  // in the element itself.
   std::string data_;
 };
 

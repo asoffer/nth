@@ -5,7 +5,6 @@
 #include "nth/base/section.h"
 #include "nth/debug/log/entry.h"
 #include "nth/debug/log/internal/arguments.h"
-#include "nth/debug/log/internal/voidifier.h"
 #include "nth/debug/log/line.h"
 #include "nth/debug/log/sink.h"
 #include "nth/debug/source_location.h"
@@ -30,24 +29,26 @@
 
 #define NTH_INTERNAL_LOG_WITH_VERBOSITY_PATH(unconditional_expr, verbosity,    \
                                              ...)                              \
-  switch (static constexpr nth::interpolation_string NTH_CONCATENATE(          \
-              NthInternalLogInterpolationString, __LINE__){__VA_ARGS__};       \
-          0)                                                                   \
+  NTH_INTERNAL_LOG_IMPL(                                                       \
+      unconditional_expr, verbosity,                                           \
+      NTH_CONCATENATE(NthInternalLogInterpolationString, __LINE__),            \
+      NTH_CONCATENATE(NthInternalLogLine, __LINE__), __VA_ARGS__)
+
+#define NTH_INTERNAL_LOG_IMPL(unconditional_expr, verbosity, interp_str_var,   \
+                              log_line_var, ...)                               \
+  switch (                                                                     \
+      static constexpr nth::interpolation_string interp_str_var{__VA_ARGS__};  \
+      0)                                                                       \
   default:                                                                     \
-    switch (                                                                   \
-        NTH_PLACE_IN_SECTION(nth_log_line) static constinit ::nth::log_line    \
-            NTH_CONCATENATE(NthInternalLogLine, __LINE__){                     \
-                verbosity,                                                     \
-                NTH_CONCATENATE(NthInternalLogInterpolationString, __LINE__)}; \
-        0)                                                                     \
+    switch (NTH_PLACE_IN_SECTION(                                              \
+                nth_log_line) static constinit ::nth::log_line log_line_var{   \
+        verbosity, interp_str_var};                                            \
+            0)                                                                 \
     default:                                                                   \
-      (((void)unconditional_expr),                                             \
-       not NTH_CONCATENATE(NthInternalLogLine, __LINE__).enabled())            \
+      (((void)unconditional_expr), not log_line_var.enabled())                 \
           ? (void)0                                                            \
-          : nth::internal_log::voidifier{} <<=                                 \
-            ::nth::internal_log::line_injector<                                \
-                NTH_CONCATENATE(NthInternalLogInterpolationString, __LINE__)   \
-                    .placeholders(),                                           \
-                NTH_CONCATENATE(NthInternalLogLine, __LINE__)> {}
+          : ::nth::internal_log::voidifier{} <<=                               \
+            ::nth::internal_log::line_injector<interp_str_var.placeholders(),  \
+                                               log_line_var> {}
 
 #endif  // NTH_LOG_INTERNAL_H

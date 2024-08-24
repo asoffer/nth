@@ -1,13 +1,20 @@
 package(default_visibility = ["//visibility:public"])
 
 cc_library(
+    name = "configuration",
+    hdrs = ["configuration.h"],
+    deps = [
+        "//nth/debug:source_location",
+    ],
+)
+
+cc_library(
     name = "entry",
     visibility = ["//nth/debug/log:__subpackages__"],
     hdrs = ["entry.h"],
     srcs = ["entry.cc"],
     deps = [
         ":line",
-        "//nth/configuration:log",
         "//nth/format/interpolate",
         "//nth/io/writer",
     ],
@@ -22,7 +29,6 @@ cc_library(
         "//nth/format/interpolate:string_view",
     ],
 )
-
 
 cc_library(
     name = "log",
@@ -56,6 +62,7 @@ cc_library(
     hdrs = ["sink.h"],
     srcs = ["sink.cc"],
     deps = [
+        ":configuration",
         ":entry",
         ":line",
         "//nth/base:indestructible",
@@ -67,10 +74,10 @@ cc_library(
     name = "stderr_log_sink",
     hdrs = ["stderr_log_sink.h"],
     deps = [
+        ":configuration",
         ":entry",
         ":line",
         ":sink",
-        "//nth/configuration:log",
         "//nth/io/writer:file",
         "//nth/memory:bytes",
     ],
@@ -80,6 +87,7 @@ cc_library(
     name = "vector_log_sink",
     hdrs = ["vector_log_sink.h"],
     deps = [
+        ":configuration",
         ":entry",
         ":line",
         ":sink",

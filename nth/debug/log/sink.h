@@ -1,6 +1,7 @@
 #ifndef NTH_DEBUG_LOG_SINK_H
 #define NTH_DEBUG_LOG_SINK_H
 
+#include "nth/debug/log/configuration.h"
 #include "nth/debug/log/entry.h"
 #include "nth/debug/log/line.h"
 #include "nth/registration/registrar.h"
@@ -11,7 +12,8 @@ namespace nth {
 // sink to receive all log messages received after registration.
 struct log_sink {
   virtual ~log_sink() = default;
-  virtual void send(log_line const&, log_entry const&) = 0;
+  virtual void send(log_configuration const&, log_line const&,
+                    log_entry const&) = 0;
 };
 
 namespace internal_log {

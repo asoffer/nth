@@ -100,23 +100,25 @@ size_t DigitCount(size_t n) {
   return count;
 }
 
+
+void handle_contract_violation(nth::contract_violation const& v) {
+  NTH_LOG(
+      "\033[31;1m{} failed.\n"
+      "  \033[37;1mExpression:\033[0m"
+      "\n    {}\n\n"
+      "  \033[37;1mExpression tree:\033[0m\n"
+      "{}\n") <<=
+      {nth::log_configuration().source_location(v.contract().source_location()),
+       v.contract().category(), v.contract().expression(), v.payload()};
+  contract_violations->add(v);
+}
+
 }  // namespace
 
 int main() {
   size_t width = TerminalWidth();
   nth::register_log_sink(nth::stderr_log_sink);
-  nth::register_contract_violation_handler(
-      [](nth::contract_violation const& v) {
-        NTH_LOG(
-            "\033[31;1m{} failed.\n"
-            "  \033[37;1mExpression:\033[0m"
-            "\n    {}\n\n"
-            "  \033[37;1mExpression tree:\033[0m\n"
-            "{}\n") <<=
-            {v.contract().category(), v.contract().expression(), v.payload()};
-
-        contract_violations->add(v);
-      });
+  nth::register_contract_violation_handler(handle_contract_violation);
 
   int32_t tests        = 0;
   int32_t tests_passed = 0;
