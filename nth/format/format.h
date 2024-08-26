@@ -1,12 +1,6 @@
 #ifndef NTH_FORMAT_FORMAT_H
 #define NTH_FORMAT_FORMAT_H
 
-#include <charconv>
-#include <concepts>
-#include <cstddef>
-#include <span>
-#include <string_view>
-
 #include "nth/format/internal/format.h"
 #include "nth/io/writer/writer.h"
 #include "nth/memory/bytes.h"
@@ -20,51 +14,34 @@ namespace nth {
 
 // `format_spec` defines the type's format specification.
 //
-// If a type author wishes to provide a custom format specification type for
-// their type, they may implement two customization points. They must have a
-// nested type member named `nth_format_spec` whose type will be used as the
-// format spec for this object. If `nth_format_spec` is not specified, the
-// default of `nth::trivial_format_spec`, an empty type, will be inferred.
-//
-// A type author may also define a function named NthDefaultFormatSpec callable
-// with an `nth::type_tag<T>` (where `T` is their type) to define a custom
-// default format specification for their type. If not provided, the default
-// constructor on the format specifier will be used. This function must be
-// findable via argument-dependent lookup.
+// A type author may customize this value by providing a nested type member
+// named `nth_format_spec` which will be used as the value for
+// `nth::format_spec<T>`. If no such nested type is provided, the default
+// `nth::trivial_format_spec`, an empty type` will be used.
 template <typename T>
 using format_spec = internal_format::format_spec<T>::type;
 
-// Returns the default format specifier of type `format_spec<T>`. This is either
-// a default constructed `format_spec<T>`, or, if `NthDefaultFormatSpec` is
-// defined as described above, the result of invoking that function.
+// `default_format_spec` is a function defining the format specifier to be used
+// in the event that a formatter does not provide one. Type authors may
+// customize this value by providing a function named `NthDefaultFormatSpec`
+// which  is callable with an `nth::type_tag<T>` (where `T` is their type). This
+// function must be findable via argument-dependent lookup. If no such function
+// is provided, but `nth::format_spec<T>` is default constructible, the default
+// constructed value will be used. Otherwise the program is ill-formed and a
+// compilation error will be reported.
 template <typename T>
 constexpr ::nth::format_spec<T> default_format_spec();
 
+// Formats `value` to `w` according to the format specification `spec`.
 template <int&..., typename T>
 constexpr auto format(io::forward_writer auto& w, format_spec<T> const& spec,
-                      T const& value);
-
-// Writes `x` to `w` with the same bit-representation, taking exactly
-// `sizeof(x)` bytes. Returns whether or not the write succeeded.
-template <int&..., io::forward_writer W, typename T>
-typename W::write_result_type format_fixed(
-    W& w, T x) requires std::is_trivially_copyable_v<T>;
-
-// Writes a length-prefixed integer to `w` with the value `n`. The length prefix
-// must fit in a single byte, meaning that integers represented must be
-// representable in `256` or fewer bytes. The number is represented in
-// little-endian order.
-constexpr bool format_integer(io::writer auto& w,
-                              std::signed_integral auto n) requires(sizeof(n) <=
-                                                                    256);
-
-// Writes a length-prefixed integer to `w` with the value `n`. The length prefix
-// must fit in a single byte, meaning that integers represented must be
-// representable in `256` or fewer bytes. The number is represented as a
-// sign-byte (1 for negative numbers, 0 otherwise) followed by the magnitude of
-// the number in little-endian order.
-bool format_integer(io::writer auto& w,
-                    std::unsigned_integral auto n) requires(sizeof(n) <= 256);
+                      T const& value) {
+  if constexpr (requires { NthFormat(w, spec, value); }) {
+    return NthFormat(w, spec, value);
+  } else {
+    w.write(nth::byte_range(std::string_view("Unknown")));
+  }
+}
 
 // Implementation
 
@@ -73,73 +50,10 @@ constexpr ::nth::format_spec<T> default_format_spec() {
   if constexpr (requires { NthDefaultFormatSpec(nth::type<T>); }) {
     return NthDefaultFormatSpec(nth::type<T>);
   } else {
+    static_assert(nth::default_constructible<::nth::format_spec<T>>,
+                  "Because `NthDefaultFormatSpec(nth::type<T>)` is not "
+                  "specified, the type must be default-constructible");
     return {};
-  }
-}
-
-template <int&..., typename T>
-constexpr auto format(io::forward_writer auto& w, format_spec<T> const& spec,
-                      T const& value) {
-  return NthFormat(w, NTH_MOVE(spec), value);
-}
-
-// Writes `x` to `w` with the same bit-representation, taking exactly
-// `sizeof(x)` bytes. Returns whether or not the write succeeded.
-template <int&..., io::forward_writer W, typename T>
-typename W::write_result_type format_fixed(
-    W& w, T x) requires std::is_trivially_copyable_v<T> {
-  return w.write(nth::bytes(x));
-}
-
-constexpr bool format_integer(io::writer auto& w,
-                              std::signed_integral auto n) requires(sizeof(n) <=
-                                                                    256) {
-  auto c = w.allocate(1);
-  if (not c) { return false; }
-
-  std::byte b = static_cast<std::byte>(n < 0);
-  if (w.write(nth::bytes(b)).written() != 1) { return false; }
-
-  std::make_unsigned_t<decltype(n)> m;
-  std::memcpy(&m, &n, sizeof(m));
-  if (n < 0) { m = ~m + 1; }
-
-  if constexpr (sizeof(n) == 1) {
-    return w.write(nth::bytes(m)).written() == sizeof(m) and
-           w.write_at(*c, nth::bytes(static_cast<std::byte>(1)));
-  } else {
-    std::byte buffer[sizeof(n)];
-    std::byte* ptr = buffer;
-    while (m) {
-      *ptr++ = static_cast<std::byte>(m & uint8_t{0xff});
-      m >>= 8;
-    }
-    auto length = ptr - buffer;
-    return w.write(std::span(buffer, length)).written() ==
-               static_cast<size_t>(length) and
-           w.write_at(*c, nth::bytes(static_cast<std::byte>(length)));
-  }
-}
-
-bool format_integer(io::writer auto& w,
-                    std::unsigned_integral auto n) requires(sizeof(n) <= 256) {
-  auto c = w.allocate(1);
-  if (not c) { return false; }
-
-  if constexpr (sizeof(n) == 1) {
-    return w.write(nth::bytes(n)).written() == sizeof(n) and
-           w.write_at(*c, nth::bytes(static_cast<std::byte>(1)));
-  } else {
-    std::byte buffer[sizeof(n)];
-    std::byte* ptr = buffer;
-    while (n) {
-      *ptr++ = static_cast<std::byte>(n & uint8_t{0xff});
-      n >>= 8;
-    }
-    auto length = ptr - buffer;
-    return w.write(std::span(buffer, length)).written() ==
-               static_cast<size_t>(length) and
-           w.write_at(*c, nth::bytes(static_cast<std::byte>(length)));
   }
 }
 

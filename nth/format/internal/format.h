@@ -1,9 +1,11 @@
 #ifndef NTH_FORMAT_INTERNAL_FORMAT_H
 #define NTH_FORMAT_INTERNAL_FORMAT_H
 
+#include <charconv>
 #include <concepts>
 #include <cstddef>
 #include <cstdlib>
+#include <string_view>
 
 #include "nth/memory/bytes.h"
 
@@ -54,16 +56,29 @@ struct format_spec<I> {
 };
 
 template <typename T>
-requires(requires { typename T::nth_format_spec; }) struct format_spec<T> {
+  requires(requires { typename T::nth_format_spec; })
+struct format_spec<T> {
   using type = T::nth_format_spec;
 };
 
 }  // namespace internal_format
 }  // namespace nth
 
-void NthFormat(auto& w, auto const&...) {
-  w.write(nth::byte_range(std::string_view("Unknown")));
+void NthFormat(auto& w, nth::trivial_format_spec, void const* ptr) {
+  w.write(nth::byte_range(std::string_view("0x")));
+  uintptr_t ptrint = reinterpret_cast<uintptr_t>(ptr);
+  char buffer[sizeof(uintptr_t) * 2];
+  char* p = buffer + (sizeof(uintptr_t) * 2) - 1;
+
+  constexpr char const Hex[] = "0123456789abcdef";
+  for (size_t i = 0; i < sizeof(uintptr_t); ++i) {
+    *p-- = Hex[static_cast<uint8_t>(ptrint) & 0x0f];
+    *p-- = Hex[static_cast<uint8_t>(ptrint) >> 4];
+    ptrint >>= 8;
+  }
+  w.write(nth::byte_range(std::string_view(buffer)));
 }
+
 void NthFormat(auto& w, nth::trivial_format_spec, std::string_view s) {
   w.write(nth::byte_range(s));
 }
