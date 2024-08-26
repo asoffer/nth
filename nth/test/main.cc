@@ -100,7 +100,6 @@ size_t DigitCount(size_t n) {
   return count;
 }
 
-
 void handle_contract_violation(nth::contract_violation const& v) {
   NTH_LOG(
       "\033[31;1m{} failed.\n"

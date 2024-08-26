@@ -95,7 +95,7 @@ def _impl(ctx):
         tool_path(name = "strip",   path = "/bin/false"),
     ]
     features = [
-        std_lib_version("2a"),
+        std_lib_version("2b"),
         compiler_flags(ctx.attr.warnings + [
             "-fbracket-depth=1024",
             "-fdiagnostics-color=always",
@@ -106,6 +106,8 @@ def _impl(ctx):
             "-ldl",
             "-lm",
             "-lstdc++",
+            "-Wl",
+            "-ld_classic",
         ] + {
             "macosx": ["-framework", "CoreFoundation"],
         }.get(ctx.attr.os, [])),
@@ -129,14 +131,11 @@ def _impl(ctx):
         abi_libc_version = "unknown",
         cxx_builtin_include_directories = {
            "macosx": [
-                "/usr/local/opt/llvm/include/c++/v1/",
-                "/usr/local/Cellar/llvm/18.1.7/lib/clang/18/include",
-                "/opt/homebrew/Cellar/llvm/16.0.4/lib/clang/16/include/",
-                "/opt/homebrew/Cellar/llvm/16.0.4/lib/clang/16/share/",
-                "/Library/Developer/CommandLineTools/SDKs/MacOSX13.sdk/usr/include/",
-                "/Library/Developer/CommandLineTools/SDKs/MacOSX13.sdk/System/Library/Frameworks/CoreFoundation.framework/Headers",
-                "/Library/Developer/CommandLineTools/SDKs/MacOSX14.sdk/usr/include/",
-                "/Library/Developer/CommandLineTools/SDKs/MacOSX14.sdk/System/Library/Frameworks/CoreFoundation.framework/Headers",
+                "/opt/local/libexec/llvm-18/lib/clang/18/include",
+                "/opt/local/libexec/llvm-18/lib/clang/18/share",
+                "/opt/local/libexec/llvm-18/include/c++/v1/",
+                "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/",
+                "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/System/Library/Frameworks/",
             ],
         }.get(ctx.attr.os, [
             "/usr/lib",

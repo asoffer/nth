@@ -1,5 +1,6 @@
 #include "nth/io/environment_variable.h"
 
+#include <cstdlib>
 #include <mutex>
 
 namespace nth::environment {

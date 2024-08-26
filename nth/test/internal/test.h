@@ -30,8 +30,7 @@ NTH_DEFINE_MUTABLE_COMPILE_TIME_SEQUENCE(
                                __VA_ARGS__)
 
 #define NTH_INTERNAL_IMPLEMENT_EXPECT(verbosity_path, ...)                     \
-  NTH_INTERNAL_CONTRACTS_CHECK("NTH_EXPECT", verbosity_path, std::abort(),     \
-                               __VA_ARGS__)
+  NTH_INTERNAL_CONTRACTS_CHECK("NTH_EXPECT", verbosity_path, , __VA_ARGS__)
 
 namespace nth::test {
 

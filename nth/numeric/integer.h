@@ -134,45 +134,6 @@ struct integer {
                                  n.words().size());
   }
 
-  friend bool NthSerialize(auto &s, integer const &n) {
-    if (nth::format_fixed(s, static_cast<bool>(n.sign_)).written() != 1 or
-        not nth::format_integer(s, n.size_)) {
-      return false;
-    }
-    for (uintptr_t w : n.words()) {
-      if (nth::format_fixed(s, w).written() != sizeof(uintptr_t)) {
-        return false;
-      }
-    }
-    return true;
-  }
-
-  friend bool NthDeserialize(auto &d, integer &n) {
-    bool sig;
-    uintptr_t size;
-    if (not nth::io::read_fixed(d, sig) or not nth::io::read_integer(d, size)) {
-      return false;
-    }
-    n.sign_ = sig;
-    n.size_ = size;
-    switch (size) {
-      case 0: return true;
-      case 1: return nth::io::read_fixed(d, n.data_[0]);
-      case 2:
-        return nth::io::read_fixed(d, n.data_[0]) and
-               nth::io::read_fixed(d, n.data_[1]);
-      default: {
-        uintptr_t *ptr = new uintptr_t[size];
-        n.data_[0]     = reinterpret_cast<uintptr_t>(ptr);
-        n.data_[1]     = size;
-        for (size_t i = 0; i < size; ++i) {
-          if (not nth::io::read_fixed(d, *ptr++)) { return false; }
-        }
-        return true;
-      } break;
-    }
-  }
-
  private:
   void ResizeTo(uint64_t n);
 

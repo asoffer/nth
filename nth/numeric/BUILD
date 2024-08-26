@@ -29,7 +29,6 @@ cc_test(
     deps = [
       ":integer",
       ":test_traits",
-      "//nth/io/serialize:round_trip",
       "//nth/test:main",
     ],
 )

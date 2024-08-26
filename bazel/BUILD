@@ -4,7 +4,7 @@ load(":cc_toolchain_config.bzl", "cc_toolchain_config")
 cc_toolchain_suite(
     name = "cc",
     toolchains = {
-        "darwin": ":macosx_toolchain_x64",
+        # "darwin": ":macosx_toolchain_x64",
         "darwin_arm64": ":macosx_toolchain_arm64",
         "k8": ":k8_toolchain",
     },
@@ -49,15 +49,17 @@ cc_toolchain_config(
         "-Wpedantic",
         "-Wuninitialized",
         "-Wno-c++2b-extensions",
+        "-Wno-deprecated-declarations",
         "-Wno-gcc-compat",
         "-Wno-gnu-statement-expression-from-macro-expansion",
+        "-Wno-missing-field-initializers",
     ]
 )
 
 cc_toolchain_config(
     name = "macosx_toolchain_arm64_config",
     os = "macosx",
-    compiler_path = "/usr/local/bin/clang-16",
+    compiler_path = "/opt/local/bin/clang++-mp-18",
     warnings = [
         "-Wall",
         "-Werror",
@@ -65,8 +67,10 @@ cc_toolchain_config(
         "-Wpedantic",
         "-Wuninitialized",
         "-Wno-c++2b-extensions",
+        "-Wno-deprecated-declarations",
         "-Wno-gcc-compat",
         "-Wno-gnu-statement-expression-from-macro-expansion",
+        "-Wno-missing-field-initializers",
     ]
 )
 
@@ -94,7 +98,9 @@ cc_toolchain_config(
         "-Wpedantic",
         "-Wuninitialized",
         "-Wno-c++2b-extensions",
+        "-Wno-deprecated-declarations",
         "-Wno-gcc-compat",
         "-Wno-gnu-statement-expression-from-macro-expansion",
+        "-Wno-missing-field-initializers",
     ]
 )
