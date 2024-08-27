@@ -88,7 +88,7 @@
             <div class="section" itemprop="articleBody">
               
                 <h1 id="nthbasecore"><code>//nth/base:core</code></h1>
-<p>Provides two macros <code>NTH_MOVE</code> and <code>NTH_FORWARD</code> which are replacements for <code>std::move</code> and
+<p>Provides two macros <code>NTH_MOVE</code> and <code>NTH_FWD</code> which are replacements for <code>std::move</code> and
 <code>std::forward</code> respectively. In large code bases the extra cost of compiling these function
 templates and inlining them can have noticeable affect on compilation times. These macros are
 equivalent implementations removing that cost.</p>
