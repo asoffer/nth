@@ -85,8 +85,8 @@ struct point {
     return nth::interpolation_spec(s);
   }
 
-  template <nth::io::forward_writer W>
-  friend void NthFormat(W w, nth::format_spec<point> spec, point const &pt) {
+  friend void NthFormat(nth::io::writer auto &w, nth::format_spec<point> spec,
+                        point const &pt) {
     nth::interpolate(w, spec, pt.x, pt.y);
   }
   int x = 10;

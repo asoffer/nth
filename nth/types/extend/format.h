@@ -17,8 +17,8 @@ struct formatting : nth::extension<T> {
     return {};
   }
 
-  friend void NthFormat(nth::io::forward_writer auto &w,
-                        nth::format_spec<T> const &, T const &value) {
+  friend void NthFormat(nth::io::writer auto &w, nth::format_spec<T> const &,
+                        T const &value) {
     std::string_view const *name_ptr =
         nth::reflect::field_names<1>(value).data();
     nth::format(w, {}, "{");

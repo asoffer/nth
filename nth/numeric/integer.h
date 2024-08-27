@@ -116,7 +116,7 @@ struct integer {
     return {};
   }
 
-  friend void NthFormat(nth::io::forward_writer auto &w, format_spec<integer>,
+  friend void NthFormat(nth::io::writer auto &w, format_spec<integer>,
                         integer const &n) {
     if (n.size_ == 0) {
       w.write(nth::byte_range(std::string_view("0")));

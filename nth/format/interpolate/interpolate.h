@@ -11,7 +11,7 @@
 
 namespace nth {
 
-template <int &..., io::forward_writer W>
+template <int &..., io::writer W>
 void interpolate(W &w, interpolation_spec spec, auto const &...values) {
   interpolation_spec child;
   ((w.write(spec.next_chunk(child)),
@@ -26,9 +26,10 @@ void interpolate(W &w, interpolation_spec spec, auto const &...values) {
   w.write(spec.last_chunk());
 }
 
-template <interpolation_string S, int &..., io::forward_writer W>
-void interpolate(W &w, auto const &...values) requires(sizeof...(values) ==
-                                                       S.placeholders()) {
+template <interpolation_string S, int &..., io::writer W>
+void interpolate(W &w, auto const &...values)
+  requires(sizeof...(values) == S.placeholders())
+{
   interpolate(w, interpolation_spec::from<S>(), values...);
 }
 

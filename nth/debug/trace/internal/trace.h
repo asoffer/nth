@@ -49,8 +49,8 @@ struct traced_expression_base {
 
 struct writable_ref {
   template <typename T>
-  requires(not std::derived_from<T, traced_expression_base>)  //
-      explicit writable_ref(T const &value NTH_ATTRIBUTE(lifetimebound))
+    requires(not std::derived_from<T, traced_expression_base>)  //
+  explicit writable_ref(T const &value NTH_ATTRIBUTE(lifetimebound))
       : ptr_(reinterpret_cast<traced_expression_base const *>(
             reinterpret_cast<uintptr_t>(nth::address(value)) | uintptr_t{1})),
         write_(write_action<T>) {}
@@ -99,20 +99,20 @@ struct tree_formatter_config {
 };
 
 inline constexpr tree_formatter_config utf8 = {
-    .child       = "├─ ",
-    .last_child  = "╰─ ",
-    .extender    = "│  ",
-    .space       = "   ",
+    .child      = "├─ ",
+    .last_child = "╰─ ",
+    .extender   = "│  ",
+    .space      = "   ",
 };
 
 inline constexpr tree_formatter_config ascii = {
-    .child       = "|- ",
-    .last_child  = "`- ",
-    .extender    = "|  ",
-    .space       = "   ",
+    .child      = "|- ",
+    .last_child = "`- ",
+    .extender   = "|  ",
+    .space      = "   ",
 };
 
-template <nth::io::forward_writer W>
+template <nth::io::writer W>
 struct tree_formatter {
   explicit constexpr tree_formatter(W &w, tree_formatter_config c)
       : writer_(w), config_(c), prefix_("  ") {
@@ -204,14 +204,14 @@ struct traced_value_holder : traced_members<T> {
     return nth::trivial_format_spec{};
   }
 
-  friend void NthFormat(io::forward_writer auto &w,
-                        format_spec<traced_value_holder>,
+  friend void NthFormat(io::writer auto &w, format_spec<traced_value_holder>,
                         traced_value_holder const &t) {
     nth::format(w, {}, t.value_);
   }
 
-  explicit constexpr operator bool() const NTH_ATTRIBUTE(
-      lifetimebound) requires(nth::explicitly_convertible_to<T, bool>) {
+  explicit constexpr operator bool() const NTH_ATTRIBUTE(lifetimebound)
+    requires(nth::explicitly_convertible_to<T, bool>)
+  {
     return value_;
   }
 
@@ -225,8 +225,10 @@ struct traced_value_holder : traced_members<T> {
 template <typename T, int DependentCount>
 struct traced_expression : traced_value_holder<T> {
   template <typename Op>
-  static traced_expression construct(auto const &...arguments NTH_ATTRIBUTE(
-      lifetimebound)) requires(sizeof...(arguments) == DependentCount) {
+  static traced_expression construct(
+      auto const &...arguments NTH_ATTRIBUTE(lifetimebound))
+    requires(sizeof...(arguments) == DependentCount)
+  {
     return traced_expression(
         [&]() -> decltype(auto) { return Op::invoke(arguments...); }, Op::name,
         writable_ref(arguments)...);
@@ -243,7 +245,7 @@ struct traced_expression : traced_value_holder<T> {
     return nth::trivial_format_spec{};
   }
 
-  template <nth::io::forward_writer W>
+  template <nth::io::writer W>
   friend void NthFormat(W &w, format_spec<traced_expression>,
                         traced_expression const &t) {
     tree_formatter<W> formatter(w, utf8);
@@ -276,8 +278,8 @@ typename T::NthTraceInternalValueType const &traced_value(
 }
 
 template <typename T>
-requires(not std::derived_from<T, traced_expression_base>)
-    T const &traced_value(T const &value NTH_ATTRIBUTE(lifetimebound)) {
+  requires(not std::derived_from<T, traced_expression_base>)
+T const &traced_value(T const &value NTH_ATTRIBUTE(lifetimebound)) {
   return value;
 }
 
@@ -349,11 +351,11 @@ decltype(auto) operator->*(T const &value, injector) {
   };                                                                           \
                                                                                \
   template <typename L, typename R>                                            \
-  requires(                                                                    \
-      std::derived_from<L, ::nth::internal_trace::traced_expression_base> or   \
-      std::derived_from<                                                       \
-          R, ::nth::internal_trace::traced_expression_base>) constexpr auto    \
-  operator NTH_IGNORE_PARENTHESES(op)(L const &lhs, R const &rhs) {            \
+    requires(                                                                  \
+        std::derived_from<L, ::nth::internal_trace::traced_expression_base> or \
+        std::derived_from<R, ::nth::internal_trace::traced_expression_base>)   \
+  constexpr auto operator NTH_IGNORE_PARENTHESES(op)(L const &lhs,             \
+                                                     R const &rhs) {           \
     return traced_expression<                                                  \
         Op::invoke_type<nth::internal_trace::underlying_type<L>,               \
                         nth::internal_trace::underlying_type<R>>,              \

@@ -16,8 +16,8 @@ namespace nth {
 // arguments.
 struct log_entry {
   struct builder {
-    struct write_result_type {
-      explicit constexpr write_result_type(size_t n) : written_(n) {}
+    struct nth_write_result_type {
+      explicit constexpr nth_write_result_type(size_t n) : written_(n) {}
 
       constexpr size_t written() const { return written_; }
 
@@ -30,7 +30,7 @@ struct log_entry {
     explicit builder(log_entry& entry NTH_ATTRIBUTE(lifetimebound))
         : entry_(entry) {}
 
-    write_result_type write(std::span<std::byte const> bytes);
+    nth_write_result_type write(std::span<std::byte const> bytes);
 
    private:
     log_entry& entry_;
@@ -41,7 +41,7 @@ struct log_entry {
     return format_spec<log_entry>();
   }
 
-  friend void NthFormat(io::forward_writer auto& w, format_spec<log_entry>,
+  friend void NthFormat(io::writer auto& w, format_spec<log_entry>,
                         log_entry const& entry) {
     w.write(nth::byte_range(entry.data_));
   }

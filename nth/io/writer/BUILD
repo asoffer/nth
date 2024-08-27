@@ -6,37 +6,34 @@ cc_library(
     deps = [":writer"],
 )
 
-# TODO: buffered_test
-
 cc_library(
     name = "file",
     hdrs = ["file.h"],
     srcs = ["file.cc"],
     deps = [
         ":writer",
+        "//nth/memory:buffer",
         "//nth/io:file_path",
-        "//nth/process/syscall:lseek",
-        "//nth/process/syscall:open",
-        "//nth/process/syscall:write",
     ],
 )
 
-# TODO: This shouldn't rely on //nth/test
-# cc_test(
-#     name = "file_test",
-#     srcs = ["file_test.cc"],
-#     deps = [
-#         ":file",
-#         ":test",
-#         "//nth/test:main",
-#     ]
-# )
+cc_test(
+    name = "file_test",
+    srcs = ["file_test.cc"],
+    deps = [
+        ":file",
+        "//nth/test:main",
+    ]
+)
 
 cc_library(
     name = "string",
     hdrs = ["string.h"],
     srcs = ["string.cc"],
-    deps = [":writer"],
+    deps = [
+        ":writer",
+        "//nth/base:attributes",
+    ],
 )
 
 cc_test(
@@ -44,18 +41,8 @@ cc_test(
     srcs = ["string_test.cc"],
     deps = [
         ":string",
-        ":test",
+        "//nth/memory:bytes",
         "//nth/test:main",
-    ],
-)
-
-cc_library(
-    name = "test",
-    testonly = True,
-    hdrs = ["test.h"],
-    deps = [
-        ":writer",
-        "//nth/test",
     ],
 )
 
@@ -63,11 +50,7 @@ cc_library(
     name = "writer",
     hdrs = ["writer.h"],
     deps = [
-        "//nth/base:core",
-        "//nth/memory:bytes",
-        "//nth/meta/concepts:comparable",
         "//nth/meta/concepts:core",
-        "//nth/meta:type",
     ],
 )
 
@@ -76,5 +59,6 @@ cc_test(
     srcs = ["writer_test.cc"],
     deps = [
         ":writer",
+        "//nth/meta:type",
     ],
 )

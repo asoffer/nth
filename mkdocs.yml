@@ -4,14 +4,14 @@ nav:
   - Libraries:
     #- algorithm: algorithm.md
     - base:
-      - <code>:attributes</code>: base/attributes.md
-      - <code>:configuration</code>: base/configuration.md
-      - <code>:core</code>: base/core.md
-      - <code>:indestructible</code>: base/indestructible.md
-      # - <code>:macros</code>: base/macros.md
-      # - <code>:pack</code>: base/pack.md
-      # - <code>:platform</code>: base/platform.md
-      - <code>:section</code>: base/section.md
+      - attributes: base/attributes.md
+      - configuration: base/configuration.md
+      - core: base/core.md
+      - indestructible: base/indestructible.md
+      # - macros: base/macros.md
+      # - pack: base/pack.md
+      # - platform: base/platform.md
+      - section: base/section.md
     #- commandline: commandline.md
     #- configuration: configuration.md
     #- container: container.md
@@ -27,7 +27,10 @@ nav:
     #- dynamic: dynamic.md
     #- format: format.md
     #- hash: hash.md
-    #- io: io.md
+    - io:
+      - writer: io/writer/writer.md
+      - file: io/writer/file.md
+      - string: io/writer/string.md
     #- memory: memory.md
     #- meta: meta.md
     #- numeric: numeric.md

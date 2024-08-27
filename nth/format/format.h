@@ -34,7 +34,7 @@ constexpr ::nth::format_spec<T> default_format_spec();
 
 // Formats `value` to `w` according to the format specification `spec`.
 template <int&..., typename T>
-constexpr auto format(io::forward_writer auto& w, format_spec<T> const& spec,
+constexpr auto format(io::writer auto& w, format_spec<T> const& spec,
                       T const& value) {
   if constexpr (requires { NthFormat(w, spec, value); }) {
     return NthFormat(w, spec, value);

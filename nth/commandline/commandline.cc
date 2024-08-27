@@ -12,7 +12,7 @@ namespace nth {
 namespace internal_commandline {
 namespace {
 
-void WriteHelpMessage(Usage const &usage, nth::io::forward_writer auto &w) {
+void WriteHelpMessage(Usage const &usage, nth::io::writer auto &w) {
   w.write(nth::byte_range(usage.description));
   w.write(nth::byte_range(std::string_view("\n\n")));
   size_t max_length =
@@ -77,7 +77,7 @@ Command HelpCommand() {
           .description = "Prints a program usage information to the terminal.",
           .execute     = +[](FlagValueSet, std::span<std::string_view const>) {
             internal_commandline::WriteHelpMessage(
-                    *internal_commandline::current_usage, nth::io::stderr_writer);
+                *internal_commandline::current_usage, nth::io::stderr_writer);
             return exit_code::success;
           }};
 }

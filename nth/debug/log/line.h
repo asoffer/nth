@@ -37,7 +37,7 @@ struct log_line {
     return format_spec<log_line>(s);
   }
 
-  friend void NthFormat(io::forward_writer auto& w, format_spec<log_line> spec,
+  friend void NthFormat(io::writer auto& w, format_spec<log_line> spec,
                         log_line const& line) {
     nth::interpolate(w, spec, line.source_location().file_name(),
                      line.source_location().line(),
