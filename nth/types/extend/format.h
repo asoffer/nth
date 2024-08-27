@@ -25,7 +25,7 @@ struct formatting : nth::extension<T> {
     std::string_view separator = "";
     nth::reflect::on_fields<1>(value, [&](auto const &...args) {
       (nth::interpolate<"{}.{} = {}">(w, std::exchange(separator, ", "),
-                                     *name_ptr++, args),
+                                      *name_ptr++, args),
        ...);
     });
     nth::format(w, {}, "}");

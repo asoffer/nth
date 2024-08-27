@@ -1,0 +1,42 @@
+site_name: nth - A collection of C++ Libraries
+nav:
+  - Home: index.md
+  - Libraries:
+    #- algorithm: algorithm.md
+    - base:
+      - <code>:attributes</code>: base/attributes.md
+      - <code>:configuration</code>: base/configuration.md
+      - <code>:core</code>: base/core.md
+      - <code>:indestructible</code>: base/indestructible.md
+      # - <code>:macros</code>: base/macros.md
+      # - <code>:pack</code>: base/pack.md
+      # - <code>:platform</code>: base/platform.md
+      - <code>:section</code>: base/section.md
+    #- commandline: commandline.md
+    #- configuration: configuration.md
+    #- container: container.md
+    #- debug: debug.md
+       #- <code>:contracts</code>: debug/contracts.md
+       #- <code>:log</code>: debug/log.md
+       #- <code>:property</code>: debug/property.md
+       #- <code>:unimplemented</code>: debug/unimplemented.md
+       #- <code>:unreachable</code>: debug/unreachable.md
+       #- <code>:source_location</code>: debug/source_location.md
+       #- <code>:trace</code>: debug/trace.md
+       #- <code>:verbosity</code>: debug/verbosity.md
+    #- dynamic: dynamic.md
+    #- format: format.md
+    #- hash: hash.md
+    #- io: io.md
+    #- memory: memory.md
+    #- meta: meta.md
+    #- numeric: numeric.md
+    #- process: process.md
+    #- registration: registration.md
+    #- strings: strings.md
+    #- test: test.md
+    #- try: try.md
+    #- types: types.md
+    #- utility: utility.md
+theme:
+  name: readthedocs
