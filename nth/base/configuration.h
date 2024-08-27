@@ -6,14 +6,16 @@
 // This file defines macros that detect compilation options across multiple
 // compilers and provide a uniform api for accessing them.
 
-// `NTH_RTTI_ENABLED` is a macro that will be defined to 1 if runtime type
-// information is available and undefined otherwise.
+// `NTH_RTTI_ENABLED` is a macro that will be defined to `true` if runtime type
+// information is available and to `false` otherwise.
 #if defined(NTH_RTTI_ENABLED)
 #error "The macro `NTH_RTTI_ENABLED` must be deduced."
 #elif (defined(__GNUC__) and defined(__GXX_RTTI) and __GXX_RTTI == 1) or       \
     (defined(__clang__) and defined(__GXX_RTTI) and __GXX_RTTI == 1) or        \
     (defined(_MSC_VER) and defined(__CPPRTTI) and __CPPRTTI == 1)
-#define NTH_RTTI_ENABLED 1
+#define NTH_RTTI_ENABLED true
+#else
+#define NTH_RTTI_ENABLED false
 #endif
 
 // `NTH_BUILD_MODE` is a function-like macro that expands to either `true` or
@@ -56,9 +58,17 @@
 #define NTH_INTERNAL_BUILD_MODE_fast true
 
 namespace nth {
+
+enum class build {
+  optimize,
+  harden,
+  debug,
+  fast,
+};
+
 namespace internal_configuration {
 
-inline constexpr bool StrEq(char const *lhs, char const *rhs) {
+inline constexpr bool str_eq(char const *lhs, char const *rhs) {
   while (true) {
     if (*lhs == '\0') {
       return *rhs == '\0';
@@ -74,24 +84,15 @@ inline constexpr bool StrEq(char const *lhs, char const *rhs) {
 
 [[noreturn]] void InvalidBuildMode();
 
-}  // namespace internal_configuration
-
-enum class build {
-  optimize,
-  harden,
-  debug,
-  fast,
-};
-
-inline constexpr build build_mode = [] {
+inline constexpr build build_mode_impl() {
   char const *mode = NTH_STRINGIFY(NTH_COMMANDLINE_BUILD_MODE);
-  if (nth::internal_configuration::StrEq(mode, "optimize")) {
+  if (nth::internal_configuration::str_eq(mode, "optimize")) {
     return build::optimize;
-  } else if (nth::internal_configuration::StrEq(mode, "harden")) {
+  } else if (nth::internal_configuration::str_eq(mode, "harden")) {
     return build::harden;
-  } else if (nth::internal_configuration::StrEq(mode, "debug")) {
+  } else if (nth::internal_configuration::str_eq(mode, "debug")) {
     return build::debug;
-  } else if (nth::internal_configuration::StrEq(mode, "fast")) {
+  } else if (nth::internal_configuration::str_eq(mode, "fast")) {
     return build::fast;
   } else {
     using ::nth::internal_configuration::InvalidBuildMode;
@@ -105,7 +106,11 @@ inline constexpr build build_mode = [] {
     InvalidBuildMode();  // Must be 'optimize', 'harden', 'debug', or 'fast'.
     // clang-format on
   }
-}();
+}
+
+}  // namespace internal_configuration
+
+inline constexpr build build_mode = internal_configuration::build_mode_impl();
 
 }  // namespace nth
 

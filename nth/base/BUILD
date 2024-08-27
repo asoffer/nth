@@ -40,6 +40,8 @@ cc_library(
     name = "indestructible",
     hdrs = ["indestructible.h"],
     deps = [
+      ":core",
+      "//nth/memory:address",
       "//nth/memory:buffer",
     ],
 )
