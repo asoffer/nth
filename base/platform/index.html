@@ -5,15 +5,15 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       <link rel="shortcut icon" href="../../img/favicon.ico" />
-    <title>configuration - nth - A collection of C++ Libraries</title>
+    <title>platform - nth - A collection of C++ Libraries</title>
     <link rel="stylesheet" href="../../css/theme.css" />
     <link rel="stylesheet" href="../../css/theme_extra.css" />
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
     
       <script>
         // Current page data
-        var mkdocs_page_name = "configuration";
-        var mkdocs_page_input_path = "base/configuration.md";
+        var mkdocs_page_name = "platform";
+        var mkdocs_page_input_path = "base/platform.md";
         var mkdocs_page_url = null;
       </script>
     
@@ -49,17 +49,25 @@
     <ul class="current">
                 <li class="toctree-l2"><a class="reference internal" href="../attributes/">attributes</a>
                 </li>
-                <li class="toctree-l2 current"><a class="reference internal current" href="#">configuration</a>
-    <ul class="current">
-    <li class="toctree-l3"><a class="reference internal" href="#nth_rtti_enabled">NTH_RTTI_ENABLED</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#nth_build_mode">NTH_BUILD_MODE</a>
-    </li>
-    </ul>
-                </li>
                 <li class="toctree-l2"><a class="reference internal" href="../core/">core</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../indestructible/">indestructible</a>
+                </li>
+                <li class="toctree-l2 current"><a class="reference internal current" href="#">platform</a>
+    <ul class="current">
+    <li class="toctree-l3"><a class="reference internal" href="#overview">Overview</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#nth_architecture">NTH_ARCHITECTURE</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#nth_build_feature">NTH_BUILD_FEATURE</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#nth_compiler">NTH_COMPILER</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#nth_executable_format">NTH_EXECUTABLE_FORMAT</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#nth_operating_system">NTH_OPERATING_SYSTEM</a>
+    </li>
+    </ul>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../section/">section</a>
                 </li>
@@ -92,7 +100,7 @@
     <li><a href="../.." class="icon icon-home" aria-label="Docs"></a></li>
           <li class="breadcrumb-item">Libraries</li>
           <li class="breadcrumb-item">base</li>
-      <li class="breadcrumb-item active">configuration</li>
+      <li class="breadcrumb-item active">platform</li>
     <li class="wy-breadcrumbs-aside">
     </li>
   </ul>
@@ -101,53 +109,42 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
             <div class="section" itemprop="articleBody">
               
-                <h1 id="nthbaseconfiguration"><code>//nth/base:configuration</code></h1>
+                <h1 id="nthbaseplatform"><code>//nth/base:platform</code></h1>
+<h2 id="overview">Overview</h2>
 <p>Provides a queryable interface to some build configuration information.</p>
-<h2 id="nth_rtti_enabled"><code>NTH_RTTI_ENABLED</code></h2>
-<p>A macro which expands to <code>true</code> if runtime type information is available and to <code>false</code> otherwise.</p>
-<h2 id="nth_build_mode"><code>NTH_BUILD_MODE</code></h2>
-<p>A function-like macro that expands to either <code>true</code> or <code>false</code>, to indicate that a particular build
-mode is specified. Build modes can be</p>
+<h2 id="nth_architecture"><code>NTH_ARCHITECTURE</code></h2>
+<p>A function-like macro that expands to either <code>true</code> or <code>false</code> depending on whether the argument
+represents the target architecture. Valid arguments are <code>arm64</code>, <code>x64</code>, and <code>unknown</code></p>
+<h2 id="nth_build_feature"><code>NTH_BUILD_FEATURE</code></h2>
+<p>A function-like macro that expands to either <code>true</code> or <code>false</code> depending on whether the build
+feature is enabled. Valid arguments are:</p>
 <ul>
 <li>
-<p><code>optimize</code>: Indicates that runtime execution speed is the primary concern. Other potential
-  priorities such as debuggability or safety are considered less imporant.</p>
+<p><code>rtti</code>: Indicates whether or not run-time type information is available.</p>
 </li>
 <li>
-<p><code>harden</code>: Indicates that the primary concern for the executable is runtime execution speed, but
-  that we are willing to tolerate a small performance loss for particularly important safety
-  features. Other priorities, such as executable size or debuggability are not considered
-  priorities.</p>
+<p><code>asan</code>: Indicates whether or not address-sanitizer is enabled.</p>
 </li>
 <li>
-<p><code>debug</code>: Indicates that the primary concern for this executable is debuggability, and that other
-  potential priorities (for example executable size, or runtime execution speed) are considered less
-  important.</p>
-</li>
-<li>
-<p><code>fast</code>: Indicates that the primary concern for this executable is compilation time, and that other
-  priorities such as runtime execution speed, debuggability, or safety, may be sacrificed in order
-  to compile the executable faster.</p>
+<p><code>tsan</code>: Indicates whether or not thread-sanitizer is enabled.</p>
 </li>
 </ul>
-<p>A build mode may only be specified on the commandline by defining the <code>NTH_COMMANDLINE_BUILD_MODE</code>
-macro to one of these identifiers. If no build mode is specified, the library will attempt to detect
-an appropriate mode, but without any guarantees.</p>
-<p>The chosen build mode will be encoded in the constexpr variable <code>nth::build_mode</code>, whose type is
-given by</p>
-<pre><code>enum class build {
-  optimize,
-  harden,
-  debug,
-  fast,
-};
-</code></pre>
+<h2 id="nth_compiler"><code>NTH_COMPILER</code></h2>
+<p>A function-like macro that expands to either <code>true</code> or <code>false</code> depending on whether the argument
+represents the compiler. Valid arguments are <code>clang</code>, <code>gcc</code>, <code>msvc</code>, or <code>unknown</code>.</p>
+<h2 id="nth_executable_format"><code>NTH_EXECUTABLE_FORMAT</code></h2>
+<p>A function-like macro that expands to either <code>true</code> or <code>false</code> depending on whether the argument
+represents the target executable format. Valid arguments are <code>elf</code>, <code>macho</code>, or <code>unknown</code>.</p>
+<h2 id="nth_operating_system"><code>NTH_OPERATING_SYSTEM</code></h2>
+<p>A function-like macro that expands to either <code>true</code> or <code>false</code> depending on whether the argument
+represents the target operating system. Valid arguments are <code>windows</code>, <code>apple</code>, <code>andriod</code>, <code>linux</code>,
+or <code>unknown</code>.</p>
               
             </div>
           </div><footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
-        <a href="../attributes/" class="btn btn-neutral float-left" title="attributes"><span class="icon icon-circle-arrow-left"></span> Previous</a>
-        <a href="../core/" class="btn btn-neutral float-right" title="core">Next <span class="icon icon-circle-arrow-right"></span></a>
+        <a href="../indestructible/" class="btn btn-neutral float-left" title="indestructible"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../section/" class="btn btn-neutral float-right" title="section">Next <span class="icon icon-circle-arrow-right"></span></a>
     </div>
 
   <hr/>
@@ -170,10 +167,10 @@ given by</p>
   <span class="rst-current-version" data-toggle="rst-current-version">
     
     
-      <span><a href="../attributes/" style="color: #fcfcfc">&laquo; Previous</a></span>
+      <span><a href="../indestructible/" style="color: #fcfcfc">&laquo; Previous</a></span>
     
     
-      <span><a href="../core/" style="color: #fcfcfc">Next &raquo;</a></span>
+      <span><a href="../section/" style="color: #fcfcfc">Next &raquo;</a></span>
     
   </span>
 </div>
