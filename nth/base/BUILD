@@ -15,14 +15,6 @@ cc_test(
 )
 
 cc_library(
-    name = "configuration",
-    hdrs = ["configuration.h"],
-    deps = [
-        ":macros",
-    ],
-)
-
-cc_library(
     name = "core",
     hdrs = ["core.h"],
     deps = [],

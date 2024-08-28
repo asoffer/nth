@@ -19,7 +19,6 @@ cc_library(
     name = "unreachable",
     hdrs = ["unreachable.h"],
     deps = [
-        "//nth/base:configuration",
         "//nth/base:platform",
         "//nth/debug/log",
     ],

@@ -7,7 +7,6 @@ cc_library(
     name = "macros",
     hdrs = ["macros.h"],
     deps = [
-        "//nth/base:configuration",
         "//nth/base:macros",
     ],
 )

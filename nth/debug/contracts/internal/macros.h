@@ -1,7 +1,6 @@
 #ifndef NTH_DEBUG_CONTRACTS_INTERNAL_MACROS_H
 #define NTH_DEBUG_CONTRACTS_INTERNAL_MACROS_H
 
-#include "nth/base/configuration.h"
 #include "nth/base/macros.h"
 
 // Macros implementing the contract behavior. The first parameter to
