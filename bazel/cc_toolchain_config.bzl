@@ -94,6 +94,7 @@ def _impl(ctx):
         tool_path(name = "objdump", path = "/bin/false"),
         tool_path(name = "strip",   path = "/bin/false"),
     ]
+
     features = [
         std_lib_version("2b"),
         compiler_flags(ctx.attr.warnings + [
@@ -106,10 +107,8 @@ def _impl(ctx):
             "-ldl",
             "-lm",
             "-lstdc++",
-            "-Wl",
-            "-ld_classic",
         ] + {
-            "macosx": ["-framework", "CoreFoundation"],
+            "macosx": ["-Wl", "-ld_classic", "-framework", "CoreFoundation"],
         }.get(ctx.attr.os, [])),
         mode_dependent_flags({
             "dbg": ["-g", "-O0"],
