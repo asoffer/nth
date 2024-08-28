@@ -3,7 +3,6 @@
 
 #include "nth/format/internal/format.h"
 #include "nth/io/writer/writer.h"
-#include "nth/memory/bytes.h"
 #include "nth/meta/type.h"
 
 // This header file defines a mechanism by which one can register format
@@ -39,7 +38,7 @@ constexpr auto format(io::writer auto& w, format_spec<T> const& spec,
   if constexpr (requires { NthFormat(w, spec, value); }) {
     return NthFormat(w, spec, value);
   } else {
-    w.write(nth::byte_range(std::string_view("Unknown")));
+    nth::io::write_text(w, std::string_view("Unknown"));
   }
 }
 

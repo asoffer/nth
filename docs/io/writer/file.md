@@ -16,7 +16,7 @@ bool WriteMessage(nth::io::file_path const & path) {
   if (not w) { return false; }
 
   std::string_view message = "hello,";
-  auto result = s.write(nth::byte_range(message));
+  auto result = nth::io::write_text(w, message);
   return result.written() == message.size();
 }
 ```

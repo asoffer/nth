@@ -42,7 +42,7 @@ struct any_formattable_ref {
 
   friend void NthFormat(io::writer auto& w, format_spec<any_formattable_ref>,
                         any_formattable_ref ref) {
-    w.write(nth::byte_range(ref.vtable_->format(ref.ptr_)));
+    nth::io::write_text(w, ref.vtable_->format(ref.ptr_));
   }
 
  private:

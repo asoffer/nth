@@ -4,6 +4,7 @@
 #include <concepts>
 #include <cstddef>
 #include <span>
+#include <string_view>
 
 #include "nth/meta/concepts/core.h"
 
@@ -84,6 +85,19 @@ concept writer = requires(W w) {
     w.write(nth::value<std::span<std::byte const>>())
   } -> nth::precisely<write_result<W>>;
 };
+
+template <writer W>
+write_result<W> write(W& w, std::span<std::byte const> bytes) {
+  return w.write(bytes);
+}
+
+// Because writing text is such a common need, `write_text` is a wrapper around
+// `write` providing this ergonomic benefit.
+template <writer W>
+write_result<W> write_text(W& w, std::string_view text) {
+  return w.write(std::span<std::byte const>(
+      reinterpret_cast<std::byte const*>(text.data()), text.size()));
+}
 
 // `minimal_writer` is the most trivial type satisfying the `writer` concept.
 // Its member functions are not implemented as it is intended only for use at

@@ -1,7 +1,6 @@
 #include "nth/io/writer/file.h"
 
 #include "nth/io/file_path.h"
-#include "nth/memory/bytes.h"
 #include "nth/test/test.h"
 
 namespace nth::io {
@@ -27,7 +26,7 @@ NTH_TEST("/nth/io/writer/file/open") {
     std::optional w = file_writer::try_open(*f);
     NTH_ASSERT(w.has_value());
 
-    NTH_ASSERT(w->write(nth::byte_range(content)).written() == content.size());
+    NTH_ASSERT(write_text(*w, content).written() == content.size());
   }
 
   std::FILE* fptr = std::fopen(f->path().c_str(), "r");

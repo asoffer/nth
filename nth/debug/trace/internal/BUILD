@@ -21,6 +21,5 @@ cc_library(
         "//nth/meta/concepts:core",
         "//nth/meta/concepts:invocable",
         "//nth/memory:address",
-        "//nth/memory:bytes",
     ],
 )

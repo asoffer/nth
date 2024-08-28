@@ -13,8 +13,8 @@ namespace internal_commandline {
 namespace {
 
 void WriteHelpMessage(Usage const &usage, nth::io::writer auto &w) {
-  w.write(nth::byte_range(usage.description));
-  w.write(nth::byte_range(std::string_view("\n\n")));
+  nth::io::write_text(w, usage.description);
+  nth::io::write_text(w, std::string_view("\n\n"));
   size_t max_length =
       std::max_element(usage.commands.begin(), usage.commands.end(),
                        [](auto const &l, auto const &r) {
@@ -23,21 +23,20 @@ void WriteHelpMessage(Usage const &usage, nth::io::writer auto &w) {
           ->name.size();
 
   for (auto const &cmd : usage.commands) {
-    w.write(
-        nth::byte_range(std::string(max_length + 2 - cmd.name.size(), ' ')));
-    w.write(nth::byte_range(cmd.name));
-    w.write(nth::byte_range(std::string_view("  ")));
+    nth::io::write_text(w, std::string(max_length + 2 - cmd.name.size(), ' '));
+    nth::io::write_text(w, cmd.name);
+    nth::io::write_text(w, std::string_view("  "));
     std::string_view s = cmd.description;
 
     size_t d = 0;
     while (not s.empty()) {
-      w.write(
-          nth::byte_range(std::string(std::exchange(d, max_length + 4), ' ')));
-      w.write(nth::byte_range(
-          GreedyLineBreak(s, 76 - max_length, text_encoding::ascii)));
-      w.write(nth::byte_range(std::string_view("\n")));
+      nth::io::write_text(w,
+                          std::string(std::exchange(d, max_length + 4), ' '));
+      nth::io::write_text(
+          w, GreedyLineBreak(s, 76 - max_length, text_encoding::ascii));
+      nth::io::write_text(w, std::string_view("\n"));
     }
-    w.write(nth::byte_range(std::string_view("\n")));
+    nth::io::write_text(w, std::string_view("\n"));
   }
 }
 

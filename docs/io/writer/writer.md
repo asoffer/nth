@@ -8,10 +8,12 @@ much of `nth`'s design, including [formatting](/format/format) and [logging](/lo
 
 As writers abstract the writing of both data (to be serialized) and text (to be logged). One might
 expect a writer to accept a `std::string_view` but this is fundamentally the wrong type for such a
-generic interface. Instead, a writer traffics in `std::span<std::byte const>`. One may produce a
-`std::span<std::byte>` viewing the bytes of an object via [`nth::bytes`](/memory/bytes), or view a
-sequence of bytes represented by an object (such as `std::string` or `std::string_view` via
-[`nth::byte_range`](/memory/bytes).
+generic interface. Instead, a writer traffics in `std::span<std::byte const>`. To address this
+common need, this header also provides a `write_text` free function, accepting a `writer` reference
+and a `std::string_view`, which converts the `std::string_view` to a span of bytes and writes the
+result. Alternatively one may produce a `std::span<std::byte const>` viewing the bytes of an object
+via [`nth::bytes`](/memory/bytes), or view a sequence of bytes represented by an object (such as
+`std::string` or `std::string_view` via [`nth::byte_range`](/memory/bytes).
 
 Because writing data may not succeed, we must also represent the notion of a "write result." This is
 formalized via the `nth::io::write_result_type` concept.

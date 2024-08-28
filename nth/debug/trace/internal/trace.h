@@ -13,7 +13,6 @@
 #include "nth/io/writer/string.h"
 #include "nth/io/writer/writer.h"
 #include "nth/memory/address.h"
-#include "nth/memory/bytes.h"
 #include "nth/meta/compile_time_string.h"
 #include "nth/meta/concepts/c_array.h"
 #include "nth/meta/concepts/convertible.h"
@@ -145,24 +144,24 @@ struct tree_formatter {
   friend void NthTraverseTreeNode(
       tree_formatter &t, writable_ref node,
       nth::tree_traversal_stack<writable_ref> &stack) {
-    t.writer_.write(nth::byte_range(t.prefix_));
+    nth::io::write_text(t.writer_, t.prefix_);
     if (t.last_node_in_subtree_) {
       t.prefix_.resize(t.prefix_.size() - t.config_.last_child.size());
       t.prefix_.append(t.config_.space);
     }
 
     if (std::span children = node.children(); children.empty()) {
-      t.writer_.write(nth::byte_range(node.str()));
+      nth::io::write_text(t.writer_, node.str());
     } else if (node.name().empty()) {
-      t.writer_.write(nth::byte_range(children[0].str()));
+      nth::io::write_text(t.writer_, children[0].str());
     } else {
-      t.writer_.write(nth::byte_range(node.name()));
+      nth::io::write_text(t.writer_, node.name());
 
       for (auto iter = children.rbegin(); iter != children.rend(); ++iter) {
         stack.push(*iter);
       }
     }
-    t.writer_.write(nth::byte_range(std::string_view("\n")));
+    nth::io::write_text(t.writer_, std::string_view("\n"));
   }
 
  private:

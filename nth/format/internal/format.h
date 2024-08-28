@@ -7,7 +7,7 @@
 #include <cstdlib>
 #include <string_view>
 
-#include "nth/memory/bytes.h"
+#include "nth/io/writer/writer.h"
 
 namespace nth {
 
@@ -65,7 +65,7 @@ struct format_spec<T> {
 }  // namespace nth
 
 void NthFormat(auto& w, nth::trivial_format_spec, void const* ptr) {
-  w.write(nth::byte_range(std::string_view("0x")));
+  nth::io::write_text(w, "0x");
   uintptr_t ptrint = reinterpret_cast<uintptr_t>(ptr);
   char buffer[sizeof(uintptr_t) * 2];
   char* p = buffer + (sizeof(uintptr_t) * 2) - 1;
@@ -76,16 +76,16 @@ void NthFormat(auto& w, nth::trivial_format_spec, void const* ptr) {
     *p-- = Hex[static_cast<uint8_t>(ptrint) >> 4];
     ptrint >>= 8;
   }
-  w.write(nth::byte_range(std::string_view(buffer)));
+  nth::io::write_text(w, buffer);
 }
 
 void NthFormat(auto& w, nth::trivial_format_spec, std::string_view s) {
-  w.write(nth::byte_range(s));
+  nth::io::write_text(w, s);
 }
 
 template <int N>
 void NthFormat(auto& w, nth::trivial_format_spec, char const (&s)[N]) {
-  w.write(nth::byte_range(std::string_view(s)));
+  nth::io::write_text(w, s);
 }
 
 void NthFormat(auto& w,
@@ -93,15 +93,9 @@ void NthFormat(auto& w,
                decltype(nullptr)) {
   using spec_type = nth::internal_format::format_spec<decltype(nullptr)>::type;
   switch (spec) {
-    case spec_type::hexadecimal:
-      w.write(nth::byte_range(std::string_view("0x0")));
-      break;
-    case spec_type::word:
-      w.write(nth::byte_range(std::string_view("nullptr")));
-      break;
-    case spec_type::decimal:
-      w.write(nth::byte_range(std::string_view("0")));
-      break;
+    case spec_type::hexadecimal: nth::io::write_text(w, "0x0"); break;
+    case spec_type::word: nth::io::write_text(w, "nullptr"); break;
+    case spec_type::decimal: nth::io::write_text(w, "0"); break;
     default: std::abort();
   }
 }
@@ -111,18 +105,10 @@ void NthFormat(auto& w,
                bool b) {
   using spec_type = nth::internal_format::format_spec<bool>::type;
   switch (spec) {
-    case spec_type::word:
-      w.write(nth::byte_range(std::string_view(b ? "true" : "false")));
-      break;
-    case spec_type::Word:
-      w.write(nth::byte_range(std::string_view(b ? "True" : "False")));
-      break;
-    case spec_type::WORD:
-      w.write(nth::byte_range(std::string_view(b ? "TRUE" : "FALSE")));
-      break;
-    case spec_type::decimal:
-      w.write(nth::byte_range(std::string_view(b ? "1" : "0")));
-      break;
+    case spec_type::word: nth::io::write_text(w, b ? "true" : "false"); break;
+    case spec_type::Word: nth::io::write_text(w, b ? "True" : "False"); break;
+    case spec_type::WORD: nth::io::write_text(w, b ? "TRUE" : "FALSE"); break;
+    case spec_type::decimal: nth::io::write_text(w, b ? "1" : "0"); break;
     default: std::abort();
   }
 }
@@ -134,7 +120,7 @@ void NthFormat(auto& w,
   switch (spec) {
     case spec_type::ascii: {
       char buffer[2] = {c, '\0'};
-      w.write(nth::byte_range(std::string_view(buffer)));
+      nth::io::write_text(w, buffer);
     } break;
     case spec_type::decimal: {
       char buffer[3] = {};
@@ -156,13 +142,13 @@ void NthFormat(auto& w,
       constexpr char const Hex[] = "0123456789abcdef";
       char buffer[3]             = {Hex[static_cast<uint8_t>(b) >> 4],
                                     Hex[static_cast<uint8_t>(b) & 0x0f], '\0'};
-      w.write(nth::byte_range(std::string_view(buffer)));
+      nth::io::write_text(w, buffer);
     } break;
     case spec_type::Hexadecimal: {
       constexpr char const Hex[] = "0123456789ABCDEF";
       char buffer[3]             = {Hex[static_cast<uint8_t>(b) >> 4],
                                     Hex[static_cast<uint8_t>(b) & 0x0f], '\0'};
-      w.write(nth::byte_range(std::string_view(buffer)));
+      nth::io::write_text(w, buffer);
     } break;
     case spec_type::decimal: {
       char buffer[3] = {};

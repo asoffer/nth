@@ -14,11 +14,11 @@ std::string s;
 nth::io::string_writer w(s);
 
 std::string_view message1 = "hello,";
-auto result1 = s.write(nth::byte_range(message1));
+auto result1 = nth::io::write_text(w, message1);
 NTH_EXPECT(result1.written() == message1.size());
 
 std::string_view message2 = " world!";
-auto result2 = s.write(nth::byte_range(message1));
+auto result2 = nth::io::write_text(w, message1);
 NTH_EXPECT(result2.written() == message2.size());
 
 NTH_EXPECT(s == "hello, world!");

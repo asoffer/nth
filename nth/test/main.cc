@@ -61,8 +61,8 @@ struct char_spacer {
     std::memset(buffer, s.content, s.count < 256 ? s.count : size_t{256});
 
     size_t iters = s.count >> 8;
-    for (size_t i = 0; i < iters; ++i) { w.write(nth::byte_range(buffer)); }
-    w.write(nth::byte_range(buffer).subspan(0, s.count - (iters << 8)));
+    for (size_t i = 0; i < iters; ++i) { nth::io::write_text(w, buffer); }
+    nth::io::write_text(w, std::string_view(buffer, s.count - (iters << 8)));
   }
   char content;
   size_t count;
@@ -83,9 +83,7 @@ struct string_view_spacer {
 
   friend void NthFormat(auto& w, nth::format_spec<string_view_spacer>,
                         string_view_spacer s) {
-    for (size_t i = 0; i < s.count; ++i) {
-      w.write(nth::byte_range(s.content));
-    }
+    for (size_t i = 0; i < s.count; ++i) { nth::io::write_text(w, s.content); }
   }
   std::string_view content;
   size_t count;

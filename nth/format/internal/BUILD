@@ -4,7 +4,7 @@ cc_library(
     name = "format",
     hdrs = ["format.h"],
     deps = [
-        "//nth/memory:bytes",
+        "//nth/io/writer",
         "//nth/meta:type",
     ],
 )

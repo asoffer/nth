@@ -119,10 +119,10 @@ struct integer {
   friend void NthFormat(nth::io::writer auto &w, format_spec<integer>,
                         integer const &n) {
     if (n.size_ == 0) {
-      w.write(nth::byte_range(std::string_view("0")));
+      nth::io::write_text(w, std::string_view("0"));
       return;
     }
-    w.write(nth::byte_range(std::string_view(negative(n) ? "-0x" : "0x")));
+    nth::io::write_text(w, std::string_view(negative(n) ? "-0x" : "0x"));
     std::unique_ptr<char[]> buffer(new char[16 * n.size_]);
     w.write(n.PrintUsingBuffer(std::span(buffer.get(), 16 * n.size_)));
   }

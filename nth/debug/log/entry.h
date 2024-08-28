@@ -43,7 +43,7 @@ struct log_entry {
 
   friend void NthFormat(io::writer auto& w, format_spec<log_entry>,
                         log_entry const& entry) {
-    w.write(nth::byte_range(entry.data_));
+    nth::io::write_text(w, entry.data_);
   }
 
   size_t id() const { return id_; }
