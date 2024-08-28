@@ -11,7 +11,6 @@ cc_library(
         "//nth/debug/log",
         "//nth/debug/property",
         "//nth/debug/trace",
-        "//nth/debug/verbosity",
     ],
 )
 

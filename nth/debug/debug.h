@@ -54,19 +54,4 @@
 // indicates that this statement is not reachable.
 #include "nth/debug/unreachable.h"
 
-// Verbosity:
-//
-// Most of these libraries may be used in a way that is optionally configurable
-// by a "verbosity" parameter. The verbosity parameter controls what variant of
-// the requested behavior should happen under which circumstances. Each library
-// documents precisely how verbosity affects its behavior.
-//
-// As an example,
-//
-// ```
-// NTH_LOG((always), "Log this line no matter what!");
-// NTH_LOG((debug), "Only log me in debug builds.");
-// ```
-#include "nth/debug/verbosity/verbosity.h"
-
 #endif  // NTH_DEBUG_DEBUG_H

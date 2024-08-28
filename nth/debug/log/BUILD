@@ -41,7 +41,6 @@ cc_library(
         "//nth/base:macros",
         "//nth/base:section",
         "//nth/debug/log/internal:log",
-        "//nth/debug/verbosity",
         "//nth/strings:glob",
     ],
 )

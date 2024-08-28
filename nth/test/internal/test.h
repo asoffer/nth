@@ -5,7 +5,6 @@
 #include <type_traits>
 
 #include "nth/base/macros.h"
-#include "nth/debug/verbosity/verbosity.h"
 #include "nth/meta/stateful.h"
 #include "nth/registration/static.h"
 #include "nth/strings/glob.h"
