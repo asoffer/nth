@@ -3,7 +3,7 @@
 
 #include "nth/commandline/commandline.h"
 #include "nth/debug/log/log.h"
-#include "nth/debug/log/stderr_log_sink.h"
+#include "nth/debug/log/file_log_sink.h"
 
 int main(int argc, char const* argv[]) {
   nth::register_log_sink(nth::stderr_log_sink);

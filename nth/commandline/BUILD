@@ -47,7 +47,7 @@ cc_library(
     deps = [
         ":commandline",
         "//nth/debug/log",
-        "//nth/debug/log:stderr_log_sink",
+        "//nth/debug/log:file_log_sink",
     ],
 )
 

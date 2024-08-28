@@ -21,6 +21,18 @@ cc_library(
 )
 
 cc_library(
+    name = "file_log_sink",
+    hdrs = ["file_log_sink.h"],
+    deps = [
+        ":configuration",
+        ":entry",
+        ":line",
+        ":sink",
+        "//nth/io/writer:file",
+    ],
+)
+
+cc_library(
     name = "line",
     hdrs = ["line.h"],
     deps = [
@@ -51,7 +63,6 @@ cc_test(
     deps = [
         ":log",
         ":vector_log_sink",
-        ":stderr_log_sink",
         "//nth/test/raw:test",
     ],
 )
@@ -66,19 +77,6 @@ cc_library(
         ":line",
         "//nth/base:indestructible",
         "//nth/registration:registrar",
-    ],
-)
-
-cc_library(
-    name = "stderr_log_sink",
-    hdrs = ["stderr_log_sink.h"],
-    deps = [
-        ":configuration",
-        ":entry",
-        ":line",
-        ":sink",
-        "//nth/io/writer:file",
-        "//nth/memory:bytes",
     ],
 )
 

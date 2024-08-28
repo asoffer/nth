@@ -39,7 +39,7 @@ cc_test(
         "//nth/debug/internal:raw_check",
         "//nth/debug/log",
         "//nth/debug/log:sink",
-        "//nth/debug/log:stderr_log_sink",
+        "//nth/debug/log:file_log_sink",
     ],
 )
 

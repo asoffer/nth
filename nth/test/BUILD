@@ -98,7 +98,7 @@ cc_library(
         "//nth/base:indestructible",
         "//nth/debug/contracts:violation",
         "//nth/debug/log:sink",
-        "//nth/debug/log:stderr_log_sink",
+        "//nth/debug/log:file_log_sink",
         "//nth/io/writer:file",
         "@abseil-cpp//absl/synchronization",
     ],

@@ -10,7 +10,7 @@
 #include "nth/debug/contracts/violation.h"
 #include "nth/debug/log/log.h"
 #include "nth/debug/log/sink.h"
-#include "nth/debug/log/stderr_log_sink.h"
+#include "nth/debug/log/file_log_sink.h"
 #include "nth/format/format.h"
 #include "nth/io/writer/file.h"
 #include "nth/test/test.h"
