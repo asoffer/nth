@@ -60,7 +60,6 @@ cc_test(
     srcs = ["unimplemented_test.cc"],
     deps = [
         ":unimplemented",
-        "//nth/debug/log:vector_log_sink",
         "//nth/test/raw:test",
     ],
 )
@@ -86,7 +85,6 @@ cc_test(
     srcs = ["unreachable_test.cc"],
     deps = [
         ":unreachable",
-        "//nth/debug/log:vector_log_sink",
         "//nth/test/raw:test",
     ],
 )

@@ -1,23 +1,28 @@
-#include "nth/debug/log/vector_log_sink.h"
-#include "nth/test/raw/test.h"
-static int unimplemented_count = 0;
-#define NTH_DEBUG_INTERNAL_TEST_UNIMPLEMENTED (+[] { ++unimplemented_count; })
+static int abort_count = 0;
+struct test_aborter {
+  ~test_aborter() { ++abort_count; }
+};
+
+#define NTH_DEBUG_INTERNAL_TEST_UNIMPLEMENTED_ABORTER ::test_aborter
 
 #include "nth/debug/unimplemented.h"
 
-void no_explicit_logging() { NTH_UNIMPLEMENTED(); }
-void explicit_logging() { NTH_UNIMPLEMENTED("{}") <<= {3}; }
+#include "nth/test/raw/test.h"
+
+namespace {
+
+void ReachesUnimplementedNoLogging() { NTH_UNIMPLEMENTED(); }
+void ReachesUnimplementedLogging() { NTH_UNIMPLEMENTED("Oops {}") <<= {3}; }
+
+}  // namespace
 
 int main() {
-  std::vector<nth::log_entry> log;
-  nth::vector_log_sink sink(log);
-  nth::register_log_sink(sink);
+  ReachesUnimplementedNoLogging();
+  NTH_RAW_TEST_ASSERT(abort_count == 1);
+  abort_count = 0;
 
-  no_explicit_logging();
-  NTH_RAW_TEST_ASSERT(unimplemented_count == 1);
-  NTH_RAW_TEST_ASSERT(log.size() == 1);
+  ReachesUnimplementedLogging();
+  NTH_RAW_TEST_ASSERT(abort_count == 1);
 
-  explicit_logging();
-  NTH_RAW_TEST_ASSERT(unimplemented_count == 2);
-  NTH_RAW_TEST_ASSERT(log.size() == 2);
+  return 0;
 }

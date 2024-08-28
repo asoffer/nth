@@ -13,14 +13,14 @@ nav:
       - section: base/section.md
     #- commandline: commandline.md
     #- container: container.md
-    #- debug: debug.md
-       #- contracts: debug/contracts.md
-       #- log: debug/log.md
-       #- property: debug/property.md
-       #- unimplemented: debug/unimplemented.md
-       #- unreachable: debug/unreachable.md
-       #- source_location: debug/source_location.md
-       #- trace: debug/trace.md
+    - debug:
+      #- contracts: debug/contracts.md
+      #- log: debug/log.md
+      #- property: debug/property.md
+      - unimplemented: debug/unimplemented.md
+      - unreachable: debug/unreachable.md
+      #- source_location: debug/source_location.md
+      #- trace: debug/trace.md
     #- dynamic: dynamic.md
     #- format: format.md
     #- hash: hash.md
