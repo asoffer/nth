@@ -12,17 +12,15 @@ nav:
       - platform: base/platform.md
       - section: base/section.md
     #- commandline: commandline.md
-    #- configuration: configuration.md
     #- container: container.md
     #- debug: debug.md
-       #- <code>:contracts</code>: debug/contracts.md
-       #- <code>:log</code>: debug/log.md
-       #- <code>:property</code>: debug/property.md
-       #- <code>:unimplemented</code>: debug/unimplemented.md
-       #- <code>:unreachable</code>: debug/unreachable.md
-       #- <code>:source_location</code>: debug/source_location.md
-       #- <code>:trace</code>: debug/trace.md
-       #- <code>:verbosity</code>: debug/verbosity.md
+       #- contracts: debug/contracts.md
+       #- log: debug/log.md
+       #- property: debug/property.md
+       #- unimplemented: debug/unimplemented.md
+       #- unreachable: debug/unreachable.md
+       #- source_location: debug/source_location.md
+       #- trace: debug/trace.md
     #- dynamic: dynamic.md
     #- format: format.md
     #- hash: hash.md

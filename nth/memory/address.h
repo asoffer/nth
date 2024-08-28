@@ -1,6 +1,7 @@
 #ifndef NTH_MEMORY_ADDRESS_H
 #define NTH_MEMORY_ADDRESS_H
 
+#include <cstddef>
 #include <type_traits>
 
 #include "nth/base/attributes.h"
