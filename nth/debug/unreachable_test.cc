@@ -11,7 +11,7 @@ void logging() { NTH_UNREACHABLE("{}") <<= {3}; }
 int main() {
   // If the build mode is optimized then the behavior of `NTH_UNREACHABLE` is
   // undefined and thus untestable.
-  if constexpr (nth::build_mode != nth::build::optimize) {
+#if not defined(NDEBUG)
     std::vector<nth::log_entry> log;
     nth::vector_log_sink sink(log);
     nth::register_log_sink(sink);
@@ -23,5 +23,5 @@ int main() {
     logging();
     NTH_RAW_TEST_ASSERT(unreachable_count == 2);
     NTH_RAW_TEST_ASSERT(log.size() == 1);
-  }
+#endif
 }

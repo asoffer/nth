@@ -111,8 +111,8 @@ def _impl(ctx):
             "macosx": ["-Wl", "-ld_classic", "-framework", "CoreFoundation"],
         }.get(ctx.attr.os, [])),
         mode_dependent_flags({
-            "dbg": ["-g", "-O0"],
-            "opt": ["-O2"],
+            "dbg": ["-g", "-O0", "-DNTH_COMMANDLINE_BUILD_MODE=debug"],
+            "opt": ["-O2", "-DNTH_COMMANDLINE_BUILD_MODE=optimize"],
         }),
     ]
 

@@ -1,8 +1,6 @@
 #ifndef NTH_BASE_MACROS_H
 #define NTH_BASE_MACROS_H
 
-#include "nth/base/platform.h"
-
 // NTH_REQUIRE_EXPANSION_TO_PREFIX_SUBEXPRESSION
 //
 // Expands the given expression argument in such a way that it can be used as a
@@ -127,57 +125,5 @@ struct NthRequireExpansionInGlobalNamespace {};
 
 #define NTH_INTERNAL_IGNORE_PARENTHESES_REMOVE(p)                              \
   NTH_CONCATENATE(, NTH_IDENTITY p)
-
-// `NTH_INLINE_CODE_SNIPPET_BEGIN`, `NTH_INLINE_CODE_SNIPPET_END`, and
-// are used to define self-contained blocks of code to be used inline, typically
-// expanded from other macros. While one could routinely use a lambda for this,
-// compilation of lambdas can be expensive on some compilers, requiring
-// instantiation of new types. In many cases, on compilers that support them,
-// GNU-style statement expressions are a more efficient tool for this job. These
-// macros expand to statement expressions when they would be available and to
-// lambdas otherwise.
-//
-// An inline code block begins with `NTH_INLINE_CODE_SNIPPET_BEGIN` and ends
-// with an invocation of the function-like macro `NTH_INLINE_CODE_SNIPPET_END`,
-// where the arguments provided to the macro are the expression to which the
-// code snippet should evaluate.
-//
-// As an example, one might define:
-// #define STATIC_COUNTER                                                      \
-//   NTH_INLINE_CODE_SNIPPET_BEGIN                                             \
-//   static int counter = 0;                                                   \
-//   NTH_INLINE_CODE_SNIPPET_END(counter++)
-//
-// Each time the line `int x = STATIC_COUNTER;` is reached, `x` will take on the
-// next value integer value.
-//
-// Note that the expression passed to `NTH_INLINE_CODE_SNIPPET_END` must
-// evaluate unconditionally (i.e., it must not contain any
-// statement-expression-like control flow.
-//
-#if NTH_COMPILER(clang) or NTH_COMPILER(gcc)
-
-#define NTH_INLINE_CODE_SNIPPET_BEGIN ({
-#define NTH_INTERNAL_INLINE_CODE_SNIPPET_END_NONEMPTY(...)                     \
-  __VA_ARGS__;                                                                 \
-  })
-#define NTH_INTERNAL_INLINE_CODE_SNIPPET_END_EMPTY(...)                        \
-  (void)0;                                                                     \
-  })
-
-#define NTH_INLINE_CODE_SNIPPET_END(...)                                       \
-  NTH_IF(NTH_IS_EMPTY(__VA_ARGS__),                                            \
-         NTH_INTERNAL_INLINE_CODE_SNIPPET_END_EMPTY,                           \
-         NTH_INTERNAL_INLINE_CODE_SNIPPET_END_NONEMPTY)                        \
-  (__VA_ARGS__)
-
-#else
-
-#define NTH_INLINE_CODE_SNIPPET_BEGIN ([&] {
-#define NTH_INLINE_CODE_SNIPPET_END(...)                                       \
-  return __VA_ARGS__;                                                          \
-  }())
-
-#endif
 
 #endif  // NTH_BASE_MACROS_H

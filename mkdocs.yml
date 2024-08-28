@@ -5,12 +5,11 @@ nav:
     #- algorithm: algorithm.md
     - base:
       - attributes: base/attributes.md
-      - configuration: base/configuration.md
       - core: base/core.md
       - indestructible: base/indestructible.md
       # - macros: base/macros.md
       # - pack: base/pack.md
-      # - platform: base/platform.md
+      - platform: base/platform.md
       - section: base/section.md
     #- commandline: commandline.md
     #- configuration: configuration.md

@@ -50,13 +50,15 @@ struct aborter {
 #define NTH_DEBUG_INTERNAL_UNREACHABLE_WITH_LOGGING(...)                       \
   NTH_INTERNAL_LOG(::nth::internal_unreachable::aborter{}, __VA_ARGS__)
 
+#if defined(NDEBUG)
 #define NTH_DEBUG_INTERNAL_UNREACHABLE(...)                                    \
-  if constexpr (nth::build_mode == nth::build::optimize) {                     \
-    ::nth::internal_unreachable::unreachable();                                \
-  } else                                                                       \
-    NTH_IF(NTH_IS_EMPTY(__VA_ARGS__),                                          \
-           NTH_DEBUG_INTERNAL_UNREACHABLE_WITHOUT_LOGGING,                     \
-           NTH_DEBUG_INTERNAL_UNREACHABLE_WITH_LOGGING)                        \
+  ::nth::internal_unreachable::unreachable();
+#else
+#define NTH_DEBUG_INTERNAL_UNREACHABLE(...)                                    \
+  NTH_IF(NTH_IS_EMPTY(__VA_ARGS__),                                            \
+         NTH_DEBUG_INTERNAL_UNREACHABLE_WITHOUT_LOGGING,                       \
+         NTH_DEBUG_INTERNAL_UNREACHABLE_WITH_LOGGING)                          \
   (__VA_ARGS__)
+#endif
 
 #endif  // NTH_DEBUG_INTERNAL_UNREACHABLE_H

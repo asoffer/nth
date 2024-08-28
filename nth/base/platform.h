@@ -1,9 +1,10 @@
 #ifndef NTH_BASE_PLATFORM_H
 #define NTH_BASE_PLATFORM_H
 
-#define NTH_INTERNAL_PLATFORM_CONCATENATE(head, ...)                           \
-  NTH_INTERNAL_PLATFORM_CONCATENATE_IMPL(head, __VA_ARGS__)
-#define NTH_INTERNAL_PLATFORM_CONCATENATE_IMPL(head, ...) head##__VA_ARGS__
+#include "nth/base/macros.h"
+
+// This file defines macros that indicate compilation options across multiple
+// compilers and provide a uniform api for accessing them.
 
 // Expands to either `true` or `false` depending on the executing hardware
 // architecture. Hardware detection should be avoided if at all possible,
@@ -14,8 +15,22 @@
 // Supported values of the `architecture` parameter are: `arm64`, and `x64`, and
 // `unknown`.
 #define NTH_ARCHITECTURE(architecture)                                         \
-  NTH_INTERNAL_PLATFORM_CONCATENATE(NTH_BASE_PLATFORM_INTERNAL_ARCHITECTURE_,  \
-                                    architecture)
+  NTH_CONCATENATE(NTH_BASE_PLATFORM_INTERNAL_ARCHITECTURE_, architecture)
+
+// A function-like macro that expands to either `true` or `false` depending on
+// whether the build feature is enabled.
+//
+// `NTH_BUILD_FEATURE(rtti)`: Indicates whether or not run-time type information
+//                            is available.
+//
+// `NTH_BUILD_FEATURE(asan)`: Indicates whether or not address-sanitizer is
+//                            enabled.
+//
+// `NTH_BUILD_FEATURE(tsan)`: Indicates whether or not thread-sanitizer is
+//                            enabled.
+//
+#define NTH_BUILD_FEATURE(feature)                                             \
+  NTH_CONCATENATE(NTH_INTERNAL_BUILD_FEATURE_, feature)
 
 // Expands to either `true` or `false` depending on the compiler used to compile
 // this program. Compiler detection should be avoided if at all possible,
@@ -26,8 +41,7 @@
 // Supported values of the `compiler_name` parameter are: `clang`, `gcc`,
 // `msvc`, and `unknown`.
 #define NTH_COMPILER(compiler_name)                                            \
-  NTH_INTERNAL_PLATFORM_CONCATENATE(NTH_BASE_PLATFORM_INTERNAL_COMPILER_,      \
-                                    compiler_name)
+  NTH_CONCATENATE(NTH_BASE_PLATFORM_INTERNAL_COMPILER_, compiler_name)
 
 // Expands to either `true` or `false` depending on the executable format being
 // compiled. Executable format detection should be avoided if at all possible,
@@ -37,8 +51,7 @@
 //
 // Supported values of the `fmt` parameter are: `elf`, `macho`, and `unknown`.
 #define NTH_EXECUTABLE_FORMAT(fmt)                                             \
-  NTH_INTERNAL_PLATFORM_CONCATENATE(                                           \
-      NTH_BASE_PLATFORM_INTERNAL_EXECUTABLE_FORMAT_, fmt)
+  NTH_CONCATENATE(NTH_BASE_PLATFORM_INTERNAL_EXECUTABLE_FORMAT_, fmt)
 
 // Expands to either `true` or `false` depending on the operating system for
 // which the program is being compiled. Operating system detection should be
@@ -49,8 +62,7 @@
 // Supported values of the `os` parameter are: `windows`, `apple`, `android`,
 // `linux`, and `unknown`.
 #define NTH_OPERATING_SYSTEM(os)                                               \
-  NTH_INTERNAL_PLATFORM_CONCATENATE(                                           \
-      NTH_BASE_PLATFORM_INTERNAL_OPERATING_SYSTEM_, os)
+  NTH_CONCATENATE(NTH_BASE_PLATFORM_INTERNAL_OPERATING_SYSTEM_, os)
 
 // Implementation.
 
@@ -134,6 +146,35 @@
 #define NTH_BASE_PLATFORM_INTERNAL_EXECUTABLE_FORMAT_elf false
 #define NTH_BASE_PLATFORM_INTERNAL_EXECUTABLE_FORMAT_macho false
 #define NTH_BASE_PLATFORM_INTERNAL_EXECUTABLE_FORMAT_unknown true
+#endif
+
+#if (defined(__GNUC__) and defined(__GXX_RTTI) and __GXX_RTTI == 1) or         \
+    (defined(__clang__) and defined(__GXX_RTTI) and __GXX_RTTI == 1) or        \
+    (defined(_MSC_VER) and defined(__CPPRTTI) and __CPPRTTI == 1)
+#define NTH_INTERNAL_BUILD_FEATURE_rtti true
+#else
+#define NTH_INTERNAL_BUILD_FEATURE_rtti false
+#endif
+
+#if defined(__has_feature)
+#if __has_feature(address_sanitizer)
+#define __SANITIZE_ADDRESS__
+#endif
+#if __has_feature(thread_sanitizer)
+#define __SANITIZE_THREAD__
+#endif
+#endif
+
+#if defined(__SANITIZE_ADDRESS__)
+#define NTH_INTERNAL_BUILD_FEATURE_asan true
+#else
+#define NTH_INTERNAL_BUILD_FEATURE_asan false
+#endif
+
+#if defined(__SANITIZE_THREAD__)
+#define NTH_INTERNAL_BUILD_FEATURE_tsan true
+#else
+#define NTH_INTERNAL_BUILD_FEATURE_tsan false
 #endif
 
 #endif  // NTH_BASE_PLATFORM_H

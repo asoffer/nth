@@ -58,9 +58,7 @@ cc_test(
 cc_library(
     name = "macros",
     hdrs = ["macros.h"],
-    deps = [
-        ":platform",
-    ],
+    deps = [],
 )
 
 cc_test(
@@ -90,7 +88,9 @@ cc_test(
 cc_library(
     name = "platform",
     hdrs = ["platform.h"],
-    deps = [],
+    deps = [
+        ":macros",
+    ],
 )
 
 cc_library(
@@ -98,6 +98,7 @@ cc_library(
     hdrs = ["section.h"],
     deps = [
         ":macros",
+        ":platform",
         "//nth/meta:compile_time_string",
     ],
 )
