@@ -24,14 +24,12 @@ int product_one(U const &u) {
 
 template <typename T>
 struct field_sum : nth::extension<T> {
-  int sum(this auto const &self) { return sum_one(self); }
+  int sum() const { return sum_one(static_cast<T const &>(*this)); }
 };
 
 template <typename T>
 struct field_product : nth::extension<T> {
-  int product(this nth::precisely<T> auto const &self) {
-    return product_one(self);
-  }
+  int product() const { return product_one(static_cast<T const &>(*this)); }
 };
 
 struct Empty : nth::extend<Empty>::with<field_sum, field_product> {};
