@@ -5,7 +5,7 @@
 #include <cstddef>
 #include <span>
 
-#include "nth/format/format.h"
+#include "nth/io/format/format.h"
 #include "nth/format/interpolate/string.h"
 #include "nth/format/interpolate/string_view.h"
 #include "nth/memory/bytes.h"

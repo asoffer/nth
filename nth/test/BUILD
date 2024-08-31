@@ -99,6 +99,8 @@ cc_library(
         "//nth/debug/contracts:violation",
         "//nth/debug/log:sink",
         "//nth/debug/log:file_log_sink",
+        "//nth/io/format",
+        "//nth/io/writer",
         "//nth/io/writer:file",
         "@abseil-cpp//absl/synchronization",
     ],

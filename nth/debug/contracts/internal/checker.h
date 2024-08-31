@@ -2,10 +2,10 @@
 #define NTH_DEBUG_CONTRACTS_INTERNAL_CHECKER_H
 
 #include "nth/debug/trace/internal/trace.h"
-#include "nth/format/format.h"
 #include "nth/format/interpolate/interpolate.h"
 #include "nth/format/interpolate/spec.h"
 #include "nth/format/interpolate/string_view.h"
+#include "nth/io/format/format.h"
 #include "nth/io/writer/writer.h"
 #include "nth/meta/type.h"
 
@@ -20,7 +20,7 @@ struct checker {
   [[nodiscard]] bool trace() const { return result_; }
 
   friend void NthFormat(io::writer auto& w, auto&, checker const& c) {
-    nth::format(w, {}, c.result_);
+    nth::io::format(w, {}, c.result_);
   }
 
  private:
@@ -40,7 +40,7 @@ struct checker<T> {
   }
 
   friend void NthFormat(io::writer auto& w, auto&, checker const& c) {
-    nth::format(w, {}, c.result_);
+    nth::io::format(w, {}, c.result_);
   }
 
  private:

@@ -36,7 +36,7 @@ cc_library(
     srcs = ["file_path.cc"],
     deps = [
         "//nth/base:core",
-        "//nth/format",
+        "//nth/io/format",
         "//nth/io/writer",
         "//nth/debug",
     ],

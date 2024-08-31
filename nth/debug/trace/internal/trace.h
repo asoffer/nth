@@ -7,9 +7,9 @@
 #include "nth/base/attributes.h"
 #include "nth/base/core.h"
 #include "nth/debug/property/internal/concepts.h"
-#include "nth/format/format.h"
 #include "nth/format/interpolate/interpolate.h"
 #include "nth/hash/fnv1a.h"
+#include "nth/io/format/format.h"
 #include "nth/io/writer/string.h"
 #include "nth/io/writer/writer.h"
 #include "nth/memory/address.h"
@@ -74,7 +74,7 @@ struct writable_ref {
   static std::string write_action(traced_expression_base const *ptr) {
     std::string s;
     io::string_writer sw(s);
-    nth::format(
+    nth::io::format(
         sw, *reinterpret_cast<T const *>(reinterpret_cast<uintptr_t>(ptr) - 1));
     return s;
   }
@@ -197,7 +197,7 @@ struct traced_value_holder : traced_members<T> {
 
   friend void NthFormat(nth::io::writer auto &w, auto &,
                         traced_value_holder const &t) {
-    nth::format(w, {}, t.value_);
+    nth::io::format(w, {}, t.value_);
   }
 
   explicit constexpr operator bool() const NTH_ATTRIBUTE(lifetimebound)

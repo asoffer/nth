@@ -2,8 +2,6 @@
 
 #include <string>
 
-#include <iostream>
-
 #include "nth/test/test.h"
 #include "nth/types/extend/extend.h"
 
@@ -24,16 +22,15 @@ NTH_TEST("extend/format") {
   nth::io::string_writer w(s);
 
   s.clear();
-  nth::format(w, Empty{});
-  std::cerr << "!" << s << "!\n";
+  nth::io::format(w, Empty{});
   NTH_EXPECT(s == "{}");
 
   s.clear();
-  nth::format(w, OneField{});
+  nth::io::format(w, OneField{});
   NTH_EXPECT(s == "{.n = 3}");
 
   s.clear();
-  nth::format(w, ManyFields{.n = 3, .s = "hello"});
+  nth::io::format(w, ManyFields{.n = 3, .s = "hello"});
   NTH_EXPECT(s == "{.n = 3, .s = hello}");
 }
 

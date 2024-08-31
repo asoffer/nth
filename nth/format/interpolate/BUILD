@@ -9,7 +9,7 @@ cc_library(
         ":string_view",
         "//nth/base:attributes",
         "//nth/base:core",
-        "//nth/format",
+        "//nth/io/format",
         "//nth/io/writer",
     ],
 )
@@ -30,7 +30,7 @@ cc_library(
     deps = [
         ":string",
         ":string_view",
-        "//nth/format",
+        "//nth/io/format",
         "//nth/memory:bytes",
         "//nth/meta/concepts:convertible"
     ],

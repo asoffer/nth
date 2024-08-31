@@ -6,7 +6,7 @@
 #include <string_view>
 
 #include "nth/base/core.h"
-#include "nth/format/format.h"
+#include "nth/io/format/format.h"
 #include "nth/io/writer/writer.h"
 
 namespace nth {
@@ -32,7 +32,7 @@ struct file_path {
   std::string const &path() const { return name_; }
 
   friend void NthFormat(io::writer auto &w, auto &, file_path const &path) {
-    nth::format(w, {}, path.name_);
+    nth::io::format(w, {}, path.name_);
   }
 
   friend bool operator==(file_path const &, file_path const &) = default;

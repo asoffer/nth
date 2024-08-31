@@ -1,9 +1,9 @@
 #ifndef NTH_TYPES_EXTEND_FORMAT_H
 #define NTH_TYPES_EXTEND_FORMAT_H
 
-#include "nth/format/format.h"
 #include "nth/format/interpolate/interpolate.h"
 #include "nth/format/interpolate/string_view.h"
+#include "nth/io/format/format.h"
 #include "nth/io/writer/writer.h"
 #include "nth/types/extend/extend.h"
 #include "nth/types/reflect.h"

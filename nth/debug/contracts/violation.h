@@ -6,8 +6,8 @@
 #include "nth/base/attributes.h"
 #include "nth/debug/contracts/contract.h"
 #include "nth/debug/source_location.h"
-#include "nth/format/format.h"
 #include "nth/format/interpolate/string_view.h"
+#include "nth/io/format/format.h"
 #include "nth/io/writer/string.h"
 #include "nth/io/writer/writer.h"
 #include "nth/registration/registrar.h"
@@ -26,7 +26,7 @@ struct any_formattable_ref {
           [](void const* raw_self) {
             std::string s;
             nth::io::string_writer w(s);
-            nth::format(w, *reinterpret_cast<T const*>(raw_self));
+            nth::io::format(w, *reinterpret_cast<T const*>(raw_self));
             return s;
           },
   };

@@ -112,7 +112,7 @@ struct integer {
   }
 
   template <interpolation_string>
-  friend trivial_formatter NthInterpolateFormatter(nth::type_tag<integer>) {
+  friend io::trivial_formatter NthInterpolateFormatter(nth::type_tag<integer>) {
     return {};
   }
 

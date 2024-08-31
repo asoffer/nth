@@ -5,7 +5,7 @@ cc_library(
     hdrs = ["extend.h"],
     srcs = ["internal/extend.h"],
     deps = [
-        "//nth/format",
+        "//nth/io/format",
         "//nth/io/writer",
         "//nth/types:reflect",
     ],

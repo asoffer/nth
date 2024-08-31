@@ -76,7 +76,7 @@ struct point {
   template <nth::interpolation_string S>
   friend auto NthInterpolateFormatter(nth::type_tag<point>) {
     if constexpr (S.empty()) {
-      return nth::trivial_formatter{};
+      return nth::io::trivial_formatter{};
     } else {
       return nth::interpolating_formatter<S>{};
     }

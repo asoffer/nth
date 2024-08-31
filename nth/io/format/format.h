@@ -1,8 +1,8 @@
-#ifndef NTH_FORMAT_FORMAT_H
-#define NTH_FORMAT_FORMAT_H
+#ifndef NTH_IO_FORMAT_FORMAT_H
+#define NTH_IO_FORMAT_FORMAT_H
 
-#include "nth/format/common_formatters.h"
-#include "nth/format/common_defaults.h"
+#include "nth/io/format/common_defaults.h"
+#include "nth/io/format/common_formatters.h"
 #include "nth/io/writer/writer.h"
 #include "nth/meta/type.h"
 
@@ -10,7 +10,7 @@
 // specifications for a type. Format specifications can be used when printing or
 // serializing values of a type to configure how the value is written.
 
-namespace nth {
+namespace nth::io {
 
 // Returns the default formatter associated with type `T`. If a function named
 // `NthDefaultFormatter` exists, findable via argument-dependent lookup that
@@ -35,7 +35,7 @@ constexpr auto default_formatter() {
 // opinions about how the value should be formatted. The design gives
 // precedence to the formatter.
 template <int&..., typename F, typename T>
-constexpr auto format(io::writer auto& w, F&& fmt, T const& value) {
+constexpr auto format(writer auto& w, F&& fmt, T const& value) {
   if constexpr (requires { fmt.format(w, value); }) {
     return fmt.format(w, value);
   } else {
@@ -46,10 +46,10 @@ constexpr auto format(io::writer auto& w, F&& fmt, T const& value) {
 // Invokes the three-argument `format`, by constructing a local
 // `default_formatter<T>()` and passing that as the formatter `fmt`.
 template <int&..., typename T>
-constexpr auto format(io::writer auto& w, T const& value) {
-  nth::format(w, default_formatter<T>(), value);
+constexpr auto format(writer auto& w, T const& value) {
+  nth::io::format(w, nth::io::default_formatter<T>(), value);
 }
 
-}  // namespace nth
+}  // namespace nth::io
 
-#endif  // NTH_FORMAT_FORMAT_H
+#endif  // NTH_IO_FORMAT_FORMAT_H

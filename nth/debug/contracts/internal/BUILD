@@ -16,9 +16,9 @@ cc_library(
     hdrs = ["checker.h"],
     deps = [
         "//nth/debug/trace/internal:trace",
-        "//nth/format",
         "//nth/format/interpolate",
         "//nth/format/interpolate:spec",
+        "//nth/io/format",
         "//nth/io/writer",
         "//nth/meta:type",
     ],
@@ -34,8 +34,8 @@ cc_library(
         ":macros",
         ":on_exit",
         "//nth/debug/contracts:violation",
-        "//nth/format",
         "//nth/format/interpolate",
+        "//nth/io/format",
         "//nth/io/writer",
     ],
 )

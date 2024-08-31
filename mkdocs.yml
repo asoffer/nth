@@ -22,9 +22,9 @@ nav:
       #- source_location: debug/source_location.md
       #- trace: debug/trace.md
     # - dynamic: dynamic.md
-    - format: format/format.md
     #- hash: hash.md
     - io:
+      - format: io/format/format.md
       - writer:
         - writer: io/writer/writer.md
         - file: io/writer/file.md

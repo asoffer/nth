@@ -11,7 +11,7 @@
 #include "nth/debug/log/file_log_sink.h"
 #include "nth/debug/log/log.h"
 #include "nth/debug/log/sink.h"
-#include "nth/format/format.h"
+#include "nth/io/format/format.h"
 #include "nth/io/writer/file.h"
 #include "nth/test/test.h"
 
@@ -46,7 +46,7 @@ nth::indestructible<contract_violation_holder> contract_violations;
 
 struct char_spacer {
   template <nth::interpolation_string>
-  friend nth::trivial_formatter NthInterpolateFormatter(
+  friend nth::io::trivial_formatter NthInterpolateFormatter(
       nth::type_tag<char_spacer>) {
     return {};
   }
@@ -66,7 +66,7 @@ struct char_spacer {
 
 struct string_view_spacer {
   template <nth::interpolation_string>
-  friend nth::trivial_formatter NthInterpolateFormatter(
+  friend nth::io::trivial_formatter NthInterpolateFormatter(
       nth::type_tag<string_view_spacer>) {
     return {};
   }
