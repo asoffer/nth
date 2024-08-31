@@ -111,13 +111,12 @@ struct integer {
     }
   }
 
-  friend nth::format_spec<integer> NthFormatSpec(nth::interpolation_string_view,
-                                                 nth::type_tag<integer>) {
+  template <interpolation_string>
+  friend trivial_formatter NthInterpolateFormatter(nth::type_tag<integer>) {
     return {};
   }
 
-  friend void NthFormat(nth::io::writer auto &w, format_spec<integer>,
-                        integer const &n) {
+  friend void NthFormat(io::writer auto &w, auto &, integer const &n) {
     if (n.size_ == 0) {
       nth::io::write_text(w, std::string_view("0"));
       return;

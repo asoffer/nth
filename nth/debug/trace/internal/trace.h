@@ -75,8 +75,7 @@ struct writable_ref {
     std::string s;
     io::string_writer sw(s);
     nth::format(
-        sw, {},
-        *reinterpret_cast<T const *>(reinterpret_cast<uintptr_t>(ptr) - 1));
+        sw, *reinterpret_cast<T const *>(reinterpret_cast<uintptr_t>(ptr) - 1));
     return s;
   }
 
@@ -196,14 +195,7 @@ struct traced_value_holder : traced_members<T> {
   traced_value_holder(traced_value_holder const &) = delete;
   traced_value_holder(traced_value_holder &&)      = delete;
 
-  using nth_format_spec = nth::trivial_format_spec;
-
-  friend constexpr auto NthDefaultFormatSpec(
-      nth::type_tag<traced_value_holder>) {
-    return nth::trivial_format_spec{};
-  }
-
-  friend void NthFormat(io::writer auto &w, format_spec<traced_value_holder>,
+  friend void NthFormat(nth::io::writer auto &w, auto &,
                         traced_value_holder const &t) {
     nth::format(w, {}, t.value_);
   }
@@ -233,20 +225,8 @@ struct traced_expression : traced_value_holder<T> {
         writable_ref(arguments)...);
   }
 
-  using nth_format_spec = nth::trivial_format_spec;
-
-  friend constexpr auto NthDefaultFormatSpec(nth::type_tag<traced_expression>) {
-    return nth::trivial_format_spec{};
-  }
-
-  friend constexpr auto NthFormatSpec(nth::interpolation_string_view,
-                                      nth::type_tag<traced_expression>) {
-    return nth::trivial_format_spec{};
-  }
-
   template <nth::io::writer W>
-  friend void NthFormat(W &w, format_spec<traced_expression>,
-                        traced_expression const &t) {
+  friend void NthFormat(W &w, auto &, traced_expression const &t) {
     tree_formatter<W> formatter(w, utf8);
     nth::tree_traversal_stack<writable_ref> stack;
     stack.push(writable_ref(t));

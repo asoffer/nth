@@ -26,7 +26,7 @@ struct any_formattable_ref {
           [](void const* raw_self) {
             std::string s;
             nth::io::string_writer w(s);
-            nth::format(w, {}, *reinterpret_cast<T const*>(raw_self));
+            nth::format(w, *reinterpret_cast<T const*>(raw_self));
             return s;
           },
   };
@@ -35,12 +35,8 @@ struct any_formattable_ref {
   constexpr any_formattable_ref(T const& t)
       : ptr_(nth::raw_address(t)), vtable_(&vtable_for<T>) {}
 
-  friend format_spec<any_formattable_ref> NthFormatSpec(
-      interpolation_string_view, type_tag<any_formattable_ref>) {
-    return {};
-  }
-
-  friend void NthFormat(io::writer auto& w, format_spec<any_formattable_ref>,
+  template <nth::interpolation_string S>
+  friend void NthFormat(nth::io::writer auto& w, auto&,
                         any_formattable_ref ref) {
     nth::io::write_text(w, ref.vtable_->format(ref.ptr_));
   }

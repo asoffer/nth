@@ -3,6 +3,7 @@
 
 #include <cstddef>
 #include <string_view>
+#include <tuple>
 
 #include "nth/base/attributes.h"
 #include "nth/format/interpolate/internal/parameter_range.h"
@@ -45,26 +46,6 @@ struct interpolation_string {
         workspace_ptr);
   }
 
-  consteval interpolation_string<Length + 2> wrap() const {
-    interpolation_string<Length + 2> result;
-    result.NthInternalInterpolationStringDataMember[0] = '{';
-    for (unsigned i = 0; i < Length; ++i) {
-      result.NthInternalInterpolationStringDataMember[i + 1] =
-          NthInternalInterpolationStringDataMember[i];
-    }
-    result.NthInternalInterpolationStringDataMember[Length + 1] = '}';
-    result.NthInternalInterpolationStringDataMember[Length + 2] = '\0';
-    auto* ptr = &result.NthInternalInterpolationStringParameterTreeMember[0];
-    *ptr++    = {.start = 0, .length = Length, .width = 0};
-    for (size_t i = 0; i < Length / 2; ++i) {
-      auto& entry =
-          result.NthInternalInterpolationStringParameterTreeMember[i + 1];
-      entry = NthInternalInterpolationStringParameterTreeMember[i];
-      ++entry.start;
-    }
-    return result;
-  }
-
   // The number of characters (UTF-8 code units) in the interpolation string.
   static constexpr size_t size() { return Length; }
   static constexpr size_t length() { return Length; }
@@ -99,6 +80,9 @@ struct interpolation_string {
 
   // Returns the number of placeholders in this interpolation string.
   constexpr size_t placeholders() const;
+
+  template <size_t N>
+  constexpr internal_interpolate::parameter_range placeholder_range() const;
 
   template <unsigned Offset, unsigned Len = Length - Offset>
   constexpr interpolation_string<Len> unchecked_substr() const {
@@ -188,6 +172,15 @@ constexpr size_t interpolation_string<Length>::placeholders() const {
     }
   }
   return i;
+}
+
+template <size_t Length>
+template <size_t N>
+constexpr internal_interpolate::parameter_range
+interpolation_string<Length>::placeholder_range() const {
+  auto* p = this->tree_range();
+  for (size_t i = 0; i < N; ++i) { p += p->width; }
+  return *p;
 }
 
 }  // namespace nth

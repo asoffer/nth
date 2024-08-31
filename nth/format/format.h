@@ -1,7 +1,8 @@
 #ifndef NTH_FORMAT_FORMAT_H
 #define NTH_FORMAT_FORMAT_H
 
-#include "nth/format/internal/format.h"
+#include "nth/format/common_formatters.h"
+#include "nth/format/common_defaults.h"
 #include "nth/io/writer/writer.h"
 #include "nth/meta/type.h"
 
@@ -11,49 +12,42 @@
 
 namespace nth {
 
-// `format_spec` defines the type's format specification.
-//
-// A type author may customize this value by providing a nested type member
-// named `nth_format_spec` which will be used as the value for
-// `nth::format_spec<T>`. If no such nested type is provided, the default
-// `nth::trivial_format_spec`, an empty type` will be used.
+// Returns the default formatter associated with type `T`. If a function named
+// `NthDefaultFormatter` exists, findable via argument-dependent lookup that
+// accepts an `nth::type_tag<T>`, the result of executing
+// `NthDefaultFormatter(nth::type<T>)` will be used as the default. Otherwise
+// `nth::trivial_formatter will be used.
 template <typename T>
-using format_spec = internal_format::format_spec<T>::type;
-
-// `default_format_spec` is a function defining the format specifier to be used
-// in the event that a formatter does not provide one. Type authors may
-// customize this value by providing a function named `NthDefaultFormatSpec`
-// which  is callable with an `nth::type_tag<T>` (where `T` is their type). This
-// function must be findable via argument-dependent lookup. If no such function
-// is provided, but `nth::format_spec<T>` is default constructible, the default
-// constructed value will be used. Otherwise the program is ill-formed and a
-// compilation error will be reported.
-template <typename T>
-constexpr ::nth::format_spec<T> default_format_spec();
-
-// Formats `value` to `w` according to the format specification `spec`.
-template <int&..., typename T>
-constexpr auto format(io::writer auto& w, format_spec<T> const& spec,
-                      T const& value) {
-  if constexpr (requires { NthFormat(w, spec, value); }) {
-    return NthFormat(w, spec, value);
+constexpr auto default_formatter() {
+  if constexpr (requires { NthDefaultFormatter(nth::type<T>); }) {
+    return NthDefaultFormatter(nth::type<T>);
   } else {
-    nth::io::write_text(w, std::string_view("Unknown"));
+    return trivial_formatter{};
   }
 }
 
-// Implementation
-
-template <typename T>
-constexpr ::nth::format_spec<T> default_format_spec() {
-  if constexpr (requires { NthDefaultFormatSpec(nth::type<T>); }) {
-    return NthDefaultFormatSpec(nth::type<T>);
+// Formats `value` with the formatter `fmt`, writing the result to `w`. If
+// `fmt.format(w, value)` is a valid expression, this expression is
+// evaluated and returned. Otherwise (if `fmt` does not say anything about
+// how the value should be printed, then `NthFormat(w, fmt, value)` is
+// evaluated and returned. The intended use is to provide both the type `T`
+// of the value being formatted and the type of the formatter `F` to express
+// opinions about how the value should be formatted. The design gives
+// precedence to the formatter.
+template <int&..., typename F, typename T>
+constexpr auto format(io::writer auto& w, F&& fmt, T const& value) {
+  if constexpr (requires { fmt.format(w, value); }) {
+    return fmt.format(w, value);
   } else {
-    static_assert(nth::default_constructible<::nth::format_spec<T>>,
-                  "Because `NthDefaultFormatSpec(nth::type<T>)` is not "
-                  "specified, the type must be default-constructible");
-    return {};
+    return NthFormat(w, fmt, value);
   }
+}
+
+// Invokes the three-argument `format`, by constructing a local
+// `default_formatter<T>()` and passing that as the formatter `fmt`.
+template <int&..., typename T>
+constexpr auto format(io::writer auto& w, T const& value) {
+  nth::format(w, default_formatter<T>(), value);
 }
 
 }  // namespace nth

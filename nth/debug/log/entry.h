@@ -36,12 +36,16 @@ struct log_entry {
     log_entry& entry_;
   };
 
-  friend format_spec<log_entry> NthFormatSpec(interpolation_string_view,
-                                              type_tag<log_entry>) {
-    return format_spec<log_entry>();
+  template <nth::interpolation_string S>
+  friend auto NthInterpolateFormatter(nth::type_tag<log_entry>) {
+    if constexpr (S.empty()) {
+      return nth::trivial_formatter{};
+    } else {
+      return nth::interpolating_formatter<S>{};
+    }
   }
 
-  friend void NthFormat(io::writer auto& w, format_spec<log_entry>,
+  friend void NthFormat(nth::io::writer auto& w, auto&,
                         log_entry const& entry) {
     nth::io::write_text(w, entry.data_);
   }

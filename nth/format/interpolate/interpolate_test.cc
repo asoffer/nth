@@ -73,21 +73,23 @@ void Bool() {
 }
 
 struct point {
-  using nth_format_spec = nth::interpolation_spec;
-
-  friend constexpr nth::interpolation_spec NthDefaultFormatSpec(
-      nth::type_tag<point>) {
-    return nth::interpolation_spec::from<"({}, {})">();
+  template <nth::interpolation_string S>
+  friend auto NthInterpolateFormatter(nth::type_tag<point>) {
+    if constexpr (S.empty()) {
+      return nth::trivial_formatter{};
+    } else {
+      return nth::interpolating_formatter<S>{};
+    }
   }
 
-  friend nth::interpolation_spec NthFormatSpec(nth::interpolation_string_view s,
-                                               nth::type_tag<point>) {
-    return nth::interpolation_spec(s);
+  template <nth::interpolation_string S>
+  friend void NthFormat(nth::io::writer auto &w,
+                        nth::interpolating_formatter<S> &, point const &pt) {
+    nth::interpolate<S>(w, pt.x, pt.y);
   }
 
-  friend void NthFormat(nth::io::writer auto &w, nth::format_spec<point> spec,
-                        point const &pt) {
-    nth::interpolate(w, spec, pt.x, pt.y);
+  friend void NthFormat(nth::io::writer auto &w, auto &, point const &pt) {
+    nth::interpolate<"({}, {})">(w, pt.x, pt.y);
   }
   int x = 10;
   int y = 20;

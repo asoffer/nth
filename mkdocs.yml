@@ -21,13 +21,14 @@ nav:
       - unreachable: debug/unreachable.md
       #- source_location: debug/source_location.md
       #- trace: debug/trace.md
-    #- dynamic: dynamic.md
-    #- format: format.md
+    # - dynamic: dynamic.md
+    - format: format/format.md
     #- hash: hash.md
     - io:
-      - writer: io/writer/writer.md
-      - file: io/writer/file.md
-      - string: io/writer/string.md
+      - writer:
+        - writer: io/writer/writer.md
+        - file: io/writer/file.md
+        - string: io/writer/string.md
     #- memory: memory.md
     #- meta: meta.md
     #- numeric: numeric.md

@@ -14,6 +14,11 @@
 
 namespace nth {
 
+template <typename T>
+void NthFormat(io::writer auto &w, auto &, T const &) {
+  nth::interpolate<"[[ {} ]]">(w, std::string_view(nth::type<T>.name()));
+}
+
 // A `log_line` represents a location in source where logging may occur (often
 // due to `NTH_LOG`. Log lines must be constructed with the annotation
 // `NTH_PLACE_IN_SECTION(nth_log_line)`
@@ -26,22 +31,21 @@ struct log_line {
                      nth::source_location loc = nth::source_location::current())
       : verbosity_path_(verbosity_path), str_(str), source_location_(loc) {}
 
-  using nth_format_spec = nth::interpolation_spec;
-
-  friend constexpr auto NthDefaultFormatSpec(nth::type_tag<log_line>) {
-    return nth::interpolation_spec{};
+  template <nth::interpolation_string S>
+  friend auto NthInterpolateFormatter(nth::type_tag<log_line>) {
+    if constexpr (S.empty()) {
+      return nth::trivial_formatter{};
+    } else {
+      return nth::interpolating_formatter<S>{};
+    }
   }
 
-  friend format_spec<log_line> NthFormatSpec(interpolation_string_view s,
-                                             type_tag<log_line>) {
-    return format_spec<log_line>(s);
-  }
-
-  friend void NthFormat(io::writer auto& w, format_spec<log_line> spec,
-                        log_line const& line) {
-    nth::interpolate(w, spec, line.source_location().file_name(),
-                     line.source_location().line(),
-                     line.source_location().function_name());
+  template <nth::interpolation_string S>
+  friend void NthFormat(io::writer auto &w, nth::interpolating_formatter<S> &,
+                        log_line const &line) {
+    nth::interpolate<S>(w, line.source_location().file_name(),
+                        line.source_location().line(),
+                        line.source_location().function_name());
   }
 
   [[nodiscard]] constexpr size_t id() const;

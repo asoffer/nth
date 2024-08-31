@@ -1,8 +1,8 @@
 #include "nth/debug/trace/trace.h"
 
+#include "nth/debug/log/file_log_sink.h"
 #include "nth/debug/log/log.h"
 #include "nth/debug/log/sink.h"
-#include "nth/debug/log/file_log_sink.h"
 #include "nth/memory/address.h"
 #include "nth/test/raw/test.h"
 
@@ -42,7 +42,7 @@ struct S {
   constexpr int triple() const { return 3 * n_; }
   constexpr S operator()(int n) const { return S(n * n_); }
 
-  private:
+ private:
   int n_;
 };
 

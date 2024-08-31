@@ -8,9 +8,9 @@
 #include "absl/synchronization/mutex.h"
 #include "nth/base/indestructible.h"
 #include "nth/debug/contracts/violation.h"
+#include "nth/debug/log/file_log_sink.h"
 #include "nth/debug/log/log.h"
 #include "nth/debug/log/sink.h"
-#include "nth/debug/log/file_log_sink.h"
 #include "nth/format/format.h"
 #include "nth/io/writer/file.h"
 #include "nth/test/test.h"
@@ -45,18 +45,13 @@ struct contract_violation_holder {
 nth::indestructible<contract_violation_holder> contract_violations;
 
 struct char_spacer {
-  using nth_format_spec = nth::trivial_format_spec;
-
-  friend constexpr auto NthDefaultFormatSpec(nth::type_tag<char_spacer>) {
-    return nth::trivial_format_spec{};
-  }
-
-  friend nth::format_spec<char_spacer> NthFormatSpec(
-      nth::interpolation_string_view, nth::type_tag<char_spacer>) {
+  template <nth::interpolation_string>
+  friend nth::trivial_formatter NthInterpolateFormatter(
+      nth::type_tag<char_spacer>) {
     return {};
   }
 
-  friend void NthFormat(auto& w, nth::format_spec<char_spacer>, char_spacer s) {
+  friend void NthFormat(nth::io::writer auto& w, auto&, char_spacer s) {
     char buffer[256];
     std::memset(buffer, s.content, s.count < 256 ? s.count : size_t{256});
 
@@ -64,27 +59,22 @@ struct char_spacer {
     for (size_t i = 0; i < iters; ++i) { nth::io::write_text(w, buffer); }
     nth::io::write_text(w, std::string_view(buffer, s.count - (iters << 8)));
   }
+
   char content;
   size_t count;
 };
 
 struct string_view_spacer {
-  using nth_format_spec = nth::trivial_format_spec;
-
-  friend constexpr auto NthDefaultFormatSpec(
+  template <nth::interpolation_string>
+  friend nth::trivial_formatter NthInterpolateFormatter(
       nth::type_tag<string_view_spacer>) {
-    return nth::trivial_format_spec{};
-  }
-
-  friend nth::format_spec<string_view_spacer> NthFormatSpec(
-      nth::interpolation_string_view, nth::type_tag<string_view_spacer>) {
     return {};
   }
 
-  friend void NthFormat(auto& w, nth::format_spec<string_view_spacer>,
-                        string_view_spacer s) {
+  friend void NthFormat(nth::io::writer auto& w, auto&, string_view_spacer s) {
     for (size_t i = 0; i < s.count; ++i) { nth::io::write_text(w, s.content); }
   }
+
   std::string_view content;
   size_t count;
 };

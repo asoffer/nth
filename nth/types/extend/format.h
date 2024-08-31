@@ -12,23 +12,17 @@ namespace nth {
 
 template <typename T>
 struct formatting : nth::extension<T> {
-  friend nth::trivial_format_spec NthFormatSpec(nth::interpolation_string_view,
-                                                nth::type_tag<T>) {
-    return {};
-  }
-
-  friend void NthFormat(nth::io::writer auto &w, nth::format_spec<T> const &,
-                        T const &value) {
+  friend void NthFormat(io::writer auto &w, auto &, T const &value) {
     std::string_view const *name_ptr =
         nth::reflect::field_names<1>(value).data();
-    nth::format(w, {}, "{");
+    nth::io::write_text(w, "{");
     std::string_view separator = "";
     nth::reflect::on_fields<1>(value, [&](auto const &...args) {
       (nth::interpolate<"{}.{} = {}">(w, std::exchange(separator, ", "),
                                       *name_ptr++, args),
        ...);
     });
-    nth::format(w, {}, "}");
+    nth::io::write_text(w, "}");
   }
 };
 

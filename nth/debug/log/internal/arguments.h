@@ -27,14 +27,13 @@ namespace nth::internal_log {
 // ```
 //
 
-template <log_line const& Line>
+template <log_line const& Line, interpolation_string S>
 struct arguments {
   template <typename... Ts>
-  arguments(log_configuration const & config, Ts const&... values) {
+  arguments(log_configuration const& config, Ts const&... values) {
     log_entry e(Line.id());
     log_entry::builder builder(e);
-    nth::interpolate(builder, interpolation_spec(Line.interpolation_string()),
-                     values...);
+    nth::interpolate<S>(builder, values...);
 
     for (auto* sink : registered_log_sinks()) { sink->send(config, Line, e); }
   }
@@ -43,8 +42,7 @@ struct arguments {
   arguments(Ts const&... values) {
     log_entry e(Line.id());
     log_entry::builder builder(e);
-    nth::interpolate(builder, interpolation_spec(Line.interpolation_string()),
-                     values...);
+    nth::interpolate<S>(builder, values...);
 
     for (auto* sink : registered_log_sinks()) {
       sink->send(log_configuration{}, Line, e);
@@ -54,12 +52,12 @@ struct arguments {
 
 struct argument_ignorer {};
 
-template <unsigned N, log_line const& Line>
+template <unsigned N, log_line const&, interpolation_string>
 struct line_injector;
 
 struct voidifier {
-  template <log_line const& Line>
-  friend void operator<<=(voidifier, line_injector<0, Line> const&) {}
+  template <log_line const& Line, interpolation_string S>
+  friend void operator<<=(voidifier, line_injector<0, Line, S> const&) {}
   template <typename T>
   friend void operator<<=(voidifier, T const&) {
     constexpr bool MissingInterpolationArguments = nth::precisely<T, voidifier>;
@@ -88,13 +86,13 @@ struct voidifier {
   }
 };
 
-template <unsigned N, log_line const& Line>
-struct line_injector  {
-  voidifier operator<<=(arguments<Line> const&) { return {}; }
+template <unsigned N, log_line const& Line, interpolation_string S>
+struct line_injector {
+  voidifier operator<<=(arguments<Line, S> const&) { return {}; }
 };
 
-template <log_line const& Line>
-struct line_injector<0, Line> : arguments<Line> {
+template <log_line const& Line, interpolation_string S>
+struct line_injector<0, Line, S> : arguments<Line, S> {
   voidifier operator<<=(argument_ignorer) { return {}; }
 };
 

@@ -49,6 +49,7 @@
           ? (void)0                                                            \
           : ::nth::internal_log::voidifier{} <<=                               \
             ::nth::internal_log::line_injector<interp_str_var.placeholders(),  \
-                                               log_line_var> {}
+                                               log_line_var, interp_str_var> { \
+      }
 
 #endif  // NTH_LOG_INTERNAL_H

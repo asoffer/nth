@@ -66,8 +66,10 @@ struct type_tag final {
     return str.template substr<index, str.size() - (index + 1)>();
   }
 
-  static constexpr auto return_type() requires(std::is_function_v<T>);
-  static constexpr auto parameters() requires(std::is_function_v<T>);
+  static constexpr auto return_type()
+    requires(std::is_function_v<T>);
+  static constexpr auto parameters()
+    requires(std::is_function_v<T>);
 
  private:
   static constexpr std::string_view get_name_impl() { return Name; }
@@ -84,9 +86,8 @@ struct type_id final {
   friend constexpr bool operator==(type_id lhs, type_id rhs) = default;
   friend constexpr bool operator!=(type_id lhs, type_id rhs) = default;
 
-  // TODO: We cannot name `format_spec` because that header depends on this one.
-  friend void NthFormat(auto& p, auto, type_id id) {
-    p.write(nth::byte_range(id.id_()));
+  friend void NthFormat(auto& w, auto&, type_id id) {
+    w.write(nth::byte_range(id.id_()));
   }
 
  private:
@@ -121,12 +122,16 @@ struct FunctionSignature<R(Parameters...)> {
 }  // namespace internal_type
 
 template <typename T>
-constexpr auto type_tag<T>::return_type() requires(std::is_function_v<T>) {
+constexpr auto type_tag<T>::return_type()
+  requires(std::is_function_v<T>)
+{
   return internal_type::FunctionSignature<T>::return_type;
 };
 
 template <typename T>
-constexpr auto type_tag<T>::parameters() requires(std::is_function_v<T>) {
+constexpr auto type_tag<T>::parameters()
+  requires(std::is_function_v<T>)
+{
   return internal_type::FunctionSignature<T>::parameters;
 };
 
