@@ -27,11 +27,18 @@ NTH_TEST("extend/format") {
 
   s.clear();
   nth::io::format(w, OneField{});
-  NTH_EXPECT(s == "{.n = 3}");
+  NTH_EXPECT(s ==
+             "{\n"
+             "  .n = 3,\n"
+             "}");
 
   s.clear();
   nth::io::format(w, ManyFields{.n = 3, .s = "hello"});
-  NTH_EXPECT(s == "{.n = 3, .s = hello}");
+  NTH_EXPECT(s ==
+             "{\n"
+             "  .n = 3,\n"
+             "  .s = hello,\n"
+             "}");
 }
 
 }  // namespace

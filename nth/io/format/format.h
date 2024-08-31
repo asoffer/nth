@@ -50,6 +50,82 @@ constexpr auto format(writer auto& w, T const& value) {
   nth::io::format(w, nth::io::default_formatter<T>(), value);
 }
 
+// A structural formatter is one which has `begin_substructure` and
+// `end_substructure` member functions. Users of the formatter may call these
+// functions to indicate to the formatter a tree-like structure. It is the
+// responsibility of the caller to ensure that calls to `begin_substructure` and
+// `end_substructure` are properly paired and nested.
+template <typename F>
+concept structural_formatter = requires(F f, minimal_writer& w) {
+  f.begin_substructure(w);
+  f.end_substructure(w);
+};
+
+// A wrapper function which one can call whether or not `f` is a structural
+// formatter. If `f` is a structura formatter, calls `f.begin_substructure(w)`.
+// Otherwise, does nothing.
+template <typename F>
+auto begin_substructure(writer auto& w, F& f) {
+  if constexpr (structural_formatter<F>) { f.begin_substructure(w); }
+}
+
+// A wrapper function which one can call whether or not `f` is a structural
+// formatter. If `f` is a structura formatter, calls `f.end_substructure(w)`.
+// Otherwise, does nothing.
+template <typename F>
+auto end_substructure(writer auto& w, F& f) {
+  if constexpr (structural_formatter<F>) { f.end_substructure(w); }
+}
+
+template <typename F>
+auto begin_entry(writer auto& w, F& f) {
+  if constexpr (structural_formatter<F> and requires { f.begin_entry(w); }) {
+    f.begin_entry(w);
+  }
+}
+
+template <typename F>
+auto end_entry(writer auto& w, F& f) {
+  if constexpr (structural_formatter<F> and requires { f.end_entry(w); }) {
+    f.end_entry(w);
+  }
+}
+
+// An RAII class that invokes `begin_substructure(f)` on construction and
+// `end_substructure(f)` on desturction.
+template <writer W, typename F>
+struct with_substructure {
+  explicit with_substructure(W& w NTH_ATTRIBUTE(lifetimebound),
+                             F& f NTH_ATTRIBUTE(lifetimebound))
+      : w_(w), f_(f) {
+    begin_substructure(w_, f_);
+  }
+  ~with_substructure() { end_substructure(w_, f_); }
+
+  struct entry {
+    ~entry() { end_entry(w_, f_); }
+
+   private:
+    friend with_substructure;
+
+    explicit entry(W& w NTH_ATTRIBUTE(lifetimebound),
+                   F& f NTH_ATTRIBUTE(lifetimebound))
+        : w_(w), f_(f) {
+      begin_entry(w_, f_);
+    }
+
+   private:
+    W& w_;
+    F& f_;
+  };
+
+  entry with_entry() const { return entry(w_, f_); }
+
+ private:
+  W& w_;
+  F& f_;
+};
+
 }  // namespace nth::io
 
 #endif  // NTH_IO_FORMAT_FORMAT_H

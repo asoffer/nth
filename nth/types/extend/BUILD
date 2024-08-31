@@ -45,6 +45,8 @@ cc_library(
     hdrs = ["format.h"],
     deps = [
         ":extend",
+        "//nth/container:stack",
+        "//nth/debug:unreachable",
         "//nth/types:reflect",
     ],
 )
