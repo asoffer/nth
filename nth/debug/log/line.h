@@ -14,13 +14,6 @@
 
 namespace nth {
 
-namespace io {
-template <typename T>
-void NthFormat(io::writer auto &w, auto &, T const &) {
-  nth::interpolate<"[[ {} ]]">(w, std::string_view(nth::type<T>.name()));
-}
-}  // namespace io
-
 // A `log_line` represents a location in source where logging may occur (often
 // due to `NTH_LOG`. Log lines must be constructed with the annotation
 // `NTH_PLACE_IN_SECTION(nth_log_line)`

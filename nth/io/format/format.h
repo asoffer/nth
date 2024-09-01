@@ -126,6 +126,11 @@ struct with_substructure {
   F& f_;
 };
 
+template <typename F>
+void NthFormat(nth::io::writer auto& w, F&, auto const&) {
+  nth::io::write_text(w, "?");
+}
+
 }  // namespace nth::io
 
 #endif  // NTH_IO_FORMAT_FORMAT_H

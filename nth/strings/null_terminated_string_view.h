@@ -7,6 +7,7 @@
 #include <string_view>
 
 #include "nth/base/attributes.h"
+#include "nth/io/writer/writer.h"
 
 namespace nth {
 
@@ -34,7 +35,8 @@ struct null_terminated_string_view {
   constexpr null_terminated_string_view() = default;
 
   // Copy consturctor
-  constexpr null_terminated_string_view(null_terminated_string_view const &) = default;
+  constexpr null_terminated_string_view(null_terminated_string_view const &) =
+      default;
 
   // Constructs a `null_terminated_string_view` pointing to the given `data`
   // under the assumption that `data` is a pointer to a null-terminated char
@@ -42,21 +44,24 @@ struct null_terminated_string_view {
   explicit constexpr null_terminated_string_view(from_pointer_tag,
                                                  char const *data)
       : data_(data), size_([&]() -> size_t {
-          // clang-format off
           if consteval {
-              auto *p = data;
-              while (*p != '\0') { ++p; }
-              return p - data;
+            auto *p = data;
+            while (*p != '\0') { ++p; }
+            return p - data;
           } else {
             return std::strlen(data);
           }
-          // clang-format on
         }()) {}
 
   // Constructs a `null_terminated_string_view` pointing to the given `data`.
   // The last character (at index `N - 1`) must be null.
   template <size_t N>
   constexpr null_terminated_string_view(from_array_tag, char const (&data)[N]);
+
+  friend void NthFormat(nth::io::writer auto &w, auto &,
+                        null_terminated_string_view s) {
+    nth::io::write_text(w, std::string_view(s));
+  }
 
   // Constructs a `null_terminated_string_view` viewing the contents of `s`.
   constexpr null_terminated_string_view(
@@ -78,10 +83,9 @@ struct null_terminated_string_view {
            std::memcmp(lhs.data(), rhs.data(), lhs.size()) == 0;
   }
 
-  constexpr operator std::string_view () const {
+  constexpr operator std::string_view() const {
     return std::string_view(data_, size_);
   }
-
 
   void remove_prefix(size_t length) {
     // NTH_REQUIRE((harden), length <= size_);

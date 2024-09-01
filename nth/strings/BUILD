@@ -35,6 +35,7 @@ cc_library(
     hdrs = ["null_terminated_string_view.h"],
     deps = [
         "//nth/base:attributes",
+        "//nth/io/writer",
     ],
 )
 

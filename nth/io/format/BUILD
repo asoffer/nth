@@ -13,3 +13,11 @@ cc_library(
       "//nth/meta:type",
     ],
 )
+
+cc_library(
+    name = "common",
+    hdrs = ["common.h"],
+    deps = [
+      ":format",
+    ],
+)

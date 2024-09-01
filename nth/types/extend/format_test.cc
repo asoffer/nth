@@ -1,6 +1,7 @@
 #include "nth/types/extend/format.h"
 
 #include <string>
+#include <iostream>
 
 #include "nth/test/test.h"
 #include "nth/types/extend/extend.h"
@@ -27,6 +28,7 @@ NTH_TEST("extend/format") {
 
   s.clear();
   nth::io::format(w, OneField{});
+  std::cerr << s << "\n";
   NTH_EXPECT(s ==
              "{\n"
              "  .n = 3,\n"

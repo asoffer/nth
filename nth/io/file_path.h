@@ -31,8 +31,8 @@ struct file_path {
   // path.
   std::string const &path() const { return name_; }
 
-  friend void NthFormat(io::writer auto &w, auto &, file_path const &path) {
-    nth::io::format(w, {}, path.name_);
+  friend void NthFormat(io::writer auto &w, auto &fmt, file_path const &path) {
+    nth::io::format(w, fmt, path.name_);
   }
 
   friend bool operator==(file_path const &, file_path const &) = default;
