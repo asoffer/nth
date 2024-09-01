@@ -85,10 +85,9 @@ auto begin_entry(writer auto& w, F& f) {
 }
 
 template <typename F>
-auto end_entry(writer auto& w, F& f, auto&&... args) {
-  if constexpr (structural_formatter<F> and
-                requires { f.end_entry(w, NTH_FWD(args)...); }) {
-    f.end_entry(w, NTH_FWD(args)...);
+auto end_entry(writer auto& w, F& f) {
+  if constexpr (structural_formatter<F> and requires { f.end_entry(w); }) {
+    f.end_entry(w);
   }
 }
 

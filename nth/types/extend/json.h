@@ -1,7 +1,7 @@
 #ifndef NTH_TYPES_EXTEND_JSON_H
 #define NTH_TYPES_EXTEND_JSON_H
 
-#include <iterator>
+#include <type_traits>
 
 #include "nth/io/format/common.h"
 #include "nth/io/format/format.h"
@@ -11,6 +11,52 @@
 #include "nth/types/extend/format.h"
 
 namespace nth::ext {
+namespace internal_json {
+
+enum class kind { number, string, array, associative, object };
+
+template <typename>
+struct category_impl {
+  static constexpr kind value = kind::object;
+};
+
+template <typename T>
+  requires std::is_arithmetic_v<T>
+struct category_impl<T> {
+  static constexpr kind value = kind::number;
+};
+
+template <nth::explicitly_convertible_to<std::string_view> T>
+struct category_impl<T> {
+  static constexpr kind value = kind::string;
+};
+
+template <typename T>
+concept has_begin_and_end = requires(T t) {
+  std::begin(t);
+  std::end(t);
+} and not nth::explicitly_convertible_to<T, std::string_view>;
+
+template <typename T>
+concept is_associative = has_begin_and_end<T> and requires(T t) {
+  typename T::key_type;
+  typename T::mapped_type;
+};
+
+template <has_begin_and_end T>
+struct category_impl<T> {
+  static constexpr kind value = kind::array;
+};
+
+template <is_associative T>
+struct category_impl<T> {
+  static constexpr kind value = kind::associative;
+};
+
+template <typename T>
+inline constexpr kind category = category_impl<T>::value;
+
+}  // namespace internal_json
 
 struct json_formatter : internal_format::basic_structural_formatter,
                         nth::io::quote_formatter,
@@ -28,26 +74,28 @@ struct json_formatter : internal_format::basic_structural_formatter,
   }
 
   template <typename T>
-  void format(io::writer auto &w, T const &value)
-    requires(requires {
-      std::begin(value);
-      std::end(value);
-    } and not nth::explicitly_convertible_to<T, std::string_view>)
-  {
+    requires(internal_json::category<T> == internal_json::kind::array)
+  void format(io::writer auto &w, T const &value) {
     begin_substructure(w, '[', ']');
-    auto end_iter  = std::end(value);
-    auto prev_iter = std::begin(value);
-    if (prev_iter != end_iter) {
-      for (auto curr_iter = prev_iter + 1; curr_iter != end_iter;
-           prev_iter      = curr_iter, ++curr_iter) {
-        begin_entry(w);
-        nth::io::format(w, *this, *prev_iter);
-        end_entry(w);
-      }
-
+    for (auto const &element : value) {
       begin_entry(w);
-      nth::io::format(w, *this, *prev_iter);
-      end_entry(w, true);
+      nth::io::format(w, *this, element);
+      end_entry(w);
+    }
+    end_substructure(w);
+  }
+
+  template <typename T>
+  void format(io::writer auto &w, T const &value)
+    requires(internal_json::category<T> == internal_json::kind::associative)
+  {
+    begin_substructure(w);
+    for (auto const &[k, v] : value) {
+      begin_entry(w);
+      nth::io::format(w, *this, k);
+      nth::io::write_text(w, ": ");
+      nth::io::format(w, *this, v);
+      end_entry(w);
     }
     end_substructure(w);
   }
@@ -63,16 +111,14 @@ struct format_json : nth::extension<T, format> {
     std::string_view const *name_ptr =
         nth::reflect::field_names<1>(value).data();
     io::with_substructure sub(w, fmt);
-    size_t i = 0;
     nth::reflect::on_fields<1>(value, [&](auto const &...args) {
-      size_t limit = sizeof...(args);
       ((fmt.begin_entry(w),
         nth::io::format(w, fmt,
                         internal_format::entry{
                             .key   = *name_ptr++,
                             .value = args,
                         }),
-        fmt.end_entry(w, ++i == limit)),
+        fmt.end_entry(w)),
        ...);
     });
   }

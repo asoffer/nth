@@ -29,7 +29,7 @@ NTH_TEST("extend/format") {
   nth::io::format(w, OneField{});
   NTH_EXPECT(s ==
              "{\n"
-             "  .n = 3,\n"
+             "  .n = 3\n"
              "}");
 
   s.clear();
@@ -37,7 +37,7 @@ NTH_TEST("extend/format") {
   NTH_EXPECT(s ==
              "{\n"
              "  .n = 3,\n"
-             "  .s = hello,\n"
+             "  .s = hello\n"
              "}");
 }
 
