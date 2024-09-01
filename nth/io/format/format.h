@@ -85,9 +85,10 @@ auto begin_entry(writer auto& w, F& f) {
 }
 
 template <typename F>
-auto end_entry(writer auto& w, F& f) {
-  if constexpr (structural_formatter<F> and requires { f.end_entry(w); }) {
-    f.end_entry(w);
+auto end_entry(writer auto& w, F& f, auto&&... args) {
+  if constexpr (structural_formatter<F> and
+                requires { f.end_entry(w, NTH_FWD(args)...); }) {
+    f.end_entry(w, NTH_FWD(args)...);
   }
 }
 
@@ -101,25 +102,6 @@ struct with_substructure {
     begin_substructure(w_, f_);
   }
   ~with_substructure() { end_substructure(w_, f_); }
-
-  struct entry {
-    ~entry() { end_entry(w_, f_); }
-
-   private:
-    friend with_substructure;
-
-    explicit entry(W& w NTH_ATTRIBUTE(lifetimebound),
-                   F& f NTH_ATTRIBUTE(lifetimebound))
-        : w_(w), f_(f) {
-      begin_entry(w_, f_);
-    }
-
-   private:
-    W& w_;
-    F& f_;
-  };
-
-  entry with_entry() const { return entry(w_, f_); }
 
  private:
   W& w_;

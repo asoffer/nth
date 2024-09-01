@@ -19,5 +19,6 @@ cc_library(
     hdrs = ["common.h"],
     deps = [
       ":format",
+      "//nth/format/interpolate:string",
     ],
 )

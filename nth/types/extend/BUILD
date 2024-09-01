@@ -43,6 +43,7 @@ cc_test(
 cc_library(
     name = "format",
     hdrs = ["format.h"],
+    srcs = ["internal/format.h"],
     deps = [
         ":extend",
         "//nth/io/format",
@@ -59,6 +60,28 @@ cc_test(
     deps = [
         ":format",
         ":extend",
+        "//nth/test:main",
+    ],
+)
+
+cc_library(
+    name = "json",
+    hdrs = ["json.h"],
+    deps = [
+        ":extend",
+        ":format",
+        "//nth/io/format",
+        "//nth/io/format:common",
+        "//nth/types:reflect",
+    ],
+)
+
+cc_test(
+    name = "json_test",
+    srcs = ["json_test.cc"],
+    deps = [
+        ":extend",
+        ":json",
         "//nth/test:main",
     ],
 )

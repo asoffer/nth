@@ -1,19 +1,18 @@
 #include "nth/types/extend/format.h"
 
 #include <string>
-#include <iostream>
 
 #include "nth/test/test.h"
 #include "nth/types/extend/extend.h"
 
 namespace {
 
-struct Empty : nth::extend<Empty>::with<nth::formatting> {};
-struct OneField : nth::extend<OneField>::with<nth::formatting> {
+struct Empty : nth::extend<Empty>::with<nth::ext::format> {};
+struct OneField : nth::extend<OneField>::with<nth::ext::format> {
   int n = 3;
 };
 
-struct ManyFields : nth::extend<ManyFields>::with<nth::formatting> {
+struct ManyFields : nth::extend<ManyFields>::with<nth::ext::format> {
   int n;
   std::string s;
 };
@@ -28,7 +27,6 @@ NTH_TEST("extend/format") {
 
   s.clear();
   nth::io::format(w, OneField{});
-  std::cerr << s << "\n";
   NTH_EXPECT(s ==
              "{\n"
              "  .n = 3,\n"

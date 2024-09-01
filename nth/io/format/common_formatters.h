@@ -74,6 +74,35 @@ struct text_formatter {
   }
 };
 
+// A formatter capable of formatting text as an escaped quotation.
+struct quote_formatter {
+  void format(writer auto& w, std::string_view s) const {
+    nth::io::write_text(w, "\"");
+    size_t i = 0;
+    for (char c : s) {
+      switch (c) {
+        case '"':
+          nth::io::write_text(w, s.substr(0, i));
+          s.remove_prefix(i + 1);
+          i = 0;
+          nth::io::write_text(w, "\\\"");
+          break;
+        default:
+          if (std::isprint(c)) {
+            ++i;
+            continue;
+          } else {
+            nth::io::write_text(w, s.substr(0, i));
+            s.remove_prefix(i);
+            i = 0;
+          }
+      }
+    }
+    nth::io::write_text(w, s);
+    nth::io::write_text(w, "\"");
+  }
+};
+
 struct byte_formatter {
   void format(writer auto& w, std::byte b) const {
     constexpr char hex[] = "0123456789abcdef";

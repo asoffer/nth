@@ -5,6 +5,7 @@
 #include <cstring>
 #include <string_view>
 
+#include "nth/format/interpolate/string.h"
 #include "nth/io/format/format.h"
 
 namespace nth::io {
