@@ -86,3 +86,74 @@ struct Person {
 
 Now, when a person is formatted, the name will be capitalized by default, though one could pass a
 different `PersonFormatter` to achieve a different result.
+
+## Structured Formatting
+
+A common formatting pattern is to effectively format all of the content in a struct, sequence, or
+container, possibly with some surrounding decaration. The `nth::io::structural_formatter` type
+can be used to simplify this process.
+
+To use the`nth::io::structural_formatter` type, users must inherit from it and provide several
+customization points. The first such hook is a static variable template of type
+[`nth::structure`](/types/structure) named `structure_of`, as shown in the example below:
+
+```
+struct my_formatter : nth::io::structural_formatter {
+    template <typename T>
+    static constexpr nth::structure structure_of = ...
+
+    ...
+};
+```
+
+The base class will use `structure_of` to understand the structure of each to-be-formatted type and
+do the formatting accordingly. Users may also implement, for each enumerator `S` in `nth::structure`, a
+member function template in their formatter with signatures
+
+* `begin(nth::constant_value<S>, nth::io::writer auto& w)` and
+* `end(nth::constant_value<S>, nth::io::writer auto& w)`,
+
+to be called immediately before and after (respectively) an object of that structural category is
+formatted. This allows one to, for instance, wrap sequences in `"[...]"`, or associative containers in
+`"{...}"`.
+
+Note that if you implement `begin` for a structural category, you must also implement `end` (even if
+it is empty), and vice versa. Failing to do so will result in a compilation error with an error
+message explaining the mistake. This is an intentional design choice. Due to the nature of the
+design, it is easy to accidentally forget or misspell one of these function templates and silently
+leave off such a function. While we would hope that unit tests would catch such problems, enforcing
+that users must provide _both_ or _neither_ yields slightly more assurance of correctness.
+
+### Sequences
+When sequences are formatted via `nth::io::structural_formatter`, the following will occur.
+
+```
+nth::io::begin_format<nth::structure::sequence>(w, fmt);
+for (auto const& element : seq) {
+  nth::io::begin_format<nth::structure::entry>(w, fmt);
+  nth::io::format(w, fmt, element);
+  nth::io::end_format<nth::structure::entry>(w, fmt);
+}
+nth::io::end_format<nth::structure::sequence>(w, fmt);
+```
+
+### Associative containers
+When associative containers are formatted via `nth::io::structural_formatter`, the following will occur.
+
+```
+nth::io::begin_format<nth::structure::associative>(w, fmt);
+for (auto const& [k, v] : associative_container) {
+  nth::io::begin_format<nth::structure::key>(w, fmt);
+  nth::io::format(w, fmt, k);
+  nth::io::end_format<nth::structure::key>(w, fmt);
+
+  nth::io::begin_format<nth::structure::value>(w, fmt);
+  nth::io::format(w, fmt, v);
+  nth::io::end_format<nth::structure::value>(w, fmt);
+}
+nth::io::end_format<nth::structure::associative>(w, fmt);
+```
+
+### Objects
+
+There is no provided builtin mechanism for formatting objects.

@@ -33,12 +33,25 @@ enum class structure {
   // starting at 0.
   sequence,
 
-  // TODO:
-  entry,
-  key,
-  value,
-
+  // A tag associated with types that are "struct-like" in the sense that they
+  // are associative but the keys are fixed.
   object,
+
+  // A tag associated with elements in a sequnece. Structurally, a sequence
+  // contains an ordered collection of entries, each of which may have its own
+  // structure. This tag will never be directly associated with a type, but can
+  // be useful when traversing the sturcture of a sequence.
+  entry,
+
+  // A tag associated with the key in an associative or object structure. This
+  // tag will never be directly associated with a type, but can be useful when
+  // traversing the structure of an associative or object type.
+  key,
+
+  // A tag associated with the value in an associative or object structure. This
+  // tag will never be directly associated with a type, but can be useful when
+  // traversing the structure of an associative or object type.
+  value,
 
   // A default tag associated with types whose structure is unspecified via the
   // mechanisms provided below and cannot be deduced.

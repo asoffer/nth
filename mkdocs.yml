@@ -24,7 +24,10 @@ nav:
     # - dynamic: dynamic.md
     #- hash: hash.md
     - io:
-      - format: io/format/format.md
+      - format:
+        - format: io/format/format.md
+        - cc: io/format/cc.md
+        - json: io/format/json.md
       - writer:
         - writer: io/writer/writer.md
         - file: io/writer/file.md
@@ -37,7 +40,8 @@ nav:
     #- strings: strings.md
     #- test: test.md
     #- try: try.md
-    #- types: types.md
+    - types:
+      - structure: types/structure.md
     #- utility: utility.md
 theme:
   name: readthedocs
