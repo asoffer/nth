@@ -5,7 +5,7 @@ cc_library(
     hdrs = ["extend.h"],
     srcs = ["internal/extend.h"],
     deps = [
-        "//nth/io/format",
+        "//nth/format",
         "//nth/io/writer",
         "//nth/types:reflect",
     ],
@@ -47,9 +47,9 @@ cc_library(
     deps = [
         ":extend",
         "//nth/meta:constant",
-        "//nth/io/format",
-        "//nth/io/format:cc",
-        "//nth/io/format:common",
+        "//nth/format",
+        "//nth/format:cc",
+        "//nth/format:common",
         "//nth/container:stack",
         "//nth/debug:unreachable",
         "//nth/types:reflect",
@@ -63,7 +63,7 @@ cc_test(
     deps = [
         ":format",
         ":extend",
-        "//nth/io/format:json",
+        "//nth/format:json",
         "//nth/test:main",
     ],
 )

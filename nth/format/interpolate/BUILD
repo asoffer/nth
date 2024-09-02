@@ -4,12 +4,11 @@ cc_library(
     name = "interpolate",
     hdrs = ["interpolate.h"],
     deps = [
-        ":spec",
         ":string",
         ":string_view",
         "//nth/base:attributes",
         "//nth/base:core",
-        "//nth/io/format",
+        "//nth/format",
         "//nth/io/writer",
     ],
 )
@@ -21,18 +20,6 @@ cc_test(
         ":interpolate",
         "//nth/io/writer:string",
         "//nth/test/raw:test",
-    ],
-)
-
-cc_library(
-    name = "spec",
-    hdrs = ["spec.h"],
-    deps = [
-        ":string",
-        ":string_view",
-        "//nth/io/format",
-        "//nth/memory:bytes",
-        "//nth/meta/concepts:convertible"
     ],
 )
 

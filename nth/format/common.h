@@ -1,14 +1,14 @@
-#ifndef NTH_IO_FORMAT_COMMON_H
-#define NTH_IO_FORMAT_COMMON_H
+#ifndef NTH_FORMAT_COMMON_H
+#define NTH_FORMAT_COMMON_H
 
 #include <cstddef>
 #include <cstring>
 #include <string_view>
 
+#include "nth/format/format.h"
 #include "nth/format/interpolate/string.h"
-#include "nth/io/format/format.h"
 
-namespace nth::io {
+namespace nth {
 
 // An object solely used for formatting which formats as the given character
 // repeated the given number of times.
@@ -16,7 +16,7 @@ struct char_spacer {
   explicit char_spacer(char c, size_t count) : content_(c), count_(count) {}
 
   template <nth::interpolation_string>
-  friend nth::io::trivial_formatter NthInterpolateFormatter(
+  friend nth::trivial_formatter NthInterpolateFormatter(
       nth::type_tag<char_spacer>) {
     return {};
   }
@@ -41,7 +41,7 @@ struct string_view_spacer {
   explicit string_view_spacer(std::string_view s, size_t count)
       : content_(s), count_(count) {}
   template <nth::interpolation_string>
-  friend nth::io::trivial_formatter NthInterpolateFormatter(
+  friend nth::trivial_formatter NthInterpolateFormatter(
       nth::type_tag<string_view_spacer>) {
     return {};
   }
@@ -56,6 +56,6 @@ struct string_view_spacer {
   size_t count_;
 };
 
-}  // namespace nth::io
+}  // namespace nth
 
-#endif  // NTH_IO_FORMAT_COMMON_H
+#endif  // NTH_FORMAT_COMMON_H

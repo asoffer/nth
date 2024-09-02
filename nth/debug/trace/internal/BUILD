@@ -13,7 +13,7 @@ cc_library(
         "//nth/debug/property/internal:concepts",
         "//nth/format/interpolate",
         "//nth/hash:fnv1a",
-        "//nth/io/format",
+        "//nth/format",
         "//nth/io/writer",
         "//nth/io/writer:string",
         "//nth/meta:compile_time_string",

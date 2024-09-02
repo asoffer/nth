@@ -6,8 +6,8 @@
 #include <type_traits>
 
 #include "nth/base/core.h"
+#include "nth/format/format.h"
 #include "nth/format/interpolate/string_view.h"
-#include "nth/io/format/format.h"
 #include "nth/io/writer/writer.h"
 
 namespace nth {
@@ -29,7 +29,7 @@ void interpolate(W &w, Ts const &...values)
           start    = r.start + r.length + 1;
           auto fmt = NthInterpolateFormatter<
               S.template unchecked_substr<r.start, r.length>()>(nth::type<Ts>);
-          nth::io::format(w, fmt, values);
+          nth::format(w, fmt, values);
         }(),
         ...);
 
@@ -40,23 +40,23 @@ void interpolate(W &w, Ts const &...values)
 template <interpolation_string S, typename T>
 auto NthInterpolateFormatter(type_tag<T>) {
   static_assert(S.empty());
-  return io::default_formatter<T>();
+  return default_formatter<T>();
 }
 
 template <interpolation_string S>
-io::text_formatter NthInterpolateFormatter(type_tag<std::string>) {
+text_formatter NthInterpolateFormatter(type_tag<std::string>) {
   static_assert(S.empty());
   return {};
 }
 
 template <interpolation_string S>
-io::text_formatter NthInterpolateFormatter(type_tag<std::string_view>) {
+text_formatter NthInterpolateFormatter(type_tag<std::string_view>) {
   static_assert(S.empty());
   return {};
 }
 
 template <interpolation_string S, size_t N>
-io::text_formatter NthInterpolateFormatter(type_tag<char[N]>) {
+text_formatter NthInterpolateFormatter(type_tag<char[N]>) {
   static_assert(S.empty());
   return {};
 }
@@ -64,9 +64,9 @@ io::text_formatter NthInterpolateFormatter(type_tag<char[N]>) {
 template <interpolation_string S, std::integral I>
 auto NthInterpolateFormatter(type_tag<I>) {
   if constexpr (S.empty() or S == "d") {
-    return nth::io::base_formatter(10);
+    return base_formatter(10);
   } else if constexpr (S == "x") {
-    return nth::io::base_formatter(16);
+    return base_formatter(16);
   } else {
     constexpr bool Parse = S.empty();
     static_assert(Parse, "Failed to parse interpolation string");
@@ -76,13 +76,13 @@ auto NthInterpolateFormatter(type_tag<I>) {
 template <interpolation_string S>
 auto NthInterpolateFormatter(type_tag<bool>) {
   if constexpr (S.empty() or S == "b") {
-    return io::word_formatter<io::casing::lower>{};
+    return word_formatter<casing::lower>{};
   } else if constexpr (S == "B") {
-    return io::word_formatter<io::casing::title>{};
+    return word_formatter<casing::title>{};
   } else if constexpr (S == "B!") {
-    return io::word_formatter<io::casing::upper>{};
+    return word_formatter<casing::upper>{};
   } else if constexpr (S == "d") {
-    return io::base_formatter(10);
+    return base_formatter(10);
   } else {
     constexpr bool Parse = S.empty();
     static_assert(Parse, "Failed to parse interpolation string");

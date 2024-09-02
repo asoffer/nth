@@ -3,17 +3,17 @@
 ## Overview
 
 The formatting library is a layer on top of [`//nth/io/writer`](/io/writer/writer) responsible for
-marhsalling data of arbitrary types into a writer. The primary workhorse is the `nth::io::format`
+marhsalling data of arbitrary types into a writer. The primary workhorse is the `nth::format`
 function template, which accepts a `nth::io::writer`, a formatter, and an object to be formatted.
 
-There is also a two-parameter overload for `nth::io::format`, which uses `nth::default_formatter<T>`
+There is also a two-parameter overload for `nth::format`, which uses `nth::default_formatter<T>`
 as its formatter.
 
-## `nth::io::format`
+## `nth::format`
 
-The `nth::io::format` function template accepts a reference to a writer `w`, a reference to a
+The `nth::format` function template accepts a reference to a writer `w`, a reference to a
 formatter `fmt`, and a const-reference to a value `v` to be formatted. If `fmt.format(w, value)` is
-a valid expression, this is what `nth::io::format(w, fmt, v)` evaluates to. Otherwise, it will
+a valid expression, this is what `nth::format(w, fmt, v)` evaluates to. Otherwise, it will
 evaulate to `NthFormat(w, fmt, value)`, where `NthFormat` is the [FTADLE](/ftadle) hook.
 
 As an example, consider a `Person` struct and suppose we would like to implement a function that
@@ -24,7 +24,7 @@ struct Person {
   std::string name;
 
   friend void NthFormat(nth::io::writer auto& w, auto& fmt, Person const & p) {
-    nth::io::format(w, fmt, p.name);
+    nth::format(w, fmt, p.name);
   }
 };
 
@@ -32,25 +32,25 @@ std::string greeting_string(Person const & person) {
   std::string s;
   nth::io::string_writer w(s);
   nth::io::write_text(w, "Hello, ");
-  nth::io::format(w, person);
+  nth::format(w, person);
   nth::io::write_text(w, "!");
   return s;
 }
 ```
 
-Note in this example `nth::io::format(w, person)` uses the default formatter for `Person` (because
-the two-parameter `nth::io::format` is invoked). The default formatter for person is
-`nth::io::trivial_formatter` (more on how to customize this below), which does not have a `format`
-member function, so `NthFormat(w, fmt, p)` is invoked. This in turn invokes `nth::io::format(w, fmt,
+Note in this example `nth::format(w, person)` uses the default formatter for `Person` (because
+the two-parameter `nth::format` is invoked). The default formatter for person is
+`nth::trivial_formatter` (more on how to customize this below), which does not have a `format`
+member function, so `NthFormat(w, fmt, p)` is invoked. This in turn invokes `nth::format(w, fmt,
 p.name)`. This process continues recursively, now with the same writer, an
-`nth::io::trivial_formatter` for the formatter, and `p.name` of type `std::string`. Because the
+`nth::trivial_formatter` for the formatter, and `p.name` of type `std::string`. Because the
 library provides a FTADLE hook for `std::string`, this resolves by writing the string to the writer.
 
 ## Custom default formatters
 
-By default, the default formatter for a type is `nth::io::trivial_formatter`, but users may
+By default, the default formatter for a type is `nth::trivial_formatter`, but users may
 configure the default formatter (the one used when no formatter argument is provided to
-`nth::io::format`) with a FTADLE hook. In particular, users can implement a function named
+`nth::format`) with a FTADLE hook. In particular, users can implement a function named
 `NthDefaultFormatter` accepting an `nth::type_tag<T>`. Note that this function can also be a hidden
 friend inside the body of the type `T`, as this will still be findable via argument-dependent
 lookup. As an example, one might want a formatter fora person to distinguish whether or not their
@@ -79,7 +79,7 @@ struct Person {
   }
 
   friend void NthFormat(nth::io::writer auto& w, auto& fmt, Person const & p) {
-    nth::io::format(w, fmt, p.name);
+    nth::format(w, fmt, p.name);
   }
 };
 ```
@@ -90,15 +90,15 @@ different `PersonFormatter` to achieve a different result.
 ## Structured Formatting
 
 A common formatting pattern is to effectively format all of the content in a struct, sequence, or
-container, possibly with some surrounding decaration. The `nth::io::structural_formatter` type
+container, possibly with some surrounding decaration. The `nth::structural_formatter` type
 can be used to simplify this process.
 
-To use the`nth::io::structural_formatter` type, users must inherit from it and provide several
+To use the`nth::structural_formatter` type, users must inherit from it and provide several
 customization points. The first such hook is a static variable template of type
 [`nth::structure`](/types/structure) named `structure_of`, as shown in the example below:
 
 ```
-struct my_formatter : nth::io::structural_formatter {
+struct my_formatter : nth::structural_formatter {
     template <typename T>
     static constexpr nth::structure structure_of = ...
 
@@ -125,33 +125,33 @@ leave off such a function. While we would hope that unit tests would catch such 
 that users must provide _both_ or _neither_ yields slightly more assurance of correctness.
 
 ### Sequences
-When sequences are formatted via `nth::io::structural_formatter`, the following will occur.
+When sequences are formatted via `nth::structural_formatter`, the following will occur.
 
 ```
-nth::io::begin_format<nth::structure::sequence>(w, fmt);
+nth::begin_format<nth::structure::sequence>(w, fmt);
 for (auto const& element : seq) {
-  nth::io::begin_format<nth::structure::entry>(w, fmt);
-  nth::io::format(w, fmt, element);
-  nth::io::end_format<nth::structure::entry>(w, fmt);
+  nth::begin_format<nth::structure::entry>(w, fmt);
+  nth::format(w, fmt, element);
+  nth::end_format<nth::structure::entry>(w, fmt);
 }
-nth::io::end_format<nth::structure::sequence>(w, fmt);
+nth::end_format<nth::structure::sequence>(w, fmt);
 ```
 
 ### Associative containers
-When associative containers are formatted via `nth::io::structural_formatter`, the following will occur.
+When associative containers are formatted via `nth::structural_formatter`, the following will occur.
 
 ```
-nth::io::begin_format<nth::structure::associative>(w, fmt);
+nth::begin_format<nth::structure::associative>(w, fmt);
 for (auto const& [k, v] : associative_container) {
-  nth::io::begin_format<nth::structure::key>(w, fmt);
-  nth::io::format(w, fmt, k);
-  nth::io::end_format<nth::structure::key>(w, fmt);
+  nth::begin_format<nth::structure::key>(w, fmt);
+  nth::format(w, fmt, k);
+  nth::end_format<nth::structure::key>(w, fmt);
 
-  nth::io::begin_format<nth::structure::value>(w, fmt);
-  nth::io::format(w, fmt, v);
-  nth::io::end_format<nth::structure::value>(w, fmt);
+  nth::begin_format<nth::structure::value>(w, fmt);
+  nth::format(w, fmt, v);
+  nth::end_format<nth::structure::value>(w, fmt);
 }
-nth::io::end_format<nth::structure::associative>(w, fmt);
+nth::end_format<nth::structure::associative>(w, fmt);
 ```
 
 ### Objects

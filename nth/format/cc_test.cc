@@ -1,4 +1,4 @@
-#include "nth/io/format/cc.h"
+#include "nth/format/cc.h"
 
 #include <map>
 #include <string>
@@ -13,7 +13,7 @@ template <typename T>
 std::string cc(T const& obj) {
   std::string s;
   nth::io::string_writer w(s);
-  nth::io::format(w, nth::io::cc_formatter{}, obj);
+  nth::format(w, nth::io::cc_formatter{}, obj);
   return s;
 }
 
@@ -107,20 +107,20 @@ struct Object {
 
   friend void NthFormat(nth::io::writer auto& w, nth::io::cc_formatter& f,
                         Object const& obj) {
-    nth::io::begin_format<nth::structure::object>(w, f);
-    nth::io::begin_format<nth::structure::key>(w, f);
-    nth::io::format(w, f, "n");
-    nth::io::end_format<nth::structure::key>(w, f);
-    nth::io::begin_format<nth::structure::value>(w, f);
-    nth::io::format(w, f, obj.n);
-    nth::io::end_format<nth::structure::value>(w, f);
-    nth::io::begin_format<nth::structure::key>(w, f);
-    nth::io::format(w, f, "s");
-    nth::io::end_format<nth::structure::key>(w, f);
-    nth::io::begin_format<nth::structure::value>(w, f);
-    nth::io::format(w, f, obj.s);
-    nth::io::end_format<nth::structure::value>(w, f);
-    nth::io::end_format<nth::structure::object>(w, f);
+    nth::begin_format<nth::structure::object>(w, f);
+    nth::begin_format<nth::structure::key>(w, f);
+    nth::format(w, f, "n");
+    nth::end_format<nth::structure::key>(w, f);
+    nth::begin_format<nth::structure::value>(w, f);
+    nth::format(w, f, obj.n);
+    nth::end_format<nth::structure::value>(w, f);
+    nth::begin_format<nth::structure::key>(w, f);
+    nth::format(w, f, "s");
+    nth::end_format<nth::structure::key>(w, f);
+    nth::begin_format<nth::structure::value>(w, f);
+    nth::format(w, f, obj.s);
+    nth::end_format<nth::structure::value>(w, f);
+    nth::end_format<nth::structure::object>(w, f);
   }
 };
 NTH_TEST("format/cc/object") {

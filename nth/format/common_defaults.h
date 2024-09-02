@@ -1,15 +1,15 @@
-#ifndef NTH_IO_FORMAT_COMMON_DEFAULTS_H
-#define NTH_IO_FORMAT_COMMON_DEFAULTS_H
+#ifndef NTH_FORMAT_COMMON_DEFAULTS_H
+#define NTH_FORMAT_COMMON_DEFAULTS_H
 
 #include <concepts>
 #include <cstddef>
 #include <string>
 #include <string_view>
 
-#include "nth/io/format/common_formatters.h"
+#include "nth/format/common_formatters.h"
 #include "nth/meta/type.h"
 
-namespace nth::io {
+namespace nth::fmt {
 
 inline word_formatter<casing::lower> NthDefaultFormatter(
     nth::type_tag<decltype(nullptr)>) {
@@ -49,6 +49,6 @@ auto NthDefaultFormatter(nth::type_tag<I>) {
   return base_formatter(10);
 }
 
-}  // namespace nth::io
+}  // namespace nth::fmt
 
-#endif  // NTH_IO_FORMAT_COMMON_DEFAULTS_H
+#endif  // NTH_FORMAT_COMMON_DEFAULTS_H

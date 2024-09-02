@@ -1,11 +1,11 @@
-#ifndef NTH_IO_FORMAT_CC_H
-#define NTH_IO_FORMAT_CC_H
+#ifndef NTH_FORMAT_CC_H
+#define NTH_FORMAT_CC_H
 
 #include <type_traits>
 
 #include "nth/container/stack.h"
-#include "nth/io/format/common.h"
-#include "nth/io/format/format.h"
+#include "nth/format/common.h"
+#include "nth/format/format.h"
 #include "nth/io/writer/writer.h"
 #include "nth/meta/concepts/convertible.h"
 #include "nth/types/structure.h"
@@ -78,14 +78,14 @@ struct cc_formatter : structural_formatter {
     if (nesting_.empty()) { NTH_UNREACHABLE(); }
     if (nesting_.top().width++ != 0) { io::write_text(w, ","); }
     io::write_text(w, "\n");
-    io::format(w, io::char_spacer(' ', 2 * nesting_.size()));
+    nth::format(w, char_spacer(' ', 2 * nesting_.size()));
   }
 
   void begin(cv<structure::key>, writer auto &w) {
     if (nesting_.empty()) { NTH_UNREACHABLE(); }
     if (nesting_.top().width++ != 0) { io::write_text(w, ","); }
     io::write_text(w, "\n");
-    io::format(w, io::char_spacer(' ', 2 * nesting_.size()));
+    nth::format(w, char_spacer(' ', 2 * nesting_.size()));
 
     switch (nesting_.top().kind) {
       case structure::object: io::write_text(w, "."); break;
@@ -148,7 +148,7 @@ struct cc_formatter : structural_formatter {
     nesting_.pop();
     if (count != 0) {
       io::write_text(w, "\n");
-      io::format(w, io::char_spacer(' ', 2 * nesting_.size()));
+      nth::format(w, char_spacer(' ', 2 * nesting_.size()));
     }
     io::write_text(w, "}");
   }
@@ -163,4 +163,4 @@ struct cc_formatter : structural_formatter {
 
 }  // namespace nth::io
 
-#endif  // NTH_IO_FORMAT_CC_H
+#endif  // NTH_FORMAT_CC_H

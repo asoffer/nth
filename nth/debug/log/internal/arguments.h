@@ -8,7 +8,6 @@
 #include "nth/debug/log/sink.h"
 #include "nth/debug/source_location.h"
 #include "nth/format/interpolate/interpolate.h"
-#include "nth/format/interpolate/spec.h"
 #include "nth/format/interpolate/string.h"
 #include "nth/meta/concepts/core.h"
 

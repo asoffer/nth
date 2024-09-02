@@ -7,7 +7,6 @@
 #include "nth/base/section.h"
 #include "nth/debug/source_location.h"
 #include "nth/format/interpolate/interpolate.h"
-#include "nth/format/interpolate/spec.h"
 #include "nth/format/interpolate/string_view.h"
 #include "nth/io/writer/writer.h"
 #include "nth/memory/bytes.h"
@@ -29,7 +28,7 @@ struct log_line {
   template <nth::interpolation_string S>
   friend auto NthInterpolateFormatter(nth::type_tag<log_line>) {
     if constexpr (S.empty()) {
-      return nth::io::trivial_formatter{};
+      return nth::trivial_formatter{};
     } else {
       return nth::interpolating_formatter<S>{};
     }

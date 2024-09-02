@@ -1,8 +1,8 @@
-#ifndef NTH_IO_FORMAT_FORMAT_H
-#define NTH_IO_FORMAT_FORMAT_H
+#ifndef NTH_FORMAT_FORMAT_H
+#define NTH_FORMAT_FORMAT_H
 
-#include "nth/io/format/common_defaults.h"
-#include "nth/io/format/common_formatters.h"
+#include "nth/format/common_defaults.h"
+#include "nth/format/common_formatters.h"
 #include "nth/io/writer/writer.h"
 #include "nth/meta/constant.h"
 #include "nth/meta/type.h"
@@ -12,7 +12,7 @@
 // specifications for a type. Format specifications can be used when printing or
 // serializing values of a type to configure how the value is written.
 
-namespace nth::io {
+namespace nth {
 
 // Returns the default formatter associated with type `T`. If a function named
 // `NthDefaultFormatter` exists, findable via argument-dependent lookup that
@@ -37,7 +37,7 @@ constexpr auto default_formatter() {
 // opinions about how the value should be formatted. The design gives
 // precedence to the formatter.
 template <int&..., typename F, typename T>
-constexpr auto format(writer auto& w, F&& fmt, T const& value) {
+constexpr auto format(io::writer auto& w, F&& fmt, T const& value) {
   if constexpr (requires { fmt.format(w, value); }) {
     return fmt.format(w, value);
   } else {
@@ -48,18 +48,18 @@ constexpr auto format(writer auto& w, F&& fmt, T const& value) {
 // Invokes the three-argument `format`, by constructing a local
 // `default_formatter<T>()` and passing that as the formatter `fmt`.
 template <int&..., typename T>
-constexpr auto format(writer auto& w, T const& value) {
-  nth::io::format(w, nth::io::default_formatter<T>(), value);
+constexpr auto format(io::writer auto& w, T const& value) {
+  nth::format(w, nth::default_formatter<T>(), value);
 }
 
 namespace internal_format {
 template <typename F, nth::structure S>
 concept semistructural_formatter =
-    (requires(F f, minimal_writer w) { f.begin(nth::constant<S>, w); }) or
-    (requires(F f, minimal_writer w) { f.end(nth::constant<S>, w); });
+    (requires(F f, io::minimal_writer w) { f.begin(nth::constant<S>, w); }) or
+    (requires(F f, io::minimal_writer w) { f.end(nth::constant<S>, w); });
 
 template <typename F, nth::structure S>
-concept structural_formatter = requires(F f, minimal_writer w) {
+concept structural_formatter = requires(F f, io::minimal_writer w) {
   f.begin(nth::constant<S>, w);
   f.end(nth::constant<S>, w);
 };
@@ -67,7 +67,7 @@ concept structural_formatter = requires(F f, minimal_writer w) {
 }  // namespace internal_format
 
 template <nth::structure S, int&..., typename F>
-decltype(auto) begin_format(writer auto& w, F& f) {
+decltype(auto) begin_format(io::writer auto& w, F& f) {
   if constexpr (internal_format::structural_formatter<F, S>) {
     return f.begin(nth::constant<S>, w);
   } else {
@@ -82,7 +82,7 @@ decltype(auto) begin_format(writer auto& w, F& f) {
 }
 
 template <nth::structure S, int&..., typename F>
-decltype(auto) end_format(writer auto& w, F& f) {
+decltype(auto) end_format(io::writer auto& w, F& f) {
   if constexpr (internal_format::structural_formatter<F, S>) {
     return f.end(nth::constant<S>, w);
   } else {
@@ -111,7 +111,7 @@ struct structural_formatter {
     begin_format<structure::sequence>(w, self);
     for (auto const& element : value) {
       begin_format<structure::entry>(w, self);
-      nth::io::format(w, self, element);
+      nth::format(w, self, element);
       end_format<structure::entry>(w, self);
     }
     end_format<structure::sequence>(w, self);
@@ -126,11 +126,11 @@ struct structural_formatter {
     begin_format<structure::associative>(w, self);
     for (auto const& [k, v] : value) {
       begin_format<structure::key>(w, self);
-      nth::io::format(w, self, k);
+      nth::format(w, self, k);
       end_format<structure::key>(w, self);
 
       begin_format<structure::value>(w, self);
-      nth::io::format(w, self, v);
+      nth::format(w, self, v);
       end_format<structure::value>(w, self);
     }
     end_format<structure::associative>(w, self);
@@ -143,6 +143,6 @@ void NthFormat(nth::io::writer auto& w, F&, T const&) {
   nth::io::write_text(w, "?");
 }
 
-}  // namespace nth::io
+}  // namespace nth
 
-#endif  // NTH_IO_FORMAT_FORMAT_H
+#endif  // NTH_FORMAT_FORMAT_H

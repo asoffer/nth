@@ -1,5 +1,5 @@
-#ifndef NTH_STRINGS_INTERPOLATE_STRING_H
-#define NTH_STRINGS_INTERPOLATE_STRING_H
+#ifndef NTH_FORMAT_INTERPOLATE_STRING_H
+#define NTH_FORMAT_INTERPOLATE_STRING_H
 
 #include <cstddef>
 #include <string_view>
@@ -203,4 +203,4 @@ interpolation_string<Length>::placeholder_range() const {
     return 0;                                                                  \
   }()
 
-#endif  // NTH_STRINGS_INTERPOLATE_STRING_H
+#endif  // NTH_FORMAT_INTERPOLATE_STRING_H

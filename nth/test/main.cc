@@ -11,8 +11,8 @@
 #include "nth/debug/log/file_log_sink.h"
 #include "nth/debug/log/log.h"
 #include "nth/debug/log/sink.h"
-#include "nth/io/format/common.h"
-#include "nth/io/format/format.h"
+#include "nth/format/common.h"
+#include "nth/format/format.h"
 #include "nth/io/writer/file.h"
 #include "nth/test/test.h"
 
@@ -79,14 +79,14 @@ int main() {
     int before = contract_violations->failure_count();
     nth::interpolate<"\x1b[96m[ {} {} TEST ]\x1b[0m\n">(
         nth::io::stderr_writer, name,
-        nth::io::char_spacer('.', width - 10 - name.size()));
+        nth::char_spacer('.', width - 10 - name.size()));
     test();
     int after    = contract_violations->failure_count();
     bool success = (before == after);
     ++tests;
     nth::interpolate<"\x1b[{}m[ {} {} {} TEST ]\x1b[0m\n">(
         nth::io::stderr_writer, success ? "96" : "91", name,
-        nth::io::char_spacer('.', TerminalWidth() - 17 - name.size()),
+        nth::char_spacer('.', TerminalWidth() - 17 - name.size()),
         success ? "PASSED" : "FAILED");
   }
 
@@ -98,8 +98,8 @@ int main() {
       "    \u2502   Tests:          {} passed / {} executed {}\u2502\n"
       "    \u2570{}\u256f\n\n">(
       nth::io::stderr_writer,
-      nth::io::string_view_spacer("\u2500", digit_width + 37), tests_passed,
-      tests, nth::io::char_spacer(' ', 13 + digit_width),
-      nth::io::string_view_spacer("\u2500", digit_width + 37));
+      nth::string_view_spacer("\u2500", digit_width + 37), tests_passed,
+      tests, nth::char_spacer(' ', 13 + digit_width),
+      nth::string_view_spacer("\u2500", digit_width + 37));
   return contract_violations->failure_count() == 0 ? 0 : 1;
 }

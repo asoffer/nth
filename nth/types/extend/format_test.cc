@@ -2,7 +2,7 @@
 
 #include <string>
 
-#include "nth/io/format/json.h"
+#include "nth/format/json.h"
 #include "nth/test/test.h"
 #include "nth/types/extend/extend.h"
 
@@ -23,18 +23,18 @@ NTH_TEST("extend/format/cc-default") {
   nth::io::string_writer w(s);
 
   s.clear();
-  nth::io::format(w, Empty{});
+  nth::format(w, Empty{});
   NTH_EXPECT(s == "{}");
 
   s.clear();
-  nth::io::format(w, OneField{});
+  nth::format(w, OneField{});
   NTH_EXPECT(s ==
              "{\n"
              "  .n = 3\n"
              "}");
 
   s.clear();
-  nth::io::format(w, ManyFields{.n = 3, .s = "hello"});
+  nth::format(w, ManyFields{.n = 3, .s = "hello"});
   NTH_EXPECT(s ==
              "{\n"
              "  .n = 3,\n"
@@ -47,18 +47,18 @@ NTH_TEST("extend/format/json") {
   nth::io::string_writer w(s);
 
   s.clear();
-  nth::io::format(w, nth::io::json_formatter{}, Empty{});
+  nth::format(w, nth::io::json_formatter{}, Empty{});
   NTH_EXPECT(s == "{}");
 
   s.clear();
-  nth::io::format(w, nth::io::json_formatter{}, OneField{});
+  nth::format(w, nth::io::json_formatter{}, OneField{});
   NTH_EXPECT(s ==
              "{\n"
              "  \"n\": 3\n"
              "}");
 
   s.clear();
-  nth::io::format(w, nth::io::json_formatter{},
+  nth::format(w, nth::io::json_formatter{},
                   ManyFields{.n = 3, .s = "hello"});
   NTH_EXPECT(s ==
              "{\n"

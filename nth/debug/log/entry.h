@@ -39,7 +39,7 @@ struct log_entry {
   template <nth::interpolation_string S>
   friend auto NthInterpolateFormatter(nth::type_tag<log_entry>) {
     if constexpr (S.empty()) {
-      return nth::io::trivial_formatter{};
+      return nth::trivial_formatter{};
     } else {
       return nth::interpolating_formatter<S>{};
     }

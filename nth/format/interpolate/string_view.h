@@ -1,5 +1,5 @@
-#ifndef NTH_IO_FORMAT_INTERPOLATE_STRING_VIEW_H
-#define NTH_IO_FORMAT_INTERPOLATE_STRING_VIEW_H
+#ifndef NTH_FORMAT_INTERPOLATE_STRING_VIEW_H
+#define NTH_FORMAT_INTERPOLATE_STRING_VIEW_H
 
 #include <cstddef>
 #include <string_view>
@@ -50,4 +50,4 @@ struct interpolation_string_view {
 
 }  // namespace nth
 
-#endif  // NTH_IO_FORMAT_INTERPOLATE_STRING_VIEW_H
+#endif  // NTH_FORMAT_INTERPOLATE_STRING_VIEW_H
