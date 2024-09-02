@@ -66,6 +66,15 @@ struct base_formatter {
   size_t base_;
 };
 
+struct float_formatter {
+  void format(writer auto& w, std::floating_point auto x) const {
+    // TODO: Determine the right buffer size.
+    char buffer[1024] = {};
+    auto result       = std::to_chars(&buffer[0], &buffer[1024], x);
+    io::write_text(w, std::string_view(buffer, result.ptr));
+  }
+};
+
 // A formatter capable of formatting text as specified, as if by a direct call
 // to `nth::io::write_text`.
 struct text_formatter {
@@ -77,15 +86,21 @@ struct text_formatter {
 // A formatter capable of formatting text as an escaped quotation.
 struct quote_formatter {
   void format(writer auto& w, std::string_view s) const {
-    nth::io::write_text(w, "\"");
+    nth::io::write_text(w, R"(")");
     size_t i = 0;
     for (char c : s) {
       switch (c) {
+        case '\n':
+          nth::io::write_text(w, s.substr(0, i));
+          s.remove_prefix(i + 1);
+          i = 0;
+          nth::io::write_text(w, R"(\n)");
+          break;
         case '"':
           nth::io::write_text(w, s.substr(0, i));
           s.remove_prefix(i + 1);
           i = 0;
-          nth::io::write_text(w, "\\\"");
+          nth::io::write_text(w, R"(\")");
           break;
         default:
           if (std::isprint(c)) {
@@ -99,7 +114,7 @@ struct quote_formatter {
       }
     }
     nth::io::write_text(w, s);
-    nth::io::write_text(w, "\"");
+    nth::io::write_text(w, R"(")");
   }
 };
 

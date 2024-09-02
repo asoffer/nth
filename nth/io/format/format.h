@@ -4,7 +4,9 @@
 #include "nth/io/format/common_defaults.h"
 #include "nth/io/format/common_formatters.h"
 #include "nth/io/writer/writer.h"
+#include "nth/meta/constant.h"
 #include "nth/meta/type.h"
+#include "nth/types/structure.h"
 
 // This header file defines a mechanism by which one can register format
 // specifications for a type. Format specifications can be used when printing or
@@ -50,65 +52,94 @@ constexpr auto format(writer auto& w, T const& value) {
   nth::io::format(w, nth::io::default_formatter<T>(), value);
 }
 
-// A structural formatter is one which has `begin_substructure` and
-// `end_substructure` member functions. Users of the formatter may call these
-// functions to indicate to the formatter a tree-like structure. It is the
-// responsibility of the caller to ensure that calls to `begin_substructure` and
-// `end_substructure` are properly paired and nested.
-template <typename F>
-concept structural_formatter = requires(F f, minimal_writer& w) {
-  f.begin_substructure(w);
-  f.end_substructure(w);
+namespace internal_format {
+template <typename F, nth::structure S>
+concept semistructural_formatter =
+    (requires(F f, minimal_writer w) { f.begin(nth::constant<S>, w); }) or
+    (requires(F f, minimal_writer w) { f.end(nth::constant<S>, w); });
+
+template <typename F, nth::structure S>
+concept structural_formatter = requires(F f, minimal_writer w) {
+  f.begin(nth::constant<S>, w);
+  f.end(nth::constant<S>, w);
 };
 
-// A wrapper function which one can call whether or not `f` is a structural
-// formatter. If `f` is a structura formatter, calls `f.begin_substructure(w)`.
-// Otherwise, does nothing.
-template <typename F>
-auto begin_substructure(writer auto& w, F& f) {
-  if constexpr (structural_formatter<F>) { f.begin_substructure(w); }
-}
+}  // namespace internal_format
 
-// A wrapper function which one can call whether or not `f` is a structural
-// formatter. If `f` is a structura formatter, calls `f.end_substructure(w)`.
-// Otherwise, does nothing.
-template <typename F>
-auto end_substructure(writer auto& w, F& f) {
-  if constexpr (structural_formatter<F>) { f.end_substructure(w); }
-}
-
-template <typename F>
-auto begin_entry(writer auto& w, F& f) {
-  if constexpr (structural_formatter<F> and requires { f.begin_entry(w); }) {
-    f.begin_entry(w);
+template <nth::structure S, int&..., typename F>
+decltype(auto) begin_format(writer auto& w, F& f) {
+  if constexpr (internal_format::structural_formatter<F, S>) {
+    return f.begin(nth::constant<S>, w);
+  } else {
+    constexpr bool IsStructural =
+        not internal_format::semistructural_formatter<F, S>;
+    static_assert(IsStructural, R"(
+    The fromatter is not structural even though it has one of either
+    `begin_format` or `end_format`. Both must be implemented. Did you forget or
+    misspell one?
+  )");
   }
 }
 
-template <typename F>
-auto end_entry(writer auto& w, F& f) {
-  if constexpr (structural_formatter<F> and requires { f.end_entry(w); }) {
-    f.end_entry(w);
+template <nth::structure S, int&..., typename F>
+decltype(auto) end_format(writer auto& w, F& f) {
+  if constexpr (internal_format::structural_formatter<F, S>) {
+    return f.end(nth::constant<S>, w);
+  } else {
+    constexpr bool IsStructural =
+        not internal_format::semistructural_formatter<F, S>;
+    static_assert(IsStructural, R"(
+    The fromatter is not structural even though it has one of either
+    `begin_format` or `end_format`. Both must be implemented. Did you forget or
+    misspell one?
+  )");
   }
 }
 
-// An RAII class that invokes `begin_substructure(f)` on construction and
-// `end_substructure(f)` on desturction.
-template <writer W, typename F>
-struct with_substructure {
-  explicit with_substructure(W& w NTH_ATTRIBUTE(lifetimebound),
-                             F& f NTH_ATTRIBUTE(lifetimebound))
-      : w_(w), f_(f) {
-    begin_substructure(w_, f_);
+// `structural_formatter` is a CRTP base-class that can be used to simplify
+// formatting of objects which have a well-understood structure that is visible
+// in the object being formatted. Users may implement begin/end pairs of member
+// functions to be invoked immediately before and after an object of that
+// structural category is formatted.
+struct structural_formatter {
+  template <typename T>
+  void format(this auto& self, io::writer auto& w, T const& value)
+    requires(
+        std::remove_reference_t<decltype(self)>::template structure_of<T> ==
+        structure::sequence)
+  {
+    begin_format<structure::sequence>(w, self);
+    for (auto const& element : value) {
+      begin_format<structure::entry>(w, self);
+      nth::io::format(w, self, element);
+      end_format<structure::entry>(w, self);
+    }
+    end_format<structure::sequence>(w, self);
   }
-  ~with_substructure() { end_substructure(w_, f_); }
 
- private:
-  W& w_;
-  F& f_;
+  template <typename T>
+  void format(this auto& self, io::writer auto& w, T const& value)
+    requires(
+        std::remove_reference_t<decltype(self)>::template structure_of<T> ==
+        structure::associative)
+  {
+    begin_format<structure::associative>(w, self);
+    for (auto const& [k, v] : value) {
+      begin_format<structure::key>(w, self);
+      nth::io::format(w, self, k);
+      end_format<structure::key>(w, self);
+
+      begin_format<structure::value>(w, self);
+      nth::io::format(w, self, v);
+      end_format<structure::value>(w, self);
+    }
+    end_format<structure::associative>(w, self);
+  }
 };
 
-template <typename F>
-void NthFormat(nth::io::writer auto& w, F&, auto const&) {
+template <typename F, typename T>
+void NthFormat(nth::io::writer auto& w, F&, T const&) {
+  nth::io::write_text(w, std::string_view(nth::type<T>.name()));
   nth::io::write_text(w, "?");
 }
 

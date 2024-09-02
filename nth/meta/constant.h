@@ -4,7 +4,6 @@
 #include "nth/meta/type.h"
 
 namespace nth {
-namespace internal_constant {
 
 // A value that can be used in an expression context but is guaranteed to be
 // constant evaluated.
@@ -21,10 +20,8 @@ struct constant_value {
   constexpr operator nth::type_t<type()>() const { return value; }
 };
 
-}  // namespace internal_constant
-
 template <auto Value>
-auto constant = internal_constant::constant_value<Value>();
+auto constant = constant_value<Value>();
 
 }  // namespace nth
 

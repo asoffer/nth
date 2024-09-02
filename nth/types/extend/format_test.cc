@@ -2,6 +2,7 @@
 
 #include <string>
 
+#include "nth/io/format/json.h"
 #include "nth/test/test.h"
 #include "nth/types/extend/extend.h"
 
@@ -17,7 +18,7 @@ struct ManyFields : nth::extend<ManyFields>::with<nth::ext::format> {
   std::string s;
 };
 
-NTH_TEST("extend/format") {
+NTH_TEST("extend/format/cc-default") {
   std::string s;
   nth::io::string_writer w(s);
 
@@ -37,7 +38,32 @@ NTH_TEST("extend/format") {
   NTH_EXPECT(s ==
              "{\n"
              "  .n = 3,\n"
-             "  .s = hello\n"
+             "  .s = \"hello\"\n"
+             "}");
+}
+
+NTH_TEST("extend/format/json") {
+  std::string s;
+  nth::io::string_writer w(s);
+
+  s.clear();
+  nth::io::format(w, nth::io::json_formatter{}, Empty{});
+  NTH_EXPECT(s == "{}");
+
+  s.clear();
+  nth::io::format(w, nth::io::json_formatter{}, OneField{});
+  NTH_EXPECT(s ==
+             "{\n"
+             "  \"n\": 3\n"
+             "}");
+
+  s.clear();
+  nth::io::format(w, nth::io::json_formatter{},
+                  ManyFields{.n = 3, .s = "hello"});
+  NTH_EXPECT(s ==
+             "{\n"
+             "  \"n\": 3,\n"
+             "  \"s\": \"hello\"\n"
              "}");
 }
 

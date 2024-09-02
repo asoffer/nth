@@ -9,6 +9,12 @@ cc_library(
     ],
 )
 
+cc_library(
+    name = "structure",
+    hdrs = ["structure.h"],
+    deps = [],
+)
+
 cc_test(
     name = "reflect_test",
     srcs = ["reflect_test.cc"],
