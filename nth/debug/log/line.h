@@ -16,13 +16,11 @@ namespace nth {
 // due to `NTH_LOG`. Log lines must be constructed with the annotation
 // `NTH_PLACE_IN_SECTION(nth_log_line)`
 struct log_line {
-  consteval log_line(interpolation_string_view str,
-                     nth::source_location loc = nth::source_location::current())
-      : str_(str), source_location_(loc) {}
+  consteval log_line(nth::source_location loc = nth::source_location::current())
+      : source_location_(loc) {}
   consteval log_line(std::string_view verbosity_path,
-                     interpolation_string_view str,
                      nth::source_location loc = nth::source_location::current())
-      : verbosity_path_(verbosity_path), str_(str), source_location_(loc) {}
+      : verbosity_path_(verbosity_path), source_location_(loc) {}
 
   template <nth::interpolation_string S>
   friend auto NthInterpolateFormatter(nth::type_tag<log_line>) {
@@ -42,11 +40,6 @@ struct log_line {
   }
 
   [[nodiscard]] constexpr size_t id() const;
-
-  [[nodiscard]] constexpr interpolation_string_view interpolation_string()
-      const {
-    return str_;
-  }
 
   [[nodiscard]] constexpr struct source_location source_location() const {
     return source_location_;
@@ -70,7 +63,6 @@ struct log_line {
 
  private:
   std::string_view verbosity_path_;
-  interpolation_string_view str_;
   struct source_location source_location_;
   std::atomic<bool> enabled_ = true;
 };

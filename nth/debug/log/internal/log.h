@@ -42,7 +42,7 @@
   default:                                                                     \
     switch (NTH_PLACE_IN_SECTION(                                              \
                 nth_log_line) static constinit ::nth::log_line log_line_var{   \
-        verbosity, interp_str_var};                                            \
+        verbosity};                                                            \
             0)                                                                 \
     default:                                                                   \
       (((void)unconditional_expr), not log_line_var.enabled())                 \
