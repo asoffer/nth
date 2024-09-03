@@ -1,24 +1,6 @@
 package(default_visibility = ["//visibility:public"])
 
 cc_library(
-    name = "black_hole",
-    hdrs = ["black_hole.h"],
-    deps = [
-        ":flyweight_map",
-        "//nth/debug",
-    ],
-)
-
-cc_test(
-    name = "black_hole_test",
-    srcs = ["black_hole_test.cc"],
-    deps = [
-        ":black_hole",
-        "//nth/test:main",
-    ],
-)
-
-cc_library(
     name = "disjoint_set",
     hdrs = ["disjoint_set.h"],
     deps = [
