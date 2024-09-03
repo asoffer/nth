@@ -7,7 +7,7 @@
 #include <string>
 
 #include "nth/debug/log/line.h"
-#include "nth/format/interpolate/interpolate.h"
+#include "nth/format/interpolate.h"
 #include "nth/io/writer/writer.h"
 
 namespace nth {

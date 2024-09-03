@@ -23,7 +23,7 @@ returns a greeting string. To do this we would implement `NthFormat` for the `Pe
 struct Person {
   std::string name;
 
-  friend void NthFormat(nth::io::writer auto& w, auto& fmt, Person const & p) {
+  friend void NthFormat(nth::io::writer auto& w, auto& fmt, Person const& p) {
     nth::format(w, fmt, p.name);
   }
 };
@@ -60,10 +60,10 @@ name should be capitalized. One could add the following to make the default capi
 struct PersonFormatter {
   bool capitalized;
 
-  void format(nth::io::writer auto& w, Person const & p) const {
+  void format(nth::io::writer auto& w, Person const& p) const {
     if (p.name.empty()) { return; }
     if (capitalized) {
-      nth::io::write_text(w, capitalize(p.name[0])); 
+      nth::io::write_text(w, capitalize(p.name[0]));
       nth::io::write_text(w, p.name.substr(1));
     } else {
       nth::io::write_text(w, p.name);
@@ -78,7 +78,7 @@ struct Person {
     return PersonFormatter{.capitalized = true};
   }
 
-  friend void NthFormat(nth::io::writer auto& w, auto& fmt, Person const & p) {
+  friend void NthFormat(nth::io::writer auto& w, auto& fmt, Person const& p) {
     nth::format(w, fmt, p.name);
   }
 };

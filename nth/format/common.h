@@ -6,7 +6,7 @@
 #include <string_view>
 
 #include "nth/format/format.h"
-#include "nth/format/interpolate/string.h"
+#include "nth/format/interpolate.h"
 
 namespace nth {
 

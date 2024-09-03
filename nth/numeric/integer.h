@@ -9,7 +9,7 @@
 #include <string_view>
 
 #include "nth/debug/debug.h"
-#include "nth/format/interpolate/string.h"
+#include "nth/format/interpolate.h"
 #include "nth/io/reader/reader.h"
 #include "nth/io/writer/writer.h"
 #include "nth/memory/bytes.h"
@@ -112,7 +112,8 @@ struct integer {
   }
 
   template <interpolation_string>
-  friend nth::trivial_formatter NthInterpolateFormatter(nth::type_tag<integer>) {
+  friend nth::trivial_formatter NthInterpolateFormatter(
+      nth::type_tag<integer>) {
     return {};
   }
 

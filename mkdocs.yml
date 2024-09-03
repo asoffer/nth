@@ -26,6 +26,7 @@ nav:
       - format: format/format.md
       - cc: format/cc.md
       - json: format/json.md
+      - interpolate: format/interpolate.md
     #- hash: hash.md
     - io:
       - writer:

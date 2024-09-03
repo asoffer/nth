@@ -11,7 +11,7 @@ cc_library(
         "//nth/base:attributes",
         "//nth/base:core",
         "//nth/debug/property/internal:concepts",
-        "//nth/format/interpolate",
+        "//nth/format:interpolate",
         "//nth/hash:fnv1a",
         "//nth/format",
         "//nth/io/writer",

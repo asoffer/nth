@@ -5,7 +5,7 @@
 
 // `NTH_LOG` is a macro which allows one to log to one or more configurable
 // logging sinks. The macro accepts either one argument, consisting of an
-// interpolation-string (see "nth/format/interpolate/string.h"), or two
+// interpolation-string (see "nth/format/interpolate.h"), or two
 // arguments, where the first argument is a parethesized path-like string
 // literal representing the logging verbosity requirements (see
 // "nth/debug/verbosity/verbosity.h" for details), followed by an

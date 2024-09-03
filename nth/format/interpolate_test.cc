@@ -1,4 +1,4 @@
-#include "nth/format/interpolate/interpolate.h"
+#include "nth/format/interpolate.h"
 
 #include "nth/io/writer/string.h"
 #include "nth/meta/type.h"

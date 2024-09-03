@@ -8,7 +8,6 @@
 #include "nth/base/core.h"
 #include "nth/debug/property/internal/concepts.h"
 #include "nth/format/format.h"
-#include "nth/format/interpolate/interpolate.h"
 #include "nth/hash/fnv1a.h"
 #include "nth/io/writer/string.h"
 #include "nth/io/writer/writer.h"

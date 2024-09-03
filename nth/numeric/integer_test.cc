@@ -1,7 +1,7 @@
 #include "nth/numeric/integer.h"
 
 #include "nth/numeric/test_traits.h"
-#include "nth/format/interpolate/interpolate.h"
+#include "nth/format/interpolate.h"
 #include "nth/test/test.h"
 
 namespace nth {

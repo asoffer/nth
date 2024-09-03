@@ -7,8 +7,7 @@
 #include "nth/debug/log/line.h"
 #include "nth/debug/log/sink.h"
 #include "nth/debug/source_location.h"
-#include "nth/format/interpolate/interpolate.h"
-#include "nth/format/interpolate/string.h"
+#include "nth/format/interpolate.h"
 #include "nth/meta/concepts/core.h"
 
 namespace nth {

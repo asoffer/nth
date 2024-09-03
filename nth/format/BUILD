@@ -25,8 +25,8 @@ cc_library(
     name = "common",
     hdrs = ["common.h"],
     deps = [
+      ":interpolate",
       ":format",
-      "//nth/format/interpolate:string",
     ],
 )
 
@@ -43,6 +43,28 @@ cc_library(
       "//nth/meta:constant",
       "//nth/meta:type",
       "//nth/types:structure",
+    ],
+)
+
+cc_library(
+    name = "interpolate",
+    hdrs = ["interpolate.h"],
+    srcs = ["internal/parameter_range.h"],
+    deps = [
+        ":format",
+        "//nth/base:attributes",
+        "//nth/base:core",
+        "//nth/io/writer",
+    ],
+)
+
+cc_test(
+    name = "interpolate_test",
+    srcs = ["interpolate_test.cc"],
+    deps = [
+        ":interpolate",
+        "//nth/io/writer:string",
+        "//nth/test/raw:test",
     ],
 )
 

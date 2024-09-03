@@ -1,5 +1,5 @@
-#ifndef NTH_STRINGS_INTERPOLATION_INTERNAL_PARAMETER_RANGE_H
-#define NTH_STRINGS_INTERPOLATION_INTERNAL_PARAMETER_RANGE_H
+#ifndef NTH_FORMAT_INTERNAL_PARAMETER_RANGE_H
+#define NTH_FORMAT_INTERNAL_PARAMETER_RANGE_H
 
 #include <cstdint>
 #include <limits>
@@ -40,4 +40,4 @@ inline constexpr void populate_tree(std::string_view interpolation_string,
 
 }  // namespace nth::internal_interpolate
 
-#endif  // NTH_STRINGS_INTERPOLATION_INTERNAL_PARAMETER_RANGE_H
+#endif  // NTH_FORMAT_INTERNAL_PARAMETER_RANGE_H

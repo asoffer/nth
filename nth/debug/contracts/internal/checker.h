@@ -3,8 +3,7 @@
 
 #include "nth/debug/trace/internal/trace.h"
 #include "nth/format/format.h"
-#include "nth/format/interpolate/interpolate.h"
-#include "nth/format/interpolate/string_view.h"
+#include "nth/format/interpolate.h"
 #include "nth/io/writer/writer.h"
 #include "nth/meta/type.h"
 

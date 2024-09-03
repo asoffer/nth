@@ -7,7 +7,7 @@
 #include "nth/debug/contracts/contract.h"
 #include "nth/debug/source_location.h"
 #include "nth/format/format.h"
-#include "nth/format/interpolate/string_view.h"
+#include "nth/format/interpolate.h"
 #include "nth/io/writer/string.h"
 #include "nth/io/writer/writer.h"
 #include "nth/registration/registrar.h"

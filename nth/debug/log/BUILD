@@ -15,7 +15,7 @@ cc_library(
     srcs = ["entry.cc"],
     deps = [
         ":line",
-        "//nth/format/interpolate",
+        "//nth/format:interpolate",
         "//nth/io/writer",
     ],
 )
@@ -38,7 +38,7 @@ cc_library(
     deps = [
         "//nth/base:section",
         "//nth/debug:source_location",
-        "//nth/format/interpolate:string_view",
+        "//nth/format:interpolate",
     ],
 )
 

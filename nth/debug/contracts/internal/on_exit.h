@@ -2,7 +2,7 @@
 #define NTH_DEBUG_CONTRACTS_INTERNAL_ON_EXIT_H
 
 #include "nth/debug/source_location.h"
-#include "nth/format/interpolate/string.h"
+#include "nth/format/interpolate.h"
 
 namespace nth::internal_contracts {
 
