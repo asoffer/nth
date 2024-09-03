@@ -5,7 +5,7 @@ author intends this to be a valid code path that they have not yet implemented. 
 macro will always abort, after potentially logging. if `NTH_UNIMPLEMENTED` is invoked with no
 arguments, a simple default message will be logged. Users may also provide an interpolation string
 and inject extra information that will be appended to the log message, as if `NTH_UNREACHABLE` were
-`NTH_LOG`. That is, one could write
+[`NTH_LOG`](/debug/log). That is, one could write
 
 ```
 enum suit { clubs, diamonds, hearts, spades };

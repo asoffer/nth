@@ -15,7 +15,7 @@ nav:
     #- container: container.md
     - debug:
       #- contracts: debug/contracts.md
-      #- log: debug/log.md
+      - log: debug/log.md
       #- property: debug/property.md
       - unimplemented: debug/unimplemented.md
       - unreachable: debug/unreachable.md

@@ -4,7 +4,8 @@ This target defines the macro `NTH_UNREACHABLE`. Invocations of this macro are a
 code path indicates that the programmer believed this code path could never be reached in a valid
 program. In debug builds, invocation of `NTH_UNREACHABLE` will log an error message and then abort
 execution. Users may also provide an interpolation string and inject extra information that will be
-appended to the log message, as if `NTH_UNREACHABLE` were `NTH_LOG`. That is, one could write
+appended to the log message, as if `NTH_UNREACHABLE` were [`NTH_LOG`](/debug/log). That is, one
+could write
 
 ```
 switch (n) {

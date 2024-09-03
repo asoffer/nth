@@ -124,7 +124,16 @@ struct family_name_formatter {
 
 ## Escaping
 
+TODO: Escaping has not yet been implemented.
+
 At times one may wish for the interpolation string to have a literal `'{'` character embedded in it
 which is not treated as the start of a placeholder. To achieve this, one must escape the character
-by prefixing it with a `'\'` (and similarly for `'}'`). If one wishes to have a literal backslash
-`'\'` this also needs to be escaped, written as `"\\"` in the interpolation string.
+by prefixing it with a ``'`'`` (and similarly suffixing `'}'` with ``'`'``). If one wishes to have a
+literal backtick character, this also needs to be escaped as `"``"` in the interpolation string.
+
+When parsing an interpolation string, the "max munch" rule applies except for escaped closing braces
+(because the escape character follows the character to be escaped). In this case escape tokenization
+can be thought of as "max much from the right." Alternatively, one could count the number of
+backtics following the `'}'` character. The `'}'` is escaped if and only if there are an odd number
+of backticks.
+
