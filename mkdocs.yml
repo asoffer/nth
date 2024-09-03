@@ -12,7 +12,8 @@ nav:
       - platform: base/platform.md
       - section: base/section.md
     #- commandline: commandline.md
-    #- container: container.md
+    - container:
+      - stack: container/stack.md
     - debug:
       #- contracts: debug/contracts.md
       - log: debug/log.md

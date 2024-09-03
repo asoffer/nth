@@ -48,11 +48,11 @@ struct stack {
 
   // Returns a reference to the most-recently pushed element in the stack.
   // Requires that the stack not be empty.
-  reference top() { return *(next_ - 1); }
-  const_reference top() const { return *(next_ - 1); }
+  [[nodiscard]] reference top() { return *(next_ - 1); }
+  [[nodiscard]] const_reference top() const { return *(next_ - 1); }
 
   // Returns a span over the top `n` elements in the stack.
-  std::span<value_type> top_span(size_type n) {
+  [[nodiscard]] std::span<value_type> top_span(size_type n) {
     NTH_REQUIRE((debug), size() >= n);
     return std::span(next_ - n, n);
   }
@@ -61,17 +61,17 @@ struct stack {
     return std::span(next_ - n, n);
   }
   template <size_type N>
-  std::span<value_type, N> top_span() {
+  [[nodiscard]] std::span<value_type, N> top_span() {
     NTH_REQUIRE((debug), size() >= N);
     return std::span<value_type, N>(next_ - N, N);
   }
   template <size_type N>
-  std::span<value_type const, N> top_span() const {
+  [[nodiscard]] std::span<value_type const, N> top_span() const {
     NTH_REQUIRE((debug), size() >= N);
     return std::span<value_type const, N>(next_ - N, N);
   }
 
-  std::pair<value_type*, size_type> release() && {
+  [[nodiscard]] std::pair<value_type*, size_type> release() && {
     return std::pair(std::exchange(next_, nullptr), left_);
   }
 
@@ -83,15 +83,15 @@ struct stack {
   void swap(stack& other);
 
   // Returns the number of elements present in the stack.
-  size_type size() const { return capacity() - left_; }
+  [[nodiscard]] size_type size() const { return capacity() - left_; }
 
   // Returns whether the stack contains no elements.
-  bool empty() const { return size() == 0; }
+  [[nodiscard]] bool empty() const { return size() == 0; }
 
   // Returns the amount of space left before a reallocation is required.
-  constexpr size_type remaining_capacity() const { return left_; }
+  [[nodiscard]] constexpr size_type remaining_capacity() const { return left_; }
 
-  size_type capacity() const { return *capacity_address(); }
+  [[nodiscard]] size_type capacity() const { return *capacity_address(); }
 
   // Reserves enough capacity to store at least `n` elements in total.
   void reserve(size_type n);
