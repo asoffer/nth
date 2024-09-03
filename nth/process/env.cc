@@ -1,9 +1,9 @@
-#include "nth/io/environment_variable.h"
+#include "nth/process/env.h"
 
 #include <cstdlib>
 #include <mutex>
 
-namespace nth::environment {
+namespace nth::env {
 
 static constinit std::mutex set_env_mutex;
 
@@ -27,8 +27,7 @@ void store(null_terminated_string_view name, std::nullopt_t) {
 
 void store(null_terminated_string_view name,
            std::optional<null_terminated_string_view> value) {
-  value ? nth::environment::store(name, *value)
-        : nth::environment::store(name, std::nullopt);
+  value ? nth::env::store(name, *value) : nth::env::store(name, std::nullopt);
 }
 
-}  // namespace nth::environment
+}  // namespace nth::env

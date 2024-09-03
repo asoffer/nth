@@ -36,7 +36,8 @@ nav:
     #- memory: memory.md
     #- meta: meta.md
     #- numeric: numeric.md
-    #- process: process.md
+    - process:
+      - env: process/env.md
     #- registration: registration.md
     #- strings: strings.md
     #- test: test.md

@@ -1,25 +1,6 @@
 package(default_visibility = ["//visibility:public"])
 
 cc_library(
-    name = "environment_variable",
-    hdrs = ["environment_variable.h"],
-    srcs = ["environment_variable.cc"],
-    deps = [
-        "//nth/strings:null_terminated_string_view",
-    ],
-)
-
-cc_test(
-    name = "environment_variable_test",
-    srcs = ["environment_variable_test.cc"],
-    deps = [
-        ":environment_variable",
-        "//nth/meta:type",
-        "//nth/test:main",
-    ],
-)
-
-cc_library(
     name = "file",
     hdrs = ["file.h"],
     srcs = ["file.cc"],

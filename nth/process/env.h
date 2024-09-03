@@ -1,5 +1,5 @@
-#ifndef NTH_IO_ENVIRONMENT_VARIABLE_H
-#define NTH_IO_ENVIRONMENT_VARIABLE_H
+#ifndef NTH_PROCESS_ENV_H
+#define NTH_PROCESS_ENV_H
 
 #include <stdlib.h>
 
@@ -8,7 +8,7 @@
 
 #include "nth/strings/null_terminated_string_view.h"
 
-namespace nth::environment {
+namespace nth::env {
 
 // These functions are used for interacting with environment variables. While
 // the C++ standard provides `std::getenv`, it does not provide any mechanism
@@ -24,11 +24,11 @@ namespace nth::environment {
 //
 // In order to provide thread-safety, internally these functions synchronize,
 // possibly taking a lock. For this reason it is usually more performant to only
-// invoke `LoadEnvironmentVariable` when the variable's value may have changed
-// in a way that should affect program behavior. If the value is not expected to
-// change, or a change in the environment variable should not affect program
-// behavior, it is usually more performant to store that string instead of
-// reinvoking `LoadEnvironmentVariable`.
+// invoke `nth::env::load` when the variable's value may have changed in a way
+// that should affect program behavior. If the value is not expected to change,
+// or a change in the environment variable should not affect program behavior,
+// it is usually more performant to store that string instead of reinvoking
+// `nth::env::load`.
 
 // Returns the string stored in the environment variable named `name` when
 // invoked, if the environment variable is set. Otherwise, returns
@@ -45,6 +45,6 @@ void store(null_terminated_string_view name, std::nullopt_t);
 void store(null_terminated_string_view name,
            std::optional<null_terminated_string_view> value);
 
-}  // namespace nth::environment
+}  // namespace nth::env
 
-#endif  // NTH_IO_ENVIRONMENT_VARIABLE_H
+#endif  // NTH_PROCESS_ENV_H
