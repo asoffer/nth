@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <link rel="shortcut icon" href="../../img/favicon.ico" />
+    <title>interpolate - nth - A collection of C++ Libraries</title>
+    <link rel="stylesheet" href="../../css/theme.css" />
+    <link rel="stylesheet" href="../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "interpolate";
+        var mkdocs_page_input_path = "format/interpolate.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../.." class="icon icon-home"> nth - A collection of C++ Libraries
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../..">Home</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Libraries</span></p>
+              <ul class="current">
+                  <li class="toctree-l1"><a class="reference internal" >base</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../../base/attributes/">attributes</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../base/core/">core</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../base/indestructible/">indestructible</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../base/platform/">platform</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../base/section/">section</a>
+                </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" >container</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../../container/stack/">stack</a>
+                </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" >debug</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../../debug/log/">log</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../debug/unimplemented/">unimplemented</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../debug/unreachable/">unreachable</a>
+                </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1 current"><a class="reference internal current" >format</a>
+    <ul class="current">
+                <li class="toctree-l2"><a class="reference internal" href="../format/">format</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../cc/">cc</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../json/">json</a>
+                </li>
+                <li class="toctree-l2 current"><a class="reference internal current" href="#">interpolate</a>
+    <ul class="current">
+    <li class="toctree-l3"><a class="reference internal" href="#overview">Overview</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#basics">Basics</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#builtin-format-options">Builtin format options</a>
+        <ul>
+    <li class="toctree-l4"><a class="reference internal" href="#bool">bool</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#integral-types">Integral types</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#string-like">String-like</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#custom-interpolation-formatting">Custom interpolation formatting.</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#escaping">Escaping</a>
+    </li>
+    </ul>
+                </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" >io</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" >writer</a>
+    <ul>
+                <li class="toctree-l3"><a class="reference internal" href="../../io/writer/writer/">writer</a>
+                </li>
+                <li class="toctree-l3"><a class="reference internal" href="../../io/writer/file/">file</a>
+                </li>
+                <li class="toctree-l3"><a class="reference internal" href="../../io/writer/string/">string</a>
+                </li>
+    </ul>
+                </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" >process</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../../process/env/">env</a>
+                </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" >types</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../../types/structure/">structure</a>
+                </li>
+    </ul>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../..">nth - A collection of C++ Libraries</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../.." class="icon icon-home" aria-label="Docs"></a></li>
+          <li class="breadcrumb-item">Libraries</li>
+          <li class="breadcrumb-item">format</li>
+      <li class="breadcrumb-item active">interpolate</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="nthformatinterpolate"><code>//nth/format:interpolate</code></h1>
+<h2 id="overview">Overview</h2>
+<p>This target provides added functionality on top of <a href="/format/format"><code>//nth/format</code></a> by making it
+possible to specify formatters via <a href="https://en.wikipedia.org/wiki/String_interpolation">interpolation
+strings</a>.</p>
+<p>Interpolation strings, as used in the <code>nth</code> library, are strings with some number of matching braces
+<code>"{...}"</code>. Each top-level (non-nested) pair of matching braces constitutes a <em>placeholder</em> into which a
+value may be formatted. The end result of interpolating will be the interpolation string itself with
+each placeholder replaced by some formatted object.</p>
+<h2 id="basics">Basics</h2>
+<p>The core of the library is the free function-template <code>nth::interpolate</code>. It accepts an
+<code>nth::interpolation_string</code> template parameter, an <code>nth::io::writer</code> reference, and a number of
+arguments equal to the number of pairs of matching braces.</p>
+<pre><code>nth::interpolate&lt;&quot;'{}' is the Roman numeral symbol for {}.&quot;&gt;(
+  nth::io::stdout_writer, &quot;IX&quot;, 9);
+// &quot;'IX' is the Roman numeral symbol for 9.&quot;
+</code></pre>
+<p>In the example above, the placeholders are simply <code>"{}"</code>, but some types support configuration by
+putting text inside the braces. For example, integers can have an <code>'x'</code> inside to indicate they
+should be formatted in base-16. Strings can have a <code>'q'</code> to indicate that they should be escaped as
+a quotation.</p>
+<pre><code>nth::interpolate&lt;&quot;{} can be written is base-16 as {x}.&quot;&gt;(
+  nth::io::stdout_writer, 17, 17);
+// 17 can be written is base-16 as 11.&quot;
+</code></pre>
+<h2 id="builtin-format-options">Builtin format options</h2>
+<p>The following are the interpolation arguments available for builtin types:</p>
+<h3 id="bool"><strong><code>bool</code></strong></h3>
+<ul>
+<li><code>{}</code> and <code>{b}: Lower-case. Writes either</code>"true"<code>or</code>"false"`.</li>
+<li><code>{
+  B}</code>: Title-case. Writes either <code>"True" or</code>"False"`.</li>
+<li><code>{
+  B !}</code>: Upper-case. Writes either <code>"TRUE" or</code>"FALSE"`.</li>
+<li><code>{
+  d}</code>: Decimal. Writes either <code>"1" or</code>"0"`.</li>
+</ul>
+<h3 id="integral-types"><strong>Integral types</strong></h3>
+<p>Integral types are anything satisfying the <code>std::integral</code> concept (other than <code>bool</code>).</p>
+<ul>
+<li><code>{
+  d}</code>: Decimal. Writes the number in base-10.</li>
+<li><code>{
+  x}</code>: Hexadecimal. Writes the number in base-16.</li>
+</ul>
+<h3 id="string-like"><strong>String-like</strong></h3>
+<p>String-like types are anything convertible to <code>std::string_view</code>.</p>
+<ul>
+<li><code>{}</code>: Writes the string exactly as-is.</li>
+<li><code>{
+  q}</code>: Escaped. Writes the string escaping characters such as <code>"</code>, and <code>\</code>.</li>
+</ul>
+<h2 id="custom-interpolation-formatting">Custom interpolation formatting.</h2>
+<p>By default, the empty interpolation placeholder <code>"{}"</code> will format an object with that objects
+<a href="/format/format#custom-default-formatters">default formatter</a>. However, this behavior is
+customizable via a <a href="/ftadle">FTADLE</a> hook. Specifically, an author of a type <code>T</code> may implement a
+function template accepting an <code>nth::interpolation_string</code> template argument and an
+<code>nth::type_tag&lt;T&gt;</code> argument. The function, if provided, will be called with the contents that are
+between the braces to construct a formatter to be used during interpolation. As an example,</p>
+<pre><code>struct Person {
+  std::string given_name;
+  std::string family_name;
+
+  template &lt;nth::interpolation_string S&gt;
+  friend auto NthInterpolateFormatter(nth::type_tag&lt;Person&gt;) {
+    if constexpr (S.empty()) {
+      return full_name_formatter{};
+    } else if constexpr (S == &quot;g&quot;) {
+      return given_name_formatter{};
+    } else if constexpr (S == &quot;f&quot;) {
+      return family_name_formatter{};
+    } else {
+      // Checked previously so guaranteed to be false (but dependent on the
+      // template parameter.
+      constexpr bool ValidInterpolationString = S.empty();
+      static_assert(ValidInterpolationString,
+        &quot;The interpolation string is invalid. It must be &quot;{}&quot;, &quot;{
+        g}&quot;, or &quot;{
+        f}&quot;.);
+    }
+  }
+};
+</code></pre>
+<p>Now, depending on the interpolation string, a person will be formatted with a <code>full_name_formatter</code>, a <code>given_name_formatter</code> or a <code>family_name_formatter</code>. One might implement those as shown below:</p>
+<pre><code>struct full_name_formatter {
+  void format(nth::io::writer auto&amp; w, Person const &amp; p) {
+    nth::interpolate&lt;&quot;{} {}&quot;&gt;(w, p.given_name, p.family_name);
+  }
+};
+
+struct given_name_formatter {
+  void format(nth::io::writer auto&amp; w, Person const&amp; p) {
+    nth::io::write_text(w, p.given_name);
+  }
+};
+
+struct family_name_formatter {
+  void format(nth::io::writer auto&amp; w, Person const&amp; p) {
+    nth::io::write_text(w, p.family_name);
+  }
+};
+</code></pre>
+<h2 id="escaping">Escaping</h2>
+<p>TODO: Escaping has not yet been implemented.</p>
+<p>At times one may wish for the interpolation string to have a literal <code>'{'</code> character embedded in it
+which is not treated as the start of a placeholder. To achieve this, one must escape the character
+by prefixing it with a <code>'`'</code> (and similarly suffixing <code>'}'</code> with <code>'`'</code>). If one wishes to have a
+literal backtick character, this also needs to be escaped as <code>"``"</code> in the interpolation string.</p>
+<p>When parsing an interpolation string, the "max munch" rule applies except for escaped closing braces
+(because the escape character follows the character to be escaped). In this case escape tokenization
+can be thought of as "max much from the right." Alternatively, one could count the number of
+backtics following the <code>'}'</code> character. The <code>'}'</code> is escaped if and only if there are an odd number
+of backticks.</p>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../json/" class="btn btn-neutral float-left" title="json"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../../io/writer/writer/" class="btn btn-neutral float-right" title="writer">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="../json/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../../io/writer/writer/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "../..";</script>
+    <script src="../../js/theme_extra.js"></script>
+    <script src="../../js/theme.js"></script>
+      <script src="../../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

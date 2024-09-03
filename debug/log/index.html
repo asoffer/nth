@@ -5,15 +5,15 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       <link rel="shortcut icon" href="../../img/favicon.ico" />
-    <title>core - nth - A collection of C++ Libraries</title>
+    <title>log - nth - A collection of C++ Libraries</title>
     <link rel="stylesheet" href="../../css/theme.css" />
     <link rel="stylesheet" href="../../css/theme_extra.css" />
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
     
       <script>
         // Current page data
-        var mkdocs_page_name = "core";
-        var mkdocs_page_input_path = "base/core.md";
+        var mkdocs_page_name = "log";
+        var mkdocs_page_input_path = "debug/log.md";
         var mkdocs_page_url = null;
       </script>
     
@@ -45,19 +45,17 @@
               </ul>
               <p class="caption"><span class="caption-text">Libraries</span></p>
               <ul class="current">
-                  <li class="toctree-l1 current"><a class="reference internal current" >base</a>
-    <ul class="current">
-                <li class="toctree-l2"><a class="reference internal" href="../attributes/">attributes</a>
+                  <li class="toctree-l1"><a class="reference internal" >base</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../../base/attributes/">attributes</a>
                 </li>
-                <li class="toctree-l2 current"><a class="reference internal current" href="#">core</a>
-    <ul class="current">
-    </ul>
+                <li class="toctree-l2"><a class="reference internal" href="../../base/core/">core</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../indestructible/">indestructible</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../base/indestructible/">indestructible</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../platform/">platform</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../base/platform/">platform</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../section/">section</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../base/section/">section</a>
                 </li>
     </ul>
                   </li>
@@ -67,13 +65,21 @@
                 </li>
     </ul>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" >debug</a>
-    <ul>
-                <li class="toctree-l2"><a class="reference internal" href="../../debug/log/">log</a>
+                  <li class="toctree-l1 current"><a class="reference internal current" >debug</a>
+    <ul class="current">
+                <li class="toctree-l2 current"><a class="reference internal current" href="#">log</a>
+    <ul class="current">
+    <li class="toctree-l3"><a class="reference internal" href="#overview">Overview</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#verbosity">Verbosity</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#log-sinks">Log sinks</a>
+    </li>
+    </ul>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../debug/unimplemented/">unimplemented</a>
+                <li class="toctree-l2"><a class="reference internal" href="../unimplemented/">unimplemented</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../debug/unreachable/">unreachable</a>
+                <li class="toctree-l2"><a class="reference internal" href="../unreachable/">unreachable</a>
                 </li>
     </ul>
                   </li>
@@ -131,8 +137,8 @@
   <ul class="wy-breadcrumbs">
     <li><a href="../.." class="icon icon-home" aria-label="Docs"></a></li>
           <li class="breadcrumb-item">Libraries</li>
-          <li class="breadcrumb-item">base</li>
-      <li class="breadcrumb-item active">core</li>
+          <li class="breadcrumb-item">debug</li>
+      <li class="breadcrumb-item active">log</li>
     <li class="wy-breadcrumbs-aside">
     </li>
   </ul>
@@ -141,17 +147,54 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
             <div class="section" itemprop="articleBody">
               
-                <h1 id="nthbasecore"><code>//nth/base:core</code></h1>
-<p>Provides two macros <code>NTH_MOVE</code> and <code>NTH_FWD</code> which are replacements for <code>std::move</code> and
-<code>std::forward</code> respectively. In large code bases the extra cost of compiling these function
-templates and inlining them can have noticeable affect on compilation times. These macros are
-equivalent implementations removing that cost.</p>
+                <h1 id="nthdebuglog">//nth/debug/log</h1>
+<h2 id="overview">Overview</h2>
+<p>This target defines a macro <code>NTH_LOG</code> used for debug logging, and a few free functions controlling
+its behavior.</p>
+<p>Logging is built on top of the <a href="/format/interpolate">interpolation library</a>. In its simplest usage,
+one would provide an interpolation as an argument to the <code>NTH_LOG</code> macro whose placeholders will be
+filled in with logging arguments.</p>
+<pre><code>NTH_LOG(&quot;The first three primes are {}, {}, and {}&quot;) &lt;&lt;= {2, 3, 5};
+</code></pre>
+<p>Log macros also can accept an optional first argument; a parethesized path-like string-literal which
+we call the <em>verbosity path</em>. The verbosity path is simply an identifier that gives us a mechanism
+to dynamically enable or disable log statements.</p>
+<pre><code>NTH_LOG((&quot;my/verbosity/path&quot;), &quot;What roll's down {}, alone or in {}?&quot;)
+    &lt;&lt;= {&quot;stairs&quot;, &quot;pairs&quot;};
+</code></pre>
+<p>Sometimes log statements do not require any interpolaction arguments, in which case, one can simply
+elide the trailing <code>&lt;&lt;= {}</code>, as in:</p>
+<pre><code>NTH_LOG((&quot;my/verbosity/path&quot;), &quot;It's log! It's log! It's big, it's heavy, it's wood!&quot;);
+</code></pre>
+<h2 id="verbosity">Verbosity</h2>
+<p>Logs can be enabled or disabled by speficying globs.</p>
+<ul>
+<li>
+<p><strong><code>nth::log_verbosity_off</code></strong>: Accepts a glob and disables all enabled log statements whose
+  verbosity path matches the glob.</p>
+</li>
+<li>
+<p><strong><code>nth::log_verbosity_on</code></strong>: Accepts a glob and enables all disabled log statements whose
+  verbosity path matches the glob.</p>
+</li>
+<li>
+<p><strong><code>nth::log_verbosity_if</code></strong>: Accepts a glob and enables all log statements whose verbosity path
+  mtaches the glob and disables all others.</p>
+</li>
+</ul>
+<p>Dynamically changing the verbosity of log statements can be expensive, because it requires
+matching a glob against every log statement in the binary. Changing verbosity should be rare.</p>
+<h2 id="log-sinks">Log sinks</h2>
+<p>Log sinks are globally registered objects inheriting from <code>nth::log_sink</code> which process objects of
+type <code>nth::log_entry</code>. Log sinks are registered via the <code>nth::register_log_sink</code> free function and
+cannot be unregistered. When a log line is evaluated, if the log is enabled, it will construct a
+<code>nth::log_entry</code> and pass it to every registered log sink.</p>
               
             </div>
           </div><footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
-        <a href="../attributes/" class="btn btn-neutral float-left" title="attributes"><span class="icon icon-circle-arrow-left"></span> Previous</a>
-        <a href="../indestructible/" class="btn btn-neutral float-right" title="indestructible">Next <span class="icon icon-circle-arrow-right"></span></a>
+        <a href="../../container/stack/" class="btn btn-neutral float-left" title="stack"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../unimplemented/" class="btn btn-neutral float-right" title="unimplemented">Next <span class="icon icon-circle-arrow-right"></span></a>
     </div>
 
   <hr/>
@@ -174,10 +217,10 @@ equivalent implementations removing that cost.</p>
   <span class="rst-current-version" data-toggle="rst-current-version">
     
     
-      <span><a href="../attributes/" style="color: #fcfcfc">&laquo; Previous</a></span>
+      <span><a href="../../container/stack/" style="color: #fcfcfc">&laquo; Previous</a></span>
     
     
-      <span><a href="../indestructible/" style="color: #fcfcfc">Next &raquo;</a></span>
+      <span><a href="../unimplemented/" style="color: #fcfcfc">Next &raquo;</a></span>
     
   </span>
 </div>

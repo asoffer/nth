@@ -59,25 +59,69 @@
                 </li>
     </ul>
                   </li>
+                  <li class="toctree-l1"><a class="reference internal" >container</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../../../container/stack/">stack</a>
+                </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" >debug</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../../../debug/log/">log</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../../debug/unimplemented/">unimplemented</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../../debug/unreachable/">unreachable</a>
+                </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" >format</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../../../format/format/">format</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../../format/cc/">cc</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../../format/json/">json</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../../format/interpolate/">interpolate</a>
+                </li>
+    </ul>
+                  </li>
                   <li class="toctree-l1 current"><a class="reference internal current" >io</a>
     <ul class="current">
-                <li class="toctree-l2 current"><a class="reference internal current" href="#">writer</a>
+                <li class="toctree-l2 current"><a class="reference internal current" >writer</a>
     <ul class="current">
-    <li class="toctree-l3"><a class="reference internal" href="#overview">Overview</a>
+                <li class="toctree-l3 current"><a class="reference internal current" href="#">writer</a>
+    <ul class="current">
+    <li class="toctree-l4"><a class="reference internal" href="#overview">Overview</a>
     </li>
-    <li class="toctree-l3"><a class="reference internal" href="#the-writer-concept">The writer concept</a>
+    <li class="toctree-l4"><a class="reference internal" href="#the-writer-concept">The writer concept</a>
     </li>
-    <li class="toctree-l3"><a class="reference internal" href="#the-write_result_type-concept">The write_result_type concept</a>
+    <li class="toctree-l4"><a class="reference internal" href="#the-write_result_type-concept">The write_result_type concept</a>
     </li>
-    <li class="toctree-l3"><a class="reference internal" href="#write-result-customization">Write result customization.</a>
+    <li class="toctree-l4"><a class="reference internal" href="#write-result-customization">Write result customization.</a>
     </li>
-    <li class="toctree-l3"><a class="reference internal" href="#examples">Examples</a>
+    <li class="toctree-l4"><a class="reference internal" href="#examples">Examples</a>
     </li>
     </ul>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../file/">file</a>
+                <li class="toctree-l3"><a class="reference internal" href="../file/">file</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../string/">string</a>
+                <li class="toctree-l3"><a class="reference internal" href="../string/">string</a>
+                </li>
+    </ul>
+                </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" >process</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../../../process/env/">env</a>
+                </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" >types</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../../../types/structure/">structure</a>
                 </li>
     </ul>
                   </li>
@@ -98,6 +142,7 @@
     <li><a href="../../.." class="icon icon-home" aria-label="Docs"></a></li>
           <li class="breadcrumb-item">Libraries</li>
           <li class="breadcrumb-item">io</li>
+          <li class="breadcrumb-item">writer</li>
       <li class="breadcrumb-item active">writer</li>
     <li class="wy-breadcrumbs-aside">
     </li>
@@ -114,10 +159,12 @@ defines the <code>nth::io::writer</code> and <code>nth::io::write_result_type</c
 much of <code>nth</code>'s design, including <a href="/format/format">formatting</a> and <a href="/log/log">logging</a>.</p>
 <p>As writers abstract the writing of both data (to be serialized) and text (to be logged). One might
 expect a writer to accept a <code>std::string_view</code> but this is fundamentally the wrong type for such a
-generic interface. Instead, a writer traffics in <code>std::span&lt;std::byte const&gt;</code>. One may produce a
-<code>std::span&lt;std::byte&gt;</code> viewing the bytes of an object via <a href="/memory/bytes"><code>nth::bytes</code></a>, or view a
-sequence of bytes represented by an object (such as <code>std::string</code> or <code>std::string_view</code> via
-<a href="/memory/bytes"><code>nth::byte_range</code></a>.</p>
+generic interface. Instead, a writer traffics in <code>std::span&lt;std::byte const&gt;</code>. To address this
+common need, this header also provides a <code>write_text</code> free function, accepting a <code>writer</code> reference
+and a <code>std::string_view</code>, which converts the <code>std::string_view</code> to a span of bytes and writes the
+result. Alternatively one may produce a <code>std::span&lt;std::byte const&gt;</code> viewing the bytes of an object
+via <a href="/memory/bytes"><code>nth::bytes</code></a>, or view a sequence of bytes represented by an object (such as
+<code>std::string</code> or <code>std::string_view</code> via <a href="/memory/bytes"><code>nth::byte_range</code></a>.</p>
 <p>Because writing data may not succeed, we must also represent the notion of a "write result." This is
 formalized via the <code>nth::io::write_result_type</code> concept.</p>
 <h2 id="the-writer-concept">The <code>writer</code> concept</h2>
@@ -163,7 +210,7 @@ used as the associated write result type.</p>
             </div>
           </div><footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
-        <a href="../../../base/section/" class="btn btn-neutral float-left" title="section"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../../../format/interpolate/" class="btn btn-neutral float-left" title="interpolate"><span class="icon icon-circle-arrow-left"></span> Previous</a>
         <a href="../file/" class="btn btn-neutral float-right" title="file">Next <span class="icon icon-circle-arrow-right"></span></a>
     </div>
 
@@ -187,7 +234,7 @@ used as the associated write result type.</p>
   <span class="rst-current-version" data-toggle="rst-current-version">
     
     
-      <span><a href="../../../base/section/" style="color: #fcfcfc">&laquo; Previous</a></span>
+      <span><a href="../../../format/interpolate/" style="color: #fcfcfc">&laquo; Previous</a></span>
     
     
       <span><a href="../file/" style="color: #fcfcfc">Next &raquo;</a></span>

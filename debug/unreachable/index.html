@@ -5,15 +5,15 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       <link rel="shortcut icon" href="../../img/favicon.ico" />
-    <title>core - nth - A collection of C++ Libraries</title>
+    <title>unreachable - nth - A collection of C++ Libraries</title>
     <link rel="stylesheet" href="../../css/theme.css" />
     <link rel="stylesheet" href="../../css/theme_extra.css" />
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
     
       <script>
         // Current page data
-        var mkdocs_page_name = "core";
-        var mkdocs_page_input_path = "base/core.md";
+        var mkdocs_page_name = "unreachable";
+        var mkdocs_page_input_path = "debug/unreachable.md";
         var mkdocs_page_url = null;
       </script>
     
@@ -45,19 +45,17 @@
               </ul>
               <p class="caption"><span class="caption-text">Libraries</span></p>
               <ul class="current">
-                  <li class="toctree-l1 current"><a class="reference internal current" >base</a>
-    <ul class="current">
-                <li class="toctree-l2"><a class="reference internal" href="../attributes/">attributes</a>
+                  <li class="toctree-l1"><a class="reference internal" >base</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../../base/attributes/">attributes</a>
                 </li>
-                <li class="toctree-l2 current"><a class="reference internal current" href="#">core</a>
-    <ul class="current">
-    </ul>
+                <li class="toctree-l2"><a class="reference internal" href="../../base/core/">core</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../indestructible/">indestructible</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../base/indestructible/">indestructible</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../platform/">platform</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../base/platform/">platform</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../section/">section</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../base/section/">section</a>
                 </li>
     </ul>
                   </li>
@@ -67,13 +65,15 @@
                 </li>
     </ul>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" >debug</a>
-    <ul>
-                <li class="toctree-l2"><a class="reference internal" href="../../debug/log/">log</a>
+                  <li class="toctree-l1 current"><a class="reference internal current" >debug</a>
+    <ul class="current">
+                <li class="toctree-l2"><a class="reference internal" href="../log/">log</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../debug/unimplemented/">unimplemented</a>
+                <li class="toctree-l2"><a class="reference internal" href="../unimplemented/">unimplemented</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../debug/unreachable/">unreachable</a>
+                <li class="toctree-l2 current"><a class="reference internal current" href="#">unreachable</a>
+    <ul class="current">
+    </ul>
                 </li>
     </ul>
                   </li>
@@ -131,8 +131,8 @@
   <ul class="wy-breadcrumbs">
     <li><a href="../.." class="icon icon-home" aria-label="Docs"></a></li>
           <li class="breadcrumb-item">Libraries</li>
-          <li class="breadcrumb-item">base</li>
-      <li class="breadcrumb-item active">core</li>
+          <li class="breadcrumb-item">debug</li>
+      <li class="breadcrumb-item active">unreachable</li>
     <li class="wy-breadcrumbs-aside">
     </li>
   </ul>
@@ -141,17 +141,28 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
             <div class="section" itemprop="articleBody">
               
-                <h1 id="nthbasecore"><code>//nth/base:core</code></h1>
-<p>Provides two macros <code>NTH_MOVE</code> and <code>NTH_FWD</code> which are replacements for <code>std::move</code> and
-<code>std::forward</code> respectively. In large code bases the extra cost of compiling these function
-templates and inlining them can have noticeable affect on compilation times. These macros are
-equivalent implementations removing that cost.</p>
+                <h1 id="nthdebugunreachable">//nth/debug:unreachable</h1>
+<p>This target defines the macro <code>NTH_UNREACHABLE</code>. Invocations of this macro are always bugs, as this
+code path indicates that the programmer believed this code path could never be reached in a valid
+program. In debug builds, invocation of <code>NTH_UNREACHABLE</code> will log an error message and then abort
+execution. Users may also provide an interpolation string and inject extra information that will be
+appended to the log message, as if <code>NTH_UNREACHABLE</code> were <a href="/debug/log"><code>NTH_LOG</code></a>. That is, one
+could write</p>
+<pre><code>switch (n) {
+    case 0: return DoCase0();
+    case 1: return DoCase1();
+    case 2: return DoCase2();
+    default: NTH_UNREACHABLE(&quot;We should never have n = {}&quot;) &lt;&lt;= {n};
+}
+</code></pre>
+<p>In optimized builds, invocation of <code>NTH_UNREACHABLE</code> is undefined, allowing compilers to optimize
+under the assumption that this code path is never reached.</p>
               
             </div>
           </div><footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
-        <a href="../attributes/" class="btn btn-neutral float-left" title="attributes"><span class="icon icon-circle-arrow-left"></span> Previous</a>
-        <a href="../indestructible/" class="btn btn-neutral float-right" title="indestructible">Next <span class="icon icon-circle-arrow-right"></span></a>
+        <a href="../unimplemented/" class="btn btn-neutral float-left" title="unimplemented"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../../format/format/" class="btn btn-neutral float-right" title="format">Next <span class="icon icon-circle-arrow-right"></span></a>
     </div>
 
   <hr/>
@@ -174,10 +185,10 @@ equivalent implementations removing that cost.</p>
   <span class="rst-current-version" data-toggle="rst-current-version">
     
     
-      <span><a href="../attributes/" style="color: #fcfcfc">&laquo; Previous</a></span>
+      <span><a href="../unimplemented/" style="color: #fcfcfc">&laquo; Previous</a></span>
     
     
-      <span><a href="../indestructible/" style="color: #fcfcfc">Next &raquo;</a></span>
+      <span><a href="../../format/format/" style="color: #fcfcfc">Next &raquo;</a></span>
     
   </span>
 </div>

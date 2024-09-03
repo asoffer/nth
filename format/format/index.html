@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <link rel="shortcut icon" href="../../img/favicon.ico" />
+    <title>format - nth - A collection of C++ Libraries</title>
+    <link rel="stylesheet" href="../../css/theme.css" />
+    <link rel="stylesheet" href="../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "format";
+        var mkdocs_page_input_path = "format/format.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../.." class="icon icon-home"> nth - A collection of C++ Libraries
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../..">Home</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Libraries</span></p>
+              <ul class="current">
+                  <li class="toctree-l1"><a class="reference internal" >base</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../../base/attributes/">attributes</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../base/core/">core</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../base/indestructible/">indestructible</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../base/platform/">platform</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../base/section/">section</a>
+                </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" >container</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../../container/stack/">stack</a>
+                </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" >debug</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../../debug/log/">log</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../debug/unimplemented/">unimplemented</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../debug/unreachable/">unreachable</a>
+                </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1 current"><a class="reference internal current" >format</a>
+    <ul class="current">
+                <li class="toctree-l2 current"><a class="reference internal current" href="#">format</a>
+    <ul class="current">
+    <li class="toctree-l3"><a class="reference internal" href="#overview">Overview</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#nthformat_1">nth::format</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#custom-default-formatters">Custom default formatters</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#structured-formatting">Structured Formatting</a>
+        <ul>
+    <li class="toctree-l4"><a class="reference internal" href="#sequences">Sequences</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#associative-containers">Associative containers</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#objects">Objects</a>
+    </li>
+        </ul>
+    </li>
+    </ul>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../cc/">cc</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../json/">json</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../interpolate/">interpolate</a>
+                </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" >io</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" >writer</a>
+    <ul>
+                <li class="toctree-l3"><a class="reference internal" href="../../io/writer/writer/">writer</a>
+                </li>
+                <li class="toctree-l3"><a class="reference internal" href="../../io/writer/file/">file</a>
+                </li>
+                <li class="toctree-l3"><a class="reference internal" href="../../io/writer/string/">string</a>
+                </li>
+    </ul>
+                </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" >process</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../../process/env/">env</a>
+                </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" >types</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../../types/structure/">structure</a>
+                </li>
+    </ul>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../..">nth - A collection of C++ Libraries</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../.." class="icon icon-home" aria-label="Docs"></a></li>
+          <li class="breadcrumb-item">Libraries</li>
+          <li class="breadcrumb-item">format</li>
+      <li class="breadcrumb-item active">format</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="nthformat"><code>//nth/format</code></h1>
+<h2 id="overview">Overview</h2>
+<p>The formatting library is a layer on top of <a href="/io/writer/writer"><code>//nth/io/writer</code></a> responsible for
+marhsalling data of arbitrary types into a writer. The primary workhorse is the <code>nth::format</code>
+function template, which accepts a <code>nth::io::writer</code>, a formatter, and an object to be formatted.</p>
+<p>There is also a two-parameter overload for <code>nth::format</code>, which uses <code>nth::default_formatter&lt;T&gt;</code>
+as its formatter.</p>
+<h2 id="nthformat_1"><code>nth::format</code></h2>
+<p>The <code>nth::format</code> function template accepts a reference to a writer <code>w</code>, a reference to a
+formatter <code>fmt</code>, and a const-reference to a value <code>v</code> to be formatted. If <code>fmt.format(w, value)</code> is
+a valid expression, this is what <code>nth::format(w, fmt, v)</code> evaluates to. Otherwise, it will
+evaulate to <code>NthFormat(w, fmt, value)</code>, where <code>NthFormat</code> is the <a href="/ftadle">FTADLE</a> hook.</p>
+<p>As an example, consider a <code>Person</code> struct and suppose we would like to implement a function that
+returns a greeting string. To do this we would implement <code>NthFormat</code> for the <code>Person</code> struct.</p>
+<pre><code>struct Person {
+  std::string name;
+
+  friend void NthFormat(nth::io::writer auto&amp; w, auto&amp; fmt, Person const&amp; p) {
+    nth::format(w, fmt, p.name);
+  }
+};
+
+std::string greeting_string(Person const &amp; person) {
+  std::string s;
+  nth::io::string_writer w(s);
+  nth::io::write_text(w, &quot;Hello, &quot;);
+  nth::format(w, person);
+  nth::io::write_text(w, &quot;!&quot;);
+  return s;
+}
+</code></pre>
+<p>Note in this example <code>nth::format(w, person)</code> uses the default formatter for <code>Person</code> (because
+the two-parameter <code>nth::format</code> is invoked). The default formatter for person is
+<code>nth::trivial_formatter</code> (more on how to customize this below), which does not have a <code>format</code>
+member function, so <code>NthFormat(w, fmt, p)</code> is invoked. This in turn invokes <code>nth::format(w, fmt,
+p.name)</code>. This process continues recursively, now with the same writer, an
+<code>nth::trivial_formatter</code> for the formatter, and <code>p.name</code> of type <code>std::string</code>. Because the
+library provides a FTADLE hook for <code>std::string</code>, this resolves by writing the string to the writer.</p>
+<h2 id="custom-default-formatters">Custom default formatters</h2>
+<p>By default, the default formatter for a type is <code>nth::trivial_formatter</code>, but users may
+configure the default formatter (the one used when no formatter argument is provided to
+<code>nth::format</code>) with a FTADLE hook. In particular, users can implement a function named
+<code>NthDefaultFormatter</code> accepting an <code>nth::type_tag&lt;T&gt;</code>. Note that this function can also be a hidden
+friend inside the body of the type <code>T</code>, as this will still be findable via argument-dependent
+lookup. As an example, one might want a formatter fora person to distinguish whether or not their
+name should be capitalized. One could add the following to make the default capitaziled:</p>
+<pre><code>struct PersonFormatter {
+  bool capitalized;
+
+  void format(nth::io::writer auto&amp; w, Person const&amp; p) const {
+    if (p.name.empty()) { return; }
+    if (capitalized) {
+      nth::io::write_text(w, capitalize(p.name[0]));
+      nth::io::write_text(w, p.name.substr(1));
+    } else {
+      nth::io::write_text(w, p.name);
+    }
+  }
+};
+
+struct Person {
+  std::string name;
+
+  friend PersonFormatter NthDefaultFormatter(nth::type_tag&lt;Person&gt;) {
+    return PersonFormatter{.capitalized = true};
+  }
+
+  friend void NthFormat(nth::io::writer auto&amp; w, auto&amp; fmt, Person const&amp; p) {
+    nth::format(w, fmt, p.name);
+  }
+};
+</code></pre>
+<p>Now, when a person is formatted, the name will be capitalized by default, though one could pass a
+different <code>PersonFormatter</code> to achieve a different result.</p>
+<h2 id="structured-formatting">Structured Formatting</h2>
+<p>A common formatting pattern is to effectively format all of the content in a struct, sequence, or
+container, possibly with some surrounding decaration. The <code>nth::structural_formatter</code> type
+can be used to simplify this process.</p>
+<p>To use the<code>nth::structural_formatter</code> type, users must inherit from it and provide several
+customization points. The first such hook is a static variable template of type
+<a href="/types/structure"><code>nth::structure</code></a> named <code>structure_of</code>, as shown in the example below:</p>
+<pre><code>struct my_formatter : nth::structural_formatter {
+    template &lt;typename T&gt;
+    static constexpr nth::structure structure_of = ...
+
+    ...
+};
+</code></pre>
+<p>The base class will use <code>structure_of</code> to understand the structure of each to-be-formatted type and
+do the formatting accordingly. Users may also implement, for each enumerator <code>S</code> in <code>nth::structure</code>, a
+member function template in their formatter with signatures</p>
+<ul>
+<li><code>begin(nth::constant_value&lt;S&gt;, nth::io::writer auto&amp; w)</code> and</li>
+<li><code>end(nth::constant_value&lt;S&gt;, nth::io::writer auto&amp; w)</code>,</li>
+</ul>
+<p>to be called immediately before and after (respectively) an object of that structural category is
+formatted. This allows one to, for instance, wrap sequences in <code>"[...]"</code>, or associative containers in
+<code>"{...}"</code>.</p>
+<p>Note that if you implement <code>begin</code> for a structural category, you must also implement <code>end</code> (even if
+it is empty), and vice versa. Failing to do so will result in a compilation error with an error
+message explaining the mistake. This is an intentional design choice. Due to the nature of the
+design, it is easy to accidentally forget or misspell one of these function templates and silently
+leave off such a function. While we would hope that unit tests would catch such problems, enforcing
+that users must provide <em>both</em> or <em>neither</em> yields slightly more assurance of correctness.</p>
+<h3 id="sequences">Sequences</h3>
+<p>When sequences are formatted via <code>nth::structural_formatter</code>, the following will occur.</p>
+<pre><code>nth::begin_format&lt;nth::structure::sequence&gt;(w, fmt);
+for (auto const&amp; element : seq) {
+  nth::begin_format&lt;nth::structure::entry&gt;(w, fmt);
+  nth::format(w, fmt, element);
+  nth::end_format&lt;nth::structure::entry&gt;(w, fmt);
+}
+nth::end_format&lt;nth::structure::sequence&gt;(w, fmt);
+</code></pre>
+<h3 id="associative-containers">Associative containers</h3>
+<p>When associative containers are formatted via <code>nth::structural_formatter</code>, the following will occur.</p>
+<pre><code>nth::begin_format&lt;nth::structure::associative&gt;(w, fmt);
+for (auto const&amp; [k, v] : associative_container) {
+  nth::begin_format&lt;nth::structure::key&gt;(w, fmt);
+  nth::format(w, fmt, k);
+  nth::end_format&lt;nth::structure::key&gt;(w, fmt);
+
+  nth::begin_format&lt;nth::structure::value&gt;(w, fmt);
+  nth::format(w, fmt, v);
+  nth::end_format&lt;nth::structure::value&gt;(w, fmt);
+}
+nth::end_format&lt;nth::structure::associative&gt;(w, fmt);
+</code></pre>
+<h3 id="objects">Objects</h3>
+<p>There is no provided builtin mechanism for formatting objects.</p>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../../debug/unreachable/" class="btn btn-neutral float-left" title="unreachable"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../cc/" class="btn btn-neutral float-right" title="cc">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="../../debug/unreachable/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../cc/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "../..";</script>
+    <script src="../../js/theme_extra.js"></script>
+    <script src="../../js/theme.js"></script>
+      <script src="../../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

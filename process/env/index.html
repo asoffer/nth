@@ -5,15 +5,15 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       <link rel="shortcut icon" href="../../img/favicon.ico" />
-    <title>core - nth - A collection of C++ Libraries</title>
+    <title>env - nth - A collection of C++ Libraries</title>
     <link rel="stylesheet" href="../../css/theme.css" />
     <link rel="stylesheet" href="../../css/theme_extra.css" />
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
     
       <script>
         // Current page data
-        var mkdocs_page_name = "core";
-        var mkdocs_page_input_path = "base/core.md";
+        var mkdocs_page_name = "env";
+        var mkdocs_page_input_path = "process/env.md";
         var mkdocs_page_url = null;
       </script>
     
@@ -45,19 +45,17 @@
               </ul>
               <p class="caption"><span class="caption-text">Libraries</span></p>
               <ul class="current">
-                  <li class="toctree-l1 current"><a class="reference internal current" >base</a>
-    <ul class="current">
-                <li class="toctree-l2"><a class="reference internal" href="../attributes/">attributes</a>
+                  <li class="toctree-l1"><a class="reference internal" >base</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../../base/attributes/">attributes</a>
                 </li>
-                <li class="toctree-l2 current"><a class="reference internal current" href="#">core</a>
-    <ul class="current">
-    </ul>
+                <li class="toctree-l2"><a class="reference internal" href="../../base/core/">core</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../indestructible/">indestructible</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../base/indestructible/">indestructible</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../platform/">platform</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../base/platform/">platform</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../section/">section</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../base/section/">section</a>
                 </li>
     </ul>
                   </li>
@@ -103,9 +101,11 @@
                 </li>
     </ul>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" >process</a>
-    <ul>
-                <li class="toctree-l2"><a class="reference internal" href="../../process/env/">env</a>
+                  <li class="toctree-l1 current"><a class="reference internal current" >process</a>
+    <ul class="current">
+                <li class="toctree-l2 current"><a class="reference internal current" href="#">env</a>
+    <ul class="current">
+    </ul>
                 </li>
     </ul>
                   </li>
@@ -131,8 +131,8 @@
   <ul class="wy-breadcrumbs">
     <li><a href="../.." class="icon icon-home" aria-label="Docs"></a></li>
           <li class="breadcrumb-item">Libraries</li>
-          <li class="breadcrumb-item">base</li>
-      <li class="breadcrumb-item active">core</li>
+          <li class="breadcrumb-item">process</li>
+      <li class="breadcrumb-item active">env</li>
     <li class="wy-breadcrumbs-aside">
     </li>
   </ul>
@@ -141,17 +141,22 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
             <div class="section" itemprop="articleBody">
               
-                <h1 id="nthbasecore"><code>//nth/base:core</code></h1>
-<p>Provides two macros <code>NTH_MOVE</code> and <code>NTH_FWD</code> which are replacements for <code>std::move</code> and
-<code>std::forward</code> respectively. In large code bases the extra cost of compiling these function
-templates and inlining them can have noticeable affect on compilation times. These macros are
-equivalent implementations removing that cost.</p>
+                <h1 id="nthprocessenv"><code>//nth/process:env</code></h1>
+<p>This target provides a mechanism to safely read and write environment variables. The function
+<code>nth::env::load</code> returns the value of the enivronment variable if it is set and returns
+<code>std::nullopt</code> otherwise. The <code>nth::env::store</code> overload set sets, unsets or resets an environment
+variable.</p>
+<p>Calls to <code>nth::env::load</code> and <code>nth::env::store</code> are thread-safe (they may be called without
+external synchronization). Notably this is not true of <code>std::getenv</code> and <code>::setenv</code> which manipulate
+globals without synchronization. It is imporatnt to note that the thread-safety does not extend to
+<code>std::getenv</code> or <code>::setenv</code>. If any of these functions are also invoked without
+synchronization against <code>nth::env::load</code> and <code>nth::env::store</code>, the behavior is undefined.</p>
               
             </div>
           </div><footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
-        <a href="../attributes/" class="btn btn-neutral float-left" title="attributes"><span class="icon icon-circle-arrow-left"></span> Previous</a>
-        <a href="../indestructible/" class="btn btn-neutral float-right" title="indestructible">Next <span class="icon icon-circle-arrow-right"></span></a>
+        <a href="../../io/writer/string/" class="btn btn-neutral float-left" title="string"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../../types/structure/" class="btn btn-neutral float-right" title="structure">Next <span class="icon icon-circle-arrow-right"></span></a>
     </div>
 
   <hr/>
@@ -174,10 +179,10 @@ equivalent implementations removing that cost.</p>
   <span class="rst-current-version" data-toggle="rst-current-version">
     
     
-      <span><a href="../attributes/" style="color: #fcfcfc">&laquo; Previous</a></span>
+      <span><a href="../../io/writer/string/" style="color: #fcfcfc">&laquo; Previous</a></span>
     
     
-      <span><a href="../indestructible/" style="color: #fcfcfc">Next &raquo;</a></span>
+      <span><a href="../../types/structure/" style="color: #fcfcfc">Next &raquo;</a></span>
     
   </span>
 </div>
