@@ -95,11 +95,6 @@ cc_test(
 )
 
 cc_library(
-    name = "free_functions",
-    hdrs = ["free_functions.h"],
-)
-
-cc_library(
     name = "interval",
     hdrs = ["interval.h"],
     deps = [

@@ -1,12 +1,6 @@
 package(default_visibility = ["//visibility:public"])
 
 cc_library(
-    name = "always_false",
-    hdrs = ["always_false.h"],
-    deps = [],
-)
-
-cc_library(
     name = "compile_time_string",
     hdrs = ["compile_time_string.h"],
     deps = [
@@ -54,21 +48,6 @@ cc_test(
         ":constant",
         ":type",
     ],
-)
-
-cc_library(
-    name = "layout",
-    hdrs = ["layout.h"],
-    deps = [
-        ":sequence",
-        ":type",
-    ],
-)
-
-cc_test(
-    name = "layout_test",
-    srcs = ["layout_test.cc"],
-    deps = [":layout"],
 )
 
 cc_library(
