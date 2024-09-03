@@ -5,47 +5,11 @@
 
 #include "nth/base/attributes.h"
 #include "nth/debug/contracts/contract.h"
+#include "nth/debug/contracts/internal/any_formattable_ref.h"
 #include "nth/debug/source_location.h"
-#include "nth/format/format.h"
-#include "nth/format/interpolate.h"
-#include "nth/io/writer/string.h"
-#include "nth/io/writer/writer.h"
 #include "nth/registration/registrar.h"
 
 namespace nth {
-
-namespace internal_contracts {
-struct any_formattable_ref {
-  struct vtable {
-    std::string (*format)(void const*);
-  };
-
-  template <typename T>
-  static constexpr vtable vtable_for{
-      .format =
-          [](void const* raw_self) {
-            std::string s;
-            nth::io::string_writer w(s);
-            nth::format(w, *reinterpret_cast<T const*>(raw_self));
-            return s;
-          },
-  };
-
-  template <typename T>
-  constexpr any_formattable_ref(T const& t)
-      : ptr_(nth::raw_address(t)), vtable_(&vtable_for<T>) {}
-
-  friend void NthFormat(nth::io::writer auto& w, auto&,
-                        any_formattable_ref ref) {
-    nth::io::write_text(w, ref.vtable_->format(ref.ptr_));
-  }
-
- private:
-  void const* ptr_;
-  vtable const* vtable_;
-};
-
-}  // namespace internal_contracts
 
 // `contract_violation`:
 //

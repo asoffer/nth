@@ -4,9 +4,10 @@ cc_library(
     name = "property",
     hdrs = ["property.h"],
     deps = [
+        "//nth/debug/contracts",
         "//nth/debug/property/internal:concepts",
         "//nth/debug/property/internal:implementation",
-        "//nth/debug/contracts",
+        "//nth/debug/trace",
         "//nth/meta/concepts:invocable",
     ],
 )

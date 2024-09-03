@@ -18,12 +18,10 @@ cc_library(
 cc_library(
     name = "contracts",
     hdrs = ["contracts.h"],
+    srcs = ["contracts.cc"],
     deps = [
-        ":violation",
         "//nth/base:section",
-        "//nth/debug/contracts/internal:enabler",
         "//nth/debug/contracts/internal:contracts",
-        "//nth/debug/trace",
         "//nth/strings:glob",
     ],
 )
@@ -52,10 +50,7 @@ cc_library(
         "//nth/base:attributes",
         "//nth/base:indestructible",
         "//nth/debug:source_location",
-        "//nth/format",
-        "//nth/format:interpolate",
-        "//nth/io/writer",
-        "//nth/io/writer:string",
+        "//nth/debug/contracts/internal:any_formattable_ref",
         "//nth/registration:registrar",
     ],
 )

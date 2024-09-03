@@ -11,6 +11,7 @@
 #include "nth/debug/contracts/internal/on_exit.h"
 #include "nth/debug/contracts/violation.h"
 #include "nth/debug/log/log.h"
+#include "nth/debug/trace/trace.h"
 
 namespace nth::internal_contracts {
 
@@ -60,8 +61,7 @@ bool execute_contract_check(contract const& c,
           enabler_var.enabled() and                                            \
           ::nth::internal_contracts::execute_contract_check(                   \
               enabler_var, ::nth::internal_contracts::checker(expr))))         \
-  case 1:                                                                      \
-    failure_action
+  case 1: failure_action
 
 #define NTH_INTERNAL_IMPLEMENT_ENSURE(verbosity_path, ...)                     \
   ::nth::internal_contracts::on_exit NTH_CONCATENATE(                          \

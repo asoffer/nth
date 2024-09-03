@@ -4,6 +4,18 @@ package(default_visibility = [
 ])
 
 cc_library(
+    name = "any_formattable_ref",
+    hdrs = ["any_formattable_ref.h"],
+    deps = [
+        "//nth/format",
+        "//nth/io/writer",
+        "//nth/io/writer:string",
+    ],
+)
+
+
+
+cc_library(
     name = "macros",
     hdrs = ["macros.h"],
     deps = [
@@ -33,6 +45,7 @@ cc_library(
         ":macros",
         ":on_exit",
         "//nth/debug/contracts:violation",
+        "//nth/debug/trace",
         "//nth/format",
         "//nth/format:interpolate",
         "//nth/io/writer",
