@@ -1,6 +1,7 @@
 #ifndef NTH_IO_FORMAT_COMMON_FORMATTERS_H
 #define NTH_IO_FORMAT_COMMON_FORMATTERS_H
 
+#include <cstdint>
 #include <charconv>
 
 #include "nth/io/writer/writer.h"

@@ -158,3 +158,43 @@ cc_toolchain_config = rule(
     },
     provides = [CcToolchainConfigInfo],
 )
+
+def clang_toolchain(os, cpu, compiler_path, warnings):
+    name = "{}_{}_toolchain".format(os, cpu)
+    toolchain_id = "{}_{}-toolchain".format(os, cpu)
+    native.cc_toolchain(
+        name = name,
+        toolchain_identifier = toolchain_id,
+        toolchain_config = name + "_config",
+        all_files = ":empty",
+        compiler_files = ":empty",
+        dwp_files = ":empty",
+        linker_files = ":empty",
+        objcopy_files = ":empty",
+        strip_files = ":empty",
+        supports_param_files = 0,
+    )
+
+    cc_toolchain_config(
+        name = name + "_config",
+        os = os,
+        compiler_path = compiler_path,
+        warnings = warnings,
+    )
+
+    native.toolchain(
+        name = "cc_toolchain_for_{}_{}".format(os, cpu),
+        toolchain = ":linux_x86_64_toolchain",
+        toolchain_type = "@bazel_tools//tools/cpp:toolchain_type",
+        exec_compatible_with = [
+            "@platforms//cpu:{}".format(cpu),
+            "@platforms//os:{}".format(os),
+        ],
+        target_compatible_with = [
+            "@platforms//cpu:{}".format(cpu),
+            "@platforms//os:{}".format(os),
+        ],
+    )
+
+
+
