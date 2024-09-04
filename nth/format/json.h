@@ -50,7 +50,7 @@ struct json_structure<T> {
 
 }  // namespace internal_json
 
-struct json_formatter : structural_formatter {
+struct json_formatter : structural_formatter<json_formatter> {
  private:
   template <structure S>
   using cv = nth::constant_value<S>;

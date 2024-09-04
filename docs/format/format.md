@@ -90,12 +90,13 @@ different `PersonFormatter` to achieve a different result.
 ## Structured Formatting
 
 A common formatting pattern is to effectively format all of the content in a struct, sequence, or
-container, possibly with some surrounding decaration. The `nth::structural_formatter` type
-can be used to simplify this process.
+container, possibly with some surrounding decaration. The `nth::structural_formatter` type can be
+used to simplify this process.
 
-To use the`nth::structural_formatter` type, users must inherit from it and provide several
-customization points. The first such hook is a static variable template of type
-[`nth::structure`](/types/structure) named `structure_of`, as shown in the example below:
+`nth::structural_formatter` is a CRTP base class. Users must inherit this template, instantiated at
+the formatter type they are defining. Users also must provide several customization points. The
+first such hook is a static variable template of type [`nth::structure`](/types/structure) named
+`structure_of`, as shown in the example below:
 
 ```
 struct my_formatter : nth::structural_formatter {

@@ -50,7 +50,7 @@ struct cc_structure<T> {
 
 }  // namespace internal_cc
 
-struct cc_formatter : structural_formatter {
+struct cc_formatter : structural_formatter<cc_formatter> {
  private:
   template <structure S>
   using cv = nth::constant_value<S>;

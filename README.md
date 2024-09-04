@@ -8,8 +8,8 @@ replacements/alternatives.
 
 ## Building from source
 
-`nth` is a collection of C++23 libraries, and relies heavily on Bazel for building and testing. You
-will need a C++23-compliant compiler and a relatively recent copy of [Bazel](https://bazel.build/).
+`nth` is a collection of C++20 libraries, and relies heavily on Bazel for building and testing. You
+will need a C++20-compliant compiler and a relatively recent copy of [Bazel](https://bazel.build/).
 Specifically,
 
 * Bazel version 7.3.1 or greater

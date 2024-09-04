@@ -96,12 +96,10 @@ def _impl(ctx):
     ]
 
     features = [
-        std_lib_version("2b"),
+        std_lib_version("20"),
         compiler_flags(ctx.attr.warnings + [
-            "-fbracket-depth=1024",
             "-fdiagnostics-color=always",
             "-fno-exceptions",
-            "-D_LIBCPP_ENABLE_CXX20_REMOVED_TYPE_TRAITS",
         ]),
         linking_flags([
             "-ldl",

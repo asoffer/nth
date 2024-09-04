@@ -101,40 +101,40 @@ decltype(auto) end_format(io::writer auto& w, F& f) {
 // in the object being formatted. Users may implement begin/end pairs of member
 // functions to be invoked immediately before and after an object of that
 // structural category is formatted.
+template <typename F>
 struct structural_formatter {
   template <typename T>
-  void format(this auto& self, io::writer auto& w, T const& value)
-    requires(
-        std::remove_reference_t<decltype(self)>::template structure_of<T> ==
-        structure::sequence)
+  void format(io::writer auto& w, T const& value)
+    requires(F::template structure_of<T> == structure::sequence)
   {
-    begin_format<structure::sequence>(w, self);
+    begin_format<structure::sequence>(w, self());
     for (auto const& element : value) {
-      begin_format<structure::entry>(w, self);
-      nth::format(w, self, element);
-      end_format<structure::entry>(w, self);
+      begin_format<structure::entry>(w, self());
+      nth::format(w, self(), element);
+      end_format<structure::entry>(w, self());
     }
-    end_format<structure::sequence>(w, self);
+    end_format<structure::sequence>(w, self());
   }
 
   template <typename T>
-  void format(this auto& self, io::writer auto& w, T const& value)
-    requires(
-        std::remove_reference_t<decltype(self)>::template structure_of<T> ==
-        structure::associative)
+  void format(io::writer auto& w, T const& value)
+    requires(F::template structure_of<T> == structure::associative)
   {
-    begin_format<structure::associative>(w, self);
+    begin_format<structure::associative>(w, self());
     for (auto const& [k, v] : value) {
-      begin_format<structure::key>(w, self);
-      nth::format(w, self, k);
-      end_format<structure::key>(w, self);
+      begin_format<structure::key>(w, self());
+      nth::format(w, self(), k);
+      end_format<structure::key>(w, self());
 
-      begin_format<structure::value>(w, self);
-      nth::format(w, self, v);
-      end_format<structure::value>(w, self);
+      begin_format<structure::value>(w, self());
+      nth::format(w, self(), v);
+      end_format<structure::value>(w, self());
     }
-    end_format<structure::associative>(w, self);
+    end_format<structure::associative>(w, self());
   }
+
+ private:
+  F& self() { return static_cast<F&>(*this); }
 };
 
 template <typename F, typename T>
