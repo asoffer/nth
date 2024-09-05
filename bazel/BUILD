@@ -49,7 +49,7 @@ clang_toolchain(
     ar_path = "/opt/local/bin/llvm-ar-mp-18",
     builtin_include_directories = [
         "/opt/local/libexec/llvm-18/include/c++/v1",
-        "/opt/local/libexec/llvm-18/lib/clang/18/include",
+        "/opt/local/libexec/llvm-18/lib/clang/18",
         "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk",
     ],
     system_headers = SYSTEM_HEADERS,
