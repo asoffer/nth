@@ -33,7 +33,7 @@ clang_toolchain(
     cc_compiler_path = "/usr/bin/clang++-18",
     ar_path = "/usr/bin/ar",
     builtin_include_directories = [
-        "/usr/lib/llvm-18/lib/clang/18/include",
+        "/usr/lib/llvm-18/lib/clang/18",
         "/usr/include",
     ],
     system_headers = SYSTEM_HEADERS,
