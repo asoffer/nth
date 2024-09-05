@@ -18,6 +18,7 @@ cc_library(
     deps = [
         "//nth/base:core",
         "//nth/format",
+        "//nth/format:interpolate",
         "//nth/io/writer",
         "//nth/debug",
     ],

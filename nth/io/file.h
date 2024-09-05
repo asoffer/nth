@@ -8,7 +8,7 @@
 
 #include "nth/io/file_path.h"
 
-namespace nth {
+namespace nth::io {
 
 struct file;
 
@@ -55,10 +55,11 @@ struct file {
 
   // Attempts to read up to `std::span(buffer).size()` bytes into `buffer`, and
   // returns a span which is a prefix of `buffer` consisting of the bytes read.
-  auto read_into(auto& buffer) requires(
-      requires { std::span(buffer); } and
-      std::is_trivially_copyable_v<
-          typename decltype(std::span(buffer))::element_type>) {
+  auto read_into(auto& buffer)
+    requires(requires { std::span(buffer); } and
+             std::is_trivially_copyable_v<
+                 typename decltype(std::span(buffer))::element_type>)
+  {
     using type = typename decltype(std::span(buffer))::element_type;
     return read_into_impl(std::span<type>(buffer));
   }
@@ -100,6 +101,6 @@ struct file {
 // destoryed when `close` is invoked on the returned object.
 file TemporaryFile();
 
-}  // namespace nth
+}  // namespace nth::io
 
 #endif  // NTH_IO_FILE_H

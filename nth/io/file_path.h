@@ -7,9 +7,10 @@
 
 #include "nth/base/core.h"
 #include "nth/format/format.h"
+#include "nth/format/interpolate.h"
 #include "nth/io/writer/writer.h"
 
-namespace nth {
+namespace nth::io {
 
 // Represents the name of a file. Paths are canonicalized by removing "./" and
 // "../".
@@ -31,6 +32,12 @@ struct file_path {
   // path.
   std::string const &path() const { return name_; }
 
+  // Use the same interpolation strings as `std::string_view`.
+  template <nth::interpolation_string S>
+  friend auto NthInterpolateFormatter(nth::type_tag<file_path>) {
+    return NthInterpolateFormatter<S>(nth::type<std::string_view>);
+  }
+
   friend void NthFormat(io::writer auto &w, auto &fmt, file_path const &path) {
     nth::format(w, fmt, path.name_);
   }
@@ -44,6 +51,6 @@ struct file_path {
   std::string name_;
 };
 
-}  // namespace nth
+}  // namespace nth::io
 
 #endif  // NTH_IO_FILE_PATH_H

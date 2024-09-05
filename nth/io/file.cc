@@ -5,7 +5,7 @@
 #include "nth/base/indestructible.h"
 #include "nth/debug/contracts/contracts.h"
 
-namespace nth {
+namespace nth::io {
 namespace internal_file {
 namespace {
 
@@ -63,4 +63,4 @@ std::optional<file> file::read_only(file_path const& path) {
   }
 }
 
-}  // namespace nth
+}  // namespace nth::io

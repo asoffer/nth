@@ -2,7 +2,7 @@
 
 #include "nth/debug/debug.h"
 
-namespace nth {
+namespace nth::io {
 
 std::optional<file_path> file_path::try_construct(std::string_view name) {
   std::optional<file_path> path;
@@ -43,4 +43,4 @@ std::optional<file_path> file_path::try_construct(std::string_view name) {
   return path;
 }
 
-}  // namespace nth
+}  // namespace nth::io
