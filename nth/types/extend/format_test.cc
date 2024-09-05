@@ -47,19 +47,18 @@ NTH_TEST("extend/format/json") {
   nth::io::string_writer w(s);
 
   s.clear();
-  nth::format(w, nth::io::json_formatter{}, Empty{});
+  nth::format(w, nth::json_formatter{}, Empty{});
   NTH_EXPECT(s == "{}");
 
   s.clear();
-  nth::format(w, nth::io::json_formatter{}, OneField{});
+  nth::format(w, nth::json_formatter{}, OneField{});
   NTH_EXPECT(s ==
              "{\n"
              "  \"n\": 3\n"
              "}");
 
   s.clear();
-  nth::format(w, nth::io::json_formatter{},
-                  ManyFields{.n = 3, .s = "hello"});
+  nth::format(w, nth::json_formatter{}, ManyFields{.n = 3, .s = "hello"});
   NTH_EXPECT(s ==
              "{\n"
              "  \"n\": 3,\n"

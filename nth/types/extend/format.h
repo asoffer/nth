@@ -14,7 +14,7 @@ namespace nth::ext {
 
 template <typename T>
 struct format : nth::extension<T> {
-  friend io::cc_formatter NthDefaultFormatter(nth::type_tag<T>) { return {}; }
+  friend cc_formatter NthDefaultFormatter(nth::type_tag<T>) { return {}; }
 
   friend void NthFormat(io::writer auto &w, auto &fmt, T const &value) {
     std::string_view const *name_ptr =

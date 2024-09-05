@@ -10,7 +10,7 @@
 #include "nth/meta/concepts/convertible.h"
 #include "nth/types/structure.h"
 
-namespace nth::io {
+namespace nth {
 namespace internal_json {
 
 template <typename>
@@ -60,63 +60,63 @@ struct json_formatter : structural_formatter<json_formatter> {
   static constexpr structure structure_of =
       internal_json::json_structure<T>::value;
 
-  void begin(cv<structure::object>, writer auto &w) {
+  void begin(cv<structure::object>, io::writer auto &w) {
     io::write_text(w, "{");
     nesting_.push({.close = "}", .width = 0});
   }
 
-  void begin(cv<structure::associative>, writer auto &w) {
+  void begin(cv<structure::associative>, io::writer auto &w) {
     io::write_text(w, "{");
     nesting_.push({.close = "}", .width = 0});
   }
 
-  void begin(cv<structure::sequence>, writer auto &w) {
+  void begin(cv<structure::sequence>, io::writer auto &w) {
     io::write_text(w, "[");
     nesting_.push({.close = "]", .width = 0});
   }
 
-  void begin(cv<structure::entry>, writer auto &w) {
+  void begin(cv<structure::entry>, io::writer auto &w) {
     if (nesting_.empty()) { NTH_UNREACHABLE(); }
     if (nesting_.top().width++ != 0) { io::write_text(w, ","); }
     io::write_text(w, "\n");
     nth::format(w, char_spacer(' ', 2 * nesting_.size()));
   }
 
-  void begin(cv<structure::key>, writer auto &w) {
+  void begin(cv<structure::key>, io::writer auto &w) {
     if (nesting_.empty()) { NTH_UNREACHABLE(); }
     if (nesting_.top().width++ != 0) { io::write_text(w, ","); }
     io::write_text(w, "\n");
     nth::format(w, char_spacer(' ', 2 * nesting_.size()));
   }
 
-  void begin(cv<structure::value>, writer auto &) {}
+  void begin(cv<structure::value>, io::writer auto &) {}
 
-  void end(cv<structure::associative>, writer auto &w) { this->end(w); }
-  void end(cv<structure::object>, writer auto &w) { this->end(w); }
-  void end(cv<structure::sequence>, writer auto &w) { this->end(w); }
-  void end(cv<structure::entry>, writer auto &) { ++nesting_.top().width; }
-  void end(cv<structure::key>, writer auto &w) { io::write_text(w, ": "); }
-  void end(cv<structure::value>, writer auto &) { ++nesting_.top().width; }
+  void end(cv<structure::associative>, io::writer auto &w) { this->end(w); }
+  void end(cv<structure::object>, io::writer auto &w) { this->end(w); }
+  void end(cv<structure::sequence>, io::writer auto &w) { this->end(w); }
+  void end(cv<structure::entry>, io::writer auto &) { ++nesting_.top().width; }
+  void end(cv<structure::key>, io::writer auto &w) { io::write_text(w, ": "); }
+  void end(cv<structure::value>, io::writer auto &) { ++nesting_.top().width; }
 
   using structural_formatter::format;
 
-  void format(writer auto &w, bool b) {
+  void format(io::writer auto &w, bool b) {
     io::write_text(w, b ? "true" : "false");
   }
-  void format(writer auto &w, std::integral auto n) {
+  void format(io::writer auto &w, std::integral auto n) {
     base_formatter(10).format(w, n);
   }
-  void format(writer auto &w, std::floating_point auto x) {
+  void format(io::writer auto &w, std::floating_point auto x) {
     float_formatter{}.format(w, x);
   }
 
   template <nth::explicitly_convertible_to<std::string_view> T>
-  void format(writer auto &w, T const &s) {
+  void format(io::writer auto &w, T const &s) {
     quote_formatter{}.format(w, static_cast<std::string_view>(s));
   }
 
  private:
-  void end(writer auto &w) {
+  void end(io::writer auto &w) {
     if (nesting_.empty()) { NTH_UNREACHABLE(); }
     auto [close, count] = nesting_.top();
     nesting_.pop();
@@ -134,6 +134,6 @@ struct json_formatter : structural_formatter<json_formatter> {
   nth::stack<nesting> nesting_;
 };
 
-}  // namespace nth::io
+}  // namespace nth
 
 #endif  // NTH_FORMAT_JSON_H

@@ -13,7 +13,7 @@ template <typename T>
 std::string cc(T const& obj) {
   std::string s;
   nth::io::string_writer w(s);
-  nth::format(w, nth::io::cc_formatter{}, obj);
+  nth::format(w, nth::cc_formatter{}, obj);
   return s;
 }
 
@@ -105,7 +105,7 @@ struct Object {
   int n;
   std::string s;
 
-  friend void NthFormat(nth::io::writer auto& w, nth::io::cc_formatter& f,
+  friend void NthFormat(nth::io::writer auto& w, nth::cc_formatter& f,
                         Object const& obj) {
     nth::begin_format<nth::structure::object>(w, f);
     nth::begin_format<nth::structure::key>(w, f);

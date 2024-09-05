@@ -13,7 +13,7 @@ template <typename T>
 std::string json(T const& obj) {
   std::string s;
   nth::io::string_writer w(s);
-  nth::format(w, nth::io::json_formatter{}, obj);
+  nth::format(w, nth::json_formatter{}, obj);
   return s;
 }
 
@@ -105,7 +105,7 @@ struct Object {
   int n;
   std::string s;
 
-  friend void NthFormat(nth::io::writer auto& w, nth::io::json_formatter& f,
+  friend void NthFormat(nth::io::writer auto& w, nth::json_formatter& f,
                         Object const& obj) {
     nth::begin_format<nth::structure::associative>(w, f);
     nth::begin_format<nth::structure::key>(w, f);

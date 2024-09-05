@@ -10,7 +10,7 @@
 #include "nth/meta/concepts/convertible.h"
 #include "nth/types/structure.h"
 
-namespace nth::io {
+namespace nth {
 namespace internal_cc {
 
 template <typename>
@@ -59,29 +59,29 @@ struct cc_formatter : structural_formatter<cc_formatter> {
   template <typename T>
   static constexpr structure structure_of = internal_cc::cc_structure<T>::value;
 
-  void begin(cv<structure::associative>, writer auto &w) {
+  void begin(cv<structure::associative>, io::writer auto &w) {
     io::write_text(w, "{");
     nesting_.push({.kind = structure::associative, .width = 0});
   }
 
-  void begin(cv<structure::object>, writer auto &w) {
+  void begin(cv<structure::object>, io::writer auto &w) {
     io::write_text(w, "{");
     nesting_.push({.kind = structure::object, .width = 0});
   }
 
-  void begin(cv<structure::sequence>, writer auto &w) {
+  void begin(cv<structure::sequence>, io::writer auto &w) {
     io::write_text(w, "{");
     nesting_.push({.kind = structure::sequence, .width = 0});
   }
 
-  void begin(cv<structure::entry>, writer auto &w) {
+  void begin(cv<structure::entry>, io::writer auto &w) {
     if (nesting_.empty()) { NTH_UNREACHABLE(); }
     if (nesting_.top().width++ != 0) { io::write_text(w, ","); }
     io::write_text(w, "\n");
     nth::format(w, char_spacer(' ', 2 * nesting_.size()));
   }
 
-  void begin(cv<structure::key>, writer auto &w) {
+  void begin(cv<structure::key>, io::writer auto &w) {
     if (nesting_.empty()) { NTH_UNREACHABLE(); }
     if (nesting_.top().width++ != 0) { io::write_text(w, ","); }
     io::write_text(w, "\n");
@@ -93,16 +93,16 @@ struct cc_formatter : structural_formatter<cc_formatter> {
     }
   }
 
-  void begin(cv<structure::value>, writer auto &) {
+  void begin(cv<structure::value>, io::writer auto &) {
     if (nesting_.empty()) { NTH_UNREACHABLE(); }
     nesting_.top().in_value = true;
   }
 
-  void end(cv<structure::associative>, writer auto &w) { this->end(w); }
-  void end(cv<structure::object>, writer auto &w) { this->end(w); }
-  void end(cv<structure::sequence>, writer auto &w) { this->end(w); }
-  void end(cv<structure::entry>, writer auto &) { ++nesting_.top().width; }
-  void end(cv<structure::key>, writer auto &w) {
+  void end(cv<structure::associative>, io::writer auto &w) { this->end(w); }
+  void end(cv<structure::object>, io::writer auto &w) { this->end(w); }
+  void end(cv<structure::sequence>, io::writer auto &w) { this->end(w); }
+  void end(cv<structure::entry>, io::writer auto &) { ++nesting_.top().width; }
+  void end(cv<structure::key>, io::writer auto &w) {
     switch (nesting_.top().kind) {
       case structure::object: io::write_text(w, " = "); break;
       case structure::associative: io::write_text(w, ", "); break;
@@ -111,7 +111,7 @@ struct cc_formatter : structural_formatter<cc_formatter> {
             {static_cast<int>(nesting_.top().kind)};
     }
   }
-  void end(cv<structure::value>, writer auto &w) {
+  void end(cv<structure::value>, io::writer auto &w) {
     ++nesting_.top().width;
     if (nesting_.empty() or nesting_.top().kind != structure::object) {
       io::write_text(w, "}");
@@ -121,18 +121,18 @@ struct cc_formatter : structural_formatter<cc_formatter> {
 
   using structural_formatter::format;
 
-  void format(writer auto &w, bool b) {
+  void format(io::writer auto &w, bool b) {
     io::write_text(w, b ? "true" : "false");
   }
-  void format(writer auto &w, std::integral auto n) {
+  void format(io::writer auto &w, std::integral auto n) {
     base_formatter(10).format(w, n);
   }
-  void format(writer auto &w, std::floating_point auto x) {
+  void format(io::writer auto &w, std::floating_point auto x) {
     float_formatter{}.format(w, x);
   }
 
   template <nth::explicitly_convertible_to<std::string_view> T>
-  void format(writer auto &w, T const &s) {
+  void format(io::writer auto &w, T const &s) {
     if (not nesting_.empty() and nesting_.top().kind == structure::object and
         not nesting_.top().in_value) {
       io::write_text(w, static_cast<std::string_view>(s));
@@ -142,7 +142,7 @@ struct cc_formatter : structural_formatter<cc_formatter> {
   }
 
  private:
-  void end(writer auto &w) {
+  void end(io::writer auto &w) {
     if (nesting_.empty()) { NTH_UNREACHABLE(); }
     int count = nesting_.top().width;
     nesting_.pop();
@@ -161,6 +161,6 @@ struct cc_formatter : structural_formatter<cc_formatter> {
   stack<nesting> nesting_;
 };
 
-}  // namespace nth::io
+}  // namespace nth
 
 #endif  // NTH_FORMAT_CC_H
