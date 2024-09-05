@@ -32,6 +32,11 @@
 #define NTH_BUILD_FEATURE(feature)                                             \
   NTH_CONCATENATE(NTH_INTERNAL_BUILD_FEATURE_, feature)
 
+// A functios-like macro that expands to either `true` or `false` depending on
+// whether this argument is the set build mode.
+#define NTH_BUILD_MODE(mode)                                                   \
+  NTH_CONCATENATE(NTH_BASE_PLATFORM_INTERNAL_BUILD_MODE_, mode)
+
 // Expands to either `true` or `false` depending on the compiler used to compile
 // this program. Compiler detection should be avoided if at all possible,
 // relying instead on platform-independent behaviors. However, implementing such
@@ -176,5 +181,54 @@
 #else
 #define NTH_INTERNAL_BUILD_FEATURE_tsan false
 #endif
+
+#define NTH_BASE_PLATFORM_INTERNAL_BUILD_MODE_optimize false
+#define NTH_BASE_PLATFORM_INTERNAL_BUILD_MODE_harden false
+#define NTH_BASE_PLATFORM_INTERNAL_BUILD_MODE_debug false
+#define NTH_BASE_PLATFORM_INTERNAL_BUILD_MODE_fastbuild true
+
+#if defined(NTH_CLI_BUILD_MODE_OPTIMIZE)
+#undef NTH_BASE_PLATFORM_INTERNAL_BUILD_MODE_optimize
+#define NTH_BASE_PLATFORM_INTERNAL_BUILD_MODE_optimize true
+#undef NTH_BASE_PLATFORM_INTERNAL_BUILD_MODE_fastbuild
+#define NTH_BASE_PLATFORM_INTERNAL_BUILD_MODE_fastbuild false
+#endif
+
+#if defined(NTH_CLI_BUILD_MODE_HARDEN)
+#undef NTH_BASE_PLATFORM_INTERNAL_BUILD_MODE_harden
+#define NTH_BASE_PLATFORM_INTERNAL_BUILD_MODE_harden true
+#undef NTH_BASE_PLATFORM_INTERNAL_BUILD_MODE_fastbuild
+#define NTH_BASE_PLATFORM_INTERNAL_BUILD_MODE_fastbuild false
+#endif
+
+#if defined(NTH_CLI_BUILD_MODE_DEBUG)
+#undef NTH_BASE_PLATFORM_INTERNAL_BUILD_MODE_debug
+#define NTH_BASE_PLATFORM_INTERNAL_BUILD_MODE_debug true
+#undef NTH_BASE_PLATFORM_INTERNAL_BUILD_MODE_fastbuild
+#define NTH_BASE_PLATFORM_INTERNAL_BUILD_MODE_fastbuild false
+#endif
+
+static_assert(NTH_BASE_PLATFORM_INTERNAL_BUILD_MODE_optimize +
+                      NTH_BASE_PLATFORM_INTERNAL_BUILD_MODE_harden +
+                      NTH_BASE_PLATFORM_INTERNAL_BUILD_MODE_debug +
+                      NTH_BASE_PLATFORM_INTERNAL_BUILD_MODE_fastbuild ==
+                  1,
+              R"(Exactly one build mode must be set.)");
+
+namespace nth {
+enum class build { optimize, harden, debug, fastbuild };
+
+inline constexpr build build_mode =
+#if defined(NTH_CLI_BUILD_MODE_OPTIMIZE)
+    nth::build::optimize;
+#elif defined(NTH_CLI_BUILD_MODE_HARDEN)
+    nth::build::harden;
+#elif defined(NTH_CLI_BUILD_MODE_DEBUG)
+    nth::build::debug;
+#else
+    nth::build::fastbuild;
+#endif
+
+}  // namespace nth
 
 #endif  // NTH_BASE_PLATFORM_H

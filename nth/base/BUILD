@@ -77,9 +77,32 @@ cc_test(
     ],
 )
 
+config_setting(
+    name = "opt_build",
+    visibility = ["//visibility:private"],
+    values = {"compilation_mode": "opt"},
+)
+
+config_setting(
+    name = "dbg_build",
+    visibility = ["//visibility:private"],
+    values = {"compilation_mode": "dbg"},
+)
+
+config_setting(
+    name = "fast_build",
+    visibility = ["//visibility:private"],
+    values = {"compilation_mode": "fastbuild"},
+)
+
 cc_library(
     name = "platform",
     hdrs = ["platform.h"],
+    defines = select({
+        ":opt_build": ["NTH_CLI_BUILD_MODE_OPTIMIZE"],
+        ":dbg_build": ["NTH_CLI_BUILD_MODE_DEBUG"],
+        "//conditions:default": ["NTH_CLI_BUILD_MODE_FASTBUILD"]
+    }),
     deps = [
         ":macros",
     ],

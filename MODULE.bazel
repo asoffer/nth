@@ -1,6 +1,7 @@
-bazel_dep(name = "abseil-cpp", version = "20240116.2")
+bazel_dep(name = "abseil-cpp", version = "20240722.0")
 bazel_dep(name = "platforms", version = "0.0.10")
 
 register_toolchains(
-    "//bazel:cc_toolchain_for_linux_x86_64"
+    "//bazel:linux_x86_64_toolchain",
+    "//bazel:macos_arm64_toolchain",
 )

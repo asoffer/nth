@@ -1,13 +1,19 @@
 load("@bazel_tools//tools/cpp:cc_toolchain_config_lib.bzl",
+     "action_config",
      "feature",
      "flag_group",
      "flag_set",
+     "tool",
      "tool_path",
      "with_feature_set",
 )
+
 load("@bazel_tools//tools/build_defs/cc:action_names.bzl", "ACTION_NAMES")
 
-def make_flags(name, actions, flags):
+def _toolchain_id(os, cpu):
+    return "{}_{}-toolchain".format(os, cpu)
+
+def _make_flags(name, actions, flags):
     return feature(
         name = name,
         enabled = True,
@@ -19,151 +25,192 @@ def make_flags(name, actions, flags):
         ],
     )
 
-ALL_COMPILE_ACTIONS = [
+
+_ALL_C_COMPILE_ACTIONS = [
+    ACTION_NAMES.c_compile,
     ACTION_NAMES.assemble,
     ACTION_NAMES.preprocess_assemble,
+]
+
+
+_ALL_CC_COMPILE_ACTIONS = [
+    ACTION_NAMES.cpp_compile,
     ACTION_NAMES.linkstamp_compile,
+    ACTION_NAMES.cpp_header_parsing,
+    ACTION_NAMES.cpp_module_compile,
+    ACTION_NAMES.cpp_module_codegen,
+]
+
+_ALL_CODEGEN_ACTIONS = [
     ACTION_NAMES.c_compile,
     ACTION_NAMES.cpp_compile,
-    ACTION_NAMES.cpp_header_parsing,
+    ACTION_NAMES.linkstamp_compile,
+    ACTION_NAMES.assemble,
+    ACTION_NAMES.preprocess_assemble,
     ACTION_NAMES.cpp_module_codegen,
-    ACTION_NAMES.cpp_module_compile,
-    ACTION_NAMES.clif_match,
-    ACTION_NAMES.lto_backend,
 ]
 
-ALL_LINK_ACTIONS= [
-    ACTION_NAMES.cpp_link_dynamic_library,
-    ACTION_NAMES.cpp_link_nodeps_dynamic_library,
-    ACTION_NAMES.cpp_link_executable,
-]
+_ALL_COMPILE_ACTIONS = _ALL_CC_COMPILE_ACTIONS + _ALL_C_COMPILE_ACTIONS
+
+def _warnings(flags, system_headers):
+    return _make_flags(
+        name = "warnings",
+        actions = _ALL_CC_COMPILE_ACTIONS + _ALL_CC_COMPILE_ACTIONS,
+        flags = flags + ["--system-header-prefix=" + d for d in system_headers],
+    )
 
 
-def std_lib_version(version):
-    return make_flags(
+def _std_lib_version(version):
+    return _make_flags(
         name = "std_lib_version",
-        actions = [
-            ACTION_NAMES.cpp_compile,
-            ACTION_NAMES.cpp_header_parsing,
-            ACTION_NAMES.cpp_module_codegen,
-            ACTION_NAMES.cpp_module_compile,
-        ],
+        actions = _ALL_CC_COMPILE_ACTIONS,
         flags = ["-std=c++" + version],
     )
 
 
-def mode_dependent_flags(dictionary):
+def _common_flags():
     return feature(
-        name = "mode_dependent_flags",
+        name = "common_flags",
         enabled = True,
         flag_sets = [
             flag_set(
-                actions = [ACTION_NAMES.c_compile, ACTION_NAMES.cpp_compile],
-                flag_groups = [flag_group(flags = value)],
-                with_features = [with_feature_set(features = [key])],
-            ) for (key, value) in dictionary.items()
+                actions = _ALL_COMPILE_ACTIONS,
+                flag_groups = ([
+                    flag_group(
+                        flags = [
+                            "-fcolor-diagnostics",
+                        ],
+                    ),
+                ]),
+            ),
         ],
     )
 
 
-def compiler_flags(flags):
-    return make_flags(
-        name = "compiler_flags",
-        actions = ALL_COMPILE_ACTIONS,
-        flags = flags,
+def _opt_flags():
+    return feature(
+        name = "opt_flags",
+        enabled = True,
+        flag_sets = [
+            flag_set(
+                actions = _ALL_CODEGEN_ACTIONS,
+                flag_groups = ([
+                    flag_group(
+                        flags = ["-O3"],
+                    ),
+                ]),
+                with_features = [with_feature_set(features = ["opt"])],
+            ),
+        ]
     )
 
 
-def linking_flags(ls):
-    return make_flags(
-        name = "linking_flags",
-        actions = ALL_LINK_ACTIONS,
-        flags = ls,
+def _debug_flags():
+    return feature(
+        name = "debug_flags",
+        enabled = True,
+        flag_sets = [
+            flag_set(
+                actions = _ALL_CODEGEN_ACTIONS,
+                flag_groups = ([
+                    flag_group(
+                        flags = ["-g"],
+                    ),
+                ]),
+                with_features = [with_feature_set(features = ["dbg"])],
+            ),
+            flag_set(
+                actions = _ALL_CODEGEN_ACTIONS,
+                flag_groups = [
+                    flag_group(
+                        flags = ["-gsplit-dwarf", "-g"],
+                        expand_if_available = "per_object_debug_info_file",
+                    ),
+                ],
+            ),
+        ]
     )
+
 
 def _impl(ctx):
-    tool_paths = [
-        tool_path(name = "gcc",     path = ctx.attr.compiler_path),
-        tool_path(name = "ld",      path = "/usr/bin/ld"),
-        tool_path(name = "ar",      path = {
-            "macosx": "/usr/bin/libtool",
-        }.get(ctx.attr.os, "/usr/bin/ar")),
-        tool_path(name = "cpp",     path = "/bin/false"),
-        tool_path(name = "gcov",    path = "/bin/false"),
-        tool_path(name = "nm",      path = "/bin/false"),
-        tool_path(name = "objdump", path = "/bin/false"),
-        tool_path(name = "strip",   path = "/bin/false"),
-    ]
-
     features = [
-        std_lib_version("20"),
-        compiler_flags(ctx.attr.warnings + [
-            "-fdiagnostics-color=always",
-            "-fno-exceptions",
-        ]),
-        linking_flags([
-            "-ldl",
-            "-lm",
-            "-lstdc++",
-        ] + {
-            "macosx": ["-Wl", "-ld_classic", "-framework", "CoreFoundation"],
-        }.get(ctx.attr.os, [])),
-        mode_dependent_flags({
-            "dbg": ["-g", "-O0", "-DNTH_COMMANDLINE_BUILD_MODE=debug"],
-            "opt": ["-O2", "-DNTH_COMMANDLINE_BUILD_MODE=optimize"],
-        }),
+        feature(name = "dbg"),
+        feature(name = "opt"),
+        _std_lib_version("20"),
+        _common_flags(),
+        _debug_flags(),
+        _opt_flags(),
+        _warnings(getattr(ctx.attr, "warnings", []),
+                  getattr(ctx.attr, "system_headers", [])),
+
     ]
 
     return cc_common.create_cc_toolchain_config_info(
         ctx = ctx,
-        toolchain_identifier = "cc-toolchain",
-        host_system_name = "host",
-        target_system_name = "target",
-        target_cpu = "gcc",
-        target_libc = {
-          "macosx": "macosx",
-        }.get(ctx.attr.os, "unknown"),
-        compiler = "gcc",
+        toolchain_identifier = _toolchain_id(ctx.attr.os, ctx.attr.cpu),
+        host_system_name = "local",
+        target_system_name = "local",
+        target_cpu = ctx.attr.cpu,
+        target_libc = "unknown",
+        compiler = "clang",
         abi_version = "unknown",
         abi_libc_version = "unknown",
-        cxx_builtin_include_directories = {
-           "macosx": [
-                "/opt/local/libexec/llvm-18/lib/clang/18/include",
-                "/opt/local/libexec/llvm-18/lib/clang/18/share",
-                "/opt/local/libexec/llvm-18/include/c++/v1/",
-                "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/",
-                "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/System/Library/Frameworks/",
-            ],
-        }.get(ctx.attr.os, [
-            "/usr/lib",
-            "/usr/include",
-            "/usr/local/include",
-        ]),
-        tool_paths = tool_paths,
-        features = features + [
-            feature(name = "dbg"),
-            feature(name = "fastbuild"),
-            feature(name = "opt"),
+        cxx_builtin_include_directories = ctx.attr.builtin_include_directories,
+        tool_paths = [
+            tool_path(name = "gcc", path = ctx.attr.cc_compiler_path),
+            tool_path(name = "ld", path = "/usr/bin/ld"),
+            tool_path(name = "ar", path = ctx.attr.ar_path),
+            tool_path(name = "cpp", path = "/bin/false"),
+            tool_path(name = "gcov", path = "/bin/false"),
+            tool_path(name = "nm", path = "/bin/false"),
+            tool_path(name = "objdump", path = "/bin/false"),
+            tool_path(name = "strip", path = "/bin/false"),
         ],
+        action_configs = [
+            action_config(action_name = name, enabled = True, tools = [
+                tool(path = ctx.attr.c_compiler_path)
+            ])
+            for name in _ALL_C_COMPILE_ACTIONS
+        ] + [
+            action_config(action_name = name, enabled = True, tools = [
+                tool(path = ctx.attr.cc_compiler_path)
+            ])
+            for name in _ALL_CC_COMPILE_ACTIONS
+        ],
+        features = features,
     )
 
-cc_toolchain_config = rule(
+
+_cc_toolchain_config = rule(
     implementation = _impl,
     attrs = {
-        "compiler_path": attr.string(),
-        "os": attr.string(),
+        "ar_path": attr.string(mandatory = True),
+        "c_compiler_path": attr.string(mandatory = True),
+        "cc_compiler_path": attr.string(mandatory = True),
+        "builtin_include_directories": attr.string_list(mandatory = True),
+        "os": attr.string(mandatory = True),
+        "cpu": attr.string(mandatory = True),
+        "system_headers": attr.string_list(),
         "warnings": attr.string_list(),
     },
     provides = [CcToolchainConfigInfo],
 )
 
-def clang_toolchain(os, cpu, compiler_path, warnings):
-    name = "{}_{}_toolchain".format(os, cpu)
-    toolchain_id = "{}_{}-toolchain".format(os, cpu)
+def clang_toolchain(name, **kwargs):
+    os = kwargs["os"]
+    cpu = kwargs["cpu"]
+    toolchain_name = "clang_toolchain_{}_{}_toolchain".format(os, cpu)
+    toolchain_id = _toolchain_id(os, cpu)
+
+    _cc_toolchain_config(
+        name = toolchain_name + "_config",
+        **kwargs
+    )
+
     native.cc_toolchain(
-        name = name,
+        name = toolchain_name,
         toolchain_identifier = toolchain_id,
-        toolchain_config = name + "_config",
+        toolchain_config = toolchain_name + "_config",
         all_files = ":empty",
         compiler_files = ":empty",
         dwp_files = ":empty",
@@ -173,16 +220,9 @@ def clang_toolchain(os, cpu, compiler_path, warnings):
         supports_param_files = 0,
     )
 
-    cc_toolchain_config(
-        name = name + "_config",
-        os = os,
-        compiler_path = compiler_path,
-        warnings = warnings,
-    )
-
     native.toolchain(
-        name = "cc_toolchain_for_{}_{}".format(os, cpu),
-        toolchain = ":linux_x86_64_toolchain",
+        name = name,
+        toolchain = toolchain_name,
         toolchain_type = "@bazel_tools//tools/cpp:toolchain_type",
         exec_compatible_with = [
             "@platforms//cpu:{}".format(cpu),
@@ -193,6 +233,3 @@ def clang_toolchain(os, cpu, compiler_path, warnings):
             "@platforms//os:{}".format(os),
         ],
     )
-
-
-
