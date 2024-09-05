@@ -71,18 +71,17 @@
 // The `NTH_REQUIRE` macro injects tracing into the wrapped
 // expression and evaluates it. If the wrapped expression evaluates to `true`,
 // control flow proceeds with no visible side-effects. If the expression
-// evaluates to `false`, a diagnostic is reported and program execution is
-// aborted. In either case, all registered expectation handlers are notified of
-// the result.
+// evaluates to `false`, all registered violation handlers are invoked and
+// execution is aborted.
 #define NTH_REQUIRE(...) NTH_INTERNAL_CONTRACTS_DO(REQUIRE, __VA_ARGS__)
 
 // `NTH_ENSURE`:
 //
 // The `NTH_ENSURE` macro injects tracing into the wrapped expression and
-// evaluates it. If the wrapped expression evaluates to `true`, control flow
-// proceeds with no visible side-effects. If the expression evaluates to
-// `false`, a diagnostic is reported and program execution is aborted. In either
-// case, all registered expectation handlers are notified of the result.
+// evaluates it at the end of the scope containing it. If the wrapped expression
+// evaluates to `true`, control flow proceeds with no visible side-effects. If
+// the expression evaluates to `false`, all registered violation handlers are
+// invoked and execution is aborted.
 #define NTH_ENSURE(...) NTH_INTERNAL_CONTRACTS_DO(ENSURE, __VA_ARGS__)
 
 namespace nth {

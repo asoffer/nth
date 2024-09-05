@@ -72,8 +72,13 @@ void RequireOnlyAbortsOnFalse() {
   NTH_DEBUG_INTERNAL_RAW_CHECK(require_failed_count == 0);
   NTH_DEBUG_INTERNAL_RAW_CHECK(ensure_failed_count == 0);
   NTH_REQUIRE(false);
+#if NTH_BUILD_MODE(debug) or NTH_BUILD_MODE(harden)
   NTH_DEBUG_INTERNAL_RAW_CHECK(failure_count == 1);
   NTH_DEBUG_INTERNAL_RAW_CHECK(require_failed_count == 1);
+#else
+  NTH_DEBUG_INTERNAL_RAW_CHECK(failure_count == 0);
+  NTH_DEBUG_INTERNAL_RAW_CHECK(require_failed_count == 0);
+#endif
   NTH_DEBUG_INTERNAL_RAW_CHECK(ensure_failed_count == 0);
 }
 
@@ -84,9 +89,14 @@ void EnsureOnlyAbortsOnFalse() {
   NTH_DEBUG_INTERNAL_RAW_CHECK(require_failed_count == 0);
   NTH_DEBUG_INTERNAL_RAW_CHECK(ensure_failed_count == 0);
   { NTH_ENSURE(false); }
+#if NTH_BUILD_MODE(debug) or NTH_BUILD_MODE(harden)
   NTH_DEBUG_INTERNAL_RAW_CHECK(failure_count == 1);
-  NTH_DEBUG_INTERNAL_RAW_CHECK(require_failed_count == 0);
   NTH_DEBUG_INTERNAL_RAW_CHECK(ensure_failed_count == 1);
+#else
+  NTH_DEBUG_INTERNAL_RAW_CHECK(failure_count == 0);
+  NTH_DEBUG_INTERNAL_RAW_CHECK(ensure_failed_count == 0);
+#endif
+  NTH_DEBUG_INTERNAL_RAW_CHECK(require_failed_count == 0);
 }
 
 void EnsureEvaluatesAtEndOfScope() {
@@ -107,9 +117,14 @@ void EnsureEvaluatesAtEndOfScope() {
     NTH_DEBUG_INTERNAL_RAW_CHECK(ensure_failed_count == 0);
     NTH_ENSURE(false);
   }
+#if NTH_BUILD_MODE(debug) or NTH_BUILD_MODE(harden)
   NTH_DEBUG_INTERNAL_RAW_CHECK(failure_count == 1);
-  NTH_DEBUG_INTERNAL_RAW_CHECK(require_failed_count == 0);
   NTH_DEBUG_INTERNAL_RAW_CHECK(ensure_failed_count == 1);
+#else
+  NTH_DEBUG_INTERNAL_RAW_CHECK(failure_count == 0);
+  NTH_DEBUG_INTERNAL_RAW_CHECK(ensure_failed_count == 0);
+#endif
+  NTH_DEBUG_INTERNAL_RAW_CHECK(require_failed_count == 0);
 }
 
 void CheckComparisonOperators() {
@@ -134,8 +149,13 @@ void CheckComparisonOperators() {
   NTH_REQUIRE(t >= 12);
   NTH_REQUIRE(t > 12);
   NTH_REQUIRE(t != 3);
+#if NTH_BUILD_MODE(debug) or NTH_BUILD_MODE(harden)
   NTH_DEBUG_INTERNAL_RAW_CHECK(failure_count == 6);
   NTH_DEBUG_INTERNAL_RAW_CHECK(require_failed_count == 6);
+#else
+  NTH_DEBUG_INTERNAL_RAW_CHECK(failure_count == 0);
+  NTH_DEBUG_INTERNAL_RAW_CHECK(require_failed_count == 0);
+#endif
   NTH_DEBUG_INTERNAL_RAW_CHECK(ensure_failed_count == 0);
 }
 
@@ -157,8 +177,13 @@ void CheckComparisonOperatorOverloads() {
   NTH_REQUIRE(t * 2 + 1 != 7);
   NTH_REQUIRE((1 + t) * 2 + 1 != 9);
   NTH_REQUIRE(9 != (1 + t) * 2 + 1);
+#if NTH_BUILD_MODE(debug) or NTH_BUILD_MODE(harden)
   NTH_DEBUG_INTERNAL_RAW_CHECK(failure_count == 4);
   NTH_DEBUG_INTERNAL_RAW_CHECK(require_failed_count == 4);
+#else
+  NTH_DEBUG_INTERNAL_RAW_CHECK(failure_count == 0);
+  NTH_DEBUG_INTERNAL_RAW_CHECK(require_failed_count == 0);
+#endif
   NTH_DEBUG_INTERNAL_RAW_CHECK(ensure_failed_count == 0);
 }
 
@@ -187,8 +212,13 @@ void CheckShortCircuiting() {
   n = 0;
   NTH_REQUIRE(t == 0 or (3 / t) == 1);
   NTH_REQUIRE(t == 2 or t == 3);
+#if NTH_BUILD_MODE(debug) or NTH_BUILD_MODE(harden)
   NTH_DEBUG_INTERNAL_RAW_CHECK(failure_count == 1);
   NTH_DEBUG_INTERNAL_RAW_CHECK(require_failed_count == 1);
+#else
+  NTH_DEBUG_INTERNAL_RAW_CHECK(failure_count == 0);
+  NTH_DEBUG_INTERNAL_RAW_CHECK(require_failed_count == 0);
+#endif
   NTH_DEBUG_INTERNAL_RAW_CHECK(ensure_failed_count == 0);
 }
 
@@ -203,7 +233,11 @@ void CheckDeclaredApi() {
   NTH_REQUIRE(traced_thing.triple() == 14);                           // Failure
   NTH_REQUIRE(traced_thing.value() == 6);                             // Failure
   NTH_REQUIRE(traced_thing.add(3).add(4).add(10) == Thing{.n = 23});  // Failure
+#if NTH_BUILD_MODE(debug) or NTH_BUILD_MODE(harden)
   NTH_DEBUG_INTERNAL_RAW_CHECK(failure_count == 3);
+#else
+  NTH_DEBUG_INTERNAL_RAW_CHECK(failure_count == 0);
+#endif
 }
 void CheckDeclaredTemplateApi() {
   reset_counts();
@@ -216,7 +250,11 @@ void CheckDeclaredTemplateApi() {
   NTH_REQUIRE(traced_thing.triple() == 14);
   NTH_REQUIRE(traced_thing.value() == 6);
   NTH_REQUIRE(traced_thing.add(3).add(4).add(10) == S<int>{.n = 23});
+#if NTH_BUILD_MODE(debug) or NTH_BUILD_MODE(harden)
   NTH_DEBUG_INTERNAL_RAW_CHECK(failure_count == 3);
+#else
+  NTH_DEBUG_INTERNAL_RAW_CHECK(failure_count == 0);
+#endif
 }
 
 int main() {
