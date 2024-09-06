@@ -42,7 +42,7 @@ nav:
     #- registration: registration.md
     #- strings: strings.md
     #- test: test.md
-    #- try: try.md
+    - try: try.md
     - types:
       - structure: types/structure.md
     #- utility: utility.md

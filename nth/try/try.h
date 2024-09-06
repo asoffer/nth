@@ -1,9 +1,6 @@
 #ifndef NTH_TRY_TRY_H
 #define NTH_TRY_TRY_H
 
-#include <utility>
-
-#include "nth/debug/debug.h"
 #include "nth/meta/concepts/core.h"
 #include "nth/try/internal/try.h"
 
@@ -43,11 +40,11 @@
 // ```
 // struct StatusExitHandler {
 //   static constexpr bool okay(absl::Status const & s) { return s.ok(); }
-// 
+//
 //   static constexpr absl::Status transform_return(absl::Status status) {
 //     return status;
 //   }
-// 
+//
 //   // In the event that the status is okay, there's nothing meaningful to
 //   // inspect, so transforming the value to be `void` loses no information.
 //   static constexpr void transform_value(absl::Status const&) {}
@@ -70,6 +67,9 @@ concept try_exit_handler = requires(H h, T t) {
   h.transform_return(t);
   h.transform_value(t);
 };
+
+// Exit handler for use in main. Failures are reported as `return 1`.
+inline constexpr nth::internal_try::MainHandler try_main;
 
 }  // namespace nth
 

@@ -7,7 +7,9 @@ cc_library(
         "internal/try.h",
     ],
     deps = [
-        "//nth/debug",
+        "//nth/base:attributes",
+        "//nth/base:core",
+        "//nth/meta:type",
         "//nth/meta/concepts:core",
     ],
 )

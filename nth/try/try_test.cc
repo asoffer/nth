@@ -1,5 +1,7 @@
 #include "nth/try/try.h"
 
+#include <optional>
+
 #include "nth/test/test.h"
 
 namespace {
@@ -31,13 +33,35 @@ NTH_TEST("try/pointer") {
   NTH_ASSERT(counter == 0);
   NTH_ASSERT(ptr == nullptr);
 
-  ptr = [&] {
-    int* c = NTH_TRY(&counter);
+  ptr = [&] -> int * {
+    int &c = NTH_TRY(&counter);
     ++counter;
-    return c;
+    return &c;
   }();
   NTH_ASSERT(ptr == &counter);
   NTH_ASSERT(counter == 1);
+}
+
+NTH_TEST("try/optional") {
+  int counter       = 0;
+  std::optional opt = [&] {
+    NTH_TRY(std::optional<int>());
+    ++counter;
+    return std::optional<int>();
+  }();
+  NTH_ASSERT(counter == 0);
+  NTH_ASSERT(opt == std::nullopt);
+
+  opt = [&] -> std::optional<int> {
+    std::optional<int> o(counter);
+    int const &c = NTH_TRY(o);
+    ++counter;
+    if (&*o == &c) { ++counter; }
+    return c;
+  }();
+  NTH_ASSERT(opt.has_value());
+  NTH_ASSERT(*opt == 0);
+  NTH_ASSERT(counter == 2);
 }
 
 struct Handler {
@@ -62,6 +86,23 @@ NTH_TEST("try/handler") {
     ++counter;
     return result;
   }() == 17);
+  NTH_EXPECT(counter == 1);
+}
+
+NTH_TEST("try/main") {
+  int counter = 0;
+  NTH_EXPECT([&] {
+    NTH_TRY((nth::try_main), false);
+    ++counter;
+    return 0;
+  }() == 1);
+  NTH_EXPECT(counter == 0);
+
+  NTH_EXPECT([&] {
+    NTH_TRY((nth::try_main), true);
+    ++counter;
+    return 0;
+  }() == 0);
   NTH_EXPECT(counter == 1);
 }
 
