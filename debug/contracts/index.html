@@ -5,15 +5,15 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       <link rel="shortcut icon" href="../../img/favicon.ico" />
-    <title>attributes - nth - A collection of C++ Libraries</title>
+    <title>//nth/debug/contracts - nth - A collection of C++ Libraries</title>
     <link rel="stylesheet" href="../../css/theme.css" />
     <link rel="stylesheet" href="../../css/theme_extra.css" />
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
     
       <script>
         // Current page data
-        var mkdocs_page_name = "attributes";
-        var mkdocs_page_input_path = "base/attributes.md";
+        var mkdocs_page_name = "//nth/debug/contracts";
+        var mkdocs_page_input_path = "debug/contracts.md";
         var mkdocs_page_url = null;
       </script>
     
@@ -44,38 +44,18 @@
                 </li>
               </ul>
               <p class="caption"><span class="caption-text">Libraries</span></p>
-              <ul class="current">
-                  <li class="toctree-l1 current"><a class="reference internal current" >base</a>
-    <ul class="current">
-                <li class="toctree-l2 current"><a class="reference internal current" href="#">attributes</a>
-    <ul class="current">
-    <li class="toctree-l3"><a class="reference internal" href="#overview">Overview</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#available-attributes">Available attributes</a>
-        <ul>
-    <li class="toctree-l4"><a class="reference internal" href="#lifetimebound">lifetimebound</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#weak">weak</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#tailcall">tailcall</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#inline_always">inline_always</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#inline_never">inline_never</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#trivial_abi">trivial_abi</a>
-    </li>
-        </ul>
-    </li>
-    </ul>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" >base</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../../base/attributes/">attributes</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../core/">core</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../base/core/">core</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../indestructible/">indestructible</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../base/indestructible/">indestructible</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../platform/">platform</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../base/platform/">platform</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../section/">section</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../base/section/">section</a>
                 </li>
     </ul>
                   </li>
@@ -87,11 +67,11 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" >debug</a>
     <ul>
-                <li class="toctree-l2"><a class="reference internal" href="../../debug/log/">log</a>
+                <li class="toctree-l2"><a class="reference internal" href="../log/">log</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../debug/unimplemented/">unimplemented</a>
+                <li class="toctree-l2"><a class="reference internal" href="../unimplemented/">unimplemented</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../debug/unreachable/">unreachable</a>
+                <li class="toctree-l2"><a class="reference internal" href="../unreachable/">unreachable</a>
                 </li>
     </ul>
                   </li>
@@ -148,9 +128,7 @@
         <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
   <ul class="wy-breadcrumbs">
     <li><a href="../.." class="icon icon-home" aria-label="Docs"></a></li>
-          <li class="breadcrumb-item">Libraries</li>
-          <li class="breadcrumb-item">base</li>
-      <li class="breadcrumb-item active">attributes</li>
+      <li class="breadcrumb-item active">//nth/debug/contracts</li>
     <li class="wy-breadcrumbs-aside">
     </li>
   </ul>
@@ -159,48 +137,17 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
             <div class="section" itemprop="articleBody">
               
-                <h1 id="nthbaseattributes"><code>//nth/base:attributes</code></h1>
+                <h1 id="nthdebugcontracts">//nth/debug/contracts</h1>
 <h2 id="overview">Overview</h2>
-<p>Defines macros which wrap compiler-specific attributes and gives them a consistent API. One may
-query whether an attribute is supported via <code>NTH_SUPPORTS_ATTRIBUTE(&lt;attribute_name&gt;)</code>, and use the
-attribute via <code>NTH_ATTRIBUTE(&lt;attribute_name&gt;)</code>. A compilation error will be reported for any
-unsupported attribute. One may also use <code>NTH_ATTRIBUTE_TRY(&lt;attribute_name&gt;)</code> which will expand to
-the appropriate attribute if it is supported and nothing otherwise.</p>
-<h2 id="available-attributes">Available attributes</h2>
-<p>Note that not all of these attributes are available on all platforms.</p>
-<h3 id="lifetimebound"><code>lifetimebound</code></h3>
-<p>Defines an attribute consistent with the proposed wg21.link/p0936r0. When attached to a function
-parameter, indicates that the return value may reference the object bound to the attributed function
-parameter.</p>
-<h3 id="weak"><code>weak</code></h3>
-<p>Defines an attribute which may be used to mark symbol declarations and definitions as 'weak'. All
-unattributed symbols are implicitly declared strong. During linking, if any strong symbol of the
-same name exists all weak symbols will be ignored. Beyond this rule, the one-definition rule still
-applies: There must be either exactly one strong symbol definition, or no strong symbol definitions
-and one weak symbol definition.</p>
-<h3 id="tailcall"><code>tailcall</code></h3>
-<p>Defines an attribute indicating that the annotated return statement must be tail-call optimized. Use
-of this attribute is intended for situations where tail-call optimization is a requirement for
-correctness, rather than an optimization. As such, no fallback implementation is supported if the
-compiler does not support it.</p>
-<h3 id="inline_always"><code>inline_always</code></h3>
-<p>Defines an attribute indicating that the annotated function must be inlined by the compiler. Note
-that this attribute refers to how the compiler generates executable code, not the <code>inline</code> attribute
-in C++.</p>
-<h3 id="inline_never"><code>inline_never</code></h3>
-<p>Defines an attribute indicating that the annotated function must not be inlined by the compiler.
-Note that this attribute refers to how the compiler generates executable code, not the <code>inline</code>
-attribute in C++.</p>
-<h3 id="trivial_abi"><code>trivial_abi</code></h3>
-<p>Defines an attribute indicating that the annotated struct is trivial for the purposes of calls,
-indicating that it can be passed in registers.</p>
+<p>This target defines two macros that can be used to validate pre- and post-conditions: <code>NTH_REQUIRE</code>
+and <code>NTH_ENSURE</code>. Each of these macros takes one or two arguments. If one argument is provided, it
+is the expression to be verified. If two are provided, the first one is a <em>verbosity path</em>,
+used identically to how it is used in the <a href="/debug/log">logging library</a>, and the second argument is
+the expression to be verified.</p>
+<h3 id="nth_require"><code>NTH_REQUIRE</code></h3>
               
             </div>
           </div><footer>
-    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
-        <a href="../.." class="btn btn-neutral float-left" title="Home"><span class="icon icon-circle-arrow-left"></span> Previous</a>
-        <a href="../core/" class="btn btn-neutral float-right" title="core">Next <span class="icon icon-circle-arrow-right"></span></a>
-    </div>
 
   <hr/>
 
@@ -222,10 +169,6 @@ indicating that it can be passed in registers.</p>
   <span class="rst-current-version" data-toggle="rst-current-version">
     
     
-      <span><a href="../.." style="color: #fcfcfc">&laquo; Previous</a></span>
-    
-    
-      <span><a href="../core/" style="color: #fcfcfc">Next &raquo;</a></span>
     
   </span>
 </div>
