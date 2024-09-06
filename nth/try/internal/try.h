@@ -50,10 +50,18 @@ struct OptionalHandler {
   }
   static constexpr std::optional<T> transform_return(
       std::optional<T> const& opt) {
-    return opt;
+    return std::nullopt;
   }
   static constexpr T const& transform_value(std::optional<T> const& opt) {
     return *opt;
+  }
+
+  static constexpr T const& transform_value(std::optional<T> & opt) {
+    return *opt;
+  }
+
+  static constexpr T&& transform_value(std::optional<T>&& opt) {
+    return *NTH_MOVE(opt);
   }
 };
 
@@ -66,16 +74,27 @@ struct MainHandler {
     return default_try_exit_handler<T>().okay(t);
   }
   static constexpr int transform_return(auto const&) { return 1; }
+
   template <typename T>
   static constexpr decltype(auto) transform_value(T const& v) {
     return default_try_exit_handler<T>().transform_value(v);
+  }
+
+  template <typename T>
+  static constexpr decltype(auto) transform_value(T& v) {
+    return default_try_exit_handler<T>().transform_value(v);
+  }
+
+  template <typename T>
+  static constexpr decltype(auto) transform_value(T&& v) {
+    return default_try_exit_handler<T>().transform_value(NTH_MOVE(v));
   }
 };
 
 template <typename T, bool LValue, bool RValue>
 struct wrap {
-  explicit wrap(T&& v) : ptr_(nth::address(v)) { NTH_LOG("Here"); }
-  explicit wrap(T& v) : ptr_(nth::address(v)) { NTH_LOG("Here"); }
+  explicit wrap(T&& v) : ptr_(nth::address(v)) {}
+  explicit wrap(T& v) : ptr_(nth::address(v)) {}
   static wrap make(T& v) { return wrap(v); }
   static wrap make(T&& v) { return wrap(NTH_MOVE(v)); }
 
@@ -99,8 +118,8 @@ struct wrap<T&&, LValue, RValue> : wrap<T, LValue, RValue> {};
 
 template <typename T>
 struct wrap<T, false, false> {
-  explicit wrap(T v) : v_(NTH_MOVE(v)) { NTH_LOG("Here"); }
-  static wrap make(T v) { return wrap(NTH_MOVE(v)); }
+  explicit wrap(T&& v) : v_(NTH_MOVE(v)) {}
+  static wrap make(T&& v) { return wrap(NTH_MOVE(v)); }
 
   decltype(auto) transform(auto& handler) {
     return handler.transform_value(NTH_MOVE(v_));
@@ -148,7 +167,7 @@ decltype(auto) default_try_exit_handler() {
 #define NTH_TRY_INTERNAL_TRY_WITH_HANDLER(handler, ...)                        \
   (({                                                                          \
      using NthTryType = decltype((__VA_ARGS__));                               \
-     NthTryType expr  = __VA_ARGS__;                                           \
+     auto&& expr      = __VA_ARGS__;                                           \
      if (not handler.okay(expr)) { return handler.transform_return(expr); }    \
      ::nth::internal_try::wrap<                                                \
          NthTryType, nth::lvalue_reference<NthTryType>,                        \

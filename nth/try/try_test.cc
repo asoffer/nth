@@ -89,21 +89,30 @@ NTH_TEST("try/handler") {
   NTH_EXPECT(counter == 1);
 }
 
-NTH_TEST("try/main") {
+struct Uncopyable {
+  explicit Uncopyable(int n) : n(n) {}
+  Uncopyable(Uncopyable const &) = delete;
+  Uncopyable(Uncopyable &&)      = default;
+  int n                          = 17;
+};
+
+NTH_TEST("try/main/uncopyable") {
+  std::optional<Uncopyable> opt;
   int counter = 0;
   NTH_EXPECT([&] {
-    NTH_TRY((nth::try_main), false);
-    ++counter;
+    Uncopyable const &uncopyable = NTH_TRY((nth::try_main), opt);
+    counter += uncopyable.n;
     return 0;
   }() == 1);
   NTH_EXPECT(counter == 0);
 
   NTH_EXPECT([&] {
-    NTH_TRY((nth::try_main), true);
-    ++counter;
+    Uncopyable uncopyable =
+        NTH_TRY((nth::try_main), std::optional(Uncopyable(34)));
+    counter += uncopyable.n;
     return 0;
   }() == 0);
-  NTH_EXPECT(counter == 1);
+  NTH_EXPECT(counter == 34);
 }
 
 }  // namespace
