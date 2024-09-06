@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <link rel="shortcut icon" href="../img/favicon.ico" />
+    <title>try - nth - A collection of C++ Libraries</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "try";
+        var mkdocs_page_input_path = "try.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href=".." class="icon icon-home"> nth - A collection of C++ Libraries
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="..">Home</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Libraries</span></p>
+              <ul class="current">
+                  <li class="toctree-l1"><a class="reference internal" >base</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../base/attributes/">attributes</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../base/core/">core</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../base/indestructible/">indestructible</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../base/platform/">platform</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../base/section/">section</a>
+                </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" >container</a>
+    <ul>
+                <li class="toctree-l2"><a class="" href="../container/stack.md">stack</a>
+                </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" >debug</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../debug/log/">log</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../debug/unimplemented/">unimplemented</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../debug/unreachable/">unreachable</a>
+                </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" >format</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../format/format/">format</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../format/cc/">cc</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../format/json/">json</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../format/interpolate/">interpolate</a>
+                </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" >io</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" >writer</a>
+    <ul>
+                <li class="toctree-l3"><a class="reference internal" href="../io/writer/writer/">writer</a>
+                </li>
+                <li class="toctree-l3"><a class="reference internal" href="../io/writer/file/">file</a>
+                </li>
+                <li class="toctree-l3"><a class="reference internal" href="../io/writer/string/">string</a>
+                </li>
+    </ul>
+                </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" >process</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../process/env/">env</a>
+                </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">try</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#overview">Overview</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#custom-exit-handlers">Custom Exit Handlers</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#custom-default-exit-handlers">Custom Default Exit Handlers</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#nthtry_main">nth::try_main</a>
+    </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" >types</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../types/structure/">structure</a>
+                </li>
+    </ul>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="..">nth - A collection of C++ Libraries</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".." class="icon icon-home" aria-label="Docs"></a></li>
+          <li class="breadcrumb-item">Libraries</li>
+      <li class="breadcrumb-item active">try</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="nthtry"><code>//nth/try</code></h1>
+<p>A library for simplifying early-exits.</p>
+<h2 id="overview">Overview</h2>
+<p>The <code>NTH_TRY</code> macro evaluates its expression and either returns early, or continues transforming the
+value.</p>
+<p>Consider, for example, a pointer. <code>NTH_TRY(some_pointer)</code> will determine whether the <code>some_pointer</code>
+is null. If so, it will return <code>nullptr</code>. Otherwise, it will evaluate to the reference
+<code>*some_pointer</code>.</p>
+<h2 id="custom-exit-handlers">Custom Exit Handlers</h2>
+<p>One may specify an <em>exit_handler</em>, as an initial parenthesized argument to <code>NTH_TRY</code>, as in
+<code>NTH_TRY((my_handler), ComputeSomeValue())</code>. The argument <code>my_handler</code> must be an expression
+satisfying the <code>nth::try_exit_handler&lt;T&gt;</code> concept, where <code>T</code> is the type of <code>ComputeSomeValue()</code>.
+Specifically,</p>
+<ul>
+<li>
+<p>It must have a member function accepting a <code>okay</code> member function accepting a <code>T</code> and returning a
+<code>bool</code> to indicate whether the value should be further transformed (<code>true</code>) or returned (<code>false</code>).</p>
+</li>
+<li>
+<p>It must contain a <code>transform_value</code> function to be invoked when the value is okay.</p>
+</li>
+<li>
+<p>It must contain a <code>transform_return</code> function to be invoked when the value is not okay and must be
+  returned.</p>
+</li>
+</ul>
+<p>Note that the expression <code>my_handler</code> may be evaluated multiple times during evaluation of
+<code>NTH_TRY</code>, so if the handler is intended to be stateful, users must ensure their handler is an
+<code>lvalue</code> or otherwise has a mechanism to share the state.</p>
+<h2 id="custom-default-exit-handlers">Custom Default Exit Handlers</h2>
+<p>The expression <code>nth::default_try_exit_handler&lt;T&gt;()</code> evaluates to a default handler, to be used
+whenever a custom exit handler is not specified as the first argument to <code>NTH_TRY</code>. There are
+several builtins: </p>
+<ul>
+<li>
+<p>All pointers have a builtin handler which detects and returns early on null pointers, and otherwise
+  evaluates by dereferencing the pointer (evaluating to a reference to the pointee).</p>
+</li>
+<li>
+<p><code>std::optional&lt;T&gt;</code> has a builtin handler which detects and returns early on <code>std::nullopt</code>, and
+  otherwise evaluates to a reference to the contained object.</p>
+</li>
+</ul>
+<p>Users may define their own custom default handlers by defining the <a href="ftadle">FTADLE</a> hook
+<code>NthDefaultTryExitHandler</code>. Users must define a function of this name, findable via ADL, accepting
+an <code>nth::type_tag&lt;T&gt;</code>, and returning the default handler to be used. Note that this expression may
+be invoked multiple times, so if a user wants the handler to be stateful, they must ensure the
+function returns a reference to a global handler, or somehow otherwise share the state.</p>
+<h2 id="nthtry_main"><code>nth::try_main</code></h2>
+<p>A custom exit handler primarily for use inside <code>main</code>. On failure the returned value will be <code>1</code>,
+indicating unsuccessful program termination. Otherwise the value is transformed according to
+<code>nth::default_try_exit_handler&lt;T&gt;</code>.</p>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../process/env/" class="btn btn-neutral float-left" title="env"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../types/structure/" class="btn btn-neutral float-right" title="structure">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="../process/env/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../types/structure/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "..";</script>
+    <script src="../js/theme_extra.js"></script>
+    <script src="../js/theme.js"></script>
+      <script src="../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>
