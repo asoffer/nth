@@ -135,7 +135,7 @@ struct minimal_writer {
 template <writer W, reader R>
 bool write_from(W& w, R& r) {
   if constexpr (reservable_writer<W> and sized_reader<R>) {
-    return r.read(w.reserve(r.size())).bytes_read();
+    return r.read(w.reserve(r.bytes_remaining())).bytes_read();
   } else {
     size_t num_read;
     std::byte buffer[1024];
