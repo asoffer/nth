@@ -18,6 +18,8 @@ struct string_writer {
 
   basic_write_result write(std::span<std::byte const> data);
 
+  std::span<std::byte> reserve(size_t n);
+
  private:
   std::string& s_;
 };

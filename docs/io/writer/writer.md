@@ -18,7 +18,7 @@ via [`nth::bytes`](/memory/bytes), or view a sequence of bytes represented by an
 Because writing data may not succeed, we must also represent the notion of a "write result." This is
 formalized via the `nth::io::write_result_type` concept.
 
-## The `writer` concept
+## `writer`
 
 Formally, `writer` is a concept requiring the type `W` to contain a `write` member function that can
 be invoked with a `std::span<std::byte const>`. The function is responsible for writing the span of
@@ -31,7 +31,16 @@ producing a returned result of `result`,
 * Callers may interpret `result.written() == byte_span.size()` as a successful write,
   `result.written() == 0` as a failure, and all other possibilities as partial success.
 
-## The `write_result_type` concept
+## `reservable_writer`
+
+A `reservable_writer` is a writer that also provides a `reserve` member function. The function
+accepts a `size_t` and returns a `std::span<std::byte>` of that size, which the user is responsible
+for filling with their desired content. Writes to this buffer must be completed before the next
+modification of the writer. The behavior of `reserve` must be identical to that of filling an
+external buffer of the same size and then calling `write` on that buffer. The reserve call often
+provides an opportunity to write directly thereby avoiding an extra memory copy.
+
+## `write_result_type`
 
 The type returned by a call to `write` on a writer must be something adhering to
 `nth::io::write_result_type`. Types adhere to this concept provided they have a `written` const
@@ -47,6 +56,7 @@ minimal, type adhering to the `write_result_type` concept, outlined here:
 struct basic_write_result {
   explicit constexpr basic_write_result(size_t n);
   [[nodiscard]] constexpr size_t written() const;
+
  private:
   // ...
 };

@@ -15,6 +15,8 @@ struct file_reader {
 
   basic_read_result read(std::span<std::byte> buffer);
 
+  size_t bytes_remaining() const;
+
  private:
   file_reader() = default;
   std::FILE* file_;

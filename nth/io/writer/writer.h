@@ -6,6 +6,8 @@
 #include <span>
 #include <string_view>
 
+#include "nth/io/reader/reader.h"
+#include "nth/meta/concepts/convertible.h"
 #include "nth/meta/concepts/core.h"
 
 namespace nth::io {
@@ -86,6 +88,26 @@ concept writer = requires(W w) {
   } -> nth::precisely<write_result<W>>;
 };
 
+// A `reservable_writer` is a writer for which a user can request an amount of
+// space to be written to directly by some external source (other than by calls
+// to `write`). The buffer reserved must be valid at least until the next
+// mutation of the writer (e.g., from a future call to `write` or `reserve`).
+// The caller promises to fill in the reserved buffer before the next mutation
+// of the writer.
+template <typename W>
+concept reservable_writer = writer<W> and requires(W w) {
+  // There must be a `reserve` member function that can be invoked with a
+  // `size_t` representing the number of bytes to be reserved. The function must
+  // return a `std::span<std::byte>` over that number of bytes. The returned
+  // buffer must be valid until the next mutation of `w`, at which point the
+  // writer may assume the buffer will not be written to again, and the contents
+  // of the buffer are considered "written" as if by a call to write with the
+  // contents of that buffer).
+  {
+    w.reserve(size_t{})
+  } -> nth::explicitly_convertible_to<std::span<std::byte>>;
+};
+
 template <writer W>
 write_result<W> write(W& w, std::span<std::byte const> bytes) {
   return w.write(bytes);
@@ -109,6 +131,24 @@ struct minimal_writer {
   write_result<minimal_writer> write(
       nth::precisely<std::span<std::byte const>> auto);
 };
+
+template <writer W, reader R>
+bool write_from(W& w, R& r) {
+  if constexpr (reservable_writer<W> and sized_reader<R>) {
+    return r.read(w.reserve(r.size())).bytes_read();
+  } else {
+    size_t num_read;
+    std::byte buffer[1024];
+    do {
+      num_read = r.read(buffer).bytes_written();
+      if (num_read == 0) { return true; }
+      size_t num_written =
+          w.write(std::span<std::byte const>(buffer, num_read)).written();
+      if (num_written != num_read) { return false; }
+    } while (num_read == 1024);
+    return true;
+  }
+}
 
 }  // namespace nth::io
 

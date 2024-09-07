@@ -3,9 +3,9 @@
 ## Overview 
 
 This target defines `nth::io::string_writer`, a type conforming to the
-[nth::io::writer](/io/writer/writer) concept, which enables users to write data to a string. The
-type can be constructed with a mutable reference to a `std::string`. The referenced string must
-outlive the `string_writer`. Calls to `write` will append to the referenced string.
+[nth::io::reservable_writer](/io/writer/writer) concept, which enables users to write data to a
+string. The type can be constructed with a mutable reference to a `std::string`. The referenced
+string must outlive the `string_writer`. Calls to `write` will append to the referenced string.
 
 ## Example usage
 

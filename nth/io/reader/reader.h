@@ -85,6 +85,13 @@ concept reader = requires(R r) {
   } -> nth::precisely<read_result<R>>;
 };
 
+// A `sized_reader` is a reader for which the size in bytes of the content being
+// read is computable via a `bytes_remaining` member function.
+template <typename R>
+concept sized_reader = reader<R> and requires(R r) {
+  { r.bytes_remaining() } -> nth::precisely<size_t>;
+};
+
 template <reader R>
 read_result<R> read(R& r, std::span<std::byte const> bytes) {
   return r.read(bytes);

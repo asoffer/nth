@@ -42,5 +42,22 @@ NTH_TEST("/nth/io/reader/file/read") {
   NTH_EXPECT(std::string_view(buffer, 13) == "Hello, world!");
 }
 
+NTH_TEST("/nth/io/reader/file/bytes_remaining") {
+  char buffer[5] = {0};
+  std::optional f =
+      file_path::try_construct("/tmp/nth_io_file_reader_test.txt");
+  NTH_ASSERT(f.has_value());
+  NTH_ASSERT(write_file(*f));
+  std::optional r = file_reader::try_open(*f);
+  NTH_ASSERT(r.has_value());
+  NTH_EXPECT(r->bytes_remaining() == 13u);
+  NTH_ASSERT(read_text(*r, buffer).bytes_read() == 5u);
+  NTH_EXPECT(r->bytes_remaining() == 8u);
+  NTH_ASSERT(read_text(*r, buffer).bytes_read() == 5u);
+  NTH_EXPECT(r->bytes_remaining() == 3u);
+  NTH_ASSERT(read_text(*r, buffer).bytes_read() == 3u);
+  NTH_EXPECT(r->bytes_remaining() == 0u);
+}
+
 }  // namespace
 }  // namespace nth::io

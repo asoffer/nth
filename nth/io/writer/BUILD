@@ -50,6 +50,8 @@ cc_library(
     name = "writer",
     hdrs = ["writer.h"],
     deps = [
+        "//nth/io/reader",
+        "//nth/meta/concepts:convertible",
         "//nth/meta/concepts:core",
     ],
 )

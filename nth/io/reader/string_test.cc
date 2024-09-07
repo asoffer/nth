@@ -25,5 +25,18 @@ NTH_TEST("string_reader/read") {
   NTH_EXPECT(std::string_view(buffer, 4) == "ebcd");
 }
 
+NTH_TEST("string_reader/bytes_remaining") {
+  std::string s = "Hello, world!";
+  string_reader r(s);
+  char buffer[5] = {0};
+  NTH_EXPECT(r.bytes_remaining() == 13u);
+  NTH_ASSERT(read_text(r, buffer).bytes_read() == 5u);
+  NTH_EXPECT(r.bytes_remaining() == 8u);
+  NTH_ASSERT(read_text(r, buffer).bytes_read() == 5u);
+  NTH_EXPECT(r.bytes_remaining() == 3u);
+  NTH_ASSERT(read_text(r, buffer).bytes_read() == 3u);
+  NTH_EXPECT(r.bytes_remaining() == 0u);
+}
+
 }  // namespace
 }  // namespace nth::io

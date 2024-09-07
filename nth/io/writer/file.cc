@@ -7,7 +7,7 @@
 namespace nth::io {
 
 std::optional<file_writer> file_writer::try_open(file_path const& f) {
-  std::FILE* ptr = std::fopen(f.path().c_str(), "w");
+  std::FILE* ptr = std::fopen(f.path().c_str(), "wb");
   if (not ptr) { return std::nullopt; }
   return std::optional<file_writer>(file_writer(ptr));
 }

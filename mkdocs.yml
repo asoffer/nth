@@ -30,6 +30,10 @@ nav:
       - interpolate: format/interpolate.md
     #- hash: hash.md
     - io:
+      - reader:
+        - reader: io/reader/reader.md
+        - file: io/reader/file.md
+        - string: io/reader/string.md
       - writer:
         - writer: io/writer/writer.md
         - file: io/writer/file.md

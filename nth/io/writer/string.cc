@@ -14,4 +14,10 @@ basic_write_result string_writer::write(std::span<std::byte const> data) {
   return basic_write_result(data.size());
 }
 
+std::span<std::byte> string_writer::reserve(size_t n) {
+  size_t size = s_.size();
+  s_.resize(s_.size() + n);
+  return std::span(reinterpret_cast<std::byte*>(s_.data()) + size, n);
+}
+
 }  // namespace nth::io
