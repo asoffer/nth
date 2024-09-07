@@ -53,6 +53,10 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../indestructible/">indestructible</a>
                 </li>
+                <li class="toctree-l2"><a class="reference internal" href="../macros/">macros</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../pack/">pack</a>
+                </li>
                 <li class="toctree-l2 current"><a class="reference internal current" href="#">platform</a>
     <ul class="current">
     <li class="toctree-l3"><a class="reference internal" href="#overview">Overview</a>
@@ -60,6 +64,8 @@
     <li class="toctree-l3"><a class="reference internal" href="#nth_architecture">NTH_ARCHITECTURE</a>
     </li>
     <li class="toctree-l3"><a class="reference internal" href="#nth_build_feature">NTH_BUILD_FEATURE</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#nth_build_mode">NTH_BUILD_MODE</a>
     </li>
     <li class="toctree-l3"><a class="reference internal" href="#nth_compiler">NTH_COMPILER</a>
     </li>
@@ -187,6 +193,26 @@ feature is enabled. Valid arguments are:</p>
 <p><code>tsan</code>: Indicates whether or not thread-sanitizer is enabled.</p>
 </li>
 </ul>
+<h2 id="nth_build_mode"><code>NTH_BUILD_MODE</code></h2>
+<p>A function-like macro that expands to either <code>true</code> or <code>false</code> depending on the build mode. Valid
+arguments are:</p>
+<ul>
+<li>
+<p><code>debug</code>: Indicates that the program is built in such a way as to optimize for debugability.</p>
+</li>
+<li>
+<p><code>fastbuild</code>: Indicates that the program is built in such a way as to optimize for compilation
+  speed.</p>
+</li>
+<li>
+<p><code>harden</code>: Indicates that the program is built in such a way as to optimize mostly for runtime
+  performance, but may accept a minory performance penalty to accommodate some safety checks.</p>
+</li>
+<li>
+<p><code>optimize</code>: Indicates that the program is built in such a way as to optimize for runtime
+  performance.</p>
+</li>
+</ul>
 <h2 id="nth_compiler"><code>NTH_COMPILER</code></h2>
 <p>A function-like macro that expands to either <code>true</code> or <code>false</code> depending on whether the argument
 represents the compiler. Valid arguments are <code>clang</code>, <code>gcc</code>, <code>msvc</code>, or <code>unknown</code>.</p>
@@ -201,7 +227,7 @@ or <code>unknown</code>.</p>
             </div>
           </div><footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
-        <a href="../indestructible/" class="btn btn-neutral float-left" title="indestructible"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../pack/" class="btn btn-neutral float-left" title="pack"><span class="icon icon-circle-arrow-left"></span> Previous</a>
         <a href="../section/" class="btn btn-neutral float-right" title="section">Next <span class="icon icon-circle-arrow-right"></span></a>
     </div>
 
@@ -225,7 +251,7 @@ or <code>unknown</code>.</p>
   <span class="rst-current-version" data-toggle="rst-current-version">
     
     
-      <span><a href="../indestructible/" style="color: #fcfcfc">&laquo; Previous</a></span>
+      <span><a href="../pack/" style="color: #fcfcfc">&laquo; Previous</a></span>
     
     
       <span><a href="../section/" style="color: #fcfcfc">Next &raquo;</a></span>

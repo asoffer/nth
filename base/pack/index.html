@@ -5,15 +5,15 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       <link rel="shortcut icon" href="../../img/favicon.ico" />
-    <title>env - nth - A collection of C++ Libraries</title>
+    <title>pack - nth - A collection of C++ Libraries</title>
     <link rel="stylesheet" href="../../css/theme.css" />
     <link rel="stylesheet" href="../../css/theme_extra.css" />
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
     
       <script>
         // Current page data
-        var mkdocs_page_name = "env";
-        var mkdocs_page_input_path = "process/env.md";
+        var mkdocs_page_name = "pack";
+        var mkdocs_page_input_path = "base/pack.md";
         var mkdocs_page_url = null;
       </script>
     
@@ -45,21 +45,69 @@
               </ul>
               <p class="caption"><span class="caption-text">Libraries</span></p>
               <ul class="current">
-                  <li class="toctree-l1"><a class="reference internal" >base</a>
-    <ul>
-                <li class="toctree-l2"><a class="reference internal" href="../../base/attributes/">attributes</a>
+                  <li class="toctree-l1 current"><a class="reference internal current" >base</a>
+    <ul class="current">
+                <li class="toctree-l2"><a class="reference internal" href="../attributes/">attributes</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../base/core/">core</a>
+                <li class="toctree-l2"><a class="reference internal" href="../core/">core</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../base/indestructible/">indestructible</a>
+                <li class="toctree-l2"><a class="reference internal" href="../indestructible/">indestructible</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../base/macros/">macros</a>
+                <li class="toctree-l2"><a class="reference internal" href="../macros/">macros</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../base/pack/">pack</a>
+                <li class="toctree-l2 current"><a class="reference internal current" href="#">pack</a>
+    <ul class="current">
+    <li class="toctree-l3"><a class="reference internal" href="#overview">Overview</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#each">each</a>
+        <ul>
+    <li class="toctree-l4"><a class="reference internal" href="#usage">Usage</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#example">Example</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#reverse_each">reverse_each</a>
+        <ul>
+    <li class="toctree-l4"><a class="reference internal" href="#usage_1">Usage</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#example_1">Example</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#invoke">invoke</a>
+        <ul>
+    <li class="toctree-l4"><a class="reference internal" href="#usage_2">Usage</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#example_2">Example</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#any">any</a>
+        <ul>
+    <li class="toctree-l4"><a class="reference internal" href="#usage_3">Usage</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#all">all</a>
+        <ul>
+    <li class="toctree-l4"><a class="reference internal" href="#usage_4">Usage</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#count_if">count_if</a>
+        <ul>
+    <li class="toctree-l4"><a class="reference internal" href="#usage_5">Usage</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#example_3">Example</a>
+    </li>
+        </ul>
+    </li>
+    </ul>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../base/platform/">platform</a>
+                <li class="toctree-l2"><a class="reference internal" href="../platform/">platform</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../base/section/">section</a>
+                <li class="toctree-l2"><a class="reference internal" href="../section/">section</a>
                 </li>
     </ul>
                   </li>
@@ -117,11 +165,9 @@
                 </li>
     </ul>
                   </li>
-                  <li class="toctree-l1 current"><a class="reference internal current" >process</a>
-    <ul class="current">
-                <li class="toctree-l2 current"><a class="reference internal current" href="#">env</a>
-    <ul class="current">
-    </ul>
+                  <li class="toctree-l1"><a class="reference internal" >process</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../../process/env/">env</a>
                 </li>
     </ul>
                   </li>
@@ -149,8 +195,8 @@
   <ul class="wy-breadcrumbs">
     <li><a href="../.." class="icon icon-home" aria-label="Docs"></a></li>
           <li class="breadcrumb-item">Libraries</li>
-          <li class="breadcrumb-item">process</li>
-      <li class="breadcrumb-item active">env</li>
+          <li class="breadcrumb-item">base</li>
+      <li class="breadcrumb-item active">pack</li>
     <li class="wy-breadcrumbs-aside">
     </li>
   </ul>
@@ -159,22 +205,80 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
             <div class="section" itemprop="articleBody">
               
-                <h1 id="nthprocessenv"><code>//nth/process:env</code></h1>
-<p>This target provides a mechanism to safely read and write environment variables. The function
-<code>nth::env::load</code> returns the value of the enivronment variable if it is set and returns
-<code>std::nullopt</code> otherwise. The <code>nth::env::store</code> overload set sets, unsets or resets an environment
-variable.</p>
-<p>Calls to <code>nth::env::load</code> and <code>nth::env::store</code> are thread-safe (they may be called without
-external synchronization). Notably this is not true of <code>std::getenv</code> and <code>::setenv</code> which manipulate
-globals without synchronization. It is imporatnt to note that the thread-safety does not extend to
-<code>std::getenv</code> or <code>::setenv</code>. If any of these functions are also invoked without
-synchronization against <code>nth::env::load</code> and <code>nth::env::store</code>, the behavior is undefined.</p>
+                <h1 id="nthbasepack"><code>//nth/base:pack</code></h1>
+<h2 id="overview">Overview</h2>
+<p>A collection of macros that wrap parameter-pack expansion idioms. The core macro is <code>NTH_PACK</code> which
+accepts an initial parethesized argument indicating what to do, followed by the pack itself.</p>
+<h2 id="each"><code>each</code></h2>
+<h3 id="usage">Usage</h3>
+<blockquote>
+<p><code>NTH_PACK((each), &lt;pack&gt;)</code></p>
+</blockquote>
+<p>Evaluates each expression in the pack. Evaluation is guaranteed to happen in
+pack-order.</p>
+<h3 id="example">Example</h3>
+<pre><code>void invoke_on_each(auto f, auto&amp;&amp;... args) {
+  NTH_PACK((each), f(args));
+}
+
+// `invoke_on_each(f, 1, 2, 3)` will evaluate `f(1)`, then `f(2)`, then `f(3)`.
+</code></pre>
+<h2 id="reverse_each"><code>reverse_each</code></h2>
+<h3 id="usage_1">Usage</h3>
+<blockquote>
+<p><code>NTH_PACK((reverse_each), &lt;pack&gt;)</code></p>
+</blockquote>
+<p>Evaluates each expression in the pack. Evaluation is guaranteed to happen in
+reverse pack-order.</p>
+<h3 id="example_1">Example</h3>
+<pre><code>void reverse_invoke_on_each(auto f, auto&amp;&amp;... args) {
+  NTH_PACK((reverse_each), f(args));
+}
+
+// `reverse_invoke_on_each(f, 1, 2, 3)` will evaluate `f(3)`, then `f(2)`, then `f(1)`.
+</code></pre>
+<h2 id="invoke"><code>invoke</code></h2>
+<h3 id="usage_2">Usage</h3>
+<blockquote>
+<p><code>NTH_PACK((invoke, &lt;fn&gt;), &lt;pack&gt;)</code></p>
+</blockquote>
+<p>Applies <code>fn</code> to each member of <code>pack</code>. Function invocation is guaranteed to happen in pack-order.</p>
+<h3 id="example_2">Example</h3>
+<pre><code>void invoke_on_each(auto f, auto&amp;&amp;... args) {
+  NTH_PACK((invoke, f), args);
+}
+
+// `invoke_on_each(f, 1, 2, 3)` will evaluate `f(1)`, then `f(2)`, then `f(3)`.
+</code></pre>
+<h2 id="any"><code>any</code></h2>
+<h3 id="usage_3">Usage</h3>
+<blockquote>
+<p><code>NTH_PACK((any, &lt;predicate&gt;), &lt;pack&gt;)</code></p>
+</blockquote>
+<p>Evaluates to <code>true</code> if any member of <code>pack</code> satisfies <code>predicate</code>, and false otherwise.</p>
+<h2 id="all"><code>all</code></h2>
+<h3 id="usage_4">Usage</h3>
+<blockquote>
+<p><code>NTH_PACK((all, &lt;predicate&gt;), &lt;pack&gt;)</code></p>
+</blockquote>
+<p>Evaluates to <code>true</code> if every member of <code>pack</code> satisfies <code>predicate</code>, and false otherwise.</p>
+<h2 id="count_if"><code>count_if</code></h2>
+<h3 id="usage_5">Usage</h3>
+<blockquote>
+<p><code>NTH_PACK((count_if, &lt;predicate&gt;), &lt;pack&gt;)</code></p>
+</blockquote>
+<p>Evaluates to a <code>size_t</code> equal to the number of members of <code>pack</code> that satisfy <code>predicate</code>.</p>
+<h3 id="example_3">Example</h3>
+<pre><code>size_t num_with_size(size_t n, auto&amp;&amp;... args) {
+  return NTH_PACK((invoke, [n](size_t s) { return s == n; }), sizeof(args));
+}
+</code></pre>
               
             </div>
           </div><footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
-        <a href="../../io/writer/string/" class="btn btn-neutral float-left" title="string"><span class="icon icon-circle-arrow-left"></span> Previous</a>
-        <a href="../../try/" class="btn btn-neutral float-right" title="try">Next <span class="icon icon-circle-arrow-right"></span></a>
+        <a href="../macros/" class="btn btn-neutral float-left" title="macros"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../platform/" class="btn btn-neutral float-right" title="platform">Next <span class="icon icon-circle-arrow-right"></span></a>
     </div>
 
   <hr/>
@@ -197,10 +301,10 @@ synchronization against <code>nth::env::load</code> and <code>nth::env::store</c
   <span class="rst-current-version" data-toggle="rst-current-version">
     
     
-      <span><a href="../../io/writer/string/" style="color: #fcfcfc">&laquo; Previous</a></span>
+      <span><a href="../macros/" style="color: #fcfcfc">&laquo; Previous</a></span>
     
     
-      <span><a href="../../try/" style="color: #fcfcfc">Next &raquo;</a></span>
+      <span><a href="../platform/" style="color: #fcfcfc">Next &raquo;</a></span>
     
   </span>
 </div>

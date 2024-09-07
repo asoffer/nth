@@ -5,15 +5,15 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       <link rel="shortcut icon" href="../../img/favicon.ico" />
-    <title>env - nth - A collection of C++ Libraries</title>
+    <title>macros - nth - A collection of C++ Libraries</title>
     <link rel="stylesheet" href="../../css/theme.css" />
     <link rel="stylesheet" href="../../css/theme_extra.css" />
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
     
       <script>
         // Current page data
-        var mkdocs_page_name = "env";
-        var mkdocs_page_input_path = "process/env.md";
+        var mkdocs_page_name = "macros";
+        var mkdocs_page_input_path = "base/macros.md";
         var mkdocs_page_url = null;
       </script>
     
@@ -45,21 +45,37 @@
               </ul>
               <p class="caption"><span class="caption-text">Libraries</span></p>
               <ul class="current">
-                  <li class="toctree-l1"><a class="reference internal" >base</a>
-    <ul>
-                <li class="toctree-l2"><a class="reference internal" href="../../base/attributes/">attributes</a>
+                  <li class="toctree-l1 current"><a class="reference internal current" >base</a>
+    <ul class="current">
+                <li class="toctree-l2"><a class="reference internal" href="../attributes/">attributes</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../base/core/">core</a>
+                <li class="toctree-l2"><a class="reference internal" href="../core/">core</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../base/indestructible/">indestructible</a>
+                <li class="toctree-l2"><a class="reference internal" href="../indestructible/">indestructible</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../base/macros/">macros</a>
+                <li class="toctree-l2 current"><a class="reference internal current" href="#">macros</a>
+    <ul class="current">
+    <li class="toctree-l3"><a class="reference internal" href="#overview">Overview</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#nth_require_expansion_to_prefix_subexpression">NTH_REQUIRE_EXPANSION_TO_PREFIX_SUBEXPRESSION(...)</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#nth_require_expansion_in_global_namespace">NTH_REQUIRE_EXPANSION_IN_GLOBAL_NAMESPACE</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#nth_stringify">NTH_STRINGIFY(...)</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#nth_first_argument">NTH_FIRST_ARGUMENT(...)</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#nth_second_argument">NTH_SECOND_ARGUMENT(...)</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#nth_tail_arguments">NTH_TAIL_ARGUMENTS(...)</a>
+    </li>
+    </ul>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../base/pack/">pack</a>
+                <li class="toctree-l2"><a class="reference internal" href="../pack/">pack</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../base/platform/">platform</a>
+                <li class="toctree-l2"><a class="reference internal" href="../platform/">platform</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../base/section/">section</a>
+                <li class="toctree-l2"><a class="reference internal" href="../section/">section</a>
                 </li>
     </ul>
                   </li>
@@ -117,11 +133,9 @@
                 </li>
     </ul>
                   </li>
-                  <li class="toctree-l1 current"><a class="reference internal current" >process</a>
-    <ul class="current">
-                <li class="toctree-l2 current"><a class="reference internal current" href="#">env</a>
-    <ul class="current">
-    </ul>
+                  <li class="toctree-l1"><a class="reference internal" >process</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../../process/env/">env</a>
                 </li>
     </ul>
                   </li>
@@ -149,8 +163,8 @@
   <ul class="wy-breadcrumbs">
     <li><a href="../.." class="icon icon-home" aria-label="Docs"></a></li>
           <li class="breadcrumb-item">Libraries</li>
-          <li class="breadcrumb-item">process</li>
-      <li class="breadcrumb-item active">env</li>
+          <li class="breadcrumb-item">base</li>
+      <li class="breadcrumb-item active">macros</li>
     <li class="wy-breadcrumbs-aside">
     </li>
   </ul>
@@ -159,22 +173,57 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
             <div class="section" itemprop="articleBody">
               
-                <h1 id="nthprocessenv"><code>//nth/process:env</code></h1>
-<p>This target provides a mechanism to safely read and write environment variables. The function
-<code>nth::env::load</code> returns the value of the enivronment variable if it is set and returns
-<code>std::nullopt</code> otherwise. The <code>nth::env::store</code> overload set sets, unsets or resets an environment
-variable.</p>
-<p>Calls to <code>nth::env::load</code> and <code>nth::env::store</code> are thread-safe (they may be called without
-external synchronization). Notably this is not true of <code>std::getenv</code> and <code>::setenv</code> which manipulate
-globals without synchronization. It is imporatnt to note that the thread-safety does not extend to
-<code>std::getenv</code> or <code>::setenv</code>. If any of these functions are also invoked without
-synchronization against <code>nth::env::load</code> and <code>nth::env::store</code>, the behavior is undefined.</p>
+                <h1 id="nthbasemacros"><code>//nth/base:macros</code></h1>
+<h2 id="overview">Overview</h2>
+<p>This header contains several common macro utilities useful as building blocs for other macro-based
+APIs.</p>
+<h2 id="nth_require_expansion_to_prefix_subexpression"><code>NTH_REQUIRE_EXPANSION_TO_PREFIX_SUBEXPRESSION(...)</code></h2>
+<p>Expands the given expression argument in such a way that it can be used as a prefix subexpression,
+but nowhere else.</p>
+<h2 id="nth_require_expansion_in_global_namespace"><code>NTH_REQUIRE_EXPANSION_IN_GLOBAL_NAMESPACE</code></h2>
+<p>Expands to a statement that is invalid except within the global namespace.</p>
+<h2 id="nth_stringify"><code>NTH_STRINGIFY(...)</code></h2>
+<p>Expands to the stringification of the argument. For example,</p>
+<pre><code>NTH_STRINGIFY(hello)  // &quot;hello&quot;
+
+#file &quot;file.h&quot;
+NTH_STRINGIFY(__FILE__)  // &quot;file.h&quot;
+</code></pre>
+<h2 id="nth_first_argument"><code>NTH_FIRST_ARGUMENT(...)</code></h2>
+<p>Expands to the first argument passed to the macro.</p>
+<h2 id="nth_second_argument"><code>NTH_SECOND_ARGUMENT(...)</code></h2>
+<p>Expands to the first argument passed to the macro.</p>
+<h2 id="nth_tail_arguments"><code>NTH_TAIL_ARGUMENTS(...)</code></h2>
+<p>Expands to all arguments except the first.</p>
+<h1 id="nth_concatenatea-b"><code>NTH_CONCATENATE(a, b)</code></h1>
+<p>Expands to its arguments except that the last token of the first argument and the first token of the
+second argument are concatenated together.</p>
+<h2 id="nth_invokefn_macro"><code>NTH_INVOKE(fn_macro, ...)</code></h2>
+<p>Invokes the first argument passed to the macro on the remaining arguments.</p>
+<h2 id="nth_identityarg"><code>NTH_IDENTITY(arg)</code></h2>
+<p>Expands to the arguments passed in.</p>
+<h2 id="nth_notarg"><code>NTH_NOT(arg)</code></h2>
+<p>The macro argument must expand to either <code>true</code> or <code>false</code>. The entire macro will expand to <code>true</code>
+if the argument expands to <code>false</code>, and <code>false</code> if the argument expands to <code>true</code>.</p>
+<h2 id="nth_ifcondition-t-f"><code>NTH_IF(condition, t, f)</code></h2>
+<p>The argument bound to <code>condition</code> must expand to either <code>true</code> or <code>false</code>. If
+it expands to <code>true</code>, then the entire macro expands to the argument bound to
+<code>t</code>. Otherwise the entire macro expands to the argument bound to <code>f</code>.</p>
+<h2 id="nth_is_empty"><code>NTH_IS_EMPTY(...)</code></h2>
+<p>Expands to <code>true</code> if no variadic arguments are passed and to <code>false</code> otherwise.</p>
+<h2 id="nth_is_parenthesizedarg"><code>NTH_IS_PARENTHESIZED(arg)</code></h2>
+<p>Expands to <code>true</code> if the argument is entirely enclosed in parentheses, and to <code>false</code> otherwise.</p>
+<h2 id="nth_ignore"><code>NTH_IGNORE(...)</code></h2>
+<p>Expands to nothing.</p>
+<h2 id="nth_ignore_parenthesesarg"><code>NTH_IGNORE_PARENTHESES(arg)</code></h2>
+<p>Expands either to its argument, if it is not parenthesesized, or to it arguments with the outermost
+parentheses removed, if it is surrounded by parentheses.</p>
               
             </div>
           </div><footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
-        <a href="../../io/writer/string/" class="btn btn-neutral float-left" title="string"><span class="icon icon-circle-arrow-left"></span> Previous</a>
-        <a href="../../try/" class="btn btn-neutral float-right" title="try">Next <span class="icon icon-circle-arrow-right"></span></a>
+        <a href="../indestructible/" class="btn btn-neutral float-left" title="indestructible"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../pack/" class="btn btn-neutral float-right" title="pack">Next <span class="icon icon-circle-arrow-right"></span></a>
     </div>
 
   <hr/>
@@ -197,10 +246,10 @@ synchronization against <code>nth::env::load</code> and <code>nth::env::store</c
   <span class="rst-current-version" data-toggle="rst-current-version">
     
     
-      <span><a href="../../io/writer/string/" style="color: #fcfcfc">&laquo; Previous</a></span>
+      <span><a href="../indestructible/" style="color: #fcfcfc">&laquo; Previous</a></span>
     
     
-      <span><a href="../../try/" style="color: #fcfcfc">Next &raquo;</a></span>
+      <span><a href="../pack/" style="color: #fcfcfc">Next &raquo;</a></span>
     
   </span>
 </div>
