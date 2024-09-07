@@ -20,6 +20,22 @@ feature is enabled. Valid arguments are:
 
 * `tsan`: Indicates whether or not thread-sanitizer is enabled.
 
+## `NTH_BUILD_MODE`
+
+A function-like macro that expands to either `true` or `false` depending on the build mode. Valid
+arguments are:
+
+* `debug`: Indicates that the program is built in such a way as to optimize for debugability.
+
+* `fastbuild`: Indicates that the program is built in such a way as to optimize for compilation
+  speed.
+
+* `harden`: Indicates that the program is built in such a way as to optimize mostly for runtime
+  performance, but may accept a minory performance penalty to accommodate some safety checks.
+
+* `optimize`: Indicates that the program is built in such a way as to optimize for runtime
+  performance.
+
 ## `NTH_COMPILER`
 
 A function-like macro that expands to either `true` or `false` depending on whether the argument

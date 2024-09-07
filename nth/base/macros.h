@@ -20,7 +20,7 @@ struct NthRequireExpansionInGlobalNamespace {};
 
 // NTH_STRINGIFY
 //
-// Expands to the first argument passed to the macro.
+// Expands to stringification of the input.
 #define NTH_STRINGIFY(...) NTH_INTERNAL_STRINGIFY(__VA_ARGS__)
 #define NTH_INTERNAL_STRINGIFY(...) #__VA_ARGS__
 
