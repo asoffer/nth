@@ -5,15 +5,15 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       <link rel="shortcut icon" href="../../../img/favicon.ico" />
-    <title>string - nth - A collection of C++ Libraries</title>
+    <title>null - nth - A collection of C++ Libraries</title>
     <link rel="stylesheet" href="../../../css/theme.css" />
     <link rel="stylesheet" href="../../../css/theme_extra.css" />
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
     
       <script>
         // Current page data
-        var mkdocs_page_name = "string";
-        var mkdocs_page_input_path = "io/writer/string.md";
+        var mkdocs_page_name = "null";
+        var mkdocs_page_input_path = "io/writer/null.md";
         var mkdocs_page_url = null;
       </script>
     
@@ -105,15 +105,13 @@
                 </li>
                 <li class="toctree-l3"><a class="reference internal" href="../file/">file</a>
                 </li>
-                <li class="toctree-l3"><a class="reference internal" href="../null/">null</a>
-                </li>
-                <li class="toctree-l3 current"><a class="reference internal current" href="#">string</a>
+                <li class="toctree-l3 current"><a class="reference internal current" href="#">null</a>
     <ul class="current">
     <li class="toctree-l4"><a class="reference internal" href="#overview">Overview</a>
     </li>
-    <li class="toctree-l4"><a class="reference internal" href="#example-usage">Example usage</a>
-    </li>
     </ul>
+                </li>
+                <li class="toctree-l3"><a class="reference internal" href="../string/">string</a>
                 </li>
     </ul>
                 </li>
@@ -151,7 +149,7 @@
           <li class="breadcrumb-item">Libraries</li>
           <li class="breadcrumb-item">io</li>
           <li class="breadcrumb-item">writer</li>
-      <li class="breadcrumb-item active">string</li>
+      <li class="breadcrumb-item active">null</li>
     <li class="wy-breadcrumbs-aside">
     </li>
   </ul>
@@ -160,32 +158,17 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
             <div class="section" itemprop="articleBody">
               
-                <h1 id="nthiowriterstring"><code>//nth/io/writer:string</code></h1>
+                <h1 id="nthiowriternull"><code>//nth/io/writer:null</code></h1>
 <h2 id="overview">Overview</h2>
-<p>This target defines <code>nth::io::string_writer</code>, a type conforming to the
-<a href="/io/writer/writer">nth::io::reservable_writer</a> concept, which enables users to write data to a
-string. The type can be constructed with a mutable reference to a <code>std::string</code>. The referenced
-string must outlive the <code>string_writer</code>. Calls to <code>write</code> will append to the referenced string.</p>
-<h2 id="example-usage">Example usage</h2>
-<pre><code>std::string s;
-nth::io::string_writer w(s);
-
-std::string_view message1 = &quot;hello,&quot;;
-auto result1 = nth::io::write_text(w, message1);
-NTH_EXPECT(result1.written() == message1.size());
-
-std::string_view message2 = &quot; world!&quot;;
-auto result2 = nth::io::write_text(w, message1);
-NTH_EXPECT(result2.written() == message2.size());
-
-NTH_EXPECT(s == &quot;hello, world!&quot;);
-</code></pre>
+<p><code>nth::io::null_writer</code> is a type conforming to the
+<a href="/io/writer/writer">nth::io::writer</a> concept, which takes no action on <code>write</code> and always reports
+successful writes.</p>
               
             </div>
           </div><footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
-        <a href="../null/" class="btn btn-neutral float-left" title="null"><span class="icon icon-circle-arrow-left"></span> Previous</a>
-        <a href="../../../process/env/" class="btn btn-neutral float-right" title="env">Next <span class="icon icon-circle-arrow-right"></span></a>
+        <a href="../file/" class="btn btn-neutral float-left" title="file"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../string/" class="btn btn-neutral float-right" title="string">Next <span class="icon icon-circle-arrow-right"></span></a>
     </div>
 
   <hr/>
@@ -208,10 +191,10 @@ NTH_EXPECT(s == &quot;hello, world!&quot;);
   <span class="rst-current-version" data-toggle="rst-current-version">
     
     
-      <span><a href="../null/" style="color: #fcfcfc">&laquo; Previous</a></span>
+      <span><a href="../file/" style="color: #fcfcfc">&laquo; Previous</a></span>
     
     
-      <span><a href="../../../process/env/" style="color: #fcfcfc">Next &raquo;</a></span>
+      <span><a href="../string/" style="color: #fcfcfc">Next &raquo;</a></span>
     
   </span>
 </div>
