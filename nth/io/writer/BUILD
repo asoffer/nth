@@ -1,12 +1,6 @@
 package(default_visibility = ["//visibility:public"])
 
 cc_library(
-    name = "buffered",
-    hdrs = ["buffered.h"],
-    deps = [":writer"],
-)
-
-cc_library(
     name = "file",
     hdrs = ["file.h"],
     srcs = ["file.cc"],
@@ -25,6 +19,24 @@ cc_test(
         "//nth/test:main",
     ]
 )
+
+cc_library(
+    name = "null",
+    hdrs = ["null.h"],
+    deps = [
+        ":writer",
+    ],
+)
+
+cc_test(
+    name = "null_test",
+    srcs = ["null_test.cc"],
+    deps = [
+        ":null",
+        "//nth/test:main",
+    ]
+)
+
 
 cc_library(
     name = "string",

@@ -37,6 +37,7 @@ nav:
       - writer:
         - writer: io/writer/writer.md
         - file: io/writer/file.md
+        - "null": io/writer/null.md
         - string: io/writer/string.md
     #- memory: memory.md
     #- meta: meta.md
