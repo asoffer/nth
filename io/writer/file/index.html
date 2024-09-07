@@ -89,6 +89,16 @@
                   </li>
                   <li class="toctree-l1 current"><a class="reference internal current" >io</a>
     <ul class="current">
+                <li class="toctree-l2"><a class="reference internal" >reader</a>
+    <ul>
+                <li class="toctree-l3"><a class="reference internal" href="../../reader/reader/">reader</a>
+                </li>
+                <li class="toctree-l3"><a class="reference internal" href="../../reader/file/">file</a>
+                </li>
+                <li class="toctree-l3"><a class="reference internal" href="../../reader/string/">string</a>
+                </li>
+    </ul>
+                </li>
                 <li class="toctree-l2 current"><a class="reference internal current" >writer</a>
     <ul class="current">
                 <li class="toctree-l3"><a class="reference internal" href="../writer/">writer</a>
@@ -161,7 +171,7 @@ exist, and clear the contents if it does. Calls to <code>write</code> will appen
   if (not w) { return false; }
 
   std::string_view message = &quot;hello,&quot;;
-  auto result = nth::io::write_text(w, message);
+  auto result = nth::io::write_text(*w, message);
   return result.written() == message.size();
 }
 </code></pre>

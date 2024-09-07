@@ -5,15 +5,15 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       <link rel="shortcut icon" href="../../../img/favicon.ico" />
-    <title>string - nth - A collection of C++ Libraries</title>
+    <title>reader - nth - A collection of C++ Libraries</title>
     <link rel="stylesheet" href="../../../css/theme.css" />
     <link rel="stylesheet" href="../../../css/theme_extra.css" />
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
     
       <script>
         // Current page data
-        var mkdocs_page_name = "string";
-        var mkdocs_page_input_path = "io/writer/string.md";
+        var mkdocs_page_name = "reader";
+        var mkdocs_page_input_path = "io/reader/reader.md";
         var mkdocs_page_url = null;
       </script>
     
@@ -89,29 +89,37 @@
                   </li>
                   <li class="toctree-l1 current"><a class="reference internal current" >io</a>
     <ul class="current">
-                <li class="toctree-l2"><a class="reference internal" >reader</a>
-    <ul>
-                <li class="toctree-l3"><a class="reference internal" href="../../reader/reader/">reader</a>
-                </li>
-                <li class="toctree-l3"><a class="reference internal" href="../../reader/file/">file</a>
-                </li>
-                <li class="toctree-l3"><a class="reference internal" href="../../reader/string/">string</a>
-                </li>
-    </ul>
-                </li>
-                <li class="toctree-l2 current"><a class="reference internal current" >writer</a>
+                <li class="toctree-l2 current"><a class="reference internal current" >reader</a>
     <ul class="current">
-                <li class="toctree-l3"><a class="reference internal" href="../writer/">writer</a>
-                </li>
-                <li class="toctree-l3"><a class="reference internal" href="../file/">file</a>
-                </li>
-                <li class="toctree-l3 current"><a class="reference internal current" href="#">string</a>
+                <li class="toctree-l3 current"><a class="reference internal current" href="#">reader</a>
     <ul class="current">
     <li class="toctree-l4"><a class="reference internal" href="#overview">Overview</a>
     </li>
-    <li class="toctree-l4"><a class="reference internal" href="#example-usage">Example usage</a>
+    <li class="toctree-l4"><a class="reference internal" href="#reader">reader</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#sized_reader">sized_reader</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#read_result_type">read_result_type</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#read-result-customization">Read result customization.</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#examples">Examples</a>
     </li>
     </ul>
+                </li>
+                <li class="toctree-l3"><a class="reference internal" href="../file/">file</a>
+                </li>
+                <li class="toctree-l3"><a class="reference internal" href="../string/">string</a>
+                </li>
+    </ul>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" >writer</a>
+    <ul>
+                <li class="toctree-l3"><a class="reference internal" href="../../writer/writer/">writer</a>
+                </li>
+                <li class="toctree-l3"><a class="reference internal" href="../../writer/file/">file</a>
+                </li>
+                <li class="toctree-l3"><a class="reference internal" href="../../writer/string/">string</a>
                 </li>
     </ul>
                 </li>
@@ -148,8 +156,8 @@
     <li><a href="../../.." class="icon icon-home" aria-label="Docs"></a></li>
           <li class="breadcrumb-item">Libraries</li>
           <li class="breadcrumb-item">io</li>
-          <li class="breadcrumb-item">writer</li>
-      <li class="breadcrumb-item active">string</li>
+          <li class="breadcrumb-item">reader</li>
+      <li class="breadcrumb-item active">reader</li>
     <li class="wy-breadcrumbs-aside">
     </li>
   </ul>
@@ -158,32 +166,67 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
             <div class="section" itemprop="articleBody">
               
-                <h1 id="nthiowriterstring"><code>//nth/io/writer:string</code></h1>
+                <h1 id="nthioreader"><code>//nth/io/reader</code></h1>
 <h2 id="overview">Overview</h2>
-<p>This target defines <code>nth::io::string_writer</code>, a type conforming to the
-<a href="/io/writer/writer">nth::io::reservable_writer</a> concept, which enables users to write data to a
-string. The type can be constructed with a mutable reference to a <code>std::string</code>. The referenced
-string must outlive the <code>string_writer</code>. Calls to <code>write</code> will append to the referenced string.</p>
-<h2 id="example-usage">Example usage</h2>
-<pre><code>std::string s;
-nth::io::string_writer w(s);
+<p>This target defines concepts related to writing data in a serialized format. In particular, it
+defines the <code>nth::io::reader</code> and <code>nth::io::read_result_type</code> concepts.</p>
+<p>As readers abstract the reading of both data (to be serialized) and text (to be parsed). One might
+expect a reader to accept a <code>std::span&lt;char&gt;</code> that data can be read into, but this is fundamentally
+the wrong type for such a generic interface. Instead, a reader traffics in <code>std::span&lt;std::byte&gt;</code>.
+To address this common need, this header also provides a <code>read_text</code> free function, accepting a
+<code>reader</code> reference and a <code>std::span&lt;char&gt;</code>, which converts the <code>std::span&lt;char&gt;</code> to a span of bytes.
+Alternatively one may produce a <code>std::span&lt;std::byte&gt;</code> Via one of the functions in the
+<a href="/memory/bytes">memory/bytes</a> header.</p>
+<p>Because reading data may not succeed, we must also represent the notion of a "read result." This is
+formalized via the <code>nth::io::read_result_type</code> concept.</p>
+<h2 id="reader"><code>reader</code></h2>
+<p>Formally, <code>reader</code> is a concept requiring the type <code>R</code> to contain a <code>read</code> member function that can
+be invoked with a <code>std::span&lt;std::byte&gt;</code>. The function is responsible for writing data into this
+span of bytes in accordance with how the type <code>R</code> defines "read." The function must return a
+<code>nth::io::read_result&lt;R&gt;</code> indicating how many bytes were read. For an argument <code>byte_span</code>
+producing a returned result of <code>result</code>,</p>
+<ul>
+<li><code>result.bytes_read()</code> must be greater than or equal to zero,</li>
+<li><code>result.bytes_read()</code> must be less than or equal to <code>byte_span.size()</code>.</li>
+</ul>
+<h2 id="sized_reader"><code>sized_reader</code></h2>
+<p>A <code>sized_reader</code> is a reader that also provides a <code>size</code> member function, The function
+must return the number of bytes left to be read. (Streams for which this number is not computable
+should be represented by <code>reader</code>s but not by <code>sized_reader</code>s).</p>
+<h2 id="read_result_type"><code>read_result_type</code></h2>
+<p>The type returned by a call to <code>read</code> on a reader must be something adhering to
+<code>nth::io::read_result_type</code>. Types adhere to this concept provided they have a <code>bytes_read</code> const
+member function taking no arguments and returning some integral type. The returned value represents
+the number of bytes consumed by a call to <code>read</code>.</p>
+<h2 id="read-result-customization">Read result customization.</h2>
+<p>By default, a <code>reader</code>'s associated read result type is <code>nth::io::basic_read_result</code>. This is a
+minimal, type adhering to the <code>read_result_type</code> concept, outlined here:</p>
+<pre><code>struct basic_read_result {
+  explicit constexpr basic_read_result(size_t n);
+  [[nodiscard]] constexpr size_t written() const;
 
-std::string_view message1 = &quot;hello,&quot;;
-auto result1 = nth::io::write_text(w, message1);
-NTH_EXPECT(result1.written() == message1.size());
-
-std::string_view message2 = &quot; world!&quot;;
-auto result2 = nth::io::write_text(w, message1);
-NTH_EXPECT(result2.written() == message2.size());
-
-NTH_EXPECT(s == &quot;hello, world!&quot;);
+ private:
+  // ...
+};
 </code></pre>
+<p>Type authors may customize their associated read result type by providing a nested type name
+<code>nth_read_result_type</code>. This type must be adhere to the <code>read_result_type</code> concept and will be
+used as the associated read result type.</p>
+<p>One can query the read result for a reader type <code>R</code> via <code>nth::io::read_result&lt;R&gt;</code>.</p>
+<h2 id="examples">Examples</h2>
+<p>There are two builtin <code>nth::io::readers</code> of note:</p>
+<ul>
+<li><a href="/io/reader/string">nth::io::string_reader</a>, for which calls to <code>read</code> append data to a
+  <code>std::string</code>, and</li>
+<li><a href="/io/reader/file">nth::io::file_reader</a>, for which calls to <code>read</code> read the data to a
+  file.</li>
+</ul>
               
             </div>
           </div><footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
-        <a href="../file/" class="btn btn-neutral float-left" title="file"><span class="icon icon-circle-arrow-left"></span> Previous</a>
-        <a href="../../../process/env/" class="btn btn-neutral float-right" title="env">Next <span class="icon icon-circle-arrow-right"></span></a>
+        <a href="../../../format/interpolate/" class="btn btn-neutral float-left" title="interpolate"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../file/" class="btn btn-neutral float-right" title="file">Next <span class="icon icon-circle-arrow-right"></span></a>
     </div>
 
   <hr/>
@@ -206,10 +249,10 @@ NTH_EXPECT(s == &quot;hello, world!&quot;);
   <span class="rst-current-version" data-toggle="rst-current-version">
     
     
-      <span><a href="../file/" style="color: #fcfcfc">&laquo; Previous</a></span>
+      <span><a href="../../../format/interpolate/" style="color: #fcfcfc">&laquo; Previous</a></span>
     
     
-      <span><a href="../../../process/env/" style="color: #fcfcfc">Next &raquo;</a></span>
+      <span><a href="../file/" style="color: #fcfcfc">Next &raquo;</a></span>
     
   </span>
 </div>

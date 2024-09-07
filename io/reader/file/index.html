@@ -5,15 +5,15 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       <link rel="shortcut icon" href="../../../img/favicon.ico" />
-    <title>string - nth - A collection of C++ Libraries</title>
+    <title>file - nth - A collection of C++ Libraries</title>
     <link rel="stylesheet" href="../../../css/theme.css" />
     <link rel="stylesheet" href="../../../css/theme_extra.css" />
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
     
       <script>
         // Current page data
-        var mkdocs_page_name = "string";
-        var mkdocs_page_input_path = "io/writer/string.md";
+        var mkdocs_page_name = "file";
+        var mkdocs_page_input_path = "io/reader/file.md";
         var mkdocs_page_url = null;
       </script>
     
@@ -89,29 +89,29 @@
                   </li>
                   <li class="toctree-l1 current"><a class="reference internal current" >io</a>
     <ul class="current">
-                <li class="toctree-l2"><a class="reference internal" >reader</a>
-    <ul>
-                <li class="toctree-l3"><a class="reference internal" href="../../reader/reader/">reader</a>
-                </li>
-                <li class="toctree-l3"><a class="reference internal" href="../../reader/file/">file</a>
-                </li>
-                <li class="toctree-l3"><a class="reference internal" href="../../reader/string/">string</a>
-                </li>
-    </ul>
-                </li>
-                <li class="toctree-l2 current"><a class="reference internal current" >writer</a>
+                <li class="toctree-l2 current"><a class="reference internal current" >reader</a>
     <ul class="current">
-                <li class="toctree-l3"><a class="reference internal" href="../writer/">writer</a>
+                <li class="toctree-l3"><a class="reference internal" href="../reader/">reader</a>
                 </li>
-                <li class="toctree-l3"><a class="reference internal" href="../file/">file</a>
-                </li>
-                <li class="toctree-l3 current"><a class="reference internal current" href="#">string</a>
+                <li class="toctree-l3 current"><a class="reference internal current" href="#">file</a>
     <ul class="current">
     <li class="toctree-l4"><a class="reference internal" href="#overview">Overview</a>
     </li>
     <li class="toctree-l4"><a class="reference internal" href="#example-usage">Example usage</a>
     </li>
     </ul>
+                </li>
+                <li class="toctree-l3"><a class="reference internal" href="../string/">string</a>
+                </li>
+    </ul>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" >writer</a>
+    <ul>
+                <li class="toctree-l3"><a class="reference internal" href="../../writer/writer/">writer</a>
+                </li>
+                <li class="toctree-l3"><a class="reference internal" href="../../writer/file/">file</a>
+                </li>
+                <li class="toctree-l3"><a class="reference internal" href="../../writer/string/">string</a>
                 </li>
     </ul>
                 </li>
@@ -148,8 +148,8 @@
     <li><a href="../../.." class="icon icon-home" aria-label="Docs"></a></li>
           <li class="breadcrumb-item">Libraries</li>
           <li class="breadcrumb-item">io</li>
-          <li class="breadcrumb-item">writer</li>
-      <li class="breadcrumb-item active">string</li>
+          <li class="breadcrumb-item">reader</li>
+      <li class="breadcrumb-item active">file</li>
     <li class="wy-breadcrumbs-aside">
     </li>
   </ul>
@@ -158,32 +158,31 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
             <div class="section" itemprop="articleBody">
               
-                <h1 id="nthiowriterstring"><code>//nth/io/writer:string</code></h1>
+                <h1 id="nthioreaderfile"><code>//nth/io/reader:file</code></h1>
 <h2 id="overview">Overview</h2>
-<p>This target defines <code>nth::io::string_writer</code>, a type conforming to the
-<a href="/io/writer/writer">nth::io::reservable_writer</a> concept, which enables users to write data to a
-string. The type can be constructed with a mutable reference to a <code>std::string</code>. The referenced
-string must outlive the <code>string_writer</code>. Calls to <code>write</code> will append to the referenced string.</p>
+<p>This target defines <code>nth::io::file_reader</code>, a type conforming to the
+<a href="/io/reader/reader">nth::io::reader</a> concept, which enables users to read data to a file. The
+type can be constructed with the static member function <code>try_open</code>, by passing it a
+<a href="/io/file_path"><code>nth::io::file_path</code></a>. <code>try_open</code> will return <code>std::nullopt</code> if the file does not
+exist.</p>
 <h2 id="example-usage">Example usage</h2>
-<pre><code>std::string s;
-nth::io::string_writer w(s);
+<pre><code>// Reads at most 1024 bytes from the file and returns the contents as a
+// `std::string`.
+std::optional&lt;std::string&gt; ReadMessage(nth::io::file_path const &amp; path) {
+  std::optional r = nth::io::file_reader::try_construct(path);
+  if (not r) { return std::nullopt; }
 
-std::string_view message1 = &quot;hello,&quot;;
-auto result1 = nth::io::write_text(w, message1);
-NTH_EXPECT(result1.written() == message1.size());
-
-std::string_view message2 = &quot; world!&quot;;
-auto result2 = nth::io::write_text(w, message1);
-NTH_EXPECT(result2.written() == message2.size());
-
-NTH_EXPECT(s == &quot;hello, world!&quot;);
+  char buffer[1024];
+  auto result = nth::io::read_text(r, buffer);
+  return std::string(buffer, result.bytes_read());
+}
 </code></pre>
               
             </div>
           </div><footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
-        <a href="../file/" class="btn btn-neutral float-left" title="file"><span class="icon icon-circle-arrow-left"></span> Previous</a>
-        <a href="../../../process/env/" class="btn btn-neutral float-right" title="env">Next <span class="icon icon-circle-arrow-right"></span></a>
+        <a href="../reader/" class="btn btn-neutral float-left" title="reader"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../string/" class="btn btn-neutral float-right" title="string">Next <span class="icon icon-circle-arrow-right"></span></a>
     </div>
 
   <hr/>
@@ -206,10 +205,10 @@ NTH_EXPECT(s == &quot;hello, world!&quot;);
   <span class="rst-current-version" data-toggle="rst-current-version">
     
     
-      <span><a href="../file/" style="color: #fcfcfc">&laquo; Previous</a></span>
+      <span><a href="../reader/" style="color: #fcfcfc">&laquo; Previous</a></span>
     
     
-      <span><a href="../../../process/env/" style="color: #fcfcfc">Next &raquo;</a></span>
+      <span><a href="../string/" style="color: #fcfcfc">Next &raquo;</a></span>
     
   </span>
 </div>

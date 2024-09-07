@@ -89,15 +89,27 @@
                   </li>
                   <li class="toctree-l1 current"><a class="reference internal current" >io</a>
     <ul class="current">
+                <li class="toctree-l2"><a class="reference internal" >reader</a>
+    <ul>
+                <li class="toctree-l3"><a class="reference internal" href="../../reader/reader/">reader</a>
+                </li>
+                <li class="toctree-l3"><a class="reference internal" href="../../reader/file/">file</a>
+                </li>
+                <li class="toctree-l3"><a class="reference internal" href="../../reader/string/">string</a>
+                </li>
+    </ul>
+                </li>
                 <li class="toctree-l2 current"><a class="reference internal current" >writer</a>
     <ul class="current">
                 <li class="toctree-l3 current"><a class="reference internal current" href="#">writer</a>
     <ul class="current">
     <li class="toctree-l4"><a class="reference internal" href="#overview">Overview</a>
     </li>
-    <li class="toctree-l4"><a class="reference internal" href="#the-writer-concept">The writer concept</a>
+    <li class="toctree-l4"><a class="reference internal" href="#writer">writer</a>
     </li>
-    <li class="toctree-l4"><a class="reference internal" href="#the-write_result_type-concept">The write_result_type concept</a>
+    <li class="toctree-l4"><a class="reference internal" href="#reservable_writer">reservable_writer</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#write_result_type">write_result_type</a>
     </li>
     <li class="toctree-l4"><a class="reference internal" href="#write-result-customization">Write result customization.</a>
     </li>
@@ -169,7 +181,7 @@ via <a href="/memory/bytes"><code>nth::bytes</code></a>, or view a sequence of b
 <code>std::string</code> or <code>std::string_view</code> via <a href="/memory/bytes"><code>nth::byte_range</code></a>.</p>
 <p>Because writing data may not succeed, we must also represent the notion of a "write result." This is
 formalized via the <code>nth::io::write_result_type</code> concept.</p>
-<h2 id="the-writer-concept">The <code>writer</code> concept</h2>
+<h2 id="writer"><code>writer</code></h2>
 <p>Formally, <code>writer</code> is a concept requiring the type <code>W</code> to contain a <code>write</code> member function that can
 be invoked with a <code>std::span&lt;std::byte const&gt;</code>. The function is responsible for writing the span of
 bytes in accordance with how the type <code>W</code> defines "write." The function must return a
@@ -181,7 +193,14 @@ producing a returned result of <code>result</code>,</p>
 <li>Callers may interpret <code>result.written() == byte_span.size()</code> as a successful write,
   <code>result.written() == 0</code> as a failure, and all other possibilities as partial success.</li>
 </ul>
-<h2 id="the-write_result_type-concept">The <code>write_result_type</code> concept</h2>
+<h2 id="reservable_writer"><code>reservable_writer</code></h2>
+<p>A <code>reservable_writer</code> is a writer that also provides a <code>reserve</code> member function. The function
+accepts a <code>size_t</code> and returns a <code>std::span&lt;std::byte&gt;</code> of that size, which the user is responsible
+for filling with their desired content. Writes to this buffer must be completed before the next
+modification of the writer. The behavior of <code>reserve</code> must be identical to that of filling an
+external buffer of the same size and then calling <code>write</code> on that buffer. The reserve call often
+provides an opportunity to write directly thereby avoiding an extra memory copy.</p>
+<h2 id="write_result_type"><code>write_result_type</code></h2>
 <p>The type returned by a call to <code>write</code> on a writer must be something adhering to
 <code>nth::io::write_result_type</code>. Types adhere to this concept provided they have a <code>written</code> const
 member function taking no arguments and returning some integral type. The returned value represents
@@ -192,6 +211,7 @@ minimal, type adhering to the <code>write_result_type</code> concept, outlined h
 <pre><code>struct basic_write_result {
   explicit constexpr basic_write_result(size_t n);
   [[nodiscard]] constexpr size_t written() const;
+
  private:
   // ...
 };
@@ -212,7 +232,7 @@ used as the associated write result type.</p>
             </div>
           </div><footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
-        <a href="../../../format/interpolate/" class="btn btn-neutral float-left" title="interpolate"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../../reader/string/" class="btn btn-neutral float-left" title="string"><span class="icon icon-circle-arrow-left"></span> Previous</a>
         <a href="../file/" class="btn btn-neutral float-right" title="file">Next <span class="icon icon-circle-arrow-right"></span></a>
     </div>
 
@@ -236,7 +256,7 @@ used as the associated write result type.</p>
   <span class="rst-current-version" data-toggle="rst-current-version">
     
     
-      <span><a href="../../../format/interpolate/" style="color: #fcfcfc">&laquo; Previous</a></span>
+      <span><a href="../../reader/string/" style="color: #fcfcfc">&laquo; Previous</a></span>
     
     
       <span><a href="../file/" style="color: #fcfcfc">Next &raquo;</a></span>
