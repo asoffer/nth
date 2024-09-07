@@ -15,7 +15,7 @@ NTH_TEST("/nth/io/writer/file/open") {
   NTH_ASSERT(w.has_value());
 }
 
-NTH_TEST("/nth/io/writer/file/open") {
+NTH_TEST("/nth/io/writer/file/write") {
   std::optional f =
       file_path::try_construct("/tmp/nth_io_file_writer_test.txt");
   NTH_ASSERT(f.has_value());

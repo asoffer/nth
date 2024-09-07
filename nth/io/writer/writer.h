@@ -17,7 +17,7 @@ namespace nth::io {
 //   * The data was written successfully.
 //
 //   * The writer failed to write the data, and the state of the writer is as it
-//     was before the attempt to write was maed.
+//     was before the attempt to write was made.
 //
 //   * The write was partially successful; only the first `n` bytes that
 //     were attempted to be written were actually written.
