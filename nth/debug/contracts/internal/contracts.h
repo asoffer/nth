@@ -73,16 +73,36 @@ bool execute_contract_check(contract const& c,
   });                                                                          \
   NTH_REQUIRE_EXPANSION_TO_PREFIX_SUBEXPRESSION(                               \
       (void)NTH_CONCATENATE(NthInternalOnExit, __LINE__))
+#elif NTH_BUILD_MODE(harden) or NTH_BUILD_MODE(fastbuild)
+#define NTH_INTERNAL_IMPLEMENT_ENSURE(verbosity_path, ...)                     \
+  ::nth::internal_contracts::on_exit NTH_CONCATENATE(                          \
+      NthInternalOnExit, __LINE__)([&](nth::source_location) {                 \
+    if (not(__VA_ARGS__)) {                                                    \
+      NTH_LOG("NTH_ENSURE({}) failed.") <<= {#__VA_ARGS__};                    \
+      ::nth::internal_contracts::ensure_failed();                              \
+    }                                                                          \
+  });                                                                          \
+  NTH_REQUIRE_EXPANSION_TO_PREFIX_SUBEXPRESSION(                               \
+      (void)NTH_CONCATENATE(NthInternalOnExit, __LINE__))
+
 #else
 #define NTH_INTERNAL_IMPLEMENT_ENSURE(verbosity_path, ...)                     \
   static_assert(sizeof(decltype(__VA_ARGS__)) != -1)
 #endif
 
-#if NTH_BUILD_MODE(debug) or NTH_BUILD_MODE(harden)
+#if NTH_BUILD_MODE(debug)
 #define NTH_INTERNAL_IMPLEMENT_REQUIRE(verbosity_path, ...)                    \
   NTH_INTERNAL_CONTRACTS_CHECK("NTH_REQUIRE", verbosity_path,                  \
-                               nth::internal_contracts::require_failed(),      \
+                               ::nth::internal_contracts::require_failed(),    \
                                __VA_ARGS__)
+#elif NTH_BUILD_MODE(harden) or NTH_BUILD_MODE(fastbuild)
+#define NTH_INTERNAL_IMPLEMENT_REQUIRE(verbosity_path, ...)                    \
+  do {                                                                         \
+    if (not(__VA_ARGS__)) {                                                    \
+      NTH_LOG("NTH_REQUIRE({}) failed.") <<= {#__VA_ARGS__};                   \
+      ::nth::internal_contracts::require_failed();                             \
+    }                                                                          \
+  } while (false)
 #else
 #define NTH_INTERNAL_IMPLEMENT_REQUIRE(verbosity_path, ...)                    \
   static_assert(sizeof(decltype(__VA_ARGS__)) != -1)

@@ -75,6 +75,9 @@ void RequireOnlyAbortsOnFalse() {
 #if NTH_BUILD_MODE(debug) or NTH_BUILD_MODE(harden)
   NTH_DEBUG_INTERNAL_RAW_CHECK(failure_count == 1);
   NTH_DEBUG_INTERNAL_RAW_CHECK(require_failed_count == 1);
+#elif NTH_BUILD_MODE(fastbuild)
+  NTH_DEBUG_INTERNAL_RAW_CHECK(failure_count == 0);
+  NTH_DEBUG_INTERNAL_RAW_CHECK(require_failed_count == 1);
 #else
   NTH_DEBUG_INTERNAL_RAW_CHECK(failure_count == 0);
   NTH_DEBUG_INTERNAL_RAW_CHECK(require_failed_count == 0);
@@ -91,6 +94,9 @@ void EnsureOnlyAbortsOnFalse() {
   { NTH_ENSURE(false); }
 #if NTH_BUILD_MODE(debug) or NTH_BUILD_MODE(harden)
   NTH_DEBUG_INTERNAL_RAW_CHECK(failure_count == 1);
+  NTH_DEBUG_INTERNAL_RAW_CHECK(ensure_failed_count == 1);
+#elif NTH_BUILD_MODE(fastbuild)
+  NTH_DEBUG_INTERNAL_RAW_CHECK(failure_count == 0);
   NTH_DEBUG_INTERNAL_RAW_CHECK(ensure_failed_count == 1);
 #else
   NTH_DEBUG_INTERNAL_RAW_CHECK(failure_count == 0);
@@ -119,6 +125,9 @@ void EnsureEvaluatesAtEndOfScope() {
   }
 #if NTH_BUILD_MODE(debug) or NTH_BUILD_MODE(harden)
   NTH_DEBUG_INTERNAL_RAW_CHECK(failure_count == 1);
+  NTH_DEBUG_INTERNAL_RAW_CHECK(ensure_failed_count == 1);
+#elif NTH_BUILD_MODE(fastbuild)
+  NTH_DEBUG_INTERNAL_RAW_CHECK(failure_count == 0);
   NTH_DEBUG_INTERNAL_RAW_CHECK(ensure_failed_count == 1);
 #else
   NTH_DEBUG_INTERNAL_RAW_CHECK(failure_count == 0);
@@ -152,6 +161,9 @@ void CheckComparisonOperators() {
 #if NTH_BUILD_MODE(debug) or NTH_BUILD_MODE(harden)
   NTH_DEBUG_INTERNAL_RAW_CHECK(failure_count == 6);
   NTH_DEBUG_INTERNAL_RAW_CHECK(require_failed_count == 6);
+#elif NTH_BUILD_MODE(fastbuild)
+  NTH_DEBUG_INTERNAL_RAW_CHECK(failure_count == 0);
+  NTH_DEBUG_INTERNAL_RAW_CHECK(require_failed_count == 6);
 #else
   NTH_DEBUG_INTERNAL_RAW_CHECK(failure_count == 0);
   NTH_DEBUG_INTERNAL_RAW_CHECK(require_failed_count == 0);
@@ -179,6 +191,9 @@ void CheckComparisonOperatorOverloads() {
   NTH_REQUIRE(9 != (1 + t) * 2 + 1);
 #if NTH_BUILD_MODE(debug) or NTH_BUILD_MODE(harden)
   NTH_DEBUG_INTERNAL_RAW_CHECK(failure_count == 4);
+  NTH_DEBUG_INTERNAL_RAW_CHECK(require_failed_count == 4);
+#elif NTH_BUILD_MODE(fastbuild)
+  NTH_DEBUG_INTERNAL_RAW_CHECK(failure_count == 0);
   NTH_DEBUG_INTERNAL_RAW_CHECK(require_failed_count == 4);
 #else
   NTH_DEBUG_INTERNAL_RAW_CHECK(failure_count == 0);
@@ -214,6 +229,9 @@ void CheckShortCircuiting() {
   NTH_REQUIRE(t == 2 or t == 3);
 #if NTH_BUILD_MODE(debug) or NTH_BUILD_MODE(harden)
   NTH_DEBUG_INTERNAL_RAW_CHECK(failure_count == 1);
+  NTH_DEBUG_INTERNAL_RAW_CHECK(require_failed_count == 1);
+#elif NTH_BUILD_MODE(fastbuild)
+  NTH_DEBUG_INTERNAL_RAW_CHECK(failure_count == 0);
   NTH_DEBUG_INTERNAL_RAW_CHECK(require_failed_count == 1);
 #else
   NTH_DEBUG_INTERNAL_RAW_CHECK(failure_count == 0);
