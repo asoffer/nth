@@ -9,7 +9,7 @@
 #include "nth/format/common_formatters.h"
 #include "nth/meta/type.h"
 
-namespace nth::fmt {
+namespace nth {
 
 inline word_formatter<casing::lower> NthDefaultFormatter(
     nth::type_tag<decltype(nullptr)>) {
@@ -49,6 +49,6 @@ auto NthDefaultFormatter(nth::type_tag<I>) {
   return base_formatter(10);
 }
 
-}  // namespace nth::fmt
+}  // namespace nth
 
 #endif  // NTH_FORMAT_COMMON_DEFAULTS_H

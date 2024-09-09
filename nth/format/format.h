@@ -138,9 +138,20 @@ struct structural_formatter {
 };
 
 template <typename F, typename T>
-void NthFormat(nth::io::writer auto& w, F&, T const&) {
+void NthFormat(nth::io::writer auto& w, F&, T const& t) {
+  char buffer[sizeof(T) * 3 + 1];
+  buffer[0]                      = '[';
+  constexpr std::string_view Hex = "0123456789abcdef";
+  char* p                        = buffer;
+  for (std::byte b : nth::bytes(t)) {
+    *++p = Hex[static_cast<uint8_t>(b) >> 4];
+    *++p = Hex[static_cast<uint8_t>(b) & 0x0f];
+    *++p = ' ';
+  }
+  *p = ']';
+
   nth::io::write_text(w, std::string_view(nth::type<T>.name()));
-  nth::io::write_text(w, "?");
+  nth::io::write_text(w, std::string_view(buffer, 3 * sizeof(T) + 1));
 }
 
 }  // namespace nth
