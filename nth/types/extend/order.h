@@ -5,7 +5,7 @@
 #include "nth/types/extend/extend.h"
 #include "nth/types/reflect.h"
 
-namespace nth {
+namespace nth::ext {
 
 template <typename T>
 struct lexical_ordering : nth::extension<T, equality> {
@@ -59,6 +59,6 @@ struct product_ordering : nth::extension<T, equality> {
   friend bool operator>(T const &lhs, T const &rhs) { return rhs < lhs; }
 };
 
-}  // namespace nth
+}  // namespace nth::ext
 
 #endif  // NTH_TYPES_EXTEND_ORDER_H

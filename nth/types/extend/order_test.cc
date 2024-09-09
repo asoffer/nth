@@ -7,12 +7,12 @@
 
 namespace {
 namespace lexical {
-struct Empty : nth::extend<Empty>::with<nth::lexical_ordering> {};
-struct OneField : nth::extend<OneField>::with<nth::lexical_ordering> {
+struct Empty : nth::extend<Empty>::with<nth::ext::lexical_ordering> {};
+struct OneField : nth::extend<OneField>::with<nth::ext::lexical_ordering> {
   int n = 3;
 };
 
-struct ManyFields : nth::extend<ManyFields>::with<nth::lexical_ordering> {
+struct ManyFields : nth::extend<ManyFields>::with<nth::ext::lexical_ordering> {
   int n;
   std::string s;
 };
@@ -81,7 +81,8 @@ struct ShortCircuitTester {
 };
 int ShortCircuitTester::invoke_count = 0;
 
-struct ShortCircuit : nth::extend<ShortCircuit>::with<nth::lexical_ordering> {
+struct ShortCircuit
+    : nth::extend<ShortCircuit>::with<nth::ext::lexical_ordering> {
   int n;
   ShortCircuitTester tester;
 };
@@ -111,12 +112,12 @@ NTH_TEST("extend/lexical-order/short-circuit") {
 }  // namespace lexical
 
 namespace product {
-struct Empty : nth::extend<Empty>::with<nth::product_ordering> {};
-struct OneField : nth::extend<OneField>::with<nth::product_ordering> {
+struct Empty : nth::extend<Empty>::with<nth::ext::product_ordering> {};
+struct OneField : nth::extend<OneField>::with<nth::ext::product_ordering> {
   int n = 3;
 };
 
-struct ManyFields : nth::extend<ManyFields>::with<nth::product_ordering> {
+struct ManyFields : nth::extend<ManyFields>::with<nth::ext::product_ordering> {
   int n;
   std::string s;
 };
@@ -185,7 +186,8 @@ struct ShortCircuitTester {
 };
 int ShortCircuitTester::invoke_count = 0;
 
-struct ShortCircuit : nth::extend<ShortCircuit>::with<nth::product_ordering> {
+struct ShortCircuit
+    : nth::extend<ShortCircuit>::with<nth::ext::product_ordering> {
   int n;
   ShortCircuitTester tester;
 };

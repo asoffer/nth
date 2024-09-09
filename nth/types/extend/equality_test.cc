@@ -7,12 +7,12 @@
 
 namespace {
 
-struct Empty : nth::extend<Empty>::with<nth::equality> {};
-struct OneField : nth::extend<OneField>::with<nth::equality> {
+struct Empty : nth::extend<Empty>::with<nth::ext::equality> {};
+struct OneField : nth::extend<OneField>::with<nth::ext::equality> {
   int n = 3;
 };
 
-struct ManyFields : nth::extend<ManyFields>::with<nth::equality> {
+struct ManyFields : nth::extend<ManyFields>::with<nth::ext::equality> {
   int n;
   std::string s;
 };
@@ -37,7 +37,7 @@ struct ShortCircuitTester {
 };
 int ShortCircuitTester::invoke_count = 0;
 
-struct ShortCircuit : nth::extend<ShortCircuit>::with<nth::equality> {
+struct ShortCircuit : nth::extend<ShortCircuit>::with<nth::ext::equality> {
   int n;
   ShortCircuitTester tester;
 };

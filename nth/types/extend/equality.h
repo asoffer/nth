@@ -4,7 +4,7 @@
 #include "nth/types/extend/extend.h"
 #include "nth/types/reflect.h"
 
-namespace nth {
+namespace nth::ext {
 
 template <typename T>
 struct equality : nth::extension<T> {
@@ -16,9 +16,7 @@ struct equality : nth::extension<T> {
     });
   }
 
-  friend bool operator!=(T const &lhs, T const &rhs) {
-    return not(lhs == rhs);
-  }
+  friend bool operator!=(T const &lhs, T const &rhs) { return not(lhs == rhs); }
 
   template <typename H>
   friend H AbslHashValue(H h, T const &value) {
@@ -28,6 +26,6 @@ struct equality : nth::extension<T> {
   }
 };
 
-}  // namespace nth
+}  // namespace nth::ext
 
 #endif  // NTH_TYPES_EXTEND_EQUALITY_H
