@@ -3,3 +3,6 @@
 bazel-*
 site/
 .gitignore
+compile_commands.json
+external
+.cache

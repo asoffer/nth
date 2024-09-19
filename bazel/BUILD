@@ -56,6 +56,22 @@ clang_toolchain(
     warnings = WARNINGS,
 )
 
+clang_toolchain(
+    name = "macos_x86_64_toolchain",
+    os = "macos",
+    cpu = "x86_64",
+    c_compiler_path = "/opt/local/bin/clang-mp-18",
+    cc_compiler_path = "/opt/local/bin/clang++-mp-18",
+    ar_path = "/opt/local/bin/llvm-ar-mp-18",
+    builtin_include_directories = [
+        "/opt/local/libexec/llvm-18/include/c++/v1",
+        "/opt/local/libexec/llvm-18/lib/clang/18",
+        "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk",
+    ],
+    system_headers = SYSTEM_HEADERS,
+    warnings = WARNINGS,
+)
+
 config_setting(
     name = "dbg",
     values = {"compilation_mode": "dbg"},
