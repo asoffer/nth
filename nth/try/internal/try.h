@@ -166,12 +166,14 @@ decltype(auto) default_try_exit_handler() {
 
 #define NTH_TRY_INTERNAL_TRY_WITH_HANDLER(handler, ...)                        \
   (({                                                                          \
-     using NthTryType = decltype((__VA_ARGS__));                               \
-     auto&& expr      = __VA_ARGS__;                                           \
-     if (not handler.okay(expr)) { return handler.transform_return(expr); }    \
+     using NthTryType       = decltype((__VA_ARGS__));                         \
+     auto&& NthInternalExpr = __VA_ARGS__;                                     \
+     if (not handler.okay(NthInternalExpr)) {                                  \
+       return handler.transform_return(NthInternalExpr);                       \
+     }                                                                         \
      ::nth::internal_try::wrap<                                                \
          NthTryType, nth::lvalue_reference<NthTryType>,                        \
-         nth::rvalue_reference<NthTryType>>::make(NTH_FWD(expr));              \
+         nth::rvalue_reference<NthTryType>>::make(NTH_FWD(NthInternalExpr));   \
    }).transform(handler))
 
 #endif  // NTH_TRY_INTERNAL_TRY_H
