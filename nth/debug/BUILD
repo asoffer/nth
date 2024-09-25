@@ -27,6 +27,8 @@ cc_library(
     name = "source_location",
     hdrs = ["source_location.h"],
     deps = [
+        "//nth/format",
+        "//nth/io/writer",
         "//nth/utility:unconstructible",
     ],
 )
@@ -36,6 +38,8 @@ cc_test(
     srcs = ["source_location_test.cc"],
     deps = [
         ":source_location",
+        "//nth/format",
+        "//nth/io/writer:string",
     ],
 )
 

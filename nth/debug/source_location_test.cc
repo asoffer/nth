@@ -1,5 +1,8 @@
 #include "nth/debug/source_location.h"
 
+#include "nth/format/format.h"
+#include "nth/io/writer/string.h"
+
 namespace some_namespace {
 
 static_assert([] {
@@ -35,4 +38,13 @@ static_assert([] {
 
 }  // namespace some_namespace
 
-int main() { return 0; }
+int main() {
+#line 30 "some_file.cc"
+  nth::source_location loc = nth::source_location::current();
+  std::string s;
+  nth::io::string_writer w(s);
+  nth::format(w, loc);
+  if (s != "some_file.cc:30") return 1;
+
+  return 0;
+}

@@ -3,6 +3,8 @@
 
 #include <string_view>
 
+#include "nth/format/format.h"
+#include "nth/io/writer/writer.h"
 #include "nth/utility/unconstructible.h"
 
 namespace nth {
@@ -37,6 +39,13 @@ struct source_location {
   constexpr std::string_view function_name() const { return function_; }
   // Returns the line number corresponding to this source location.
   constexpr unsigned line() const { return line_; }
+
+  friend void NthFormat(auto& w, auto&, nth::source_location loc) {
+    nth::io::write_text(w, loc.file_);
+    nth::io::write_text(w, ":");
+    auto fmt = nth::default_formatter<unsigned>();
+    nth::format(w, fmt, loc.line_);
+  }
 
  private:
   explicit constexpr source_location(char const* file, char const* function,
