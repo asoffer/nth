@@ -17,13 +17,13 @@ namespace nth::internal_reflect {
 template <size_t N>
 struct any {
   template <typename T>
-  operator T();
+  operator T() const;
 };
 
 template <typename T, size_t N>
 concept constructible_with = requires {
-  []<size_t... Ns>(std::index_sequence<Ns...>) -> decltype(T{any<Ns>{}...}) {
-    return {};
+  []<size_t... Ns>(std::index_sequence<Ns...>) -> decltype((T{any<Ns>{}...}, true)) {
+    return true;
   }(std::make_index_sequence<N>{});
 };
 

@@ -1,5 +1,6 @@
 #include "nth/types/extend/format.h"
 
+#include <optional>
 #include <string>
 
 #include "nth/format/json.h"
@@ -59,6 +60,40 @@ NTH_TEST("extend/format/json") {
 
   s.clear();
   nth::format(w, nth::json_formatter{}, ManyFields{.n = 3, .s = "hello"});
+  NTH_EXPECT(s ==
+             "{\n"
+             "  \"n\": 3,\n"
+             "  \"s\": \"hello\"\n"
+             "}");
+}
+
+struct WithOptional : nth::extend<WithOptional>::with<nth::ext::format> {
+  int n;
+  std::optional<std::string> s;
+};
+
+
+NTH_TEST("extend/format/optional") {
+  std::string s;
+  nth::io::string_writer w(s);
+
+  s.clear();
+  nth::format(w, nth::json_formatter{}, WithOptional{.n = 3});
+  NTH_EXPECT(s ==
+             "{\n"
+             "  \"n\": 3\n"
+             "}");
+
+  s.clear();
+  nth::format(w, nth::json_formatter{},
+              WithOptional{.n = 3, .s = std::nullopt});
+  NTH_EXPECT(s ==
+             "{\n"
+             "  \"n\": 3\n"
+             "}");
+
+  s.clear();
+  nth::format(w, nth::json_formatter{}, WithOptional{.n = 3, .s = "hello"});
   NTH_EXPECT(s ==
              "{\n"
              "  \"n\": 3,\n"
