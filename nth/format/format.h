@@ -96,6 +96,16 @@ decltype(auto) end_format(io::writer auto& w, F& f) {
   }
 }
 
+void format_key_value(io::writer auto& w, auto& fmt, auto const& key,
+                      auto const& value) {
+  nth::begin_format<nth::structure::key>(w, fmt);
+  nth::format(w, fmt, key);
+  nth::end_format<nth::structure::key>(w, fmt);
+  nth::begin_format<nth::structure::value>(w, fmt);
+  nth::format(w, fmt, value);
+  nth::end_format<nth::structure::value>(w, fmt);
+}
+
 // `structural_formatter` is a CRTP base-class that can be used to simplify
 // formatting of objects which have a well-understood structure that is visible
 // in the object being formatted. Users may implement begin/end pairs of member
