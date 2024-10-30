@@ -20,6 +20,18 @@ void Number() {
   NTH_RAW_TEST_ASSERT(s == "abc12345def");
 }
 
+void Pointer() {
+  std::string s;
+  uintptr_t ptr_value = 0x12345678;
+  nth::io::string_writer w(s);
+  nth::interpolate<"{}">(w, reinterpret_cast<void *>(ptr_value));
+  if constexpr (sizeof(uintptr_t) == 8) {
+    NTH_RAW_TEST_ASSERT(s == "0x0000000012345678");
+  } else {
+    NTH_RAW_TEST_ASSERT(s == "0x12345678");
+  }
+}
+
 void NoArguments() {
   std::string s;
   nth::io::string_writer w(s);
@@ -84,8 +96,7 @@ struct point {
 
   template <nth::interpolation_string S>
   friend void NthFormat(nth::io::writer auto &w,
-                        nth::interpolating_formatter<S> &,
-                        point const &pt) {
+                        nth::interpolating_formatter<S> &, point const &pt) {
     nth::interpolate<S>(w, pt.x, pt.y);
   }
 
@@ -123,6 +134,7 @@ void UserDefined() {
 int main() {
   Simple();
   Number();
+  Pointer();
   NoArguments();
   MultipleArguments();
   Unicode();

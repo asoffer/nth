@@ -271,6 +271,11 @@ auto NthInterpolateFormatter(type_tag<I>) {
   }
 }
 
+template <interpolation_string S, typename T>
+auto NthInterpolateFormatter(type_tag<T*>) {
+  return pointer_formatter{};
+}
+
 template <interpolation_string S>
 auto NthInterpolateFormatter(type_tag<bool>) {
   if constexpr (S.empty() or S == "b") {

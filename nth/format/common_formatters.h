@@ -1,8 +1,8 @@
 #ifndef NTH_FORMAT_COMMON_FORMATTERS_H
 #define NTH_FORMAT_COMMON_FORMATTERS_H
 
-#include <cstdint>
 #include <charconv>
+#include <cstdint>
 
 #include "nth/io/writer/writer.h"
 
@@ -136,13 +136,13 @@ struct pointer_formatter {
     char buffer[sizeof(uintptr_t) * 2 + 2] = {'0', 'x'};
 
     uintptr_t n = reinterpret_cast<uintptr_t>(ptr);
-    for (char* ptr = &buffer[sizeof(uintptr_t) * 2]; ptr != &buffer[2];
+    for (char* ptr = &buffer[sizeof(uintptr_t) * 2]; ptr != &buffer[0];
          ptr -= 2) {
       ptr[0] = hex[(n & uintptr_t{0xff}) >> 4];
       ptr[1] = hex[n & 0x0f];
       n >>= 8;
     }
-    io::write_text(w, buffer);
+    io::write_text(w, std::string_view(buffer, sizeof(uintptr_t) * 2 + 2));
   }
 };
 
