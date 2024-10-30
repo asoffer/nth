@@ -20,7 +20,6 @@ cc_test(
     ],
 )
 
-
 cc_library(
     name = "common",
     hdrs = ["common.h"],
@@ -83,8 +82,19 @@ cc_test(
     name = "json_test",
     srcs = ["json_test.cc"],
     deps = [
+      ":structure",
         ":json",
         "//nth/test:main",
     ],
 )
 
+cc_library(
+    name = "structure",
+    hdrs = ["structure.h"],
+    deps = [
+        ":common",
+        ":format",
+        "//nth/types:structure",
+        "//nth/meta/concepts:invocable",
+    ],
+)
