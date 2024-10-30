@@ -12,7 +12,7 @@
 
 namespace nth {
 struct log_configuration;
-};
+}  // namespace nth
 namespace nth::internal_log {
 
 // Arguments passed directly to a log macro, typically constructed via implicit

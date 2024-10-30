@@ -13,9 +13,12 @@ struct file_log_sink : log_sink {
   explicit file_log_sink(nth::io::file_writer& w NTH_ATTRIBUTE(lifetimebound))
       : writer_(w) {}
 
-  void send(log_configuration const&, log_line const& line,
+  void send(log_configuration const& config, log_line const& line,
             log_entry const& entry) override {
-    nth::interpolate<"{\x1b[0;36m{}:{} {}]\x1b[0m} {}\n">(writer_, line, entry);
+    auto source_loc = config.source_location().value_or(line.source_location());
+    nth::interpolate<"\x1b[0;36m{}:{} {}]\x1b[0m {}\n">(
+        writer_, source_loc.file_name(), source_loc.line(),
+        source_loc.function_name(), entry);
   }
 
  private:

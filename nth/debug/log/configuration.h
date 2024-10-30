@@ -1,6 +1,8 @@
 #ifndef NTH_DEBUG_LOG_CONFIGURATION_H
 #define NTH_DEBUG_LOG_CONFIGURATION_H
 
+#include <optional>
+
 #include "nth/debug/source_location.h"
 
 namespace nth {
@@ -13,14 +15,15 @@ struct log_configuration {
     return *this;
   }
 
-  struct source_location source_location() const {
+  std::optional<struct source_location> source_location() const {
     return location_;
   }
 
  private:
-  struct source_location location_ = nth::source_location::current();
+  std::optional<struct source_location> location_ =
+      nth::source_location::current();
 };
 
 }  // namespace nth
 
-#endif // NTH_DEBUG_LOG_CONFIGURATION_H
+#endif  // NTH_DEBUG_LOG_CONFIGURATION_H
