@@ -20,8 +20,7 @@ struct log_configuration {
   }
 
  private:
-  std::optional<struct source_location> location_ =
-      nth::source_location::current();
+  std::optional<struct source_location> location_;
 };
 
 }  // namespace nth
