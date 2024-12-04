@@ -84,6 +84,17 @@ struct text_formatter {
   }
 };
 
+struct byte_formatter {
+  void format(io::writer auto& w, std::byte b) const {
+    constexpr char hex[] = "0123456789abcdef";
+    char buffer[2];
+    uint8_t n = static_cast<uint8_t>(b);
+    buffer[0] = hex[n >> 4];
+    buffer[1] = hex[n & 0x0f];
+    io::write_text(w, buffer);
+  }
+};
+
 // A formatter capable of formatting text as an escaped quotation.
 struct quote_formatter {
   void format(io::writer auto& w, std::string_view s) const {
@@ -103,12 +114,32 @@ struct quote_formatter {
           i = 0;
           io::write_text(w, R"(\")");
           break;
+        case '\t':
+          io::write_text(w, s.substr(0, i));
+          s.remove_prefix(i + 1);
+          i = 0;
+          io::write_text(w, R"(\t")");
+          break;
+        case '\\':
+          io::write_text(w, s.substr(0, i));
+          s.remove_prefix(i + 1);
+          i = 0;
+          io::write_text(w, R"(\\)");
+          break;
+        case '\0':
+          io::write_text(w, s.substr(0, i));
+          s.remove_prefix(i + 1);
+          i = 0;
+          io::write_text(w, R"(\0)");
+          break;
         default:
           if (std::isprint(c)) {
             ++i;
             continue;
           } else {
             io::write_text(w, s.substr(0, i));
+            io::write_text(w, "\\x");
+            byte_formatter{}.format(w, static_cast<std::byte>(c));
             s.remove_prefix(i);
             i = 0;
           }
@@ -116,17 +147,6 @@ struct quote_formatter {
     }
     io::write_text(w, s);
     io::write_text(w, R"(")");
-  }
-};
-
-struct byte_formatter {
-  void format(io::writer auto& w, std::byte b) const {
-    constexpr char hex[] = "0123456789abcdef";
-    char buffer[2];
-    uint8_t n = static_cast<uint8_t>(b);
-    buffer[0] = hex[n >> 4];
-    buffer[1] = hex[n & 0x0f];
-    io::write_text(w, buffer);
   }
 };
 

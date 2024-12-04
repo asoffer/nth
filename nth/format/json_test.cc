@@ -42,6 +42,11 @@ NTH_TEST("format/json/string") {
   NTH_EXPECT(json("\"hello\n\"") == R"("\"hello\n\"")");
   NTH_EXPECT(json(std::string_view("\"hello\n\"")) == R"("\"hello\n\"")");
   NTH_EXPECT(json(std::string("\"hello\n\"")) == R"("\"hello\n\"")");
+  NTH_EXPECT(json(std::string("hello\\world")) == R"("hello\\world")");
+  NTH_EXPECT(json(std::string("hello\0world", 11)) ==
+             std::string_view(R"("hello\0world")", 14));
+  NTH_EXPECT(json(std::string("hello\\0world")) ==
+             std::string_view(R"("hello\\0world")"));
 }
 
 NTH_TEST("format/json/array") {
