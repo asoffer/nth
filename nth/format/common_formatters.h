@@ -91,7 +91,7 @@ struct byte_formatter {
     uint8_t n = static_cast<uint8_t>(b);
     buffer[0] = hex[n >> 4];
     buffer[1] = hex[n & 0x0f];
-    io::write_text(w, buffer);
+    io::write_text(w, std::string_view(buffer, 2));
   }
 };
 
@@ -126,21 +126,15 @@ struct quote_formatter {
           i = 0;
           io::write_text(w, R"(\\)");
           break;
-        case '\0':
-          io::write_text(w, s.substr(0, i));
-          s.remove_prefix(i + 1);
-          i = 0;
-          io::write_text(w, R"(\0)");
-          break;
         default:
           if (std::isprint(c)) {
             ++i;
             continue;
           } else {
             io::write_text(w, s.substr(0, i));
-            io::write_text(w, "\\x");
+            s.remove_prefix(i + 1);
+            io::write_text(w, "\\u00");
             byte_formatter{}.format(w, static_cast<std::byte>(c));
-            s.remove_prefix(i);
             i = 0;
           }
       }
