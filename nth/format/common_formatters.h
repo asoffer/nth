@@ -118,7 +118,7 @@ struct quote_formatter {
           io::write_text(w, s.substr(0, i));
           s.remove_prefix(i + 1);
           i = 0;
-          io::write_text(w, R"(\t")");
+          io::write_text(w, R"(\t)");
           break;
         case '\\':
           io::write_text(w, s.substr(0, i));
