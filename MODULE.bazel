@@ -1,5 +1,6 @@
 bazel_dep(name = "abseil-cpp", version = "20240722.0")
 bazel_dep(name = "platforms", version = "0.0.10")
+bazel_dep(name = "toolchains_llvm", version = "1.3.0")
 
 bazel_dep(name = "hedron_compile_commands", dev_dependency = True)
 git_override(
@@ -8,8 +9,38 @@ git_override(
     commit = "1e08f8e0507b6b6b1f4416a9a22cf5c28beaba93",
 )
 
-register_toolchains(
-    "//bazel:linux_x86_64_toolchain",
-    "//bazel:macos_arm64_toolchain",
-    "//bazel:macos_x86_64_toolchain",
+# Configure and register the toolchain.
+llvm = use_extension("@toolchains_llvm//toolchain/extensions:llvm.bzl", "llvm")
+llvm.toolchain(
+    llvm_version = "19.1.3",
+    cxx_standard = {"": "c++20"},
+    compile_flags = {"": [
+        # Security
+        "-U_FORTIFY_SOURCE",  # https://github.com/google/sanitizers/issues/247
+        "-fstack-protector",
+        "-fno-omit-frame-pointer",
+
+        # Diagnostics
+        "-fcolor-diagnostics",
+        "-Wall",
+        "-Wthread-safety",
+        "-Wself-assign",
+        "-Werror",
+        "-Wextra",
+        "-Wpedantic",
+        "-Wuninitialized",
+        "-Wno-c++2b-extensions",
+        "-Wno-deprecated-declarations",
+        "-Wno-gcc-compat",
+        "-Wno-gnu-statement-expression-from-macro-expansion",
+        "-Wno-missing-field-initializers",
+        "-Wno-unused-parameter",
+        "-Wno-deprecated",
+
+        # Miscellaneous
+        "-faligned-allocation",
+    ]}
 )
+use_repo(llvm, "llvm_toolchain")
+
+register_toolchains("@llvm_toolchain//:all")
