@@ -49,6 +49,10 @@ auto NthDefaultFormatter(nth::type_tag<I>) {
   return base_formatter(10);
 }
 
+inline auto NthDefaultFormatter(nth::type_tag<float>) { return float_formatter{}; }
+
+inline auto NthDefaultFormatter(nth::type_tag<double>) { return float_formatter{}; }
+
 }  // namespace nth
 
 #endif  // NTH_FORMAT_COMMON_DEFAULTS_H

@@ -7,15 +7,15 @@
 #include <utility>
 
 #include "nth/debug/debug.h"
+#include "nth/format/interpolate.h"
+#include "nth/io/writer/writer.h"
 
 namespace nth {
 
 namespace internal_interval {
 
 template <typename T>
-concept Subtractable = requires(T t) {
-  t - t;
-};
+concept Subtractable = requires(T t) { t - t; };
 
 template <typename T>
 struct LengthBase {};
@@ -96,8 +96,8 @@ struct interval : internal_interval::LengthBase<T> {
   constexpr bool empty() const { return lower_bound() == upper_bound(); }
 
   template <size_t N>
-  requires(N == 0 or
-           N == 1) friend constexpr value_type const& get(interval const& i) {
+    requires(N == 0 or N == 1)
+  friend constexpr value_type const& get(interval const& i) {
     if constexpr (N == 0) {
       return i.lower_bound();
     } else {
@@ -106,7 +106,8 @@ struct interval : internal_interval::LengthBase<T> {
   }
 
   template <size_t N>
-  requires(N == 0 or N == 1) friend constexpr value_type&& get(interval&& i) {
+    requires(N == 0 or N == 1)
+  friend constexpr value_type&& get(interval&& i) {
     if constexpr (N == 0) {
       return std::move(i).lower_bound();
     } else {
@@ -114,12 +115,12 @@ struct interval : internal_interval::LengthBase<T> {
     }
   }
 
-  friend void NthPrint(auto& p, auto& f, interval const& i) {
-    p.write("[");
-    f(p, i.lower_bound_);
-    p.write(", ");
-    f(p, i.upper_bound_);
-    p.write(")");
+  friend void NthFormat(io::writer auto& w, auto& fmt, interval const& i) {
+    nth::io::write_text(w, "[");
+    nth::format(w, fmt, i.lower_bound());
+    nth::io::write_text(w, ", ");
+    nth::format(w, fmt, i.upper_bound());
+    nth::io::write_text(w, ")");
   }
 
  private:
@@ -127,13 +128,14 @@ struct interval : internal_interval::LengthBase<T> {
 };
 
 template <typename L, typename H>
-requires(std::is_same_v<std::decay_t<L>, std::decay_t<H>>) interval(L&&, H&&)
-->interval<std::decay_t<L>>;
+  requires(std::is_same_v<std::decay_t<L>, std::decay_t<H>>)
+interval(L&&, H&&) -> interval<std::decay_t<L>>;
 
 namespace internal_interval {
 
 template <typename T>
-requires(Subtractable<T>) struct LengthBase<T> {
+  requires(Subtractable<T>)
+struct LengthBase<T> {
   using length_type = decltype(std::declval<T>() - std::declval<T>());
   length_type length() const {
     auto& [lower_bound, upper_bound] = static_cast<interval<T> const&>(*this);
@@ -144,17 +146,14 @@ requires(Subtractable<T>) struct LengthBase<T> {
 }  // namespace internal_interval
 }  // namespace nth
 
-template <typename T>
-NTH_TRACE_DECLARE_API_TEMPLATE(
-    nth::interval<T>, (contains)(covers)(empty)(lower_bound)(upper_bound));
-
 namespace std {
 
 template <typename T>
 struct tuple_size<::nth::interval<T>> : std::integral_constant<size_t, 2> {};
 
 template <size_t N, typename T>
-requires(N == 0 or N == 1) struct tuple_element<N, ::nth::interval<T>> {
+  requires(N == 0 or N == 1)
+struct tuple_element<N, ::nth::interval<T>> {
   using type = T;
 };
 

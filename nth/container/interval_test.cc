@@ -2,27 +2,21 @@
 
 #include <string>
 
+#include "nth/io/writer/string.h"
 #include "nth/test/test.h"
 
 namespace nth {
 namespace {
-#if 0
-
-using ::nth::test::Any;
-using ::nth::test::Argument;
-using ::nth::test::Fuzzy;
 
 NTH_INVOKE_TEST("interval/*") {
   co_yield nth::TestArguments{3, 5};
   co_yield nth::TestArguments{5.1, 6.1};
-  co_await Fuzzy(Any<int>(), AtLeast(Argument<int, 0>()));
 }
 
 NTH_TEST("interval/construction", auto const &low, auto const &hi) {
   interval i(low, hi);
-  auto t = nth::trace<"i">(i);
-  NTH_EXPECT(t.lower_bound() == low);
-  NTH_EXPECT(t.upper_bound() == hi);
+  NTH_EXPECT(i.lower_bound() == low);
+  NTH_EXPECT(i.upper_bound() == hi);
 
   auto [s, e] = i;
   NTH_EXPECT(s == low);
@@ -36,12 +30,11 @@ NTH_TEST("interval/length", auto const &low, auto const &hi) {
 
 NTH_TEST("interval/contains") {
   interval<std::string> i("abc", "def");
-  auto t = nth::trace<"i">(i);
-  NTH_EXPECT(not t.contains("aba"));
-  NTH_EXPECT(t.contains("abc"));
-  NTH_EXPECT(t.contains("abd"));
-  NTH_EXPECT(t.contains("dbc"));
-  NTH_EXPECT(not t.contains("def"));
+  NTH_EXPECT(not i.contains("aba"));
+  NTH_EXPECT(i.contains("abc"));
+  NTH_EXPECT(i.contains("abd"));
+  NTH_EXPECT(i.contains("dbc"));
+  NTH_EXPECT(not i.contains("def"));
 }
 
 NTH_TEST("interval/set-bounds") {
@@ -52,6 +45,31 @@ NTH_TEST("interval/set-bounds") {
   NTH_EXPECT(i.lower_bound() == "ghi");
   NTH_EXPECT(not i.contains("abc"));
 }
-#endif
+
+NTH_TEST("interval/covers") {
+  NTH_EXPECT(nth::interval(1, 3).covers(nth::interval(1, 2)));
+  NTH_EXPECT(nth::interval(1, 3).covers(nth::interval(1, 3)));
+  NTH_EXPECT(not nth::interval(2, 3).covers(nth::interval(1, 3)));
+  NTH_EXPECT(not nth::interval(1, 3).covers(nth::interval(2, 4)));
+  NTH_EXPECT(not nth::interval(1, 3).covers(nth::interval(4, 6)));
+}
+
+NTH_TEST("interval/length") {
+  NTH_EXPECT(nth::interval(1, 3).length() == 2);
+  NTH_EXPECT(nth::interval(1, 1).length() == 0);
+  NTH_EXPECT(nth::interval(1, 1).empty());
+}
+
+NTH_TEST("interval/format") {
+  std::string s;
+  nth::io::string_writer w(s);
+  nth::format(w, nth::default_formatter<int>(), nth::interval(1, 3));
+  NTH_EXPECT(s == "[1, 3)");
+
+  s.clear();
+  nth::format(w, nth::default_formatter<double>(), nth::interval(1.1, 3.3));
+  NTH_EXPECT(s == "[1.1, 3.3)");
+}
+
 }  // namespace
 }  // namespace nth
