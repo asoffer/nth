@@ -3,10 +3,15 @@
 
 #include <charconv>
 #include <cstdint>
+#include <optional>
 
 #include "nth/io/writer/writer.h"
+#include "nth/meta/type.h"
 
 namespace nth {
+
+template <int&..., typename F, typename T>
+constexpr auto format(io::writer auto& w, F&& fmt, T const& value);
 
 // A formatter which has no opinions about how objects of any type should be
 // formatted.
@@ -141,6 +146,53 @@ struct quote_formatter {
     }
     io::write_text(w, s);
     io::write_text(w, R"(")");
+  }
+};
+
+struct default_formatter_t {
+  template <typename T>
+  void format(io::writer auto& w, T const& t) const
+    requires(requires { NthDefaultFormatter(nth::type<T>); })
+  {
+    auto fmt = NthDefaultFormatter(nth::type<T>);
+    ::nth::format(w, fmt, t);
+  }
+
+  template <typename T>
+  void format(io::writer auto& w, std::optional<T> const& opt) const {
+    if (opt) {
+      default_formatter_t fmt;
+      nth::format(w, fmt, *opt);
+    } else {
+      io::write_text(w, "std::nullopt");
+    }
+  }
+};
+
+struct debug_formatter_t {
+  template <typename T>
+  void format(io::writer auto& w, T const& t) const
+    requires(requires { NthDefaultFormatter(nth::type<T>); })
+  {
+    auto fmt = NthDefaultFormatter(nth::type<T>);
+    ::nth::format(w, fmt, t);
+  }
+
+  template <typename T>
+  void format(io::writer auto& w, T const& t) const
+    requires(
+        requires {
+          t.begin();
+          t.end();
+        } and not requires { NthDefaultFormatter(nth::type<T>); })
+  {
+    nth::io::write_text(w, "[");
+    std::string_view separator = "";
+    for (auto const& element : t) {
+      nth::io::write_text(w, std::exchange(separator, ", "));
+      nth::format(w, *this, element);
+    }
+    nth::io::write_text(w, "]");
   }
 };
 

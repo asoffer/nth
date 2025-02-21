@@ -1,6 +1,8 @@
 #ifndef NTH_FORMAT_FORMAT_H
 #define NTH_FORMAT_FORMAT_H
 
+#include <optional>
+
 #include "nth/format/common_defaults.h"
 #include "nth/format/common_formatters.h"
 #include "nth/io/writer/writer.h"
@@ -142,16 +144,6 @@ void NthFormat(nth::io::writer auto& w, F&, T const& t) {
   nth::io::write_text(w, std::string_view(buffer, 3 * sizeof(T) + 1));
 }
 
-struct default_formatter_t {
-  template <typename T>
-  void format(io::writer auto& w, T const& t) const
-    requires(requires { NthDefaultFormatter(nth::type<T>); })
-  {
-    auto fmt = NthDefaultFormatter(nth::type<T>);
-    ::nth::format(w, fmt, t);
-  }
-};
-
 // The default formatter. When an object is being formatted, if a function named
 // `NthDefaultFormatter` exists, findable via argument-dependent lookup that
 // accepts an `nth::type_tag<T>`, the result of executing
@@ -159,32 +151,6 @@ struct default_formatter_t {
 // Otherwise `nth::trivial_formatter will be used.
 inline constexpr default_formatter_t default_formatter;
 
-struct debug_formatter_t {
-  template <typename T>
-  void format(io::writer auto& w, T const& t) const
-    requires(requires { NthDefaultFormatter(nth::type<T>); })
-  {
-    auto fmt = NthDefaultFormatter(nth::type<T>);
-    ::nth::format(w, fmt, t);
-  }
-
-  template <typename T>
-  void format(io::writer auto& w, T const& t) const
-    requires(
-        requires {
-          t.begin();
-          t.end();
-        } and not requires { NthDefaultFormatter(nth::type<T>); })
-  {
-    nth::io::write_text(w, "[");
-    std::string_view separator = "";
-    for (auto const& element : t) {
-      nth::io::write_text(w, std::exchange(separator, ", "));
-      nth::format(w, *this, element);
-    }
-    nth::io::write_text(w, "]");
-  }
-};
 inline constexpr debug_formatter_t debug_formatter;
 
 template <int&..., typename T>

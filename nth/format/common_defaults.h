@@ -3,6 +3,7 @@
 
 #include <concepts>
 #include <cstddef>
+#include <optional>
 #include <string>
 #include <string_view>
 
@@ -49,9 +50,13 @@ auto NthDefaultFormatter(nth::type_tag<I>) {
   return base_formatter(10);
 }
 
-inline auto NthDefaultFormatter(nth::type_tag<float>) { return float_formatter{}; }
+inline auto NthDefaultFormatter(nth::type_tag<float>) {
+  return float_formatter{};
+}
 
-inline auto NthDefaultFormatter(nth::type_tag<double>) { return float_formatter{}; }
+inline auto NthDefaultFormatter(nth::type_tag<double>) {
+  return float_formatter{};
+}
 
 }  // namespace nth
 
