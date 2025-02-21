@@ -236,7 +236,7 @@ void interpolate(W& w, Ts const&... values)
 template <interpolation_string S, typename T>
 auto NthInterpolateFormatter(type_tag<T>) {
   static_assert(S.empty());
-  return default_formatter<T>();
+  return nth::default_formatter;
 }
 
 template <interpolation_string S>

@@ -14,20 +14,6 @@
 
 namespace nth {
 
-// Returns the default formatter associated with type `T`. If a function named
-// `NthDefaultFormatter` exists, findable via argument-dependent lookup that
-// accepts an `nth::type_tag<T>`, the result of executing
-// `NthDefaultFormatter(nth::type<T>)` will be used as the default. Otherwise
-// `nth::trivial_formatter will be used.
-template <typename T>
-constexpr auto default_formatter() {
-  if constexpr (requires { NthDefaultFormatter(nth::type<T>); }) {
-    return NthDefaultFormatter(nth::type<T>);
-  } else {
-    return trivial_formatter{};
-  }
-}
-
 // Formats `value` with the formatter `fmt`, writing the result to `w`. If
 // `fmt.format(w, value)` is a valid expression, this expression is
 // evaluated and returned. Otherwise (if `fmt` does not say anything about
@@ -37,20 +23,12 @@ constexpr auto default_formatter() {
 // opinions about how the value should be formatted. The design gives
 // precedence to the formatter.
 template <int&..., typename F, typename T>
-constexpr auto format(io::writer auto& w, F&& fmt, T const& value) {
-  if constexpr (requires { fmt.format(w, value); }) {
-    return fmt.format(w, value);
-  } else {
-    return NthFormat(w, fmt, value);
-  }
-}
+constexpr auto format(io::writer auto& w, F&& fmt, T const& value);
 
 // Invokes the three-argument `format`, by constructing a local
 // `default_formatter<T>()` and passing that as the formatter `fmt`.
 template <int&..., typename T>
-constexpr auto format(io::writer auto& w, T const& value) {
-  nth::format(w, nth::default_formatter<T>(), value);
-}
+constexpr auto format(io::writer auto& w, T const& value);
 
 namespace internal_format {
 template <typename F, nth::structure S>
@@ -162,6 +140,36 @@ void NthFormat(nth::io::writer auto& w, F&, T const& t) {
 
   nth::io::write_text(w, std::string_view(nth::type<T>.name()));
   nth::io::write_text(w, std::string_view(buffer, 3 * sizeof(T) + 1));
+}
+
+struct default_formatter_t {
+  template <typename T>
+  void format(io::writer auto& w, T const& t) const
+      requires (requires { NthDefaultFormatter(nth::type<T>); }) {
+    auto fmt = NthDefaultFormatter(nth::type<T>);
+    ::nth::format(w, fmt, t);
+  }
+};
+
+// The default formatter. When an object is being formatted, if a function named
+// `NthDefaultFormatter` exists, findable via argument-dependent lookup that
+// accepts an `nth::type_tag<T>`, the result of executing
+// `NthDefaultFormatter(nth::type<T>)` will be used to format that object.
+// Otherwise `nth::trivial_formatter will be used.
+inline constexpr default_formatter_t default_formatter;
+
+template <int&..., typename T>
+constexpr auto format(io::writer auto& w, T const& value) {
+  nth::format(w, default_formatter, value);
+}
+
+template <int&..., typename F, typename T>
+constexpr auto format(io::writer auto& w, F&& fmt, T const& value) {
+  if constexpr (requires { fmt.format(w, value); }) {
+    return fmt.format(w, value);
+  } else {
+    return NthFormat(w, fmt, value);
+  }
 }
 
 }  // namespace nth

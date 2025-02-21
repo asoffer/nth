@@ -43,8 +43,7 @@ struct source_location {
   friend void NthFormat(auto& w, auto&, nth::source_location loc) {
     nth::io::write_text(w, loc.file_);
     nth::io::write_text(w, ":");
-    auto fmt = nth::default_formatter<unsigned>();
-    nth::format(w, fmt, loc.line_);
+    nth::format(w, loc.line_);
   }
 
  private:

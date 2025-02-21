@@ -63,12 +63,20 @@ NTH_TEST("interval/length") {
 NTH_TEST("interval/format") {
   std::string s;
   nth::io::string_writer w(s);
-  nth::format(w, nth::default_formatter<int>(), nth::interval(1, 3));
+  nth::format(w, nth::interval(1, 3));
   NTH_EXPECT(s == "[1, 3)");
 
   s.clear();
-  nth::format(w, nth::default_formatter<double>(), nth::interval(1.1, 3.3));
+  nth::format(w, nth::base_formatter(16), nth::interval(16, 32));
+  NTH_EXPECT(s == "[10, 20)");
+
+  s.clear();
+  nth::format(w, nth::interval(1.1, 3.3));
   NTH_EXPECT(s == "[1.1, 3.3)");
+
+  s.clear();
+  nth::interpolate<"{}">(w, nth::interval(1, 3));
+  NTH_EXPECT(s == "[1, 3)");
 }
 
 }  // namespace
