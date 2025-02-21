@@ -60,6 +60,21 @@ NTH_TEST("interval/length") {
   NTH_EXPECT(nth::interval(1, 1).empty());
 }
 
+NTH_TEST("interval/intersection") {
+  NTH_EXPECT(nth::interval(1, 3).intersection(nth::interval(2, 4)) ==
+             nth::interval(2, 3));
+  NTH_EXPECT(nth::interval(1, 3).intersection(nth::interval(2, 3)) ==
+             nth::interval(2, 3));
+  NTH_EXPECT(nth::interval(2, 3).intersection(nth::interval(2, 4)) ==
+             nth::interval(2, 3));
+  NTH_EXPECT(nth::interval(2, 3).intersection(nth::interval(2, 3)) ==
+             nth::interval(2, 3));
+  NTH_EXPECT(nth::interval(2, 3).intersection(nth::interval(3, 4)) ==
+             std::nullopt);
+  NTH_EXPECT(nth::interval(2, 3).intersection(nth::interval(4, 5)) ==
+             std::nullopt);
+}
+
 NTH_TEST("interval/format") {
   std::string s;
   nth::io::string_writer w(s);

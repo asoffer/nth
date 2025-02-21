@@ -92,6 +92,15 @@ struct interval : internal_interval::LengthBase<T> {
            i.upper_bound() <= upper_bound();
   }
 
+  // Returns `std::nullopt` if the intervals do not intersect. Otherwise,
+  // returns the intersection of the intervals.
+  std::optional<interval> intersection(interval const& i) const {
+    value_type const& l = std::max(lower_bound(), i.lower_bound());
+    value_type const& u = std::min(upper_bound(), i.upper_bound());
+    if (l < u) { return interval(l, u); }
+    return std::nullopt;
+  }
+
   // Returns `true` if the interval is empty and `false` otherwise.
   constexpr bool empty() const { return lower_bound() == upper_bound(); }
 
