@@ -235,13 +235,18 @@ void interpolate(W& w, Ts const&... values)
 
 template <interpolation_string S, typename T>
 auto NthInterpolateFormatter(type_tag<T>) {
-  static_assert(S.empty());
-  return nth::default_formatter;
+  if constexpr (S.empty()) {
+    return nth::default_formatter;
+  } else if constexpr (S == "?") {
+    return nth::debug_formatter;
+  } else {
+    static_assert(false);
+  }
 }
 
 template <interpolation_string S>
 auto NthInterpolateFormatter(type_tag<std::string>) {
-  if constexpr (S == "q") {
+  if constexpr (S == "q" or S == "?") {
     return quote_formatter{};
   } else {
     static_assert(S.empty());
@@ -265,6 +270,8 @@ auto NthInterpolateFormatter(type_tag<I>) {
     return base_formatter(10);
   } else if constexpr (S == "x") {
     return base_formatter(16);
+  } else if constexpr (S == "?") {
+    return nth::debug_formatter;
   } else {
     constexpr bool Parse = S.empty();
     static_assert(Parse, "Failed to parse interpolation string");
@@ -278,7 +285,7 @@ auto NthInterpolateFormatter(type_tag<T*>) {
 
 template <interpolation_string S>
 auto NthInterpolateFormatter(type_tag<bool>) {
-  if constexpr (S.empty() or S == "b") {
+  if constexpr (S.empty() or S == "b" or S == "?") {
     return word_formatter<casing::lower>{};
   } else if constexpr (S == "B") {
     return word_formatter<casing::title>{};

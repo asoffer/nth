@@ -129,6 +129,25 @@ void UserDefined() {
   s.clear();
 }
 
+void Debug() {
+  std::string s;
+  nth::io::string_writer w(s);
+
+  nth::interpolate<"{?}">(w, 3);
+  NTH_RAW_TEST_ASSERT(s == "3");
+
+  std::vector<int> v = {1, 2, 3};
+
+  s.clear();
+  nth::interpolate<"{?}">(w, v);
+  NTH_RAW_TEST_ASSERT(s == "[1, 2, 3]");
+
+  std::vector<std::vector<int>> vv = {{}, {1}, {2, 3, 4}, {}};
+  s.clear();
+  nth::interpolate<"{?}">(w, vv);
+  NTH_RAW_TEST_ASSERT(s == "[[], [1], [2, 3, 4], []]");
+}
+
 }  // namespace
 
 int main() {
@@ -141,4 +160,5 @@ int main() {
   NonDefaultFormatSpec();
   Bool();
   UserDefined();
+  Debug();
 }
