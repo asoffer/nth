@@ -3,6 +3,8 @@
 
 #include <optional>
 
+#include "absl/status/status.h"
+#include "absl/status/statusor.h"
 #include "nth/base/attributes.h"
 #include "nth/base/core.h"
 #include "nth/debug/debug.h"
@@ -56,7 +58,7 @@ struct OptionalHandler {
     return *opt;
   }
 
-  static constexpr T const& transform_value(std::optional<T> & opt) {
+  static constexpr T const& transform_value(std::optional<T>& opt) {
     return *opt;
   }
 
@@ -67,6 +69,33 @@ struct OptionalHandler {
 
 template <typename T>
 inline constexpr OptionalHandler<T> optional_handler;
+
+template <typename T>
+struct AbslStatusOrHandler {
+  static constexpr bool okay(absl::StatusOr<T> const& s) { return s.ok(); }
+
+  static auto transform_return(absl::StatusOr<T> s) {
+    struct return_type {
+      operator bool() const { return s.ok(); }
+      operator absl::Status() const { return NTH_MOVE(s).status(); }
+      absl::StatusOr<T>& s;
+    };
+    return return_type{s};
+  }
+
+  static constexpr T const& transform_value(absl::StatusOr<T> const& s) {
+    return *s;
+  }
+
+  static constexpr T const& transform_value(absl::StatusOr<T>& s) { return *s; }
+
+  static constexpr T&& transform_value(absl::StatusOr<T>&& s) {
+    return *NTH_MOVE(s);
+  }
+};
+
+template <typename T>
+inline constexpr AbslStatusOrHandler<T> absl_status_or_handler;
 
 struct MainHandler {
   template <typename T>
@@ -130,6 +159,11 @@ struct wrap<T, false, false> {
 };
 
 }  // namespace internal_try
+
+template <typename T>
+constexpr auto const& NthDefaultTryExitHandler(type_tag<absl::StatusOr<T>>) {
+  return internal_try::absl_status_or_handler<T>;
+}
 
 template <typename T>
 constexpr auto const& NthDefaultTryExitHandler(type_tag<T*>) {

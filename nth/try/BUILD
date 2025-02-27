@@ -11,6 +11,8 @@ cc_library(
         "//nth/base:core",
         "//nth/meta:type",
         "//nth/meta/concepts:core",
+        "@abseil-cpp//absl/status",
+        "@abseil-cpp//absl/status:statusor",
     ],
 )
 

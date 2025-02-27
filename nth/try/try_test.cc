@@ -64,6 +64,28 @@ NTH_TEST("try/optional") {
   NTH_ASSERT(counter == 2);
 }
 
+NTH_TEST("try/absl::StatusOr") {
+  int counter         = 0;
+  absl::Status status = [&] -> absl::Status {
+    NTH_TRY(absl::StatusOr<int>(absl::InternalError("")));
+    ++counter;
+    return absl::InternalError("");
+  }();
+  NTH_ASSERT(counter == 0);
+  NTH_ASSERT(status == absl::InternalError(""));
+
+  absl::StatusOr<int> status_or = [&] -> absl::StatusOr<int> {
+    absl::StatusOr<int> status_or(counter);
+    int const &c = NTH_TRY(status_or);
+    ++counter;
+    if (&*status_or == &c) { ++counter; }
+    return c;
+  }();
+  NTH_ASSERT(status_or.ok());
+  NTH_ASSERT(*status_or == 0);
+  NTH_ASSERT(counter == 2);
+}
+
 struct Handler {
   static constexpr bool okay(bool b) { return not b; }
   static constexpr int transform_return(bool) { return 17; }
