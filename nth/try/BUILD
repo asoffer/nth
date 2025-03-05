@@ -9,6 +9,7 @@ cc_library(
     deps = [
         "//nth/base:attributes",
         "//nth/base:core",
+        "//nth/base:macros",
         "//nth/meta:type",
         "//nth/meta/concepts:core",
         "@abseil-cpp//absl/status",

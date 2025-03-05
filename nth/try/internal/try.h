@@ -7,7 +7,7 @@
 #include "absl/status/statusor.h"
 #include "nth/base/attributes.h"
 #include "nth/base/core.h"
-#include "nth/debug/debug.h"
+#include "nth/base/macros.h"
 #include "nth/memory/address.h"
 #include "nth/meta/concepts/core.h"
 #include "nth/meta/type.h"
