@@ -48,6 +48,12 @@ NTH_TEST("try/pointer") {
     return 0;
   }();
   NTH_ASSERT(counter == 1);
+
+  NTH_ASSERT(not [&]()->bool {
+    [[maybe_unused]] double &val = NTH_TRY(d);
+    return true;
+  }());
+  NTH_ASSERT(counter == 1);
 }
 
 NTH_TEST("try/optional") {

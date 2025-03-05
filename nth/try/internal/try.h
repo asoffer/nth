@@ -37,10 +37,15 @@ inline constexpr DefaultHandler default_handler;
 
 template <typename T>
 struct PointerHandler {
+  struct result_type {
+    template <typename U>
+    constexpr operator U*() const {
+      return nullptr;
+    }
+    constexpr operator bool() const { return false; }
+  };
   static constexpr bool okay(T* ptr) { return ptr; }
-  static constexpr decltype(nullptr) transform_return(T* ptr) {
-    return nullptr;
-  }
+  static constexpr result_type transform_return(T* ptr) { return {}; }
   static constexpr T& transform_value(T* ptr) { return *ptr; }
 };
 
