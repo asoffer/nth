@@ -25,7 +25,7 @@ NTH_TEST("try/bool") {
 
 NTH_TEST("try/pointer") {
   int counter = 0;
-  int *ptr    = [&] {
+  int *ptr    = [&]() -> int    *{
     NTH_TRY(static_cast<int *>(nullptr));
     ++counter;
     return static_cast<int *>(nullptr);
@@ -39,6 +39,14 @@ NTH_TEST("try/pointer") {
     return &c;
   }();
   NTH_ASSERT(ptr == &counter);
+  NTH_ASSERT(counter == 1);
+
+  double *d = nullptr;
+  ptr       = [&] -> int       *{
+    NTH_TRY(d);
+    ++counter;
+    return 0;
+  }();
   NTH_ASSERT(counter == 1);
 }
 
@@ -135,6 +143,41 @@ NTH_TEST("try/main/uncopyable") {
     return 0;
   }() == 0);
   NTH_EXPECT(counter == 34);
+}
+
+NTH_TEST("try/status/uncopyable") {
+  {
+    absl::StatusOr<Uncopyable> s = Uncopyable(3);
+    auto result                  = [&]() -> absl::StatusOr<int> {
+      Uncopyable const &u = NTH_TRY(s);
+      return u.n;
+    }();
+
+    NTH_ASSERT(result.ok());
+    NTH_EXPECT(*result == 3);
+  }
+
+  {
+    absl::StatusOr<Uncopyable> s = Uncopyable(4);
+    auto result                  = [&]() -> absl::StatusOr<int> {
+      Uncopyable u = NTH_TRY(std::move(s));
+      return u.n;
+    }();
+
+    NTH_ASSERT(result.ok());
+    NTH_EXPECT(*result == 4);
+  }
+
+  {
+    absl::StatusOr<Uncopyable> s = Uncopyable(5);
+    auto result                  = [&]() -> absl::StatusOr<int> {
+      Uncopyable u = std::move(NTH_TRY(s));
+      return u.n;
+    }();
+
+    NTH_ASSERT(result.ok());
+    NTH_EXPECT(*result == 5);
+  }
 }
 
 }  // namespace

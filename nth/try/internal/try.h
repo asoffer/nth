@@ -38,7 +38,9 @@ inline constexpr DefaultHandler default_handler;
 template <typename T>
 struct PointerHandler {
   static constexpr bool okay(T* ptr) { return ptr; }
-  static constexpr T* transform_return(T* ptr) { return ptr; }
+  static constexpr decltype(nullptr) transform_return(T* ptr) {
+    return nullptr;
+  }
   static constexpr T& transform_value(T* ptr) { return *ptr; }
 };
 
@@ -74,20 +76,19 @@ template <typename T>
 struct AbslStatusOrHandler {
   static constexpr bool okay(absl::StatusOr<T> const& s) { return s.ok(); }
 
-  static auto transform_return(absl::StatusOr<T> s) {
-    struct return_type {
-      operator bool() const { return s.ok(); }
-      operator absl::Status() const { return NTH_MOVE(s).status(); }
-      absl::StatusOr<T>& s;
-    };
-    return return_type{s};
+  static absl::Status transform_return(absl::StatusOr<T> const& s) {
+    return s.status();
+  }
+
+  static absl::Status transform_return(absl::StatusOr<T>&& s) {
+    return NTH_MOVE(s).status();
   }
 
   static constexpr T const& transform_value(absl::StatusOr<T> const& s) {
     return *s;
   }
 
-  static constexpr T const& transform_value(absl::StatusOr<T>& s) { return *s; }
+  static constexpr T& transform_value(absl::StatusOr<T>& s) { return *s; }
 
   static constexpr T&& transform_value(absl::StatusOr<T>&& s) {
     return *NTH_MOVE(s);
