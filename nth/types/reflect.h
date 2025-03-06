@@ -57,6 +57,22 @@ auto on_fields(T const& obj, auto&& f) {
   }
 }
 
+// Invokes `f(fields...)` where `fields` is a pack of references to the
+// fields in the object `obj`.
+template <int BaseCount, int&..., reflectable T>
+auto on_fields(T& obj, auto&& f) {
+  if constexpr (::nth::reflect::field_count<T, BaseCount> == 0) {
+    return NTH_FWD(f)();
+  } else {
+    auto refs =
+        internal_reflect::get_fields<::nth::reflect::field_count<T, BaseCount>,
+                                     internal_reflect::lvalue>(obj);
+    return [&]<size_t... Ns>(std::index_sequence<Ns...>) {
+      return NTH_FWD(f)(refs.template get<Ns>()...);
+    }(std::make_index_sequence<::nth::reflect::field_count<T, BaseCount>>{});
+  }
+}
+
 }  // namespace reflect
 }  // namespace nth
 
