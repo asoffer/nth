@@ -45,6 +45,17 @@ cc_library(
     ],
 )
 
+cc_test(
+    name = "format_test",
+    srcs = ["format_test.cc"],
+    deps = [
+        ":format",
+        "//nth/test:main",
+        "@abseil-cpp//absl/strings",
+        "@abseil-cpp//absl/strings:str_format",
+    ],
+)
+
 cc_library(
     name = "interpolate",
     hdrs = ["interpolate.h"],
