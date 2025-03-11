@@ -36,6 +36,8 @@ llvm.toolchain(
         "-Wno-missing-field-initializers",
         "-Wno-unused-parameter",
         "-Wno-deprecated",
+        "-Wl,--allow-shlib-undefined",
+        "-Wno-unused-command-line-argument",
 
         # Miscellaneous
         "-faligned-allocation",
