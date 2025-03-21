@@ -77,6 +77,17 @@ struct OptionalHandler {
 template <typename T>
 inline constexpr OptionalHandler<T> optional_handler;
 
+struct AbslStatusHandler {
+  static constexpr bool okay(absl::Status const& s) { return s.ok(); }
+
+  static absl::Status transform_return(absl::Status const& s) { return s; }
+  static absl::Status transform_return(absl::Status&& s) { return NTH_MOVE(s); }
+
+  static constexpr void transform_value(absl::Status const&) { return; }
+};
+
+inline constexpr AbslStatusHandler absl_status_handler;
+
 template <typename T>
 struct AbslStatusOrHandler {
   static constexpr bool okay(absl::StatusOr<T> const& s) { return s.ok(); }
@@ -165,6 +176,10 @@ struct wrap<T, false, false> {
 };
 
 }  // namespace internal_try
+
+constexpr auto const& NthDefaultTryExitHandler(type_tag<absl::Status>) {
+  return internal_try::absl_status_handler;
+}
 
 template <typename T>
 constexpr auto const& NthDefaultTryExitHandler(type_tag<absl::StatusOr<T>>) {

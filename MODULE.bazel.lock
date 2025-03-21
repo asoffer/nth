@@ -226,7 +226,7 @@
     "@@toolchains_llvm~//toolchain/extensions:llvm.bzl%llvm": {
       "general": {
         "bzlTransitiveDigest": "DbHjmsbc+5UNcxe3NTxwxbUMxZqW/A99vu2JcopPuJk=",
-        "usagesDigest": "WHJXXPvAX8T43kwOtEA4lbsMhlnBSqUPnk+QaY4AUkw=",
+        "usagesDigest": "UUo/fQaLr/ksRqVgutC+QXtPl2NSuzs+YVeZwrco8+8=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},
         "envVariables": {},
@@ -276,6 +276,8 @@
                   "-Wno-missing-field-initializers",
                   "-Wno-unused-parameter",
                   "-Wno-deprecated",
+                  "-Wl,--allow-shlib-undefined",
+                  "-Wno-unused-command-line-argument",
                   "-faligned-allocation"
                 ]
               },

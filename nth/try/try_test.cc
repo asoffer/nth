@@ -78,6 +78,19 @@ NTH_TEST("try/optional") {
   NTH_ASSERT(counter == 2);
 }
 
+NTH_TEST("try/absl::Status") {
+  int counter         = 0;
+  absl::Status status = [&] -> absl::Status {
+    NTH_TRY(absl::OkStatus());
+    ++counter;
+    NTH_TRY(absl::InternalError(""));
+    ++counter;
+    return absl::InternalError(":(");
+  }();
+  NTH_ASSERT(counter == 1);
+  NTH_ASSERT(status == absl::InternalError(""));
+}
+
 NTH_TEST("try/absl::StatusOr") {
   int counter         = 0;
   absl::Status status = [&] -> absl::Status {
