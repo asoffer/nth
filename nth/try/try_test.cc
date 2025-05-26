@@ -78,6 +78,11 @@ NTH_TEST("try/optional") {
   NTH_ASSERT(counter == 2);
 }
 
+NTH_TEST("unwrap/optional") {
+  auto result = NTH_UNWRAP(std::optional<int>(3));
+  NTH_ASSERT(result == 3);
+}
+
 NTH_TEST("try/absl::Status") {
   int counter         = 0;
   absl::Status status = [&] -> absl::Status {

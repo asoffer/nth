@@ -1,6 +1,7 @@
 #ifndef NTH_TRY_INTERNAL_TRY_H
 #define NTH_TRY_INTERNAL_TRY_H
 
+#include <cstdlib>
 #include <optional>
 
 #include "absl/status/status.h"
@@ -225,6 +226,32 @@ decltype(auto) default_try_exit_handler() {
      auto&& NthInternalExpr = __VA_ARGS__;                                     \
      if (not handler.okay(NthInternalExpr)) {                                  \
        return handler.transform_return(NthInternalExpr);                       \
+     }                                                                         \
+     ::nth::internal_try::wrap<                                                \
+         NthTryType, nth::lvalue_reference<NthTryType>,                        \
+         nth::rvalue_reference<NthTryType>>::make(NTH_FWD(NthInternalExpr));   \
+   }).transform(handler))
+
+#define NTH_TRY_INTERNAL_UNWRAP(...)                                           \
+  NTH_IF(NTH_IS_PARENTHESIZED(NTH_FIRST_ARGUMENT(__VA_ARGS__)),                \
+         NTH_TRY_INTERNAL_UNWRAP_WITH_HANDLER,                                 \
+         NTH_TRY_INTERNAL_UNWRAP_WITHOUT_HANDLER)                              \
+  (__VA_ARGS__)
+
+#define NTH_TRY_INTERNAL_UNWRAP_WITHOUT_HANDLER(...)                           \
+  NTH_TRY_INTERNAL_UNWRAP_WITH_HANDLER(                                        \
+      (::nth::default_try_exit_handler<                                        \
+          std::remove_cvref_t<decltype(__VA_ARGS__)>>()),                      \
+      __VA_ARGS__)
+
+#define NTH_TRY_INTERNAL_UNWRAP_WITH_HANDLER(handler, ...)                     \
+  (({                                                                          \
+     using NthTryType       = decltype((__VA_ARGS__));                         \
+     auto&& NthInternalExpr = __VA_ARGS__;                                     \
+     if (not handler.okay(NthInternalExpr)) {                                  \
+       NTH_LOG("FATAL ERROR: {}") <<=                                          \
+           {handler.transform_return(NthInternalExpr)};                        \
+       std::abort();                                                           \
      }                                                                         \
      ::nth::internal_try::wrap<                                                \
          NthTryType, nth::lvalue_reference<NthTryType>,                        \

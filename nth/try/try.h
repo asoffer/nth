@@ -30,6 +30,12 @@
 // null.
 #define NTH_TRY(...) NTH_TRY_INTERNAL_TRY(__VA_ARGS__)
 
+// `NTH_UNWRAP` computes the passed-in expression and either evaluates to a
+// possibly transformed value of it, or aborts. The primary purpose is to.
+// This is similar to `NTH_TRY` but aborts rather than returning, for situations
+// where a particular invariant is expected to hold.
+#define NTH_UNWRAP(...) NTH_TRY_INTERNAL_UNWRAP(__VA_ARGS__)
+
 // One can control the mechanism by which error handling occurs by passing in a
 // first parenthesized argument. The argument must adhere to the
 // `nth::try_exit_handler<T>` concept defined below, where `T` is the type of
