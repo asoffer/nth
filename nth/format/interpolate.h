@@ -206,21 +206,19 @@ void interpolate(W& w, Ts const&... values)
   requires(sizeof...(values) == S.placeholders())
 {
   size_t start = 0;
+  auto DoFmt   = [&]<size_t N, typename T>(T const& value) {
+    constexpr auto r = S.template placeholder_range<N>();
+    nth::io::write_text(
+        w, static_cast<std::string_view>(S).substr(start, r.start - 1 - start));
+    start    = r.start + r.length + 1;
+    auto fmt = NthInterpolateFormatter<
+          S.template unchecked_substr<r.start, r.length>()>(nth::type<T>);
+    nth::format(w, fmt, value);
+  };
   [&]<size_t... Ns>(std::index_sequence<Ns...>) {
-    (
-        [&] {
-          constexpr auto r = S.template placeholder_range<Ns>();
-          nth::io::write_text(w, static_cast<std::string_view>(S).substr(
-                                     start, r.start - 1 - start));
-          start    = r.start + r.length + 1;
-          auto fmt = NthInterpolateFormatter<
-              S.template unchecked_substr<r.start, r.length>()>(nth::type<Ts>);
-          nth::format(w, fmt, values);
-        }(),
-        ...);
-
-    nth::io::write_text(w, static_cast<std::string_view>(S).substr(start));
+    (DoFmt.template operator()<Ns, Ts>(values), ...);
   }(std::make_index_sequence<S.placeholders()>{});
+  nth::io::write_text(w, static_cast<std::string_view>(S).substr(start));
 }
 
 // Users can customize the interpretation of the interpolation string via the
