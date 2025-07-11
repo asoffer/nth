@@ -1,3 +1,5 @@
+load("@bazel_skylib//rules:common_settings.bzl", "string_flag")
+
 package(default_visibility = ["//visibility:public"])
 
 cc_library(
@@ -78,21 +80,34 @@ cc_test(
 )
 
 config_setting(
+    name = "harden_build",
+    visibility = ["//visibility:private"],
+    flag_values = {"//nth/base:build": "harden"}
+)
+
+config_setting(
     name = "opt_build",
     visibility = ["//visibility:private"],
-    values = {"compilation_mode": "opt"},
+    flag_values = {"//nth/base:build": "optimize"}
 )
 
 config_setting(
     name = "dbg_build",
     visibility = ["//visibility:private"],
-    values = {"compilation_mode": "dbg"},
+    flag_values = {"//nth/base:build": "debug"}
 )
 
 config_setting(
     name = "fast_build",
     visibility = ["//visibility:private"],
-    values = {"compilation_mode": "fastbuild"},
+    flag_values = {"//nth/base:build": "fast"}
+)
+
+
+string_flag(
+    name = "build",
+    values = ["fast", "harden", "optimize", "debug"],
+    build_setting_default = "fast",
 )
 
 cc_library(
@@ -101,6 +116,7 @@ cc_library(
     defines = select({
         ":opt_build": ["NTH_CLI_BUILD_MODE_OPTIMIZE"],
         ":dbg_build": ["NTH_CLI_BUILD_MODE_DEBUG"],
+        ":harden_build": ["NTH_CLI_BUILD_MODE_HARDEN"],
         "//conditions:default": ["NTH_CLI_BUILD_MODE_FASTBUILD"]
     }),
     deps = [

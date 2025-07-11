@@ -20,7 +20,7 @@ basic_write_result file_writer::write(std::span<std::byte const> data) {
 file_writer::~file_writer() {
   if (not file_) { return; }
   int result = std::fclose(file_);
-  NTH_REQUIRE((harden), result == 0);
+  NTH_REQUIRE(result == 0);
 }
 
 }  // namespace nth::io

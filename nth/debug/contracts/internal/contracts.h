@@ -63,7 +63,7 @@ bool execute_contract_check(contract const& c,
               enabler_var, ::nth::internal_contracts::checker(expr))))         \
   case 1: failure_action
 
-#if NTH_BUILD_MODE(debug) or NTH_BUILD_MODE(harden)
+#if NTH_BUILD_MODE(debug)
 #define NTH_INTERNAL_IMPLEMENT_ENSURE(verbosity_path, ...)                     \
   ::nth::internal_contracts::on_exit NTH_CONCATENATE(                          \
       NthInternalOnExit, __LINE__)([&](nth::source_location) {                 \
@@ -99,7 +99,7 @@ bool execute_contract_check(contract const& c,
 #define NTH_INTERNAL_IMPLEMENT_REQUIRE(verbosity_path, ...)                    \
   do {                                                                         \
     if (not(__VA_ARGS__)) {                                                    \
-      NTH_LOG("NTH_REQUIRE({}) failed.") <<= {#__VA_ARGS__};                   \
+      NTH_LOG((verbosity_path), "NTH_REQUIRE({}) failed.") <<= {#__VA_ARGS__};   \
       ::nth::internal_contracts::require_failed();                             \
     }                                                                          \
   } while (false)
