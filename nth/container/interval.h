@@ -11,7 +11,6 @@
 #include "nth/io/writer/writer.h"
 
 namespace nth {
-
 namespace internal_interval {
 
 template <typename T>
@@ -140,6 +139,18 @@ template <typename L, typename H>
   requires(std::is_same_v<std::decay_t<L>, std::decay_t<H>>)
 interval(L&&, H&&) -> interval<std::decay_t<L>>;
 
+template <std::totally_ordered T>
+interval<T> point(T const& t) {
+  return interval<T>(t, t);
+}
+
+template <std::totally_ordered T>
+  requires(std::copyable<T> and std::movable<T>)
+interval<T> point(T&& t) {
+  auto copy = t;
+  return interval<T>(std::move(t), std::move(copy));
+}
+
 namespace internal_interval {
 
 template <typename T>
@@ -149,6 +160,39 @@ struct LengthBase<T> {
   length_type length() const {
     auto& [lower_bound, upper_bound] = static_cast<interval<T> const&>(*this);
     return upper_bound - lower_bound;
+  }
+
+  interval<T>& operator+=(length_type const& d) {
+    auto& self                       = static_cast<interval<T> const&>(*this);
+    auto& [lower_bound, upper_bound] = self;
+    // `const_cast` is safe because `*this` is not const.
+    const_cast<T&>(lower_bound) += d;
+    const_cast<T&>(upper_bound) += d;
+    return const_cast<interval<T>&>(self);
+  }
+
+  interval<T>& operator-=(length_type const& d) {
+    auto& self                       = static_cast<interval<T> const&>(*this);
+    auto& [lower_bound, upper_bound] = self;
+    // `const_cast` is safe because `*this` is not const.
+    const_cast<T&>(lower_bound) -= d;
+    const_cast<T&>(upper_bound) -= d;
+    return const_cast<interval<T>&>(self);
+  }
+
+  friend interval<T> operator+(interval<T> i, length_type const& d) {
+    i += d;
+    return i;
+  }
+
+  friend interval<T> operator+(length_type const& d, interval<T> i) {
+    i += d;
+    return i;
+  }
+
+  friend interval<T> operator-(interval<T> i, length_type const& d) {
+    i -= d;
+    return i;
   }
 };
 

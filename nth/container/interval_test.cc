@@ -75,6 +75,13 @@ NTH_TEST("interval/intersection") {
              std::nullopt);
 }
 
+NTH_TEST("interval/translate") {
+  NTH_EXPECT(nth::interval(1, 5) - 3 == nth::interval(-2, 2));
+  NTH_EXPECT(nth::interval(1, 5) + 3 == nth::interval(4, 8));
+}
+
+NTH_TEST("interval/point") { NTH_EXPECT(nth::point(3) == nth::interval(3, 3)); }
+
 NTH_TEST("interval/format") {
   std::string s;
   nth::io::string_writer w(s);
