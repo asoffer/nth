@@ -58,8 +58,7 @@ struct OptionalHandler {
   static constexpr bool okay(std::optional<T> const& opt) {
     return opt.has_value();
   }
-  static constexpr std::optional<T> transform_return(
-      std::optional<T> const& opt) {
+  static constexpr std::nullopt_t transform_return(std::optional<T> const&) {
     return std::nullopt;
   }
   static constexpr T const& transform_value(std::optional<T> const& opt) {
