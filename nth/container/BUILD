@@ -81,6 +81,9 @@ cc_library(
     hdrs = ["interval.h"],
     deps = [
       "//nth/debug",
+      "//nth/format",
+      "//nth/format:json",
+      "//nth/io/writer",
     ],
 )
 

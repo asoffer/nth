@@ -7,7 +7,8 @@
 #include <utility>
 
 #include "nth/debug/debug.h"
-#include "nth/format/interpolate.h"
+#include "nth/format/format.h"
+#include "nth/format/json.h"
 #include "nth/io/writer/writer.h"
 
 namespace nth {
@@ -123,12 +124,25 @@ struct interval : internal_interval::LengthBase<T> {
     }
   }
 
-  friend void NthFormat(io::writer auto& w, auto& fmt, interval const& i) {
+  friend void NthFormat(io::writer auto& w, auto& fmt, interval const& i)
+    requires requires(T const& t) { nth::format(w, fmt, t); }
+  {
     nth::io::write_text(w, "[");
     nth::format(w, fmt, i.lower_bound());
     nth::io::write_text(w, ", ");
     nth::format(w, fmt, i.upper_bound());
     nth::io::write_text(w, ")");
+  }
+
+  friend void NthFormat(io::writer auto& w, json_formatter& fmt,
+                        interval const& i)
+    requires requires(T const& t) { nth::format(w, fmt, t); }
+  {
+    nth::io::write_text(w, "[");
+    nth::format(w, fmt, i.lower_bound());
+    nth::io::write_text(w, ", ");
+    nth::format(w, fmt, i.upper_bound());
+    nth::io::write_text(w, "]");
   }
 
  private:
