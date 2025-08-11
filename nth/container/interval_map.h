@@ -83,7 +83,7 @@ struct interval_map {
   // until the next non-const member function is invoked on this `interval_map`.
   auto const& mapped_intervals() const { return intervals_; }
 
-  friend void NthPrint(auto& p, auto& f, interval_map const& is) {
+  friend void NthFormat(auto& p, auto& f, interval_map const& is) {
     if (is.empty()) {
       p.write("{}");
       return;

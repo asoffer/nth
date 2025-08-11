@@ -167,6 +167,10 @@ struct default_formatter_t {
       io::write_text(w, "std::nullopt");
     }
   }
+
+  void format(io::writer auto& w, std::nullopt_t) const {
+    io::write_text(w, "std::nullopt");
+  }
 };
 
 struct debug_formatter_t {

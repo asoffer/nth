@@ -127,23 +127,6 @@ struct structural_formatter {
   F& self() { return static_cast<F&>(*this); }
 };
 
-template <typename F, typename T>
-void NthFormat(nth::io::writer auto& w, F&, T const& t) {
-  char buffer[sizeof(T) * 3 + 1];
-  buffer[0]                      = '[';
-  constexpr std::string_view Hex = "0123456789abcdef";
-  char* p                        = buffer;
-  for (std::byte b : nth::bytes(t)) {
-    *++p = Hex[static_cast<uint8_t>(b) >> 4];
-    *++p = Hex[static_cast<uint8_t>(b) & 0x0f];
-    *++p = ' ';
-  }
-  *p = ']';
-
-  nth::io::write_text(w, std::string_view(nth::type<T>.name()));
-  nth::io::write_text(w, std::string_view(buffer, 3 * sizeof(T) + 1));
-}
-
 // The default formatter. When an object is being formatted, if a function named
 // `NthDefaultFormatter` exists, findable via argument-dependent lookup that
 // accepts an `nth::type_tag<T>`, the result of executing

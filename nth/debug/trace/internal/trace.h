@@ -73,8 +73,25 @@ struct writable_ref {
   static std::string write_action(traced_expression_base const *ptr) {
     std::string s;
     io::string_writer sw(s);
-    nth::format(
-        sw, *reinterpret_cast<T const *>(reinterpret_cast<uintptr_t>(ptr) - 1));
+    auto const &t =
+        *reinterpret_cast<T const *>(reinterpret_cast<uintptr_t>(ptr) - 1);
+    if constexpr (requires { NthFormat(sw, nth::default_formatter, t); }) {
+      nth::format(sw, t);
+    } else {
+      char buffer[sizeof(T) * 3 + 1];
+      buffer[0]                      = '[';
+      constexpr std::string_view Hex = "0123456789abcdef";
+      char *p                        = buffer;
+      for (std::byte b : nth::bytes(t)) {
+        *++p = Hex[static_cast<uint8_t>(b) >> 4];
+        *++p = Hex[static_cast<uint8_t>(b) & 0x0f];
+        *++p = ' ';
+      }
+      *p = ']';
+
+      io::write_text(sw, std::string_view(nth::type<T>.name()));
+      io::write_text(sw, std::string_view(buffer, 3 * sizeof(T) + 1));
+    }
     return s;
   }
 

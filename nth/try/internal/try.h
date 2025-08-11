@@ -9,6 +9,7 @@
 #include "nth/base/attributes.h"
 #include "nth/base/core.h"
 #include "nth/base/macros.h"
+#include "nth/debug/log/log.h"
 #include "nth/memory/address.h"
 #include "nth/meta/concepts/core.h"
 #include "nth/meta/type.h"
@@ -44,6 +45,10 @@ struct PointerHandler {
       return nullptr;
     }
     constexpr operator bool() const { return false; }
+
+    friend void NthFormat(auto& w, auto&, result_type) {
+      io::write_text(w, "nullptr");
+    }
   };
   static constexpr bool okay(T* ptr) { return ptr; }
   static constexpr result_type transform_return(T* ptr) { return {}; }

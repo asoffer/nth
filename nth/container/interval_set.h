@@ -88,7 +88,7 @@ struct interval_set {
   // invoked on this `interval_set`.
   std::span<interval_type const> intervals() const { return intervals_; }
 
-  friend void NthPrint(auto& p, auto& f, interval_set const& is) {
+  friend void NthFormat(auto& p, auto& f, interval_set const& is) {
     if (is.empty()) {
       p.write("{}");
       return;

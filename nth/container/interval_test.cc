@@ -97,6 +97,10 @@ NTH_TEST("interval/format") {
   NTH_EXPECT(s == "[1.1, 3.3)");
 
   s.clear();
+  nth::format(w, nth::json_formatter{}, nth::interval(1, 3));
+  NTH_EXPECT(s == "[1, 3]");
+
+  s.clear();
   nth::interpolate<"{}">(w, nth::interval(1, 3));
   NTH_EXPECT(s == "[1, 3)");
 }
