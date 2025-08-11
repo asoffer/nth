@@ -37,6 +37,10 @@ struct type_tag final {
 
   constexpr operator type_id() const;
 
+  friend void NthFormat(auto& w, auto&, type_tag) {
+    w.write(nth::byte_range(get_name_impl()));
+  }
+
   template <nth::explicitly_convertible_to<T> U>
   static constexpr auto cast(U&& u) {
     return static_cast<T>(std::forward<U>(u));
