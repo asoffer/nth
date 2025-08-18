@@ -18,7 +18,8 @@ struct section_type {
 };
 
 template <compile_time_string S>
-requires(S.size() <= 16) inline section_type<S> section;
+  requires(S.size() <= 16)
+inline section_type<S> section;
 
 }  // namespace nth
 

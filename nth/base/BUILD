@@ -140,6 +140,10 @@ cc_test(
         "section_test.cc",
         "internal/external_section.cc",
     ],
+    linkopts = select({
+        "@platforms//os:linux": ["-Wl,-z,nostart-stop-gc"],
+        "@platforms//os:osx": [],
+    }),
     deps = [
         ":section",
         "//nth/test/raw:test",

@@ -10,6 +10,9 @@ test \
   --test_arg="--use-colour yes" \
   --test_output=errors \
 
+test:ci \
+  --dynamic_mode=off \
+
 build:asan \
   --copt=-fsanitize=address \
   --linkopt=-fsanitize=address \
