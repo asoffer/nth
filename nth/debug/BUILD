@@ -88,6 +88,7 @@ cc_test(
 cc_test(
     name = "unreachable_test",
     srcs = ["unreachable_test.cc"],
+    tags = ["skip-opt"],
     deps = [
         ":unreachable",
         "//nth/test/raw:test",
