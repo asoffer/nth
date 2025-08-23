@@ -124,6 +124,9 @@ struct cc_formatter : structural_formatter<cc_formatter> {
   void format(io::writer auto &w, bool b) {
     io::write_text(w, b ? "true" : "false");
   }
+
+  void format(io::writer auto &w, std::monostate) { io::write_text(w, "{}"); }
+
   void format(io::writer auto &w, std::integral auto n) {
     base_formatter(10).format(w, n);
   }
