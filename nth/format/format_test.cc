@@ -1,12 +1,14 @@
 #include "nth/format/format.h"
 
+#include <string>
+#include <string_view>
+#include <vector>
+
 #include "absl/strings/str_cat.h"
 #include "absl/strings/str_format.h"
 #include "nth/test/test.h"
 
 namespace {
-
-namespace some_ns {
 
 struct S {
   friend void NthFormat(nth::io::writer auto& w, auto&, S const& s) {
@@ -17,16 +19,51 @@ struct S {
   std::string str;
 };
 
-}  // namespace some_ns
+NTH_TEST("format/container") {
+  std::string result;
+  nth::io::string_writer w(result);
+  std::vector<S> v;
+  nth::container_formatter<nth::default_formatter_t> fmt("{", ", ", "}", {});
 
-NTH_TEST("format/absl_stringify") {
-  NTH_EXPECT(absl::StrCat(some_ns::S{.str = "hello"}) == "[[hello]]");
+  nth::format(w, fmt, v);
+  NTH_ASSERT(result == "{}");
 
-  static_assert(absl::HasAbslStringify<some_ns::S>::value);
+  result.clear();
+  v.push_back({.str = "hello"});
+  nth::format(w, fmt, v);
+  NTH_ASSERT(result == "{[[hello]]}");
 
-  // TODO: Understand why `absl::StrFormat` does not work.
-  // NTH_EXPECT(absl::StrFormat("{%v}", some_ns::S{.str = "hello"}) ==
-  //            "{[[hello]]}");
+  result.clear();
+  v.push_back({.str = "world"});
+  nth::format(w, fmt, v);
+  NTH_ASSERT(result == "{[[hello]], [[world]]}");
 }
+
+struct StringRef {
+  operator std::string_view() const { return content; }
+  std::string_view content;
+};
+
+NTH_TEST("format/debug/container") {
+  std::vector<std::string> v{"hello", "world"};
+  std::string result;
+  nth::io::string_writer w(result);
+  nth::format(w, nth::debug_formatter, v);
+  NTH_EXPECT(result == "[\"hello\", \"world\"]");
+
+  result.clear();
+  std::vector<StringRef> v2{{.content = "hello"}, {.content = "world"}};
+  nth::format(w, nth::debug_formatter, v);
+  NTH_EXPECT(result == "[\"hello\", \"world\"]");
+}
+
+static_assert(
+    nth::type<decltype(NthDefaultFormatter(nth::type<std::string>))> ==
+    nth::type<nth::text_formatter>);
+static_assert(
+    nth::type<decltype(NthDefaultFormatter(nth::type<std::string_view>))> ==
+    nth::type<nth::text_formatter>);
+static_assert(nth::type<decltype(NthDefaultFormatter(nth::type<StringRef>))> ==
+              nth::type<nth::text_formatter>);
 
 }  // namespace

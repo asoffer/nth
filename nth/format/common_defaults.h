@@ -4,8 +4,11 @@
 #include <concepts>
 #include <cstddef>
 #include <optional>
+#include <span>
 #include <string>
 #include <string_view>
+#include <variant>
+#include <vector>
 
 #include "nth/format/common_formatters.h"
 #include "nth/meta/type.h"
@@ -23,15 +26,16 @@ inline word_formatter<casing::lower> NthDefaultFormatter(nth::type_tag<bool>) {
 
 inline ascii_formatter NthDefaultFormatter(nth::type_tag<char>) { return {}; }
 
+inline trivial_formatter NthDefaultFormatter(nth::type_tag<std::monostate>) {
+  return {};
+}
+
 inline byte_formatter NthDefaultFormatter(nth::type_tag<std::byte>) {
   return {};
 }
 
-inline text_formatter NthDefaultFormatter(nth::type_tag<std::string>) {
-  return {};
-}
-
-inline text_formatter NthDefaultFormatter(nth::type_tag<std::string_view>) {
+template <std::convertible_to<std::string_view> T>
+inline text_formatter NthDefaultFormatter(nth::type_tag<T>) {
   return {};
 }
 

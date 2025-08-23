@@ -150,32 +150,6 @@ constexpr auto format(io::writer auto& w, F&& fmt, T const& value) {
   }
 }
 
-namespace internal_format {
-
-template <typename Sink>
-struct absl_stringify_writer {
-  explicit absl_stringify_writer(Sink& sink) : sink_(sink) {}
-
-  io::basic_write_result write(std::span<std::byte const> bytes) {
-    sink_.Append(std::string_view(reinterpret_cast<char const*>(bytes.data()),
-                                  bytes.size()));
-    return io::basic_write_result(bytes.size());
-  }
-
- private:
-  Sink& sink_;
-};
-
-}  // namespace internal_format
 }  // namespace nth
-
-template <typename Sink, typename T>
-  requires(requires(nth::io::minimal_writer w, T const& value) {
-    NthFormat(w, nth::default_formatter, value);
-  })
-void AbslStringify(Sink& sink, T const& value) {
-  nth::internal_format::absl_stringify_writer<Sink> w(sink);
-  nth::format(w, value);
-}
 
 #endif  // NTH_FORMAT_FORMAT_H

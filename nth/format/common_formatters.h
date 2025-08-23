@@ -89,6 +89,36 @@ struct text_formatter {
   }
 };
 
+template <typename F>
+struct container_formatter {
+  explicit container_formatter(std::string open, std::string separator,
+                               std::string close, F fmt)
+      : open_(std::move(open)),
+        separator_(separator),
+        close_(std::move(close)),
+        fmt_(std::move(fmt)) {}
+
+  void format(io::writer auto& w, auto const& c) const
+    requires(requires {
+      c.begin();
+      c.end();
+    })
+  {
+    io::write_text(w, open_);
+    std::string_view separator = "";
+    for (auto const& elem : c) {
+      io::write_text(w, std::exchange(separator, separator_));
+      nth::format(w, fmt_, elem);
+    }
+    io::write_text(w, close_);
+  }
+
+  std::string open_;
+  std::string separator_;
+  std::string close_;
+  F fmt_;
+};
+
 struct byte_formatter {
   void format(io::writer auto& w, std::byte b) const {
     constexpr char hex[] = "0123456789abcdef";
@@ -174,9 +204,16 @@ struct default_formatter_t {
 };
 
 struct debug_formatter_t {
+  void format(io::writer auto& w, std::string_view s) const {
+    quote_formatter f;
+    nth::format(w, f, s);
+  }
+
   template <typename T>
   void format(io::writer auto& w, T const& t) const
-    requires(requires { NthDefaultFormatter(nth::type<T>); })
+    requires(
+        requires { NthDefaultFormatter(nth::type<T>); } and
+        not requires { std::string_view(t); })
   {
     auto fmt = NthDefaultFormatter(nth::type<T>);
     ::nth::format(w, fmt, t);
@@ -190,13 +227,8 @@ struct debug_formatter_t {
           t.end();
         } and not requires { NthDefaultFormatter(nth::type<T>); })
   {
-    nth::io::write_text(w, "[");
-    std::string_view separator = "";
-    for (auto const& element : t) {
-      nth::io::write_text(w, std::exchange(separator, ", "));
-      nth::format(w, *this, element);
-    }
-    nth::io::write_text(w, "]");
+    container_formatter<debug_formatter_t> fmt("[", ", ", "]", *this);
+    nth::format(w, fmt, t);
   }
 };
 
