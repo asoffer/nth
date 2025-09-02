@@ -23,7 +23,12 @@ cc_library(
         "//nth/base:section",
         "//nth/debug/contracts/internal:contracts",
         "//nth/strings:glob",
+        ":registry.ld",
     ],
+    linkopts = [
+        "-Wl,-T,$(location registry.ld)",
+    ],
+    data = ["registry.ld"],
 )
 
 # TODO: Split this test into tracing and testing for the contract macros.

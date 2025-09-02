@@ -54,7 +54,12 @@ cc_library(
         "//nth/base:section",
         "//nth/debug/log/internal:log",
         "//nth/strings:glob",
+        ":registry.ld",
     ],
+    linkopts = [
+        "-Wl,-T,$(location registry.ld)",
+    ],
+    data = ["registry.ld"],
 )
 
 cc_test(
