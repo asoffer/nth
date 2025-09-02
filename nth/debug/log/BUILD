@@ -54,12 +54,18 @@ cc_library(
         "//nth/base:section",
         "//nth/debug/log/internal:log",
         "//nth/strings:glob",
-        ":registry.ld",
-    ],
-    linkopts = [
-        "-Wl,-T,$(location registry.ld)",
-    ],
-    data = ["registry.ld"],
+    ] + select({
+        "@platforms//os:linux": [":registry.ld"],
+        "//conditions:default": []
+    }),
+    linkopts = select({
+        "@platforms//os:linux": ["-Wl,-T,$(location registry.ld)"],
+        "//conditions:default": []
+    }),
+    data = select({
+        "@platforms//os:linux": ["registry.ld"],
+        "//conditions:default": []
+    })
 )
 
 cc_test(
