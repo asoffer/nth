@@ -37,6 +37,7 @@ NTH_TEST("format/container") {
   v.push_back({.str = "world"});
   nth::format(w, fmt, v);
   NTH_ASSERT(result == "{[[hello]], [[world]]}");
+  NTH_ASSERT(nth::format_to_string(fmt, v) == "{[[hello]], [[world]]}");
 }
 
 struct StringRef {
@@ -55,6 +56,8 @@ NTH_TEST("format/debug/container") {
   std::vector<StringRef> v2{{.content = "hello"}, {.content = "world"}};
   nth::format(w, nth::debug_formatter, v);
   NTH_EXPECT(result == "[\"hello\", \"world\"]");
+  NTH_EXPECT(nth::format_to_string(nth::debug_formatter, v) ==
+             "[\"hello\", \"world\"]");
 }
 
 static_assert(

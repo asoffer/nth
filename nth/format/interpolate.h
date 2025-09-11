@@ -221,6 +221,16 @@ void interpolate(W& w, Ts const&... values)
   nth::io::write_text(w, static_cast<std::string_view>(S).substr(start));
 }
 
+template <interpolation_string S, int&..., typename... Ts>
+std::string interpolate_to_string(Ts const&... values)
+  requires(sizeof...(values) == S.placeholders())
+{
+  std::string s;
+  nth::io::string_writer w(s);
+  nth::interpolate<S>(w, values...);
+  return s;
+}
+
 // Users can customize the interpretation of the interpolation string via the
 // `NthInterpolateFormatter` FTADLE hook. Specifically, when an interpolation
 // slot is encountered, the `nth::interpolate` function will invoke

@@ -1,10 +1,11 @@
 #ifndef NTH_FORMAT_FORMAT_H
 #define NTH_FORMAT_FORMAT_H
 
-#include <optional>
+#include <string>
 
 #include "nth/format/common_defaults.h"
 #include "nth/format/common_formatters.h"
+#include "nth/io/writer/string.h"
 #include "nth/io/writer/writer.h"
 #include "nth/meta/constant.h"
 #include "nth/meta/type.h"
@@ -31,6 +32,12 @@ constexpr auto format(io::writer auto& w, F&& fmt, T const& value);
 // `default_formatter<T>()` and passing that as the formatter `fmt`.
 template <int&..., typename T>
 constexpr auto format(io::writer auto& w, T const& value);
+
+template <int&..., typename F, typename T>
+std::string format_to_string(F&& fmt, T const& value);
+
+template <int&..., typename T>
+std::string format_to_string(T const& value);
 
 namespace internal_format {
 template <typename F, nth::structure S>
@@ -148,6 +155,19 @@ constexpr auto format(io::writer auto& w, F&& fmt, T const& value) {
   } else {
     return NthFormat(w, fmt, value);
   }
+}
+
+template <int&..., typename F, typename T>
+std::string format_to_string(F&& fmt, T const& value) {
+  std::string s;
+  nth::io::string_writer w(s);
+  nth::format(w, fmt, value);
+  return s;
+}
+
+template <int&..., typename T>
+std::string format_to_string(T const& value) {
+  return format_to_string(default_formatter, value);
 }
 
 }  // namespace nth

@@ -11,6 +11,8 @@ void Simple() {
   nth::io::string_writer w(s);
   nth::interpolate<"abc{}def">(w, "xyz");
   NTH_RAW_TEST_ASSERT(s == "abcxyzdef");
+  NTH_RAW_TEST_ASSERT(nth::interpolate_to_string<"abc{}def">("xyz") ==
+                      "abcxyzdef");
 }
 
 void Number() {
@@ -51,6 +53,8 @@ void Unicode() {
   nth::io::string_writer w(s);
   nth::interpolate<"{}años">(w, "cumple");
   NTH_RAW_TEST_ASSERT(s == "cumpleaños");
+  NTH_RAW_TEST_ASSERT(nth::interpolate_to_string<"{}años">("cumple"),
+                      "cumpleaños");
 }
 
 void NonDefaultFormatSpec() {
@@ -126,6 +130,8 @@ void UserDefined() {
 
   nth::interpolate<"{({x}, {})}">(w, pt);
   NTH_RAW_TEST_ASSERT(s == "(a, 20)");
+  NTH_RAW_TEST_ASSERT(nth::interpolate_to_string<"{({x}, {})}">(pt) ==
+                      "(a, 20)");
   s.clear();
 }
 
@@ -145,6 +151,8 @@ void Debug() {
   std::vector<std::vector<int>> vv = {{}, {1}, {2, 3, 4}, {}};
   s.clear();
   nth::interpolate<"{?}">(w, vv);
+  NTH_RAW_TEST_ASSERT(s == "[[], [1], [2, 3, 4], []]");
+  nth::interpolate_to_string<"{?}">(vv);
   NTH_RAW_TEST_ASSERT(s == "[[], [1], [2, 3, 4], []]");
 }
 

@@ -38,6 +38,7 @@ cc_library(
     ],
     deps = [
       "//nth/io/writer",
+      "//nth/io/writer:string",
       "//nth/memory:bytes",
       "//nth/meta:constant",
       "//nth/meta:type",
@@ -65,6 +66,7 @@ cc_library(
         "//nth/base:attributes",
         "//nth/base:core",
         "//nth/io/writer",
+        "//nth/io/writer:string",
     ],
 )
 
