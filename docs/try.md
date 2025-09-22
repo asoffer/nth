@@ -48,6 +48,10 @@ an `nth::type_tag<T>`, and returning the default handler to be used. Note that t
 be invoked multiple times, so if a user wants the handler to be stateful, they must ensure the
 function returns a reference to a global handler, or somehow otherwise share the state.
 
+## `NTH_UNWRAP`
+
+Much like `NTH_TRY`, but aborts in the event of an error, rather than returning.
+
 ## `nth::try_main`
 
 A custom exit handler primarily for use inside `main`. On failure the returned value will be `1`,
