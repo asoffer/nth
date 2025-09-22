@@ -131,6 +131,8 @@
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#custom-default-exit-handlers">Custom Default Exit Handlers</a>
     </li>
+    <li class="toctree-l2"><a class="reference internal" href="#nth_unwrap">NTH_UNWRAP</a>
+    </li>
     <li class="toctree-l2"><a class="reference internal" href="#nthtry_main">nth::try_main</a>
     </li>
     </ul>
@@ -214,6 +216,8 @@ several builtins: </p>
 an <code>nth::type_tag&lt;T&gt;</code>, and returning the default handler to be used. Note that this expression may
 be invoked multiple times, so if a user wants the handler to be stateful, they must ensure the
 function returns a reference to a global handler, or somehow otherwise share the state.</p>
+<h2 id="nth_unwrap"><code>NTH_UNWRAP</code></h2>
+<p>Much like <code>NTH_TRY</code>, but aborts in the event of an error, rather than returning.</p>
 <h2 id="nthtry_main"><code>nth::try_main</code></h2>
 <p>A custom exit handler primarily for use inside <code>main</code>. On failure the returned value will be <code>1</code>,
 indicating unsuccessful program termination. Otherwise the value is transformed according to
