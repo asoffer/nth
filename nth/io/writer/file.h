@@ -35,6 +35,7 @@ struct file_writer {
     file_ = std::exchange(f.file_, nullptr);
     return *this;
   }
+  void flush();
   ~file_writer();
 
   basic_write_result write(std::span<std::byte const> data);

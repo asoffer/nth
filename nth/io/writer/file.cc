@@ -17,6 +17,8 @@ basic_write_result file_writer::write(std::span<std::byte const> data) {
                                         1, data.size(), file_));
 }
 
+void file_writer::flush() { std::fflush(file_); }
+
 file_writer::~file_writer() {
   if (not file_) { return; }
   int result = std::fclose(file_);

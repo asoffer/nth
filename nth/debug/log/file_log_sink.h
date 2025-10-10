@@ -28,6 +28,8 @@ struct file_log_sink : log_sink {
     }
   }
 
+  void flush() override { writer_.flush(); }
+
  private:
   nth::io::file_writer& writer_;
   bool ansi_color_;

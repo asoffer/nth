@@ -19,5 +19,8 @@ registrar<log_sink*>::range_type registered_log_sinks() {
 }  // namespace internal_log
 
 void register_log_sink(log_sink& sink) { registrar_->insert(&sink); }
+void flush_logs() {
+  for (log_sink* s : internal_log::registered_log_sinks()) { s->flush(); }
+}
 
 }  // namespace nth

@@ -11,9 +11,10 @@ namespace nth {
 // Any object whose type inherits from `log_sink` may be registered as a log
 // sink to receive all log messages received after registration.
 struct log_sink {
-  virtual ~log_sink() = default;
+  virtual ~log_sink()                 = default;
   virtual void send(log_configuration const&, log_line const&,
                     log_entry const&) = 0;
+  virtual void flush() {}
 };
 
 namespace internal_log {
@@ -25,6 +26,7 @@ registrar<log_sink*>::range_type registered_log_sinks();
 // Registers `sink` as a log sink. There is no mechanism for unregistering
 // `sink`.
 void register_log_sink(log_sink& sink);
+void flush_logs();
 
 }  // namespace nth
 
