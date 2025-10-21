@@ -216,21 +216,43 @@ decltype(auto) default_try_exit_handler() {
   NTH_IF(NTH_IS_PARENTHESIZED(NTH_FIRST_ARGUMENT(__VA_ARGS__)),                \
          NTH_TRY_INTERNAL_TRY_WITH_HANDLER,                                    \
          NTH_TRY_INTERNAL_TRY_WITHOUT_HANDLER)                                 \
-  (__VA_ARGS__)
+  (NTH_TRY_INTERNAL_RETURN, __VA_ARGS__)
 
-#define NTH_TRY_INTERNAL_TRY_WITHOUT_HANDLER(...)                              \
+#define NTH_TRY_INTERNAL_TRY_OR_BREAK(...)                                     \
+  NTH_IF(NTH_IS_PARENTHESIZED(NTH_FIRST_ARGUMENT(__VA_ARGS__)),                \
+         NTH_TRY_INTERNAL_TRY_WITH_HANDLER,                                    \
+         NTH_TRY_INTERNAL_TRY_WITHOUT_HANDLER)                                 \
+  (NTH_TRY_INTERNAL_BREAK, __VA_ARGS__)
+
+#define NTH_TRY_INTERNAL_TRY_OR_CONTINUE(...)                                  \
+  NTH_IF(NTH_IS_PARENTHESIZED(NTH_FIRST_ARGUMENT(__VA_ARGS__)),                \
+         NTH_TRY_INTERNAL_TRY_WITH_HANDLER,                                    \
+         NTH_TRY_INTERNAL_TRY_WITHOUT_HANDLER)                                 \
+  (NTH_TRY_INTERNAL_CONTINUE, __VA_ARGS__)
+
+#define NTH_TRY_INTERNAL_TRY_WITHOUT_HANDLER(action, ...)                      \
   NTH_TRY_INTERNAL_TRY_WITH_HANDLER(                                           \
+      action,                                                                  \
       (::nth::default_try_exit_handler<                                        \
           std::remove_cvref_t<decltype(__VA_ARGS__)>>()),                      \
       __VA_ARGS__)
 
-#define NTH_TRY_INTERNAL_TRY_WITH_HANDLER(handler, ...)                        \
+#define NTH_TRY_INTERNAL_RETURN(handler)                                       \
+  return handler.transform_return(NthInternalExpr);
+
+#define NTH_TRY_INTERNAL_BREAK(handler)                                        \
+  (void)handler.transform_return(NthInternalExpr);                             \
+  break;
+
+#define NTH_TRY_INTERNAL_CONTINUE(handler)                                     \
+  (void)handler.transform_return(NthInternalExpr);                             \
+  continue;
+
+#define NTH_TRY_INTERNAL_TRY_WITH_HANDLER(action, handler, ...)                \
   (({                                                                          \
      using NthTryType       = decltype((__VA_ARGS__));                         \
      auto&& NthInternalExpr = __VA_ARGS__;                                     \
-     if (not handler.okay(NthInternalExpr)) {                                  \
-       return handler.transform_return(NthInternalExpr);                       \
-     }                                                                         \
+     if (not handler.okay(NthInternalExpr)) { action(handler); }               \
      ::nth::internal_try::wrap<                                                \
          NthTryType, nth::lvalue_reference<NthTryType>,                        \
          nth::rvalue_reference<NthTryType>>::make(NTH_FWD(NthInternalExpr));   \

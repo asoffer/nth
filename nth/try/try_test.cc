@@ -204,4 +204,35 @@ NTH_TEST("try/status/uncopyable") {
   }
 }
 
+NTH_TEST("try/continue") {
+  std::vector<int> nums;
+  for (int i = 0; i < 10; ++i) {
+    int *ptr = (i % 3 == 0) ? nullptr : &i;
+    nums.push_back(NTH_TRY_OR_CONTINUE(ptr));
+  }
+  NTH_ASSERT(nums.size() == 6u);
+  NTH_EXPECT(nums[0] == 1);
+  NTH_EXPECT(nums[1] == 2);
+  NTH_EXPECT(nums[2] == 4);
+  NTH_EXPECT(nums[3] == 5);
+  NTH_EXPECT(nums[4] == 7);
+  NTH_EXPECT(nums[5] == 8);
+}
+
+NTH_TEST("try/break") {
+  std::vector<int> nums;
+  for (int i = 0; i < 10; ++i) {
+    int *ptr = (i == 7) ? nullptr : &i;
+    nums.push_back(NTH_TRY_OR_BREAK(ptr));
+  }
+  NTH_ASSERT(nums.size() == 7u);
+  NTH_EXPECT(nums[0] == 0);
+  NTH_EXPECT(nums[1] == 1);
+  NTH_EXPECT(nums[2] == 2);
+  NTH_EXPECT(nums[3] == 3);
+  NTH_EXPECT(nums[4] == 4);
+  NTH_EXPECT(nums[5] == 5);
+  NTH_EXPECT(nums[6] == 6);
+}
+
 }  // namespace
