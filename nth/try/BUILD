@@ -10,6 +10,7 @@ cc_library(
         "//nth/base:attributes",
         "//nth/base:core",
         "//nth/base:macros",
+        "//nth/debug/log",
         "//nth/meta:type",
         "//nth/meta/concepts:core",
         "@abseil-cpp//absl/status",
