@@ -6,6 +6,7 @@ cc_library(
     srcs = ["file.cc"],
     deps = [
         ":reader",
+        "//nth/debug",
         "//nth/io:file_path",
     ],
 )

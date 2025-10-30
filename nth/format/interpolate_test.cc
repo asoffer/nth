@@ -1,5 +1,6 @@
 #include "nth/format/interpolate.h"
 
+#include "nth/meta/type.h"
 #include "nth/io/writer/string.h"
 #include "nth/meta/type.h"
 #include "nth/test/raw/test.h"

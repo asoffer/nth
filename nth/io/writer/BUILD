@@ -6,6 +6,7 @@ cc_library(
     srcs = ["file.cc"],
     deps = [
         ":writer",
+        "//nth/debug",
         "//nth/memory:buffer",
         "//nth/io:file_path",
     ],
@@ -16,6 +17,7 @@ cc_test(
     srcs = ["file_test.cc"],
     deps = [
         ":file",
+        "//nth/io:file_path",
         "//nth/test:main",
     ]
 )
@@ -33,6 +35,7 @@ cc_test(
     srcs = ["null_test.cc"],
     deps = [
         ":null",
+        ":writer",
         "//nth/test:main",
     ]
 )
@@ -53,6 +56,7 @@ cc_test(
     srcs = ["string_test.cc"],
     deps = [
         ":string",
+        ":writer",
         "//nth/memory:bytes",
         "//nth/test:main",
     ],

@@ -16,6 +16,7 @@ cc_test(
     srcs = ["cc_test.cc"],
     deps = [
         ":cc",
+        "//nth/types:structure",
         "//nth/test:main",
     ],
 )
@@ -75,6 +76,7 @@ cc_test(
     srcs = ["interpolate_test.cc"],
     deps = [
         ":interpolate",
+        "//nth/meta:type",
         "//nth/io/writer:string",
         "//nth/test/raw:test",
     ],
@@ -95,9 +97,10 @@ cc_test(
     name = "json_test",
     srcs = ["json_test.cc"],
     deps = [
-      ":structure",
+        ":structure",
         ":json",
         "//nth/test:main",
+        "//nth/types:structure",
     ],
 )
 

@@ -89,21 +89,31 @@ cc_library(
 
 cc_library(
     name = "main",
+    hdrs = ["test.h"],
     srcs = ["main.cc"],
     testonly = True,
     deps = [
+        ":arguments",
+        ":fakeable_function",
+        ":fuzz",
         ":benchmark",
         ":benchmark_result",
         ":test",
         "//nth/base:indestructible",
+        "//nth/base:macros",
+        "//nth/debug/contracts",
         "//nth/debug/contracts:violation",
-        "//nth/debug/log:sink",
+        "//nth/debug/log",
         "//nth/debug/log:file_log_sink",
+        "//nth/debug/log:sink",
+        "//nth/debug/property",
         "//nth/format",
         "//nth/format:common",
         "//nth/io/writer",
         "//nth/io/writer:file",
+        "//nth/test/internal:test",
         "@abseil-cpp//absl/synchronization",
+        "@abseil-cpp//absl/strings",
     ],
 )
 

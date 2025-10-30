@@ -1,7 +1,8 @@
 common \
   --color=yes \
   --registry=https://raw.githubusercontent.com/asoffer/bazel-registry/main \
-  --registry=https://bcr.bazel.build
+  --registry=https://bcr.bazel.build \
+  --features=layering_check
 
 build \
   --strip=never

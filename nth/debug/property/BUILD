@@ -17,6 +17,7 @@ cc_test(
     srcs = ["property_test.cc"],
     deps = [
         ":property",
+        "//nth/debug/contracts:violation",
         "//nth/debug/contracts",
     ],
 )

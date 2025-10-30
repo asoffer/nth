@@ -32,6 +32,7 @@ cc_test(
     srcs = ["flat_forest_test.cc"],
     deps = [
         ":flat_forest",
+        "//nth/debug",
         "//nth/test:main",
     ],
 )
@@ -92,6 +93,7 @@ cc_test(
     srcs = ["interval_test.cc"],
     deps = [
         ":interval",
+        "//nth/io/writer:string",
         "//nth/test:main",
     ],
 )
@@ -150,6 +152,7 @@ cc_test(
     srcs = ["stable_container_test.cc"],
     deps = [
         ":stable_container",
+        "//nth/test:benchmark",
         "//nth/test:main",
     ],
 )
@@ -167,6 +170,7 @@ cc_test(
     srcs = ["stack_test.cc"],
     deps = [
         ":stack",
+        "//nth/test:benchmark",
         "//nth/test:main",
     ],
 )

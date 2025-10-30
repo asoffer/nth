@@ -2,7 +2,10 @@ package(default_visibility = ["//visibility:public"])
 
 cc_library(
     name = "debug",
-    hdrs = ["debug.h"],
+    hdrs = [
+        "debug.h",
+        "//nth/debug/property:property.h",
+    ],
     deps = [
         ":source_location",
         ":unimplemented",
@@ -10,7 +13,10 @@ cc_library(
         "//nth/debug/contracts",
         "//nth/debug/log",
         "//nth/debug/property",
+        "//nth/debug/property/internal:concepts",
+        "//nth/debug/property/internal:implementation",
         "//nth/debug/trace",
+        "//nth/meta/concepts:invocable",
     ],
 )
 

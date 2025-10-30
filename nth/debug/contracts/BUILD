@@ -20,8 +20,10 @@ cc_library(
     hdrs = ["contracts.h"],
     srcs = ["contracts.cc"],
     deps = [
+        ":violation",
         "//nth/base:section",
         "//nth/debug/contracts/internal:contracts",
+        "//nth/debug:source_location",
         "//nth/strings:glob",
     ] + select({
         "@platforms//os:linux": [":registry.ld"],
@@ -45,6 +47,7 @@ cc_test(
     copts = ["-DNTH_DEBUG_INTERNAL_NO_ABORT_FOR_TEST"],
     deps = [
         ":contracts",
+        ":violation",
         "//nth/debug/internal:raw_check",
         "//nth/debug/log",
         "//nth/debug/log:sink",

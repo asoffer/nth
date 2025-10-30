@@ -29,6 +29,7 @@ cc_test(
     deps = [
       ":integer",
       ":test_traits",
+      "//nth/format:interpolate",
       "//nth/test:main",
     ],
 )
