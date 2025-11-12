@@ -136,6 +136,47 @@ void EnsureEvaluatesAtEndOfScope() {
   NTH_DEBUG_INTERNAL_RAW_CHECK(require_failed_count == 0);
 }
 
+void Invariants() {
+  reset_counts();
+  {
+    NTH_INVARIANT(true);
+    NTH_DEBUG_INTERNAL_RAW_CHECK(failure_count == 0);
+    NTH_DEBUG_INTERNAL_RAW_CHECK(require_failed_count == 0);
+    NTH_DEBUG_INTERNAL_RAW_CHECK(ensure_failed_count == 0);
+  }
+  NTH_DEBUG_INTERNAL_RAW_CHECK(failure_count == 0);
+  NTH_DEBUG_INTERNAL_RAW_CHECK(require_failed_count == 0);
+  NTH_DEBUG_INTERNAL_RAW_CHECK(ensure_failed_count == 0);
+
+  {
+    NTH_INVARIANT(false);
+#if NTH_BUILD_MODE(debug)
+    NTH_DEBUG_INTERNAL_RAW_CHECK(failure_count == 1);
+    NTH_DEBUG_INTERNAL_RAW_CHECK(require_failed_count == 1);
+#elif NTH_BUILD_MODE(fastbuild) or NTH_BUILD_MODE(harden)
+    NTH_DEBUG_INTERNAL_RAW_CHECK(failure_count == 0);
+    NTH_DEBUG_INTERNAL_RAW_CHECK(require_failed_count == 1);
+#else
+    NTH_DEBUG_INTERNAL_RAW_CHECK(failure_count == 0);
+    NTH_DEBUG_INTERNAL_RAW_CHECK(require_failed_count == 0);
+#endif
+    NTH_DEBUG_INTERNAL_RAW_CHECK(ensure_failed_count == 0);
+  }
+#if NTH_BUILD_MODE(debug)
+  NTH_DEBUG_INTERNAL_RAW_CHECK(failure_count == 2);
+  NTH_DEBUG_INTERNAL_RAW_CHECK(require_failed_count == 1);
+  NTH_DEBUG_INTERNAL_RAW_CHECK(ensure_failed_count == 1);
+#elif NTH_BUILD_MODE(fastbuild) or NTH_BUILD_MODE(harden)
+  NTH_DEBUG_INTERNAL_RAW_CHECK(failure_count == 0);
+  NTH_DEBUG_INTERNAL_RAW_CHECK(ensure_failed_count == 1);
+  NTH_DEBUG_INTERNAL_RAW_CHECK(require_failed_count == 1);
+#else
+  NTH_DEBUG_INTERNAL_RAW_CHECK(failure_count == 0);
+  NTH_DEBUG_INTERNAL_RAW_CHECK(require_failed_count == 0);
+  NTH_DEBUG_INTERNAL_RAW_CHECK(ensure_failed_count == 0);
+#endif
+}
+
 void CheckComparisonOperators() {
   reset_counts();
 
@@ -281,7 +322,9 @@ int main() {
 
   RequireOnlyAbortsOnFalse();
   EnsureOnlyAbortsOnFalse();
+  EnsureOnlyAbortsOnFalse();
   EnsureEvaluatesAtEndOfScope();
+  Invariants();
   CheckComparisonOperators();
   CheckComparisonOperatorOverloads();
   CheckMoveOnly();

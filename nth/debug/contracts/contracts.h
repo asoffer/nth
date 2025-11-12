@@ -84,6 +84,18 @@
 // invoked and execution is aborted.
 #define NTH_ENSURE(...) NTH_INTERNAL_CONTRACTS_DO(ENSURE, __VA_ARGS__)
 
+// `NTH_INVARIANT`:
+//
+// The `NTH_INVARIANT` macro injects tracing into the wrapped expression and
+// evaluates it both wehre it is specified and at the end of the scope
+// containing it. If the wrapped expression evaluates to `true`, control flow
+// proceeds with no visible side-effects. If the expression evaluates to
+// `false`, all registered violation handlers are invoked and execution is
+// aborted.
+#define NTH_INVARIANT(...)                                                     \
+  NTH_REQUIRE(__VA_ARGS__);                                                    \
+  NTH_ENSURE(__VA_ARGS__)
+
 namespace nth {
 
 void contract_check_off(std::string_view glob);
