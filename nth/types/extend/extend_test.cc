@@ -158,5 +158,29 @@ NTH_TEST("extend/implies") {
   // NTH_EXPECT(static_cast<A<S<D>> const &>(s).f() == 1);
 }
 
+namespace many_fields {
+
+struct S : nth::extend<S>::with<field_sum> {
+  int x0, x1, x2, x3, x4, x5, x6, x7, x8, x9, x10, x11;
+};
+
+NTH_TEST("extend/many_fields") {
+  NTH_EXPECT(S{.x0  = 0,
+               .x1  = 1,
+               .x2  = 2,
+               .x3  = 3,
+               .x4  = 4,
+               .x5  = 5,
+               .x6  = 6,
+               .x7  = 7,
+               .x8  = 8,
+               .x9  = 9,
+               .x10 = 10,
+               .x11 = 11}
+                 .sum() == 66);
+}
+
+}  // namespace many_fields
+
 }  // namespace extend
 }  // namespace

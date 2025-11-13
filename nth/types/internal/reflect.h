@@ -22,7 +22,8 @@ struct any {
 
 template <typename T, size_t N>
 concept constructible_with = requires {
-  []<size_t... Ns>(std::index_sequence<Ns...>) -> decltype((T{any<Ns>{}...}, true)) {
+  []<size_t... Ns>(
+      std::index_sequence<Ns...>) -> decltype((T{any<Ns>{}...}, true)) {
     return true;
   }(std::make_index_sequence<N>{});
 };
@@ -109,6 +110,44 @@ auto get_fields(auto& v) {
         K, nth::type_sequence<decltype(x0), decltype(x1), decltype(x2),
                               decltype(x3), decltype(x4), decltype(x5),
                               decltype(x6)>>(x0, x1, x2, x3, x4, x5, x6);
+  } else if constexpr (Count == 8) {
+    auto& [x0, x1, x2, x3, x4, x5, x6, x7] = v;
+    return field_ref_t<
+        K, nth::type_sequence<decltype(x0), decltype(x1), decltype(x2),
+                              decltype(x3), decltype(x4), decltype(x5),
+                              decltype(x6), decltype(x7)>>(x0, x1, x2, x3, x4,
+                                                           x5, x6, x7);
+  } else if constexpr (Count == 9) {
+    auto& [x0, x1, x2, x3, x4, x5, x6, x7, x8] = v;
+    return field_ref_t<
+        K, nth::type_sequence<decltype(x0), decltype(x1), decltype(x2),
+                              decltype(x3), decltype(x4), decltype(x5),
+                              decltype(x6), decltype(x7), decltype(x8)>>(
+        x0, x1, x2, x3, x4, x5, x6, x7, x8);
+  } else if constexpr (Count == 10) {
+    auto& [x0, x1, x2, x3, x4, x5, x6, x7, x8, x9] = v;
+    return field_ref_t<
+        K, nth::type_sequence<decltype(x0), decltype(x1), decltype(x2),
+                              decltype(x3), decltype(x4), decltype(x5),
+                              decltype(x6), decltype(x7), decltype(x8),
+                              decltype(x9)>>(x0, x1, x2, x3, x4, x5, x6, x7, x8,
+                                             x9);
+  } else if constexpr (Count == 11) {
+    auto& [x0, x1, x2, x3, x4, x5, x6, x7, x8, x9, x10] = v;
+    return field_ref_t<
+        K, nth::type_sequence<decltype(x0), decltype(x1), decltype(x2),
+                              decltype(x3), decltype(x4), decltype(x5),
+                              decltype(x6), decltype(x7), decltype(x8),
+                              decltype(x9), decltype(x10)>>(
+        x0, x1, x2, x3, x4, x5, x6, x7, x8, x9, x10);
+  } else if constexpr (Count == 12) {
+    auto& [x0, x1, x2, x3, x4, x5, x6, x7, x8, x9, x10, x11] = v;
+    return field_ref_t<
+        K, nth::type_sequence<decltype(x0), decltype(x1), decltype(x2),
+                              decltype(x3), decltype(x4), decltype(x5),
+                              decltype(x6), decltype(x7), decltype(x8),
+                              decltype(x9), decltype(x10), decltype(x11)>>(
+        x0, x1, x2, x3, x4, x5, x6, x7, x8, x9, x10, x11);
   }
 }
 
