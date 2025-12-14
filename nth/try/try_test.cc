@@ -208,7 +208,7 @@ NTH_TEST("try/continue") {
   std::vector<int> nums;
   for (int i = 0; i < 10; ++i) {
     int *ptr = (i % 3 == 0) ? nullptr : &i;
-    nums.push_back(NTH_TRY_OR_CONTINUE(ptr));
+    nums.push_back(NTH_UNWRAP_OR(continue, ptr));
   }
   NTH_ASSERT(nums.size() == 6u);
   NTH_EXPECT(nums[0] == 1);
@@ -223,7 +223,7 @@ NTH_TEST("try/break") {
   std::vector<int> nums;
   for (int i = 0; i < 10; ++i) {
     int *ptr = (i == 7) ? nullptr : &i;
-    nums.push_back(NTH_TRY_OR_BREAK(ptr));
+    nums.push_back(NTH_UNWRAP_OR(break, ptr));
   }
   NTH_ASSERT(nums.size() == 7u);
   NTH_EXPECT(nums[0] == 0);

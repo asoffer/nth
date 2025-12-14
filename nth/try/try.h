@@ -1,6 +1,7 @@
 #ifndef NTH_TRY_TRY_H
 #define NTH_TRY_TRY_H
 
+#include "nth/base/macros.h"
 #include "nth/meta/concepts/core.h"
 #include "nth/try/internal/try.h"
 
@@ -30,29 +31,18 @@
 // null.
 #define NTH_TRY(...) NTH_TRY_INTERNAL_TRY(__VA_ARGS__)
 
-// `NTH_TRY_OR_BREAK` computes the passed-in expression and either `break`s or
-// evaluates to a possibly transformed version of it, dependent on
-// configuration. This functions analogously to `NTH_TRY` except that it breaks
-// from the current switch or loop ignoring the error value, rather than
-// returning. The error value is still computed, so if a custom handler is
-// provided, the `transform_return` function is still invoked, but the end value
-// is discarded.
-#define NTH_TRY_OR_BREAK(...) NTH_TRY_INTERNAL_TRY_OR_BREAK(__VA_ARGS__)
-
-// `NTH_TRY_OR_CONTINUE` computes the passed-in expression and either
-// `continue`s or evaluates to a possibly transformed version of it, dependent
-// on configuration. This functions analogously to `NTH_TRY` except that it
-// continues in the current loop ignoring the error value, rather than
-// returning. The error value is still computed, so if a custom handler is
-// provided, the `transform_return` function is still invoked, but the end value
-// is discarded.
-#define NTH_TRY_OR_CONTINUE(...) NTH_TRY_INTERNAL_TRY_OR_CONTINUE(__VA_ARGS__)
-
 // `NTH_UNWRAP` computes the passed-in expression and either evaluates to a
-// possibly transformed value of it, or aborts. The primary purpose is to.
-// This is similar to `NTH_TRY` but aborts rather than returning, for situations
-// where a particular invariant is expected to hold.
+// possibly transformed value of it, or aborts. This is similar to `NTH_TRY` but
+// aborts rather than returning, for situations where a particular invariant is
+// expected to hold.
 #define NTH_UNWRAP(...) NTH_TRY_INTERNAL_UNWRAP(__VA_ARGS__)
+
+// `NTH_UNWRAP_OR` computes the passed-in expression and either evaluates to a
+// possibly transformed value of it, or passes control according to `action`.
+// The `action` parameter must be `break`, `continue`, or `return`. Note that
+// `NTH_UNWRAP_OR(return, expr)` is similar to `NTH_TRY(expr)` but returns void.
+#define NTH_UNWRAP_OR(action, ...)                                             \
+  NTH_TRY_INTERNAL_UNWRAP_OR(action, __VA_ARGS__)
 
 // One can control the mechanism by which error handling occurs by passing in a
 // first parenthesized argument. The argument must adhere to the
