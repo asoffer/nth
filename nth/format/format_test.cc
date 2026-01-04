@@ -19,6 +19,13 @@ struct S {
   std::string str;
 };
 
+NTH_TEST("format/variant") {
+  std::variant<int, bool> v = 3;
+  NTH_ASSERT(nth::format_to_string(v) == "3");
+  v = true;
+  NTH_EXPECT(nth::format_to_string(v) == "true");
+}
+
 NTH_TEST("format/container") {
   std::string result;
   nth::io::string_writer w(result);

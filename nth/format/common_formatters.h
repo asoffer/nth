@@ -4,6 +4,7 @@
 #include <charconv>
 #include <cstdint>
 #include <optional>
+#include <variant>
 
 #include "nth/io/writer/writer.h"
 #include "nth/meta/type.h"
@@ -200,6 +201,12 @@ struct default_formatter_t {
 
   void format(io::writer auto& w, std::nullopt_t) const {
     io::write_text(w, "std::nullopt");
+  }
+
+  template <typename... Ts>
+  void format(io::writer auto& w, std::variant<Ts...> const& v) const {
+    default_formatter_t fmt;
+    std::visit([&](auto const& v) { nth::format(w, fmt, v); }, v);
   }
 };
 
