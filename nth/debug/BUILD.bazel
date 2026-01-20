@@ -35,7 +35,6 @@ cc_library(
     deps = [
         "//nth/format",
         "//nth/io/writer",
-        "//nth/utility:unconstructible",
     ],
 )
 

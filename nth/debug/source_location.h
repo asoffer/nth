@@ -5,7 +5,6 @@
 
 #include "nth/format/format.h"
 #include "nth/io/writer/writer.h"
-#include "nth/utility/unconstructible.h"
 
 namespace nth {
 
@@ -26,10 +25,9 @@ struct source_location {
   // Returns a `source_location` reperesenting the location at which this
   // function call is invoked.
   static constexpr source_location current(
-      unconstructible_except_by<source_location> = {},
-      char const* file                           = __builtin_FILE(),
-      char const* function                       = __builtin_FUNCTION(),
-      int line                                   = __builtin_LINE()) {
+      char const* file     = __builtin_FILE(),
+      char const* function = __builtin_FUNCTION(),
+      int line             = __builtin_LINE()) {
     return source_location(file, function, line);
   }
 
