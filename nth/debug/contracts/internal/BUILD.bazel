@@ -1,3 +1,5 @@
+load("@rules_cc//cc:cc_library.bzl", "cc_library")
+
 package(default_visibility = [
     "//nth/debug:__subpackages__",
     "//nth/test:__subpackages__",
@@ -13,8 +15,6 @@ cc_library(
     ],
 )
 
-
-
 cc_library(
     name = "macros",
     hdrs = ["macros.h"],
@@ -28,8 +28,8 @@ cc_library(
     hdrs = ["checker.h"],
     deps = [
         "//nth/debug/trace/internal:trace",
-        "//nth/format:interpolate",
         "//nth/format",
+        "//nth/format:interpolate",
         "//nth/io/writer",
         "//nth/meta:type",
     ],
@@ -37,8 +37,8 @@ cc_library(
 
 cc_library(
     name = "contracts",
-    hdrs = ["contracts.h"],
     srcs = ["contracts.cc"],
+    hdrs = ["contracts.h"],
     deps = [
         ":checker",
         ":enabler",
@@ -58,9 +58,9 @@ cc_library(
     name = "enabler",
     hdrs = ["enabler.h"],
     deps = [
-        "//nth/debug/contracts:violation",
         "//nth/base:section",
         "//nth/debug:source_location",
+        "//nth/debug/contracts:violation",
     ],
 )
 

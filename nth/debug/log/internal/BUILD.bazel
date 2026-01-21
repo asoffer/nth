@@ -1,11 +1,13 @@
+load("@rules_cc//cc:cc_library.bzl", "cc_library")
+
 package(default_visibility = ["//nth/debug/log:__subpackages__"])
 
 cc_library(
     name = "arguments",
     hdrs = ["arguments.h"],
     deps = [
-        "//nth/debug/log:line",
         "//nth/debug/log:entry",
+        "//nth/debug/log:line",
         "//nth/meta/concepts:core",
     ],
 )
@@ -17,8 +19,8 @@ cc_library(
         ":arguments",
         "//nth/base:macros",
         "//nth/base:section",
-        "//nth/debug/log:line",
-        "//nth/debug/log:entry",
         "//nth/debug:source_location",
+        "//nth/debug/log:entry",
+        "//nth/debug/log:line",
     ],
 )

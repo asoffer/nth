@@ -1,13 +1,16 @@
+load("@rules_cc//cc:cc_library.bzl", "cc_library")
+load("@rules_cc//cc:cc_test.bzl", "cc_test")
+
 package(default_visibility = ["//visibility:public"])
 
 cc_library(
     name = "arguments",
+    testonly = True,
     hdrs = ["arguments.h"],
     visibility = ["//visibility:private"],
-    testonly = True,
     deps = [
-      "//nth/test/internal:arguments",
-      "//nth/test/internal:invocation",
+        "//nth/test/internal:arguments",
+        "//nth/test/internal:invocation",
     ],
 )
 
@@ -31,8 +34,8 @@ cc_library(
 cc_library(
     name = "benchmark_result",
     testonly = True,
-    hdrs = ["benchmark_result.h"],
     srcs = ["benchmark_result.cc"],
+    hdrs = ["benchmark_result.h"],
     deps = [
         "//nth/base:indestructible",
         "//nth/registration:registrar",
@@ -73,31 +76,31 @@ cc_library(
 
 cc_library(
     name = "test",
-    hdrs = ["test.h"],
-    srcs = ["test.cc"],
     testonly = True,
+    srcs = ["test.cc"],
+    hdrs = ["test.h"],
     deps = [
         ":arguments",
         ":fakeable_function",
         ":fuzz",
         "//nth/base:macros",
-        "//nth/debug/property",
         "//nth/debug/contracts",
+        "//nth/debug/property",
         "//nth/test/internal:test",
     ],
 )
 
 cc_library(
     name = "main",
-    hdrs = ["test.h"],
-    srcs = ["main.cc"],
     testonly = True,
+    srcs = ["main.cc"],
+    hdrs = ["test.h"],
     deps = [
         ":arguments",
-        ":fakeable_function",
-        ":fuzz",
         ":benchmark",
         ":benchmark_result",
+        ":fakeable_function",
+        ":fuzz",
         ":test",
         "//nth/base:indestructible",
         "//nth/base:macros",
@@ -112,8 +115,8 @@ cc_library(
         "//nth/io/writer",
         "//nth/io/writer:file",
         "//nth/test/internal:test",
-        "@abseil-cpp//absl/synchronization",
         "@abseil-cpp//absl/strings",
+        "@abseil-cpp//absl/synchronization",
     ],
 )
 

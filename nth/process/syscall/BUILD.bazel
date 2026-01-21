@@ -1,9 +1,11 @@
+load("@rules_cc//cc:cc_library.bzl", "cc_library")
+
 package(default_visibility = ["//visibility:public"])
 
 cc_library(
     name = "fstat",
-    hdrs = ["fstat.h"],
     srcs = ["fstat.cc"],
+    hdrs = ["fstat.h"],
     deps = [
         "//nth/base:attributes",
         "//nth/debug:fakeable_function",
@@ -12,8 +14,8 @@ cc_library(
 
 cc_library(
     name = "lseek",
-    hdrs = ["lseek.h"],
     srcs = ["lseek.cc"],
+    hdrs = ["lseek.h"],
     deps = [
         "//nth/base:attributes",
         "//nth/debug:fakeable_function",
@@ -22,8 +24,8 @@ cc_library(
 
 cc_library(
     name = "open",
-    hdrs = ["open.h"],
     srcs = ["open.cc"],
+    hdrs = ["open.h"],
     deps = [
         "//nth/base:attributes",
         "//nth/debug:fakeable_function",
@@ -32,8 +34,8 @@ cc_library(
 
 cc_library(
     name = "read",
-    hdrs = ["read.h"],
     srcs = ["read.cc"],
+    hdrs = ["read.h"],
     deps = [
         "//nth/base:attributes",
         "//nth/debug:fakeable_function",
@@ -42,8 +44,8 @@ cc_library(
 
 cc_library(
     name = "write",
-    hdrs = ["write.h"],
     srcs = ["write.cc"],
+    hdrs = ["write.h"],
     deps = [
         "//nth/base:attributes",
         "//nth/debug:fakeable_function",

@@ -1,12 +1,14 @@
+load("@rules_cc//cc:cc_library.bzl", "cc_library")
+
 package(default_visibility = ["//nth/debug:__subpackages__"])
 
 cc_library(
     name = "raw_check",
     hdrs = ["raw_check.h"],
-    deps = [],
     visibility = [
         "//nth:__subpackages__",
     ],
+    deps = [],
 )
 
 cc_library(

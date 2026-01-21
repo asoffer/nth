@@ -1,9 +1,12 @@
+load("@rules_cc//cc:cc_library.bzl", "cc_library")
+load("@rules_cc//cc:cc_test.bzl", "cc_test")
+
 package(default_visibility = ["//visibility:public"])
 
 cc_library(
     name = "file",
-    hdrs = ["file.h"],
     srcs = ["file.cc"],
+    hdrs = ["file.h"],
     deps = [
         ":reader",
         "//nth/debug",
@@ -18,7 +21,7 @@ cc_test(
         ":file",
         "//nth/io/writer:file",
         "//nth/test:main",
-    ]
+    ],
 )
 
 cc_library(
@@ -33,8 +36,8 @@ cc_library(
 
 cc_library(
     name = "string",
-    hdrs = ["string.h"],
     srcs = ["string.cc"],
+    hdrs = ["string.h"],
     deps = [":reader"],
 )
 
@@ -44,5 +47,5 @@ cc_test(
     deps = [
         ":string",
         "//nth/test:main",
-    ]
+    ],
 )

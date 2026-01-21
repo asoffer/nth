@@ -1,9 +1,12 @@
+load("@rules_cc//cc:cc_library.bzl", "cc_library")
+load("@rules_cc//cc:cc_test.bzl", "cc_test")
+
 package(default_visibility = ["//visibility:public"])
 
 cc_library(
     name = "edit_distance",
-    hdrs = ["edit_distance.h"],
     srcs = ["edit_distance.cc"],
+    hdrs = ["edit_distance.h"],
 )
 
 cc_test(
@@ -17,8 +20,8 @@ cc_test(
 
 cc_library(
     name = "glob",
-    hdrs = ["glob.h"],
     srcs = ["internal/glob.h"],
+    hdrs = ["glob.h"],
     deps = [],
 )
 
@@ -50,8 +53,8 @@ cc_test(
 
 cc_library(
     name = "text",
-    hdrs = ["text.h"],
     srcs = ["text.cc"],
+    hdrs = ["text.h"],
     deps = [
         ":text_encoding",
     ],

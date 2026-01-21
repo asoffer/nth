@@ -1,3 +1,6 @@
+load("@rules_cc//cc:cc_library.bzl", "cc_library")
+load("@rules_cc//cc:cc_test.bzl", "cc_test")
+
 package(default_visibility = ["//visibility:public"])
 
 cc_library(
@@ -17,26 +20,26 @@ cc_library(
 
 cc_library(
     name = "contracts",
-    hdrs = ["contracts.h"],
     srcs = ["contracts.cc"],
-    deps = [
-        ":violation",
-        "//nth/base:section",
-        "//nth/debug/contracts/internal:contracts",
-        "//nth/debug:source_location",
-        "//nth/strings:glob",
-    ] + select({
-        "@platforms//os:linux": [":registry.ld"],
-        "//conditions:default": []
+    hdrs = ["contracts.h"],
+    data = select({
+        "@platforms//os:linux": ["registry.ld"],
+        "//conditions:default": [],
     }),
     linkopts = select({
         "@platforms//os:linux": ["-Wl,-T,$(location registry.ld)"],
-        "//conditions:default": []
+        "//conditions:default": [],
     }),
-    data = select({
-        "@platforms//os:linux": ["registry.ld"],
-        "//conditions:default": []
-    })
+    deps = [
+        ":violation",
+        "//nth/base:section",
+        "//nth/debug:source_location",
+        "//nth/debug/contracts/internal:contracts",
+        "//nth/strings:glob",
+    ] + select({
+        "@platforms//os:linux": [":registry.ld"],
+        "//conditions:default": [],
+    }),
 )
 
 # TODO: Split this test into tracing and testing for the contract macros.
@@ -50,15 +53,15 @@ cc_test(
         ":violation",
         "//nth/debug/internal:raw_check",
         "//nth/debug/log",
-        "//nth/debug/log:sink",
         "//nth/debug/log:file_log_sink",
+        "//nth/debug/log:sink",
     ],
 )
 
 cc_library(
     name = "violation",
-    hdrs = ["violation.h"],
     srcs = ["violation.cc"],
+    hdrs = ["violation.h"],
     deps = [
         ":contract",
         "//nth/base:attributes",
