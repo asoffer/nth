@@ -1,3 +1,6 @@
+load("@rules_cc//cc:cc_library.bzl", "cc_library")
+load("@rules_cc//cc:cc_test.bzl", "cc_test")
+
 package(default_visibility = ["//visibility:public"])
 
 cc_library(
@@ -16,8 +19,8 @@ cc_test(
     srcs = ["cc_test.cc"],
     deps = [
         ":cc",
-        "//nth/types:structure",
         "//nth/test:main",
+        "//nth/types:structure",
     ],
 )
 
@@ -25,25 +28,25 @@ cc_library(
     name = "common",
     hdrs = ["common.h"],
     deps = [
-      ":interpolate",
-      ":format",
+        ":format",
+        ":interpolate",
     ],
 )
 
 cc_library(
     name = "format",
-    hdrs = ["format.h"],
     srcs = [
-        "common_formatters.h",
         "common_defaults.h",
+        "common_formatters.h",
     ],
+    hdrs = ["format.h"],
     deps = [
-      "//nth/io/writer",
-      "//nth/io/writer:string",
-      "//nth/memory:bytes",
-      "//nth/meta:constant",
-      "//nth/meta:type",
-      "//nth/types:structure",
+        "//nth/io/writer",
+        "//nth/io/writer:string",
+        "//nth/memory:bytes",
+        "//nth/meta:constant",
+        "//nth/meta:type",
+        "//nth/types:structure",
     ],
 )
 
@@ -60,8 +63,8 @@ cc_test(
 
 cc_library(
     name = "interpolate",
-    hdrs = ["interpolate.h"],
     srcs = ["internal/parameter_range.h"],
+    hdrs = ["interpolate.h"],
     deps = [
         ":format",
         "//nth/base:attributes",
@@ -76,8 +79,8 @@ cc_test(
     srcs = ["interpolate_test.cc"],
     deps = [
         ":interpolate",
-        "//nth/meta:type",
         "//nth/io/writer:string",
+        "//nth/meta:type",
         "//nth/test/raw:test",
     ],
 )
@@ -97,8 +100,8 @@ cc_test(
     name = "json_test",
     srcs = ["json_test.cc"],
     deps = [
-        ":structure",
         ":json",
+        ":structure",
         "//nth/test:main",
         "//nth/types:structure",
     ],
@@ -110,7 +113,7 @@ cc_library(
     deps = [
         ":common",
         ":format",
-        "//nth/types:structure",
         "//nth/meta/concepts:invocable",
+        "//nth/types:structure",
     ],
 )

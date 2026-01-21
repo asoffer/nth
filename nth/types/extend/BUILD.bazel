@@ -1,9 +1,12 @@
+load("@rules_cc//cc:cc_library.bzl", "cc_library")
+load("@rules_cc//cc:cc_test.bzl", "cc_test")
+
 package(default_visibility = ["//visibility:public"])
 
 cc_library(
     name = "extend",
-    hdrs = ["extend.h"],
     srcs = ["internal/extend.h"],
+    hdrs = ["extend.h"],
     deps = [
         "//nth/format",
         "//nth/io/writer",
@@ -39,19 +42,18 @@ cc_test(
     ],
 )
 
-
 cc_library(
     name = "format",
-    hdrs = ["format.h"],
     srcs = ["internal/format.h"],
+    hdrs = ["format.h"],
     deps = [
         ":extend",
-        "//nth/meta:constant",
+        "//nth/container:stack",
+        "//nth/debug:unreachable",
         "//nth/format",
         "//nth/format:cc",
         "//nth/format:common",
-        "//nth/container:stack",
-        "//nth/debug:unreachable",
+        "//nth/meta:constant",
         "//nth/types:reflect",
         "//nth/types:structure",
     ],
@@ -61,8 +63,8 @@ cc_test(
     name = "format_test",
     srcs = ["format_test.cc"],
     deps = [
-        ":format",
         ":extend",
+        ":format",
         "//nth/format:json",
         "//nth/test:main",
     ],

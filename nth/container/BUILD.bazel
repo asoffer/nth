@@ -1,3 +1,6 @@
+load("@rules_cc//cc:cc_library.bzl", "cc_library")
+load("@rules_cc//cc:cc_test.bzl", "cc_test")
+
 package(default_visibility = ["//visibility:public"])
 
 cc_library(
@@ -44,7 +47,7 @@ cc_library(
         "//nth/container/internal:index",
         "//nth/debug",
         "//nth/meta/concepts:hash",
-        "@abseil-cpp//absl/container:flat_hash_set"
+        "@abseil-cpp//absl/container:flat_hash_set",
     ],
 )
 
@@ -64,7 +67,7 @@ cc_library(
         "//nth/container/internal:index",
         "//nth/debug",
         "//nth/meta/concepts:hash",
-        "@abseil-cpp//absl/container:flat_hash_set"
+        "@abseil-cpp//absl/container:flat_hash_set",
     ],
 )
 
@@ -81,10 +84,10 @@ cc_library(
     name = "interval",
     hdrs = ["interval.h"],
     deps = [
-      "//nth/debug",
-      "//nth/format",
-      "//nth/format:json",
-      "//nth/io/writer",
+        "//nth/debug",
+        "//nth/format",
+        "//nth/format:json",
+        "//nth/io/writer",
     ],
 )
 
@@ -112,8 +115,8 @@ cc_test(
     srcs = ["interval_set_test.cc"],
     deps = [
         ":interval_set",
-        "//nth/test:main",
         "//nth/debug/property",
+        "//nth/test:main",
     ],
 )
 
@@ -124,7 +127,7 @@ cc_library(
         ":interval",
         ":interval_set",
         "//nth/debug",
-        "@abseil-cpp//absl/container:btree"
+        "@abseil-cpp//absl/container:btree",
     ],
 )
 
@@ -133,8 +136,8 @@ cc_test(
     srcs = ["interval_map_test.cc"],
     deps = [
         ":interval_map",
-        "//nth/test:main",
         "//nth/debug/property",
+        "//nth/test:main",
     ],
 )
 

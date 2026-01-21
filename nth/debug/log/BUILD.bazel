@@ -1,3 +1,6 @@
+load("@rules_cc//cc:cc_library.bzl", "cc_library")
+load("@rules_cc//cc:cc_test.bzl", "cc_test")
+
 package(default_visibility = ["//visibility:public"])
 
 cc_library(
@@ -10,9 +13,9 @@ cc_library(
 
 cc_library(
     name = "entry",
-    visibility = ["//nth/debug/log:__subpackages__"],
-    hdrs = ["entry.h"],
     srcs = ["entry.cc"],
+    hdrs = ["entry.h"],
+    visibility = ["//nth/debug/log:__subpackages__"],
     deps = [
         ":line",
         "//nth/format:interpolate",
@@ -44,8 +47,16 @@ cc_library(
 
 cc_library(
     name = "log",
-    hdrs = ["log.h"],
     srcs = ["log.cc"],
+    hdrs = ["log.h"],
+    data = select({
+        "@platforms//os:linux": ["registry.ld"],
+        "//conditions:default": [],
+    }),
+    linkopts = select({
+        "@platforms//os:linux": ["-Wl,-T,$(location registry.ld)"],
+        "//conditions:default": [],
+    }),
     deps = [
         ":entry",
         ":line",
@@ -56,16 +67,8 @@ cc_library(
         "//nth/strings:glob",
     ] + select({
         "@platforms//os:linux": [":registry.ld"],
-        "//conditions:default": []
+        "//conditions:default": [],
     }),
-    linkopts = select({
-        "@platforms//os:linux": ["-Wl,-T,$(location registry.ld)"],
-        "//conditions:default": []
-    }),
-    data = select({
-        "@platforms//os:linux": ["registry.ld"],
-        "//conditions:default": []
-    })
 )
 
 cc_test(
@@ -80,8 +83,8 @@ cc_test(
 
 cc_library(
     name = "sink",
-    hdrs = ["sink.h"],
     srcs = ["sink.cc"],
+    hdrs = ["sink.h"],
     deps = [
         ":configuration",
         ":entry",

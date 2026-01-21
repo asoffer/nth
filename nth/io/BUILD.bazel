@@ -1,9 +1,12 @@
+load("@rules_cc//cc:cc_library.bzl", "cc_library")
+load("@rules_cc//cc:cc_test.bzl", "cc_test")
+
 package(default_visibility = ["//visibility:public"])
 
 cc_library(
     name = "file",
-    hdrs = ["file.h"],
     srcs = ["file.cc"],
+    hdrs = ["file.h"],
     deps = [
         ":file_path",
         "//nth/base:indestructible",
@@ -13,14 +16,14 @@ cc_library(
 
 cc_library(
     name = "file_path",
-    hdrs = ["file_path.h"],
     srcs = ["file_path.cc"],
+    hdrs = ["file_path.h"],
     deps = [
         "//nth/base:core",
+        "//nth/debug",
         "//nth/format",
         "//nth/format:interpolate",
         "//nth/io/writer",
-        "//nth/debug",
     ],
 )
 

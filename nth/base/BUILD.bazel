@@ -1,4 +1,6 @@
 load("@bazel_skylib//rules:common_settings.bzl", "string_flag")
+load("@rules_cc//cc:cc_library.bzl", "cc_library")
+load("@rules_cc//cc:cc_test.bzl", "cc_test")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -34,9 +36,9 @@ cc_library(
     name = "indestructible",
     hdrs = ["indestructible.h"],
     deps = [
-      ":core",
-      "//nth/memory:address",
-      "//nth/memory:buffer",
+        ":core",
+        "//nth/memory:address",
+        "//nth/memory:buffer",
     ],
 )
 
@@ -59,7 +61,7 @@ cc_test(
     name = "macros_test",
     srcs = ["macros_test.cc"],
     deps = [
-        ":macros"
+        ":macros",
     ],
 )
 
@@ -75,39 +77,43 @@ cc_test(
     name = "pack_test",
     srcs = ["pack_test.cc"],
     deps = [
-        ":pack"
+        ":pack",
     ],
 )
 
 config_setting(
     name = "harden_build",
+    flag_values = {"//nth/base:build": "harden"},
     visibility = ["//visibility:private"],
-    flag_values = {"//nth/base:build": "harden"}
 )
 
 config_setting(
     name = "opt_build",
+    flag_values = {"//nth/base:build": "optimize"},
     visibility = ["//visibility:private"],
-    flag_values = {"//nth/base:build": "optimize"}
 )
 
 config_setting(
     name = "dbg_build",
+    flag_values = {"//nth/base:build": "debug"},
     visibility = ["//visibility:private"],
-    flag_values = {"//nth/base:build": "debug"}
 )
 
 config_setting(
     name = "fast_build",
+    flag_values = {"//nth/base:build": "fast"},
     visibility = ["//visibility:private"],
-    flag_values = {"//nth/base:build": "fast"}
 )
-
 
 string_flag(
     name = "build",
-    values = ["fast", "harden", "optimize", "debug"],
     build_setting_default = "fast",
+    values = [
+        "fast",
+        "harden",
+        "optimize",
+        "debug",
+    ],
 )
 
 cc_library(
@@ -117,7 +123,7 @@ cc_library(
         ":opt_build": ["NTH_CLI_BUILD_MODE_OPTIMIZE"],
         ":dbg_build": ["NTH_CLI_BUILD_MODE_DEBUG"],
         ":harden_build": ["NTH_CLI_BUILD_MODE_HARDEN"],
-        "//conditions:default": ["NTH_CLI_BUILD_MODE_FASTBUILD"]
+        "//conditions:default": ["NTH_CLI_BUILD_MODE_FASTBUILD"],
     }),
     deps = [
         ":macros",
@@ -137,8 +143,8 @@ cc_library(
 cc_test(
     name = "section_test",
     srcs = [
-        "section_test.cc",
         "internal/external_section.cc",
+        "section_test.cc",
     ],
     linkopts = select({
         "@platforms//os:linux": ["-Wl,-z,nostart-stop-gc"],

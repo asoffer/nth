@@ -1,8 +1,10 @@
+load("@rules_cc//cc:cc_library.bzl", "cc_library")
+
 package(default_visibility = ["//nth/dynamic:__subpackages__"])
 
 cc_library(
     name = "jit_function_base",
-    hdrs = ["jit_function_base.h"],
     srcs = ["jit_function_base.cc"],
+    hdrs = ["jit_function_base.h"],
     deps = [],
 )

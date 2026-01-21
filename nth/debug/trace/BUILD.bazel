@@ -1,3 +1,6 @@
+load("@rules_cc//cc:cc_library.bzl", "cc_library")
+load("@rules_cc//cc:cc_test.bzl", "cc_test")
+
 package(default_visibility = ["//visibility:public"])
 
 cc_library(
@@ -16,10 +19,10 @@ cc_test(
     srcs = ["trace_test.cc"],
     deps = [
         ":trace",
+        "//nth/debug/log",
+        "//nth/debug/log:file_log_sink",
+        "//nth/debug/log:sink",
         "//nth/memory:address",
         "//nth/test/raw:test",
-        "//nth/debug/log",
-        "//nth/debug/log:sink",
-        "//nth/debug/log:file_log_sink",
     ],
 )

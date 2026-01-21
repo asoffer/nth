@@ -1,16 +1,19 @@
+load("@rules_cc//cc:cc_library.bzl", "cc_library")
+load("@rules_cc//cc:cc_test.bzl", "cc_test")
+
 package(default_visibility = ["//visibility:public"])
 
 cc_library(
     name = "integer",
-    hdrs = ["integer.h"],
     srcs = ["integer.cc"],
+    hdrs = ["integer.h"],
     deps = [
         "//nth/debug",
         "//nth/format:interpolate",
-        "//nth/memory:bytes",
-        "//nth/meta/concepts:core",
         "//nth/io/reader",
         "//nth/io/writer",
+        "//nth/memory:bytes",
+        "//nth/meta/concepts:core",
     ],
 )
 
@@ -19,7 +22,7 @@ cc_library(
     testonly = True,
     hdrs = ["test_traits.h"],
     deps = [
-      "//nth/test",
+        "//nth/test",
     ],
 )
 
@@ -27,9 +30,9 @@ cc_test(
     name = "integer_test",
     srcs = ["integer_test.cc"],
     deps = [
-      ":integer",
-      ":test_traits",
-      "//nth/format:interpolate",
-      "//nth/test:main",
+        ":integer",
+        ":test_traits",
+        "//nth/format:interpolate",
+        "//nth/test:main",
     ],
 )

@@ -1,9 +1,12 @@
+load("@rules_cc//cc:cc_library.bzl", "cc_library")
+load("@rules_cc//cc:cc_test.bzl", "cc_test")
+
 package(default_visibility = ["//visibility:public"])
 
 cc_library(
     name = "env",
-    hdrs = ["env.h"],
     srcs = ["env.cc"],
+    hdrs = ["env.h"],
     deps = [
         "//nth/strings:null_terminated_string_view",
     ],
@@ -21,20 +24,20 @@ cc_test(
 
 cc_library(
     name = "signal",
-    hdrs = ["signal.h"],
     srcs = [
         "signal.cc",
         "signal.xmacro.h",
     ],
+    hdrs = ["signal.h"],
 )
 
 cc_library(
     name = "exit_code",
-    hdrs = ["exit_code.h"],
     srcs = [
         "exit_code.cc",
         "exit_code.xmacro.h",
     ],
+    hdrs = ["exit_code.h"],
     deps = [
         ":signal",
     ],
