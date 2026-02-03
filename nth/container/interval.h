@@ -81,7 +81,8 @@ struct interval : internal_interval::LengthBase<T> {
   // `this->lower_bound()` and strictly less than `upper_bound()`.
   template <std::totally_ordered_with<value_type> U>
   constexpr bool contains(U const& u) const {
-    return lower_bound() <= u and u < upper_bound();
+    return (lower_bound() <= u and u < upper_bound()) or
+           (lower_bound() == u and upper_bound() == u);
   }
 
   // Returns `true` if and only if every element `x` for which `i.contains(x)`
@@ -97,7 +98,7 @@ struct interval : internal_interval::LengthBase<T> {
   std::optional<interval> intersection(interval const& i) const {
     value_type const& l = std::max(lower_bound(), i.lower_bound());
     value_type const& u = std::min(upper_bound(), i.upper_bound());
-    if (l < u) { return interval(l, u); }
+    if (l < u or (l == u and (empty() or i.empty()))) { return interval(l, u); }
     return std::nullopt;
   }
 

@@ -35,6 +35,8 @@ NTH_TEST("interval/contains") {
   NTH_EXPECT(i.contains("abd"));
   NTH_EXPECT(i.contains("dbc"));
   NTH_EXPECT(not i.contains("def"));
+  NTH_EXPECT(nth::interval<std::string>("a", "a").contains("a"));
+  NTH_EXPECT(not nth::interval<std::string>("a", "a").contains("aa"));
 }
 
 NTH_TEST("interval/set-bounds") {
@@ -73,6 +75,12 @@ NTH_TEST("interval/intersection") {
              std::nullopt);
   NTH_EXPECT(nth::interval(2, 3).intersection(nth::interval(4, 5)) ==
              std::nullopt);
+  NTH_EXPECT(nth::interval(2, 5).intersection(nth::interval(3, 3)) ==
+             nth::interval(3, 3));
+  NTH_EXPECT(nth::interval(3, 3).intersection(nth::interval(2, 5)) ==
+             nth::interval(3, 3));
+  NTH_EXPECT(nth::point(3).intersection(nth::point(3)) == nth::point(3));
+  NTH_EXPECT(nth::point(3).intersection(nth::point(4)) == std::nullopt);
 }
 
 NTH_TEST("interval/translate") {
