@@ -1,6 +1,11 @@
 #include "nth/try/try.h"
 
+#include <concepts>
 #include <optional>
+#include <string_view>
+#include <type_traits>
+#include <utility>
+#include <variant>
 
 #include "nth/test/test.h"
 
@@ -233,6 +238,52 @@ NTH_TEST("try/break") {
   NTH_EXPECT(nums[4] == 4);
   NTH_EXPECT(nums[5] == 5);
   NTH_EXPECT(nums[6] == 6);
+}
+
+struct Mercurial {
+  std::string_view value() & { return "&"; }
+  std::string_view value() && { return "&&"; }
+  std::string_view value() const & { return "const &"; }
+  std::string_view value() const && { return "const &&"; }
+};
+
+struct MercurialHandler {
+  using type = std::variant<Mercurial, Mercurial>;
+
+  static constexpr bool okay(type const &value) { return value.index() == 0; }
+
+  template <typename T>
+    requires std::same_as<std::remove_cvref_t<T>, type>
+  static constexpr std::pair<int, std::string_view> transform_value(T &&value) {
+    return {0, std::get<0>(std::forward<T>(value)).value()};
+  }
+
+  template <typename T>
+    requires std::same_as<std::remove_cvref_t<T>, type>
+  static constexpr std::pair<int, std::string_view> transform_return(
+      T &&value) {
+    return {1, std::get<1>(std::forward<T>(value)).value()};
+  }
+};
+
+NTH_TEST("try/handler/value_category") {
+  using namespace std::string_view_literals;
+  auto success = std::in_place_index<0>;
+  auto failure = std::in_place_index<1>;
+  auto run     = []<typename T>(nth::type_tag<T>, auto index) {
+    MercurialHandler handler;
+    std::remove_reference_t<T> value{index};
+    return NTH_TRY((handler), static_cast<T>(value));
+  };
+  using T = MercurialHandler::type;
+  NTH_EXPECT(run(nth::type<T &>, success) == std::pair{0, "&"sv});
+  NTH_EXPECT(run(nth::type<T &>, failure) == std::pair{1, "&"sv});
+  NTH_EXPECT(run(nth::type<T &&>, success) == std::pair{0, "&&"sv});
+  NTH_EXPECT(run(nth::type<T &&>, failure) == std::pair{1, "&&"sv});
+  NTH_EXPECT(run(nth::type<T const &>, success) == std::pair{0, "const &"sv});
+  NTH_EXPECT(run(nth::type<T const &>, failure) == std::pair{1, "const &"sv});
+  NTH_EXPECT(run(nth::type<T const &&>, success) == std::pair{0, "const &&"sv});
+  NTH_EXPECT(run(nth::type<T const &&>, failure) == std::pair{1, "const &&"sv});
 }
 
 }  // namespace

@@ -226,7 +226,7 @@ decltype(auto) default_try_exit_handler() {
       __VA_ARGS__)
 
 #define NTH_TRY_INTERNAL_RETURN(handler)                                       \
-  return handler.transform_return(NthInternalExpr);
+  return handler.transform_return(NTH_FWD(NthInternalExpr));
 
 #define NTH_TRY_INTERNAL_TRY_WITH_HANDLER(action, handler, ...)                \
   (({                                                                          \
@@ -266,7 +266,7 @@ decltype(auto) default_try_exit_handler() {
      auto&& NthInternalExpr = __VA_ARGS__;                                     \
      if (not handler.okay(NthInternalExpr)) {                                  \
        NTH_LOG("FATAL ERROR: {}") <<=                                          \
-           {handler.transform_return(NthInternalExpr)};                        \
+           {handler.transform_return(NTH_FWD(NthInternalExpr))};               \
        std::abort();                                                           \
      }                                                                         \
      ::nth::internal_try::wrap<                                                \
