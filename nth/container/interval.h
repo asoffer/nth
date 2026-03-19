@@ -45,7 +45,7 @@ struct interval : internal_interval::LengthBase<T> {
 
   template <std::totally_ordered_with<value_type> U>
   friend bool operator!=(interval const& lhs, interval<U> const& rhs) {
-    return not !(lhs == rhs);
+    return not (lhs == rhs);
   }
 
   // Returns a reference to the lower bound of the interval.

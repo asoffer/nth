@@ -21,6 +21,7 @@ NTH_TEST("interval/construction", auto const &low, auto const &hi) {
   auto [s, e] = i;
   NTH_EXPECT(s == low);
   NTH_EXPECT(e == hi);
+  NTH_EXPECT(not (i != i));
 }
 
 NTH_TEST("interval/length", auto const &low, auto const &hi) {
