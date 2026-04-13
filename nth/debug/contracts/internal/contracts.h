@@ -45,14 +45,15 @@ bool execute_contract_check(contract const& c,
   NTH_INTERNAL_CONTRACTS_CHECK_IMPL(                                           \
       name, verbosity_path,                                                    \
       NTH_CONCATENATE(NthInternalContractsChecker, __LINE__),                  \
-      NTH_CONCATENATE(NthInternalContractsEnabler, __LINE__), failure_action,  \
+      NTH_CONCATENATE(NthInternalContractsEnabler, __LINE__),                  \
+      NTH_CONCATENATE(NthInternalContractsLogVar, __LINE__), failure_action,   \
       #__VA_ARGS__,                                                            \
       (::nth::internal_trace::injector{}                                       \
            ->*__VA_ARGS__->*::nth::internal_trace::injector{}))
 
-#define NTH_INTERNAL_CONTRACTS_CHECK_IMPL(category, verbosity_path,            \
-                                          checker_var, enabler_var,            \
-                                          failure_action, str, expr)           \
+#define NTH_INTERNAL_CONTRACTS_CHECK_IMPL(                                     \
+    category, verbosity_path, checker_var, enabler_var, log_line_var,          \
+    failure_action, str, expr)                                                 \
   switch (                                                                     \
       NTH_PLACE_IN_SECTION(                                                    \
           nth_contract) static constinit ::nth::internal_contracts::enabler    \
@@ -61,51 +62,39 @@ bool execute_contract_check(contract const& c,
           enabler_var.enabled() and                                            \
           ::nth::internal_contracts::execute_contract_check(                   \
               enabler_var, ::nth::internal_contracts::checker(expr))))         \
-  case 1: failure_action
+  case 1:                                                                      \
+    switch (NTH_PLACE_IN_SECTION(                                              \
+                nth_log_line) static constexpr ::nth::log_line log_line_var{   \
+        verbosity_path};                                                       \
+            0)                                                                 \
+    default:                                                                   \
+      failure_action ::nth::internal_log::voidifier{} <<=                      \
+          ::nth::internal_log::log_appender<log_line_var> {}
 
-#if NTH_BUILD_MODE(debug)
-#define NTH_INTERNAL_IMPLEMENT_ENSURE(verbosity_path, ...)                     \
-  ::nth::internal_contracts::on_exit NTH_CONCATENATE(                          \
-      NthInternalOnExit, __LINE__)([&](nth::source_location) {                 \
-    NTH_INTERNAL_CONTRACTS_CHECK("NTH_ENSURE", verbosity_path,                 \
-                                 nth::internal_contracts::ensure_failed(),     \
-                                 __VA_ARGS__);                                 \
-  });                                                                          \
-  NTH_REQUIRE_EXPANSION_TO_PREFIX_SUBEXPRESSION(                               \
-      (void)NTH_CONCATENATE(NthInternalOnExit, __LINE__))
-#elif NTH_BUILD_MODE(harden) or NTH_BUILD_MODE(fastbuild)
-#define NTH_INTERNAL_IMPLEMENT_ENSURE(verbosity_path, ...)                     \
-  ::nth::internal_contracts::on_exit NTH_CONCATENATE(                          \
-      NthInternalOnExit, __LINE__)([&](nth::source_location) {                 \
-    if (not(__VA_ARGS__)) {                                                    \
-      NTH_LOG("NTH_ENSURE({}) failed.") <<= {#__VA_ARGS__};                    \
-      ::nth::internal_contracts::ensure_failed();                              \
-    }                                                                          \
-  });                                                                          \
-  NTH_REQUIRE_EXPANSION_TO_PREFIX_SUBEXPRESSION(                               \
-      (void)NTH_CONCATENATE(NthInternalOnExit, __LINE__))
-
-#else
+#if NTH_BUILD_MODE(optimize)
 #define NTH_INTERNAL_IMPLEMENT_ENSURE(verbosity_path, ...)                     \
   static_assert(sizeof(decltype(__VA_ARGS__)) != -1)
+#else
+#define NTH_INTERNAL_IMPLEMENT_ENSURE(verbosity_path, ...)                     \
+  ::nth::internal_contracts::on_exit NTH_CONCATENATE(                          \
+      NthInternalOnExit, __LINE__)([&](nth::source_location) {                 \
+    NTH_INTERNAL_CONTRACTS_CHECK(                                              \
+        "NTH_ENSURE", verbosity_path,                                          \
+        (nth::internal_contracts::ensure_failed(), 0) <<, __VA_ARGS__);        \
+  });                                                                          \
+  NTH_REQUIRE_EXPANSION_TO_PREFIX_SUBEXPRESSION(                               \
+      (void)NTH_CONCATENATE(NthInternalOnExit, __LINE__))
+
 #endif
 
-#if NTH_BUILD_MODE(debug)
-#define NTH_INTERNAL_IMPLEMENT_REQUIRE(verbosity_path, ...)                    \
-  NTH_INTERNAL_CONTRACTS_CHECK("NTH_REQUIRE", verbosity_path,                  \
-                               ::nth::internal_contracts::require_failed(),    \
-                               __VA_ARGS__)
-#elif NTH_BUILD_MODE(harden) or NTH_BUILD_MODE(fastbuild)
-#define NTH_INTERNAL_IMPLEMENT_REQUIRE(verbosity_path, ...)                    \
-  do {                                                                         \
-    if (not(__VA_ARGS__)) {                                                    \
-      NTH_LOG((verbosity_path), "NTH_REQUIRE({}) failed.") <<= {#__VA_ARGS__};   \
-      ::nth::internal_contracts::require_failed();                             \
-    }                                                                          \
-  } while (false)
-#else
+#if NTH_BUILD_MODE(optimize)
 #define NTH_INTERNAL_IMPLEMENT_REQUIRE(verbosity_path, ...)                    \
   static_assert(sizeof(decltype(__VA_ARGS__)) != -1)
+#else
+#define NTH_INTERNAL_IMPLEMENT_REQUIRE(verbosity_path, ...)                    \
+  NTH_INTERNAL_CONTRACTS_CHECK(                                                \
+      "NTH_REQUIRE", verbosity_path,                                           \
+      (::nth::internal_contracts::require_failed(), 0) <<, __VA_ARGS__)
 #endif
 
 #endif  // NTH_DEBUG_CONTRACTS_INTERNAL_CONTRACTS_H

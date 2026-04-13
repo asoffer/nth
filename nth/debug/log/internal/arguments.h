@@ -53,9 +53,20 @@ struct argument_ignorer {};
 template <unsigned N, log_line const&, interpolation_string>
 struct line_injector;
 
+template <log_line const& Line>
+struct log_appender {
+  template <interpolation_string S>
+  static constexpr line_injector<S.placeholders(), Line, S> log() {
+    return {};
+  }
+};
+
 struct voidifier {
+  friend voidifier operator<<(int, voidifier) { return {}; }
   template <log_line const& Line, interpolation_string S>
   friend void operator<<=(voidifier, line_injector<0, Line, S> const&) {}
+  template <log_line const& Line>
+  friend void operator<<=(voidifier, log_appender<Line> const&) {}
   template <typename T>
   friend void operator<<=(voidifier, T const&) {
     constexpr bool MissingInterpolationArguments = nth::precisely<T, voidifier>;
@@ -73,11 +84,11 @@ struct voidifier {
         "    ```\n"
         "\n"
         "    If you wish to have braces treated literally rather than as interpolation\n"
-        "    slots, you may escape them via an extra layer of braces:\n"
+        "    slots, you may escape them with backslashes:\n"
         "\n"
         "    ```\n"
         "    // Prints \"These are braces: {}, but these are not: not braces.\"\n"
-        "    NTH_LOG(\"These are braces: {{}}, but these are not: {}\")\n"
+        "    NTH_LOG(\"These are braces: \\{\\}, but these are not: {}\")\n"
         "        <<= {\"not braces\"};\n"
         "    ```\n");
     // clang-format on
