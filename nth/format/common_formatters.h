@@ -241,17 +241,29 @@ struct debug_formatter_t {
 
 struct pointer_formatter {
   void format(io::writer auto& w, void const* ptr) const {
-    constexpr char hex[]                   = "0123456789abcdef";
-    char buffer[sizeof(uintptr_t) * 2 + 2] = {'0', 'x'};
+    if (not ptr) {
+      io::write_text(w, "0x0");
+      return;
+    }
 
-    uintptr_t n = reinterpret_cast<uintptr_t>(ptr);
+    constexpr char Hex[] = "0123456789abcdef";
+    char buffer[sizeof(uintptr_t) * 2 + 2];
+
+    char const* end        = &buffer[sizeof(uintptr_t) * 2 + 2];
+    char* earliest_nonzero = buffer + sizeof(uintptr_t) * 2;
+    uintptr_t n            = reinterpret_cast<uintptr_t>(ptr);
     for (char* ptr = &buffer[sizeof(uintptr_t) * 2]; ptr != &buffer[0];
          ptr -= 2) {
-      ptr[0] = hex[(n & uintptr_t{0xff}) >> 4];
-      ptr[1] = hex[n & 0x0f];
+      ptr[0] = Hex[(n & uintptr_t{0xff}) >> 4];
+      ptr[1] = Hex[n & 0x0f];
+      if ((n & uintptr_t{0xff}) != 0) { earliest_nonzero = ptr; }
       n >>= 8;
     }
-    io::write_text(w, std::string_view(buffer, sizeof(uintptr_t) * 2 + 2));
+    earliest_nonzero -= 2;
+    earliest_nonzero[0] = '0';
+    earliest_nonzero[1] = 'x';
+    io::write_text(w,
+                   std::string_view(earliest_nonzero, end - earliest_nonzero));
   }
 };
 

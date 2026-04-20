@@ -19,6 +19,18 @@ struct S {
   std::string str;
 };
 
+NTH_TEST("format/pointer") {
+  uintptr_t ptr_value = 0x12345678;
+  NTH_LOG("{}")<<=nth::format_to_string(nth::pointer_formatter{},
+                                   reinterpret_cast<void*>(ptr_value));
+  NTH_EXPECT(nth::format_to_string(nth::pointer_formatter{},
+                                   reinterpret_cast<void*>(ptr_value)) ==
+             "0x12345678");
+  ptr_value = 0;
+  NTH_EXPECT(nth::format_to_string(nth::pointer_formatter{},
+                                   reinterpret_cast<void*>(ptr_value)) ==
+             "0x0");
+}
 NTH_TEST("format/variant") {
   std::variant<int, bool> v = 3;
   NTH_ASSERT(nth::format_to_string(v) == "3");

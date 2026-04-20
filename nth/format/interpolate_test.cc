@@ -29,7 +29,7 @@ void Pointer() {
   nth::io::string_writer w(s);
   nth::interpolate<"{}">(w, reinterpret_cast<void *>(ptr_value));
   if constexpr (sizeof(uintptr_t) == 8) {
-    NTH_RAW_TEST_ASSERT(s == "0x0000000012345678");
+    NTH_RAW_TEST_ASSERT(s == "0x12345678");
   } else {
     NTH_RAW_TEST_ASSERT(s == "0x12345678");
   }
