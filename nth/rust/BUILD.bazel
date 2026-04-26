@@ -1,0 +1,19 @@
+load("@rules_rust//rust:defs.bzl", "rust_library", "rust_test")
+
+rust_library(
+    name = "rust",
+    crate_name = "nth",
+    srcs = [
+        "lib.rs",
+        "log.rs",
+    ],
+)
+
+rust_test(
+    name = "test",
+    deps = [":rust"],
+    srcs = [
+        "lib.rs",
+        "log.rs",
+    ],
+)
