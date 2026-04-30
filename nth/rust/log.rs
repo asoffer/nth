@@ -1,12 +1,19 @@
 pub mod internal {
   #[repr(C)]
-  pub struct CxxStringView(&'static u8, usize);
+  #[derive(Clone, Copy)]
+  pub struct CxxStaticStringView(&'static u8, usize);
 
-  impl CxxStringView {
-    pub const fn new(s: &'static str) -> CxxStringView {
+  impl CxxStaticStringView {
+    pub const fn new(s: &'static str) -> CxxStaticStringView {
       // length - 1, to account for the null-terminator added by `concat!`
       // before the call to this function.
-      CxxStringView(null_terminated(s), s.as_bytes().len() - 1)
+      CxxStaticStringView(null_terminated(s), s.as_bytes().len() - 1)
+    }
+  }
+
+  impl From<CxxStaticStringView> for &'static [u8] {
+    fn from(sv: CxxStaticStringView) -> &'static [u8] {
+      unsafe { std::slice::from_raw_parts(sv.0 as *const u8, sv.1) }
     }
   }
 
@@ -31,16 +38,16 @@ pub mod internal {
 
 #[repr(C)]
 pub struct LogLocation {
-  file: &'static u8,
-  function: &'static u8,
-  line: u32,
+  pub file: &'static u8,
+  pub function: &'static u8,
+  pub line: u32,
 }
 
 #[repr(C)]
 pub struct LogLine {
-  verbosity_path: internal::CxxStringView,
-  location: LogLocation,
-  enabled: std::sync::atomic::AtomicBool,
+  pub verbosity_path: internal::CxxStaticStringView,
+  pub location: LogLocation,
+  pub enabled: std::sync::atomic::AtomicBool,
 }
 
 const _: () = {
@@ -55,14 +62,24 @@ pub fn lines() -> &'static [LogLine] {
 
 #[cfg(test)]
 mod tests {
-  use crate::log::{self, LogLine, LogLocation, internal};
   use std::sync::atomic::AtomicBool;
 
-  #[cfg_attr(target_vendor = "apple", unsafe(link_section = "__DATA,nth_log_line"))]
-  #[cfg_attr(not(target_vendor = "apple"), unsafe(link_section = "nth_log_line"))]
+  use crate::log::internal;
+  use crate::log::LogLine;
+  use crate::log::LogLocation;
+  use crate::log::{self};
+
+  #[cfg_attr(
+    target_vendor = "apple",
+    unsafe(link_section = "__DATA,nth_log_line")
+  )]
+  #[cfg_attr(
+    not(target_vendor = "apple"),
+    unsafe(link_section = "nth_log_line")
+  )]
   #[used]
   static LINE: LogLine = LogLine {
-    verbosity_path: internal::CxxStringView::new("verbosity\0"),
+    verbosity_path: internal::CxxStaticStringView::new("verbosity\0"),
     location: LogLocation {
       file: internal::null_terminated("file\0"),
       function: internal::null_terminated("function\0"),
@@ -75,7 +92,7 @@ mod tests {
   fn one_line_registered() {
     assert_eq!(log::lines().len(), 1);
     let line = &log::lines()[0];
-    assert_eq!(line.location.line, 17);
+    assert_eq!(Into::<&'static [u8]>::into(line.verbosity_path), b"verbosity");
     assert_eq!(line.location.line, 17);
   }
 }
