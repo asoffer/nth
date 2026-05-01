@@ -87,6 +87,10 @@ NTH_TEST("format/cc/array") {
       "}");
 }
 
+NTH_TEST("format/cc/variant") {
+  NTH_EXPECT(cc(std::variant<int, char>{3}) == "3");
+}
+
 NTH_TEST("format/cc/associative") {
   NTH_EXPECT(cc(std::map<int, std::string>{}) == "{}");
 
