@@ -22,6 +22,7 @@ template <typename T>
 concept reflectable = requires { typename T::nth_reflectable; };
 
 namespace reflect {
+inline constexpr bool fields_are_countable = false;
 
 // Returns the number of fields in the struct `T`, under the assumption that `T`
 // has `BaseCount` direct base classes (if this assumption is violated, behavior
@@ -45,7 +46,9 @@ field_names(T const& value) {
 // fields in the object `obj`.
 template <int BaseCount, int&..., reflectable T>
 auto on_fields(T const& obj, auto&& f) {
-  if constexpr (::nth::reflect::field_count<T, BaseCount> == 0) {
+  if constexpr (::nth::reflect::field_count<T, BaseCount> == -1) {
+    static_assert(fields_are_countable);
+  } else if constexpr (::nth::reflect::field_count<T, BaseCount> == 0) {
     return NTH_FWD(f)();
   } else {
     auto refs =
@@ -61,7 +64,9 @@ auto on_fields(T const& obj, auto&& f) {
 // fields in the object `obj`.
 template <int BaseCount, int&..., reflectable T>
 auto on_fields(T& obj, auto&& f) {
-  if constexpr (::nth::reflect::field_count<T, BaseCount> == 0) {
+  if constexpr (::nth::reflect::field_count<T, BaseCount> == -1) {
+    static_assert(fields_are_countable);
+  } else if constexpr (::nth::reflect::field_count<T, BaseCount> == 0) {
     return NTH_FWD(f)();
   } else {
     auto refs =
