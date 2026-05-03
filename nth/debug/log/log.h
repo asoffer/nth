@@ -45,13 +45,14 @@ namespace nth {
 // `glob`.
 void log_verbosity_off(std::string_view glob);
 
-// Turns on any log line which was off and whose verbosity path matches the glob
-// `glob`.
-void log_verbosity_on(std::string_view glob);
+// Turns on any log line whose verbosity path matches the glob `glob`, setting
+// its config to a parsed `config`. If the `config` fails to parse, no change
+// occurs.
+void log_verbosity_on(std::string_view glob, std::string_view config = "");
 
 // Enables the log lines whose verbosity path match the glob `glob` and disables
 // all others.
-void log_verbosity_if(std::string_view glob);
+void log_verbosity_if(std::string_view glob, std::string_view config = "");
 
 }  // namespace nth
 

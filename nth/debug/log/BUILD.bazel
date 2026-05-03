@@ -40,6 +40,9 @@ cc_library(
     hdrs = ["line.h"],
     deps = [
         "//nth/base:section",
+        "//nth/base:core",
+        "//nth/meta/concepts:core",
+        "//nth/meta:type",
         "//nth/debug:source_location",
         "//nth/format:interpolate",
     ],

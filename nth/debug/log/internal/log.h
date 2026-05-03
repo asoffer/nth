@@ -27,6 +27,24 @@
 #define NTH_INTERNAL_LOG_WITHOUT_VERBOSITY_PATH(unconditional_expr, ...)       \
   NTH_INTERNAL_LOG_WITH_VERBOSITY_PATH(unconditional_expr, (""), __VA_ARGS__)
 
+#define NTH_INTERNAL_LOG_GET_VERBOSITY_PATH(v)                                 \
+  NTH_FIRST_ARGUMENT(NTH_IGNORE_PARENTHESES(v))
+
+#define NTH_INTERNAL_LOG_GET_CONFIG_READER(v)                                  \
+  NTH_INTERNAL_LOG_GET_CONFIG_READER_UNWRAPPED(NTH_IGNORE_PARENTHESES(v))
+
+#define NTH_INTERNAL_LOG_GET_CONFIG_READER_UNWRAPPED(...)                      \
+  NTH_INTERNAL_LOG_GET_CONFIG_READER_IMPL(                                     \
+      __VA_ARGS__, NTH_INTERNAL_LOG_GET_CONFIG_READER_2,                       \
+      NTH_INTERNAL_LOG_GET_CONFIG_READER_1, _)                                 \
+  (__VA_ARGS__)
+
+#define NTH_INTERNAL_LOG_GET_CONFIG_READER_1(a)                                \
+  ::nth::log_line::default_reader {}
+#define NTH_INTERNAL_LOG_GET_CONFIG_READER_2(a, b) b
+
+#define NTH_INTERNAL_LOG_GET_CONFIG_READER_IMPL(_1, _2, arg, ...) arg
+
 #define NTH_INTERNAL_LOG_WITH_VERBOSITY_PATH(unconditional_expr, verbosity,    \
                                              ...)                              \
   NTH_INTERNAL_LOG_IMPL(                                                       \
@@ -34,22 +52,25 @@
       NTH_CONCATENATE(NthInternalLogInterpolationString, __LINE__),            \
       NTH_CONCATENATE(NthInternalLogLine, __LINE__), __VA_ARGS__)
 
-#define NTH_INTERNAL_LOG_IMPL(unconditional_expr, verbosity, interp_str_var,   \
-                              log_line_var, ...)                               \
-  switch (                                                                     \
-      static constexpr nth::interpolation_string interp_str_var{__VA_ARGS__};  \
-      0)                                                                       \
-  default:                                                                     \
-    switch (NTH_PLACE_IN_SECTION(                                              \
-                nth_log_line) static constinit ::nth::log_line log_line_var{   \
-        verbosity};                                                            \
-            0)                                                                 \
-    default:                                                                   \
-      (((void)unconditional_expr), not log_line_var.enabled())                 \
-          ? (void)0                                                            \
-          : ::nth::internal_log::voidifier{} <<=                               \
-            ::nth::internal_log::line_injector<interp_str_var.placeholders(),  \
-                                               log_line_var, interp_str_var> { \
+#define NTH_INTERNAL_LOG_IMPL(unconditional_expr, verbosity, interp_str_var,           \
+                              log_line_var, ...)                                       \
+  switch (                                                                             \
+      static constexpr nth::interpolation_string interp_str_var{__VA_ARGS__};          \
+      0)                                                                               \
+  default:                                                                             \
+    switch (NTH_PLACE_IN_SECTION(                                                      \
+                nth_log_line) static constinit ::nth::log_line log_line_var{           \
+        NTH_INTERNAL_LOG_GET_VERBOSITY_PATH(verbosity),                                \
+        nth::type<decltype(NTH_INTERNAL_LOG_GET_CONFIG_READER(verbosity))>.decayed()}; \
+            0)                                                                         \
+    default:                                                                           \
+      (((void)unconditional_expr),                                                     \
+       not log_line_var.enabled(                                                       \
+           NTH_INTERNAL_LOG_GET_CONFIG_READER(verbosity)))                             \
+          ? (void)0                                                                    \
+          : ::nth::internal_log::voidifier{} <<=                                       \
+            ::nth::internal_log::line_injector<interp_str_var.placeholders(),          \
+                                               log_line_var, interp_str_var> {         \
       }
 
 #endif  // NTH_LOG_INTERNAL_H

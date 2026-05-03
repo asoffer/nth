@@ -17,6 +17,14 @@ pub mod internal {
     }
   }
 
+  #[repr(C, align(8))]
+  pub struct Opaque(pub [u8; 24]);
+  impl Opaque {
+    pub const fn new() -> Opaque {
+      Opaque([0u8; 24])
+    }
+  }
+
   pub const fn null_terminated(s: &'static str) -> &'static u8 {
     unsafe { &*s.as_bytes().as_ptr() }
   }
@@ -47,11 +55,36 @@ pub struct LogLocation {
 pub struct LogLine {
   pub verbosity_path: internal::CxxStaticStringView,
   pub location: LogLocation,
+  pub opaque: internal::Opaque,
   pub enabled: std::sync::atomic::AtomicBool,
 }
 
+#[macro_export]
+macro_rules! line {
+  ($verbosity:literal ) => {
+    line!($verbosity, line = ::std::line!())
+  };
+  ($verbosity:literal, line = $line:expr) => {
+    $crate::log::LogLine {
+      verbosity_path: $crate::log::internal::CxxStaticStringView::new(concat!(
+        $verbosity, "\0"
+      )),
+      location: $crate::log::LogLocation {
+        file: $crate::log::internal::null_terminated(concat!(::std::file!())),
+        line: $line,
+        function: $crate::log::internal::null_terminated(concat!(
+          ::std::module_path!(),
+          "\0"
+        )),
+      },
+      opaque: $crate::log::internal::Opaque::new(),
+      enabled: ::std::sync::atomic::AtomicBool::new(false),
+    }
+  };
+}
+
 const _: () = {
-  assert!(std::mem::size_of::<LogLine>() == 48);
+  assert!(std::mem::size_of::<LogLine>() == 72);
 };
 
 pub fn lines() -> &'static [LogLine] {
@@ -62,11 +95,7 @@ pub fn lines() -> &'static [LogLine] {
 
 #[cfg(test)]
 mod tests {
-  use std::sync::atomic::AtomicBool;
-
-  use crate::log::internal;
   use crate::log::LogLine;
-  use crate::log::LogLocation;
   use crate::log::{self};
 
   #[cfg_attr(
@@ -78,15 +107,7 @@ mod tests {
     unsafe(link_section = "nth_log_line")
   )]
   #[used]
-  static LINE: LogLine = LogLine {
-    verbosity_path: internal::CxxStaticStringView::new("verbosity\0"),
-    location: LogLocation {
-      file: internal::null_terminated("file\0"),
-      function: internal::null_terminated("function\0"),
-      line: 17,
-    },
-    enabled: AtomicBool::new(false),
-  };
+  static LINE: LogLine = line!("verbosity", line = 17);
 
   #[test]
   fn one_line_registered() {
