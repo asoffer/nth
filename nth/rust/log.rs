@@ -60,9 +60,9 @@ pub struct LogLine {
 }
 
 #[macro_export]
-macro_rules! line {
+macro_rules! log_line {
   ($verbosity:literal ) => {
-    line!($verbosity, line = ::std::line!())
+    log_line!($verbosity, line = ::std::line!())
   };
   ($verbosity:literal, line = $line:expr) => {
     $crate::log::LogLine {
@@ -107,7 +107,7 @@ mod tests {
     unsafe(link_section = "nth_log_line")
   )]
   #[used]
-  static LINE: LogLine = line!("verbosity", line = 17);
+  static LINE: LogLine = log_line!("verbosity", line = 17);
 
   #[test]
   fn one_line_registered() {
