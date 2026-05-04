@@ -95,9 +95,11 @@ struct log_line {
   // Parses `condition`, stores it as the new log condition and enables the log.
   // If parsing fails, the `log_line` remains unchanged.
   void enable(std::string_view condition) {
-    auto parsed = parse_(condition);
-    if (not parsed) { return; }
-    set_config(std::move(parsed));
+    if (parse_) {
+      auto parsed = parse_(condition);
+      if (not parsed) { return; }
+      set_config(std::move(parsed));
+    }
     enabled_.store(true, std::memory_order::release);
   }
 
