@@ -1,20 +1,31 @@
+load("@rules_cc//cc:cc_library.bzl", "cc_library")
 load("@rules_rust//rust:defs.bzl", "rust_library", "rust_test")
+
+CRATE_SRCS = [
+    "lib.rs",
+    "cxx.rs",
+    "log.rs",
+]
 
 rust_library(
     name = "rust",
     visibility = ["//visibility:public"],
     crate_name = "nth",
-    srcs = [
-        "lib.rs",
-        "log.rs",
-    ],
+    srcs = CRATE_SRCS,
+)
+
+cc_library(
+    name = "cxx_abi_test_data",
+    testonly = True,
+    srcs = ["cxx_abi_test.cc"],
+    alwayslink = True,
 )
 
 rust_test(
     name = "test",
-    deps = [":rust"],
-    srcs = [
-        "lib.rs",
-        "log.rs",
+    deps = [
+        ":rust",
+        ":cxx_abi_test_data",
     ],
+    srcs = CRATE_SRCS,
 )

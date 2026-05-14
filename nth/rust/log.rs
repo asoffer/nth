@@ -1,32 +1,10 @@
 pub mod internal {
-  #[repr(C)]
-  #[derive(Clone, Copy)]
-  pub struct CxxStaticStringView(&'static u8, usize);
-
-  impl CxxStaticStringView {
-    pub const fn new(s: &'static str) -> CxxStaticStringView {
-      // length - 1, to account for the null-terminator added by `concat!`
-      // before the call to this function.
-      CxxStaticStringView(null_terminated(s), s.as_bytes().len() - 1)
-    }
-  }
-
-  impl From<CxxStaticStringView> for &'static [u8] {
-    fn from(sv: CxxStaticStringView) -> &'static [u8] {
-      unsafe { std::slice::from_raw_parts(sv.0 as *const u8, sv.1) }
-    }
-  }
-
   #[repr(C, align(8))]
   pub struct Opaque(pub [u8; 24]);
   impl Opaque {
     pub const fn new() -> Opaque {
       Opaque([0u8; 24])
     }
-  }
-
-  pub const fn null_terminated(s: &'static str) -> &'static u8 {
-    unsafe { &*s.as_bytes().as_ptr() }
   }
 
   #[cfg(not(target_vendor = "apple"))]
@@ -53,7 +31,7 @@ pub struct LogLocation {
 
 #[repr(C)]
 pub struct LogLine {
-  pub verbosity_path: internal::CxxStaticStringView,
+  pub verbosity_path: crate::cxx::StaticStringView,
   pub location: LogLocation,
   pub opaque: internal::Opaque,
   pub enabled: std::sync::atomic::AtomicBool,
@@ -61,21 +39,16 @@ pub struct LogLine {
 
 #[macro_export]
 macro_rules! internal_log_line {
-  ($verbosity:literal ) => {
+  ($verbosity:literal) => {
     $crate::internal_log_line!($verbosity, line = ::std::line!())
   };
   ($verbosity:literal, line = $line:expr) => {
     $crate::log::LogLine {
-      verbosity_path: $crate::log::internal::CxxStaticStringView::new(concat!(
-        $verbosity, "\0"
-      )),
+      verbosity_path: $crate::cxx::null_terminated!($verbosity),
       location: $crate::log::LogLocation {
-        file: $crate::log::internal::null_terminated(concat!(::std::file!())),
+        file: $crate::cxx::null_terminated!(::std::file!()).data(),
         line: $line,
-        function: $crate::log::internal::null_terminated(concat!(
-          ::std::module_path!(),
-          "\0"
-        )),
+        function: $crate::cxx::null_terminated!(::std::module_path!()).data(),
       },
       opaque: $crate::log::internal::Opaque::new(),
       enabled: ::std::sync::atomic::AtomicBool::new(false),
