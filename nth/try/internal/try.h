@@ -21,6 +21,26 @@ decltype(auto) default_try_exit_handler();
 
 namespace internal_try {
 
+void MaybeLogWithFormat(
+    auto&& handler, auto&& arg,
+    nth::source_location loc = nth::source_location::current()) {
+  using return_type = decltype(handler.transform_return(NTH_FWD(arg)));
+  if constexpr (
+      requires(nth::io::string_writer& w, return_type value) {
+        nth::default_formatter.format(w, value);
+      } or
+      requires(nth::io::string_writer& w, return_type value) {
+        NthFormat(w, default_formatter, value);
+      }) {
+    NTH_LOG("FATAL ERROR: {}") <<=
+        {nth::log_configuration().source_location(loc),
+         handler.transform_return(NTH_FWD(arg))};
+  } else {
+    NTH_LOG("FATAL ERROR: Unformattable object of type {}") <<=
+        {nth::log_configuration().source_location(loc), nth::type<return_type>};
+  }
+}
+
 struct DefaultHandler {
   static constexpr bool okay(bool b) { return b; }
 
@@ -265,8 +285,8 @@ decltype(auto) default_try_exit_handler() {
      using NthTryType       = decltype((__VA_ARGS__));                         \
      auto&& NthInternalExpr = __VA_ARGS__;                                     \
      if (not handler.okay(NthInternalExpr)) {                                  \
-       NTH_LOG("FATAL ERROR: {}") <<=                                          \
-           {handler.transform_return(NTH_FWD(NthInternalExpr))};               \
+       nth::internal_try::MaybeLogWithFormat(handler,                          \
+                                             NTH_FWD(NthInternalExpr));        \
        std::abort();                                                           \
      }                                                                         \
      ::nth::internal_try::wrap<                                                \

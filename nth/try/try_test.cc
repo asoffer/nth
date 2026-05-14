@@ -30,24 +30,24 @@ NTH_TEST("try/bool") {
 
 NTH_TEST("try/pointer") {
   int counter = 0;
-  int *ptr    = [&]() -> int    *{
-    NTH_TRY(static_cast<int *>(nullptr));
+  int* ptr    = [&]() -> int* {
+    NTH_TRY(static_cast<int*>(nullptr));
     ++counter;
-    return static_cast<int *>(nullptr);
+    return static_cast<int*>(nullptr);
   }();
   NTH_ASSERT(counter == 0);
   NTH_ASSERT(ptr == nullptr);
 
-  ptr = [&] -> int * {
-    int &c = NTH_TRY(&counter);
+  ptr = [&] -> int* {
+    int& c = NTH_TRY(&counter);
     ++counter;
     return &c;
   }();
   NTH_ASSERT(ptr == &counter);
   NTH_ASSERT(counter == 1);
 
-  double *d = nullptr;
-  ptr       = [&] -> int       *{
+  double* d = nullptr;
+  ptr       = [&] -> int* {
     NTH_TRY(d);
     ++counter;
     return 0;
@@ -55,7 +55,7 @@ NTH_TEST("try/pointer") {
   NTH_ASSERT(counter == 1);
 
   NTH_ASSERT(not[&]()->bool {
-    [[maybe_unused]] double &val = NTH_TRY(d);
+    [[maybe_unused]] double& val = NTH_TRY(d);
     return true;
   }());
   NTH_ASSERT(counter == 1);
@@ -73,7 +73,7 @@ NTH_TEST("try/optional") {
 
   opt = [&] -> std::optional<int> {
     std::optional<int> o(counter);
-    int const &c = NTH_TRY(o);
+    int const& c = NTH_TRY(o);
     ++counter;
     if (&*o == &c) { ++counter; }
     return c;
@@ -113,7 +113,7 @@ NTH_TEST("try/absl::StatusOr") {
 
   absl::StatusOr<int> status_or = [&] -> absl::StatusOr<int> {
     absl::StatusOr<int> status_or(counter);
-    int const &c = NTH_TRY(status_or);
+    int const& c = NTH_TRY(status_or);
     ++counter;
     if (&*status_or == &c) { ++counter; }
     return c;
@@ -150,16 +150,16 @@ NTH_TEST("try/handler") {
 
 struct Uncopyable {
   explicit Uncopyable(int n) : n(n) {}
-  Uncopyable(Uncopyable const &) = delete;
-  Uncopyable(Uncopyable &&)      = default;
-  int n                          = 17;
+  Uncopyable(Uncopyable const&) = delete;
+  Uncopyable(Uncopyable&&)      = default;
+  int n                         = 17;
 };
 
 NTH_TEST("try/main/uncopyable") {
   std::optional<Uncopyable> opt;
   int counter = 0;
   NTH_EXPECT([&] {
-    Uncopyable const &uncopyable = NTH_TRY((nth::try_main), opt);
+    Uncopyable const& uncopyable = NTH_TRY((nth::try_main), opt);
     counter += uncopyable.n;
     return 0;
   }() == 1);
@@ -178,7 +178,7 @@ NTH_TEST("try/status/uncopyable") {
   {
     absl::StatusOr<Uncopyable> s = Uncopyable(3);
     auto result                  = [&]() -> absl::StatusOr<int> {
-      Uncopyable const &u = NTH_TRY(s);
+      Uncopyable const& u = NTH_TRY(s);
       return u.n;
     }();
 
@@ -212,7 +212,7 @@ NTH_TEST("try/status/uncopyable") {
 NTH_TEST("try/continue") {
   std::vector<int> nums;
   for (int i = 0; i < 10; ++i) {
-    int *ptr = (i % 3 == 0) ? nullptr : &i;
+    int* ptr = (i % 3 == 0) ? nullptr : &i;
     nums.push_back(NTH_UNWRAP_OR(continue, ptr));
   }
   NTH_ASSERT(nums.size() == 6u);
@@ -227,7 +227,7 @@ NTH_TEST("try/continue") {
 NTH_TEST("try/break") {
   std::vector<int> nums;
   for (int i = 0; i < 10; ++i) {
-    int *ptr = (i == 7) ? nullptr : &i;
+    int* ptr = (i == 7) ? nullptr : &i;
     nums.push_back(NTH_UNWRAP_OR(break, ptr));
   }
   NTH_ASSERT(nums.size() == 7u);
@@ -240,28 +240,48 @@ NTH_TEST("try/break") {
   NTH_EXPECT(nums[6] == 6);
 }
 
+struct Unformattable {
+  bool b;
+};
+
+struct UnformattableHandler {
+  static constexpr bool okay(Unformattable const& u) { return u.b; }
+
+  static constexpr Unformattable transform_value(Unformattable u) { return u; }
+  static constexpr Unformattable transform_return(Unformattable u) { return u; }
+};
+
+NTH_TEST("try/handler/unformattable") {
+  // Testing that unformattable objects still compile.
+  [[maybe_unused]] auto run = [](bool b) {
+    Unformattable u{.b = b};
+    UnformattableHandler handler;
+    return NTH_UNWRAP((handler), u);
+  };
+}
+
 struct Mercurial {
   std::string_view value() & { return "&"; }
   std::string_view value() && { return "&&"; }
-  std::string_view value() const & { return "const &"; }
-  std::string_view value() const && { return "const &&"; }
+  std::string_view value() const& { return "const &"; }
+  std::string_view value() const&& { return "const &&"; }
 };
 
 struct MercurialHandler {
   using type = std::variant<Mercurial, Mercurial>;
 
-  static constexpr bool okay(type const &value) { return value.index() == 0; }
+  static constexpr bool okay(type const& value) { return value.index() == 0; }
 
   template <typename T>
     requires std::same_as<std::remove_cvref_t<T>, type>
-  static constexpr std::pair<int, std::string_view> transform_value(T &&value) {
+  static constexpr std::pair<int, std::string_view> transform_value(T&& value) {
     return {0, std::get<0>(std::forward<T>(value)).value()};
   }
 
   template <typename T>
     requires std::same_as<std::remove_cvref_t<T>, type>
   static constexpr std::pair<int, std::string_view> transform_return(
-      T &&value) {
+      T&& value) {
     return {1, std::get<1>(std::forward<T>(value)).value()};
   }
 };
@@ -276,14 +296,14 @@ NTH_TEST("try/handler/value_category") {
     return NTH_TRY((handler), static_cast<T>(value));
   };
   using T = MercurialHandler::type;
-  NTH_EXPECT(run(nth::type<T &>, success) == std::pair{0, "&"sv});
-  NTH_EXPECT(run(nth::type<T &>, failure) == std::pair{1, "&"sv});
-  NTH_EXPECT(run(nth::type<T &&>, success) == std::pair{0, "&&"sv});
-  NTH_EXPECT(run(nth::type<T &&>, failure) == std::pair{1, "&&"sv});
-  NTH_EXPECT(run(nth::type<T const &>, success) == std::pair{0, "const &"sv});
-  NTH_EXPECT(run(nth::type<T const &>, failure) == std::pair{1, "const &"sv});
-  NTH_EXPECT(run(nth::type<T const &&>, success) == std::pair{0, "const &&"sv});
-  NTH_EXPECT(run(nth::type<T const &&>, failure) == std::pair{1, "const &&"sv});
+  NTH_EXPECT(run(nth::type<T&>, success) == std::pair{0, "&"sv});
+  NTH_EXPECT(run(nth::type<T&>, failure) == std::pair{1, "&"sv});
+  NTH_EXPECT(run(nth::type<T&&>, success) == std::pair{0, "&&"sv});
+  NTH_EXPECT(run(nth::type<T&&>, failure) == std::pair{1, "&&"sv});
+  NTH_EXPECT(run(nth::type<T const&>, success) == std::pair{0, "const &"sv});
+  NTH_EXPECT(run(nth::type<T const&>, failure) == std::pair{1, "const &"sv});
+  NTH_EXPECT(run(nth::type<T const&&>, success) == std::pair{0, "const &&"sv});
+  NTH_EXPECT(run(nth::type<T const&&>, failure) == std::pair{1, "const &&"sv});
 }
 
 }  // namespace
