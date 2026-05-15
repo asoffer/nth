@@ -36,8 +36,10 @@ cc_library(
 cc_library(
     name = "format",
     srcs = [
+        "concept.h",
         "common_defaults.h",
         "common_formatters.h",
+        "forward.h",
     ],
     hdrs = ["format.h"],
     deps = [

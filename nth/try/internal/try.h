@@ -25,13 +25,8 @@ void MaybeLogWithFormat(
     auto&& handler, auto&& arg,
     nth::source_location loc = nth::source_location::current()) {
   using return_type = decltype(handler.transform_return(NTH_FWD(arg)));
-  if constexpr (
-      requires(nth::io::string_writer& w, return_type value) {
-        nth::default_formatter.format(w, value);
-      } or
-      requires(nth::io::string_writer& w, return_type value) {
-        NthFormat(w, default_formatter, value);
-      }) {
+  if constexpr (nth::formattable_with<return_type, nth::io::string_writer,
+                                      nth::default_formatter_t>) {
     NTH_LOG("FATAL ERROR: {}") <<=
         {nth::log_configuration().source_location(loc),
          handler.transform_return(NTH_FWD(arg))};

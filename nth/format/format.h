@@ -5,6 +5,8 @@
 
 #include "nth/format/common_defaults.h"
 #include "nth/format/common_formatters.h"
+#include "nth/format/concept.h"
+#include "nth/format/forward.h"
 #include "nth/io/writer/string.h"
 #include "nth/io/writer/writer.h"
 #include "nth/meta/constant.h"
@@ -16,29 +18,6 @@
 // serializing values of a type to configure how the value is written.
 
 namespace nth {
-
-// Formats `value` with the formatter `fmt`, writing the result to `w`. If
-// `fmt.format(w, value)` is a valid expression, this expression is
-// evaluated and returned. Otherwise (if `fmt` does not say anything about
-// how the value should be printed, then `NthFormat(w, fmt, value)` is
-// evaluated and returned. The intended use is to provide both the type `T`
-// of the value being formatted and the type of the formatter `F` to express
-// opinions about how the value should be formatted. The design gives
-// precedence to the formatter.
-template <int&..., typename F, typename T>
-constexpr auto format(io::writer auto& w, F&& fmt, T const& value);
-
-// Invokes the three-argument `format`, by constructing a local
-// `default_formatter<T>()` and passing that as the formatter `fmt`.
-template <int&..., typename T>
-constexpr auto format(io::writer auto& w, T const& value);
-
-template <int&..., typename F, typename T>
-std::string format_to_string(F&& fmt, T const& value);
-
-template <int&..., typename T>
-std::string format_to_string(T const& value);
-
 namespace internal_format {
 template <typename F, nth::structure S>
 concept semistructural_formatter =
@@ -143,13 +122,17 @@ inline constexpr default_formatter_t default_formatter;
 
 inline constexpr debug_formatter_t debug_formatter;
 
-template <int&..., typename T>
-constexpr auto format(io::writer auto& w, T const& value) {
-  nth::format(w, default_formatter, value);
-}
+// Formats `value` with the formatter `fmt`, writing the result to `w`. If
+// `fmt.format(w, value)` is a valid expression, this expression is
+// evaluated and returned. Otherwise (if `fmt` does not say anything about
+// how the value should be printed, then `NthFormat(w, fmt, value)` is
+// evaluated and returned. The intended use is to provide both the type `T`
+// of the value being formatted and the type of the formatter `F` to express
+// opinions about how the value should be formatted. The design gives
+// precedence to the formatter.
 
-template <int&..., typename F, typename T>
-constexpr auto format(io::writer auto& w, F&& fmt, T const& value) {
+template <int&..., nth::io::writer W, typename F, nth::formattable_with<W, F> T>
+constexpr auto format(W& w, F&& fmt, T const& value) {
   if constexpr (requires { fmt.format(w, value); }) {
     return fmt.format(w, value);
   } else {
@@ -157,7 +140,15 @@ constexpr auto format(io::writer auto& w, F&& fmt, T const& value) {
   }
 }
 
-template <int&..., typename F, typename T>
+// Invokes the three-argument `format`, by constructing a local
+// `default_formatter<T>()` and passing that as the formatter `fmt`.
+template <int&..., nth::io::writer W,
+          nth::formattable_with<W, default_formatter_t> T>
+constexpr auto format(W& w, T const& value) {
+  nth::format(w, default_formatter, value);
+}
+
+template <int&..., typename F, formattable_with<nth::io::string_writer, F> T>
 std::string format_to_string(F&& fmt, T const& value) {
   std::string s;
   nth::io::string_writer w(s);
@@ -165,7 +156,8 @@ std::string format_to_string(F&& fmt, T const& value) {
   return s;
 }
 
-template <int&..., typename T>
+template <int&...,
+          formattable_with<nth::io::string_writer, default_formatter_t> T>
 std::string format_to_string(T const& value) {
   return format_to_string(default_formatter, value);
 }

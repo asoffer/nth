@@ -6,13 +6,11 @@
 #include <optional>
 #include <variant>
 
+#include "nth/format/forward.h"
 #include "nth/io/writer/writer.h"
 #include "nth/meta/type.h"
 
 namespace nth {
-
-template <int&..., typename F, typename T>
-constexpr auto format(io::writer auto& w, F&& fmt, T const& value);
 
 // A formatter which has no opinions about how objects of any type should be
 // formatted.
