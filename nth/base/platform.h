@@ -162,11 +162,11 @@
 #endif
 
 #if defined(__has_feature)
-#if __has_feature(address_sanitizer)
-#define __SANITIZE_ADDRESS__
+#if __has_feature(address_sanitizer) and not defined(__SANITIZE_ADDRESS__)
+#define __SANITIZE_ADDRESS__ 1
 #endif
-#if __has_feature(thread_sanitizer)
-#define __SANITIZE_THREAD__
+#if __has_feature(thread_sanitizer) and not defined(__SANITIZE_THREAD__)
+#define __SANITIZE_THREAD__ 1
 #endif
 #endif
 
