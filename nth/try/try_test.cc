@@ -306,4 +306,29 @@ NTH_TEST("try/handler/value_category") {
   NTH_EXPECT(run(nth::type<T const&&>, failure) == std::pair{1, "const &&"sv});
 }
 
+struct LifetimeProbe {
+  explicit LifetimeProbe(int v) : value(v) {}
+  ~LifetimeProbe() { value = -1; }
+  int value;
+};
+
+struct LifetimeProbeHandler {
+  static constexpr bool okay(LifetimeProbe const&) { return true; }
+  static constexpr int transform_value(LifetimeProbe const& p) {
+    return p.value;
+  }
+  static constexpr int transform_value(LifetimeProbe&& p) { return p.value; }
+  static constexpr int transform_return(LifetimeProbe const&) { return -2; }
+};
+
+LifetimeProbe MakeLifetimeProbe(int v) { return LifetimeProbe(v); }
+
+NTH_TEST("try/xvalue_temporary_lifetime") {
+  LifetimeProbeHandler handler;
+  int result = [&] {
+    return NTH_TRY((handler), std::move(MakeLifetimeProbe(42)));
+  }();
+  NTH_EXPECT(result == 42);
+}
+
 }  // namespace

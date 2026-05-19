@@ -158,29 +158,33 @@ struct MainHandler {
 };
 
 template <typename T, bool LValue, bool RValue>
-struct wrap {
-  explicit wrap(T&& v) : ptr_(nth::address(v)) {}
+struct wrap;
+
+template <typename T, bool RValue>
+struct wrap<T&, true, RValue> {
   explicit wrap(T& v) : ptr_(nth::address(v)) {}
   static wrap make(T& v) { return wrap(v); }
-  static wrap make(T&& v) { return wrap(NTH_MOVE(v)); }
 
   decltype(auto) transform(auto& handler) const {
-    if constexpr (LValue) {
-      return handler.transform_value(*ptr_);
-    } else if constexpr (RValue) {
-      return handler.transform_value(NTH_MOVE(*ptr_));
-    }
+    return handler.transform_value(*ptr_);
   }
 
  private:
   T* ptr_;
 };
 
-template <typename T, bool LValue, bool RValue>
-struct wrap<T&, LValue, RValue> : wrap<T, LValue, RValue> {};
+template <typename T>
+struct wrap<T&&, false, true> {
+  explicit wrap(T&& v) : v_(NTH_MOVE(v)) {}
+  static wrap make(T&& v) { return wrap(NTH_MOVE(v)); }
 
-template <typename T, bool LValue, bool RValue>
-struct wrap<T&&, LValue, RValue> : wrap<T, LValue, RValue> {};
+  decltype(auto) transform(auto& handler) {
+    return handler.transform_value(NTH_MOVE(v_));
+  }
+
+ private:
+  T v_;
+};
 
 template <typename T>
 struct wrap<T, false, false> {
@@ -245,8 +249,10 @@ decltype(auto) default_try_exit_handler() {
 
 #define NTH_TRY_INTERNAL_TRY_WITH_HANDLER(action, handler, ...)                \
   (({                                                                          \
-     using NthTryType       = decltype((__VA_ARGS__));                         \
-     auto&& NthInternalExpr = __VA_ARGS__;                                     \
+     using NthTryType = decltype((__VA_ARGS__));                               \
+     std::conditional_t<nth::rvalue_reference<NthTryType>,                     \
+                        std::remove_reference_t<NthTryType>, NthTryType>       \
+         NthInternalExpr = __VA_ARGS__;                                        \
      if (not handler.okay(NthInternalExpr)) { action(handler); }               \
      ::nth::internal_try::wrap<                                                \
          NthTryType, nth::lvalue_reference<NthTryType>,                        \
