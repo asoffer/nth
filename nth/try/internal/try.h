@@ -262,6 +262,8 @@ decltype(auto) default_try_exit_handler() {
 #define NTH_TRY_INTERNAL_ACTION_return(handler) return
 #define NTH_TRY_INTERNAL_ACTION_break(handler) break
 #define NTH_TRY_INTERNAL_ACTION_continue(handler) continue
+#define NTH_TRY_INTERNAL_ACTION_co_return(handler) co_return
+
 #define NTH_TRY_INTERNAL_ACTION(action)                                        \
   NTH_CONCATENATE(NTH_TRY_INTERNAL_ACTION_, action)
 
