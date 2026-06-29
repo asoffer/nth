@@ -331,4 +331,21 @@ NTH_TEST("try/xvalue_temporary_lifetime") {
   NTH_EXPECT(result == 42);
 }
 
+NTH_TEST("try/pointer-to-optional") {
+  auto opt = [&]() -> std::optional<std::string> {
+    NTH_TRY(static_cast<int*>(nullptr));
+    return "hello";
+  }();
+  NTH_EXPECT(opt == std::nullopt);
+}
+
+NTH_TEST("try/optional-to-pointer") {
+  std::string s = "hello";
+  auto ptr      = [&]() -> std::string* {
+    NTH_TRY(std::optional<int>{});
+    return &s;
+  }();
+  NTH_EXPECT(ptr == nullptr);
+}
+
 }  // namespace
