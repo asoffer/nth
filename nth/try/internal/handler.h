@@ -83,9 +83,7 @@ struct OptionalHandler {
     return *opt;
   }
 
-  static constexpr T const& transform_value(std::optional<T>& opt) {
-    return *opt;
-  }
+  static constexpr T& transform_value(std::optional<T>& opt) { return *opt; }
 
   static constexpr T&& transform_value(std::optional<T>&& opt) {
     return *NTH_MOVE(opt);

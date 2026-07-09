@@ -331,6 +331,37 @@ NTH_TEST("try/xvalue_temporary_lifetime") {
   NTH_EXPECT(result == 42);
 }
 
+NTH_TEST("unwrap/xvalue_temporary_lifetime") {
+  LifetimeProbeHandler handler;
+  int result = NTH_UNWRAP((handler), std::move(MakeLifetimeProbe(42)));
+  NTH_EXPECT(result == 42);
+}
+
+NTH_TEST("try/optional/mutable-reference") {
+  std::optional<int> o(5);
+  std::optional<int> result = [&]() -> std::optional<int> {
+    int& r = NTH_TRY(o);
+    r      = 10;
+    return r;
+  }();
+  NTH_EXPECT(*o == 10);
+  NTH_EXPECT(result == std::optional<int>(10));
+}
+
+NTH_TEST("try/parenthesized-expression") {
+  // A lone fully-parenthesized argument is the expression itself, not a
+  // handler. Parenthesization also protects top-level commas.
+  std::optional<int> o(5);
+  std::optional<int> result = [&]() -> std::optional<int> {
+    int x = NTH_TRY((o));
+    return x + 1;
+  }();
+  NTH_EXPECT(result == std::optional<int>(6));
+
+  NTH_EXPECT(NTH_UNWRAP((std::optional<std::pair<int, int>>({3, 4}))) ==
+             std::pair(3, 4));
+}
+
 NTH_TEST("try/pointer-to-optional") {
   auto opt = [&]() -> std::optional<std::string> {
     NTH_TRY(static_cast<int*>(nullptr));

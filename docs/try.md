@@ -18,7 +18,7 @@ One may specify an _exit_handler_, as an initial parenthesized argument to `NTH_
 satisfying the `nth::try_exit_handler<T>` concept, where `T` is the type of `ComputeSomeValue()`.
 Specifically,
 
-* It must have a member function accepting a `okay` member function accepting a `T` and returning a
+* It must have an `okay` member function accepting a `T` and returning a
 `bool` to indicate whether the value should be further transformed (`true`) or returned (`false`).
 
 * It must contain a `transform_value` function to be invoked when the value is okay.
@@ -29,6 +29,11 @@ Specifically,
 Note that the expression `my_handler` may be evaluated multiple times during evaluation of
 `NTH_TRY`, so if the handler is intended to be stateful, users must ensure their handler is an
 `lvalue` or otherwise has a mechanism to share the state.
+
+A parenthesized first argument is treated as a handler only if an expression follows it. A lone
+fully-parenthesized argument, as in `NTH_TRY((f(x)))`, is treated as the expression itself and uses
+the default handler. Parenthesizing the expression this way can be used to protect top-level commas,
+as in `NTH_TRY((std::pair<int, int>(1, 2)))`.
 
 ## Custom Default Exit Handlers
 

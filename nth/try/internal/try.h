@@ -88,9 +88,18 @@ decltype(auto) default_try_exit_handler() {
 
 #define NTH_TRY_INTERNAL_TRY(...)                                              \
   NTH_IF(NTH_IS_PARENTHESIZED(NTH_FIRST_ARGUMENT(__VA_ARGS__)),                \
-         NTH_TRY_INTERNAL_TRY_WITH_HANDLER,                                    \
+         NTH_TRY_INTERNAL_TRY_PARENTHESIZED,                                   \
          NTH_TRY_INTERNAL_TRY_WITHOUT_HANDLER)                                 \
   (NTH_TRY_INTERNAL_RETURN, __VA_ARGS__)
+
+// A parenthesized first argument is a handler only if an expression follows
+// it. A lone fully-parenthesized argument is the expression itself, handled by
+// the default handler, so that expressions such as `NTH_TRY((f(x)))` behave
+// identically to their unparenthesized counterparts.
+#define NTH_TRY_INTERNAL_TRY_PARENTHESIZED(action, first, ...)                 \
+  NTH_IF(NTH_IS_EMPTY(__VA_ARGS__), NTH_TRY_INTERNAL_TRY_WITHOUT_HANDLER,      \
+         NTH_TRY_INTERNAL_TRY_WITH_HANDLER)                                    \
+  (action, first __VA_OPT__(, __VA_ARGS__))
 
 #define NTH_TRY_INTERNAL_TRY_WITHOUT_HANDLER(action, ...)                      \
   NTH_TRY_INTERNAL_TRY_WITH_HANDLER(                                           \
@@ -102,9 +111,21 @@ decltype(auto) default_try_exit_handler() {
 #define NTH_TRY_INTERNAL_RETURN(handler)                                       \
   return handler.transform_return(NTH_FWD(NthInternalExpr));
 
+#define NTH_TRY_INTERNAL_HANDLER_CHECK(handler)                                \
+  static_assert(                                                               \
+      ::nth::try_exit_handler<std::remove_cvref_t<decltype(handler)>,          \
+                              NthTryType>,                                     \
+      "The handler used with this expression does not satisfy "                \
+      "`nth::try_exit_handler` for the expression's type. Either the "        \
+      "explicitly-provided handler is not usable with this type, or no "       \
+      "default handler exists for it (consider defining the "                  \
+      "`NthDefaultTryExitHandler` FTADLE hook, or passing a handler "          \
+      "explicitly as a parenthesized first argument).")
+
 #define NTH_TRY_INTERNAL_TRY_WITH_HANDLER(action, handler, ...)                \
   (({                                                                          \
      using NthTryType = decltype((__VA_ARGS__));                               \
+     NTH_TRY_INTERNAL_HANDLER_CHECK(handler);                                  \
      std::conditional_t<nth::rvalue_reference<NthTryType>,                     \
                         std::remove_reference_t<NthTryType>, NthTryType>       \
          NthInternalExpr = __VA_ARGS__;                                        \
@@ -128,9 +149,15 @@ decltype(auto) default_try_exit_handler() {
 
 #define NTH_TRY_INTERNAL_UNWRAP(...)                                           \
   NTH_IF(NTH_IS_PARENTHESIZED(NTH_FIRST_ARGUMENT(__VA_ARGS__)),                \
-         NTH_TRY_INTERNAL_UNWRAP_WITH_HANDLER,                                 \
+         NTH_TRY_INTERNAL_UNWRAP_PARENTHESIZED,                                \
          NTH_TRY_INTERNAL_UNWRAP_WITHOUT_HANDLER)                              \
   (__VA_ARGS__)
+
+// See `NTH_TRY_INTERNAL_TRY_PARENTHESIZED`.
+#define NTH_TRY_INTERNAL_UNWRAP_PARENTHESIZED(first, ...)                      \
+  NTH_IF(NTH_IS_EMPTY(__VA_ARGS__), NTH_TRY_INTERNAL_UNWRAP_WITHOUT_HANDLER,   \
+         NTH_TRY_INTERNAL_UNWRAP_WITH_HANDLER)                                 \
+  (first __VA_OPT__(, __VA_ARGS__))
 
 #define NTH_TRY_INTERNAL_UNWRAP_WITHOUT_HANDLER(...)                           \
   NTH_TRY_INTERNAL_UNWRAP_WITH_HANDLER(                                        \
@@ -140,8 +167,11 @@ decltype(auto) default_try_exit_handler() {
 
 #define NTH_TRY_INTERNAL_UNWRAP_WITH_HANDLER(handler, ...)                     \
   (({                                                                          \
-     using NthTryType       = decltype((__VA_ARGS__));                         \
-     auto&& NthInternalExpr = __VA_ARGS__;                                     \
+     using NthTryType = decltype((__VA_ARGS__));                               \
+     NTH_TRY_INTERNAL_HANDLER_CHECK(handler);                                  \
+     std::conditional_t<nth::rvalue_reference<NthTryType>,                     \
+                        std::remove_reference_t<NthTryType>, NthTryType>       \
+         NthInternalExpr = __VA_ARGS__;                                        \
      if (not handler.okay(NthInternalExpr)) {                                  \
        nth::internal_try::MaybeLogWithFormat(handler,                          \
                                              NTH_FWD(NthInternalExpr));        \

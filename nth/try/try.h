@@ -47,7 +47,10 @@
 // One can control the mechanism by which error handling occurs by passing in a
 // first parenthesized argument. The argument must adhere to the
 // `nth::try_exit_handler<T>` concept defined below, where `T` is the type of
-// the to-be-evaluated fallible expression.
+// the to-be-evaluated fallible expression. A parenthesized first argument is
+// treated as a handler only if an expression follows it; a lone
+// fully-parenthesized argument, as in `NTH_TRY((f(x)))`, is treated as the
+// expression itself and uses the default handler.
 //
 // As an example with `absl::Status`, one may define the following exit handler:
 //
