@@ -28,7 +28,7 @@ struct DefaultHandler {
 };
 
 struct EmptyTryResultType {
-  template <nth::precisely<nullptr_t> N>
+  template <nth::precisely<decltype(nullptr)> N>
   constexpr operator N() const {
     return nullptr;
   }
