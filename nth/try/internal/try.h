@@ -39,7 +39,7 @@ struct wrap<T&, true, RValue> {
   explicit wrap(T& v) : ptr_(nth::address(v)) {}
   static wrap make(T& v) { return wrap(v); }
 
-  decltype(auto) transform(auto& handler) const {
+  decltype(auto) transform(auto&& handler) const {
     return handler.transform_value(*ptr_);
   }
 
@@ -52,7 +52,7 @@ struct wrap<T&&, false, true> {
   explicit wrap(T&& v) : v_(NTH_MOVE(v)) {}
   static wrap make(T&& v) { return wrap(NTH_MOVE(v)); }
 
-  decltype(auto) transform(auto& handler) {
+  decltype(auto) transform(auto&& handler) {
     return handler.transform_value(NTH_MOVE(v_));
   }
 
@@ -65,7 +65,7 @@ struct wrap<T, false, false> {
   explicit wrap(T&& v) : v_(NTH_MOVE(v)) {}
   static wrap make(T&& v) { return wrap(NTH_MOVE(v)); }
 
-  decltype(auto) transform(auto& handler) {
+  decltype(auto) transform(auto&& handler) {
     return handler.transform_value(NTH_MOVE(v_));
   }
 

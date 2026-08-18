@@ -1,6 +1,13 @@
 #include "nth/try/try.h"
 
+#include <fcntl.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <unistd.h>
+
 #include <concepts>
+#include <csignal>
+#include <cstdlib>
 #include <optional>
 #include <string_view>
 #include <type_traits>
@@ -10,6 +17,25 @@
 #include "nth/test/test.h"
 
 namespace {
+
+#if defined(NTH_DFATAL)
+bool Aborts(auto&& func) {
+  pid_t pid = fork();
+  if (pid < 0) { return false; }
+  if (pid == 0) {
+    int dev_null = open("/dev/null", O_WRONLY);
+    if (dev_null != -1) {
+      dup2(dev_null, STDERR_FILENO);
+      close(dev_null);
+    }
+    static_cast<void>(func());
+    std::exit(0);
+  }
+  int status = 0;
+  waitpid(pid, &status, 0);
+  return WIFSIGNALED(status) && (WTERMSIG(status) == SIGABRT);
+}
+#endif
 
 NTH_TEST("try/bool") {
   int counter = 0;
@@ -378,5 +404,270 @@ NTH_TEST("try/optional-to-pointer") {
   }();
   NTH_EXPECT(ptr == nullptr);
 }
+
+#if defined(NTH_DFATAL)
+
+NTH_TEST("try/dfatal/defined/bool") {
+  int counter = 0;
+  bool result = [&]() -> bool {
+    NTH_TRY((nth::dfatal), true);
+    ++counter;
+    return true;
+  }();
+  NTH_EXPECT(counter == 1);
+  NTH_EXPECT(result);
+
+  NTH_EXPECT(Aborts([]() -> bool {
+    NTH_TRY((nth::dfatal), false);
+    return true;
+  }));
+}
+
+NTH_TEST("try/dfatal/defined/pointer") {
+  int counter = 0;
+  int x       = 42;
+  int* ptr    = [&]() -> int* {
+    int& r = NTH_TRY((nth::dfatal), &x);
+    ++counter;
+    r = 100;
+    return &r;
+  }();
+  NTH_EXPECT(counter == 1);
+  NTH_EXPECT(ptr == &x);
+  NTH_EXPECT(x == 100);
+
+  NTH_EXPECT(Aborts([]() -> int* {
+    [[maybe_unused]] int& r =
+        NTH_TRY((nth::dfatal), static_cast<int*>(nullptr));
+    return nullptr;
+  }));
+}
+
+NTH_TEST("try/dfatal/defined/optional") {
+  int counter = 0;
+  std::optional<int> o(5);
+  std::optional<int> opt = [&]() -> std::optional<int> {
+    int const& c = NTH_TRY((nth::dfatal), o);
+    ++counter;
+    return c + 1;
+  }();
+  NTH_EXPECT(counter == 1);
+  NTH_EXPECT(opt == 6);
+
+  // Mutable reference mutation
+  opt = [&]() -> std::optional<int> {
+    int& r = NTH_TRY((nth::dfatal), o);
+    r      = 10;
+    return r;
+  }();
+  NTH_EXPECT(*o == 10);
+  NTH_EXPECT(opt == 10);
+
+  // Move-only / uncopyable
+  std::optional<int> uncopyable_result = [&]() -> std::optional<int> {
+    Uncopyable u = NTH_TRY((nth::dfatal), std::optional(Uncopyable(77)));
+    return u.n;
+  }();
+  NTH_ASSERT(uncopyable_result.has_value());
+  NTH_EXPECT(*uncopyable_result == 77);
+
+  NTH_EXPECT(Aborts([]() -> std::optional<int> {
+    int val = NTH_TRY((nth::dfatal), std::optional<int>());
+    return val;
+  }));
+}
+
+NTH_TEST("try/dfatal/defined/custom_handler") {
+  Handler handler;
+  int counter = 0;
+
+  // Custom handler returns 89 on success (input false), aborts on failure
+  // (input true).
+  NTH_EXPECT([&]() -> int {
+    auto result = NTH_TRY((nth::dfatal(handler)), false);
+    ++counter;
+    return result;
+  }() == 89);
+  NTH_EXPECT(counter == 1);
+
+  NTH_EXPECT(Aborts([&]() -> int {
+    auto result = NTH_TRY((nth::dfatal(handler)), true);
+    return result;
+  }));
+}
+
+NTH_TEST("try/dfatal/defined/zero_args") {
+  int counter = 0;
+  auto res    = [&]() -> std::optional<int> {
+    int val = NTH_TRY((nth::dfatal()), std::optional<int>(99));
+    ++counter;
+    return val;
+  }();
+  NTH_EXPECT(counter == 1);
+  NTH_EXPECT(res == 99);
+
+  NTH_EXPECT(Aborts([]() -> std::optional<int> {
+    std::optional<int> opt;
+    int val = NTH_TRY((nth::dfatal()), opt);
+    return val;
+  }));
+}
+
+NTH_TEST("try/dfatal/defined/value_category") {
+  using namespace std::string_view_literals;
+  auto success     = std::in_place_index<0>;
+  auto failure     = std::in_place_index<1>;
+  auto run_success = []<typename T>(
+                         nth::type_tag<T>,
+                         auto index) -> std::pair<int, std::string_view> {
+    MercurialHandler handler;
+    std::remove_reference_t<T> value{index};
+    return NTH_TRY((nth::dfatal(handler)), static_cast<T>(value));
+  };
+  using T = MercurialHandler::type;
+  NTH_EXPECT(run_success(nth::type<T&>, success) == std::pair{0, "&"sv});
+  NTH_EXPECT(run_success(nth::type<T&&>, success) == std::pair{0, "&&"sv});
+  NTH_EXPECT(run_success(nth::type<T const&>, success) ==
+             std::pair{0, "const &"sv});
+  NTH_EXPECT(run_success(nth::type<T const&&>, success) ==
+             std::pair{0, "const &&"sv});
+
+  auto run_failure = []<typename T>(
+                         nth::type_tag<T>,
+                         auto index) -> std::pair<int, std::string_view> {
+    MercurialHandler handler;
+    std::remove_reference_t<T> value{index};
+    return NTH_TRY((nth::dfatal(handler)), static_cast<T>(value));
+  };
+  NTH_EXPECT(Aborts([&] { run_failure(nth::type<T&>, failure); }));
+  NTH_EXPECT(Aborts([&] { run_failure(nth::type<T&&>, failure); }));
+  NTH_EXPECT(Aborts([&] { run_failure(nth::type<T const&>, failure); }));
+  NTH_EXPECT(Aborts([&] { run_failure(nth::type<T const&&>, failure); }));
+}
+
+#else  // not defined(NTH_DFATAL)
+
+NTH_TEST("try/dfatal/not_defined/pointer") {
+  int counter = 0;
+  int* ptr    = [&]() -> int* {
+    NTH_TRY((nth::dfatal), static_cast<int*>(nullptr));
+    ++counter;
+    return static_cast<int*>(nullptr);
+  }();
+  NTH_EXPECT(counter == 0);
+  NTH_EXPECT(ptr == nullptr);
+
+  int x = 42;
+  ptr   = [&]() -> int* {
+    int& r = NTH_TRY((nth::dfatal), &x);
+    ++counter;
+    r = 100;
+    return &r;
+  }();
+  NTH_EXPECT(counter == 1);
+  NTH_EXPECT(ptr == &x);
+  NTH_EXPECT(x == 100);
+}
+
+NTH_TEST("try/dfatal/not_defined/optional") {
+  int counter            = 0;
+  std::optional<int> opt = [&]() -> std::optional<int> {
+    NTH_TRY((nth::dfatal), std::optional<int>());
+    ++counter;
+    return 1;
+  }();
+  NTH_EXPECT(counter == 0);
+  NTH_EXPECT(opt == std::nullopt);
+
+  std::optional<int> o(5);
+  opt = [&]() -> std::optional<int> {
+    int const& c = NTH_TRY((nth::dfatal), o);
+    ++counter;
+    return c + 1;
+  }();
+  NTH_EXPECT(counter == 1);
+  NTH_EXPECT(opt == 6);
+
+  // Mutable reference mutation
+  opt = [&]() -> std::optional<int> {
+    int& r = NTH_TRY((nth::dfatal), o);
+    r      = 10;
+    return r;
+  }();
+  NTH_EXPECT(*o == 10);
+  NTH_EXPECT(opt == 10);
+
+  // Move-only / uncopyable
+  std::optional<int> uncopyable_result = [&]() -> std::optional<int> {
+    Uncopyable u = NTH_TRY((nth::dfatal), std::optional(Uncopyable(77)));
+    return u.n;
+  }();
+  NTH_ASSERT(uncopyable_result.has_value());
+  NTH_EXPECT(*uncopyable_result == 77);
+}
+
+NTH_TEST("try/dfatal/not_defined/custom_handler") {
+  Handler handler;
+  int counter = 0;
+
+  // Custom handler returns 89 on success (input false), 17 on failure (input
+  // true).
+  NTH_EXPECT([&] {
+    auto result = NTH_TRY((nth::dfatal(handler)), false);
+    ++counter;
+    return result;
+  }() == 89);
+  NTH_EXPECT(counter == 1);
+
+  NTH_EXPECT([&] {
+    auto result = NTH_TRY((nth::dfatal(handler)), true);
+    ++counter;
+    return result;
+  }() == 17);
+  NTH_EXPECT(counter == 1);
+}
+
+NTH_TEST("try/dfatal/not_defined/zero_args") {
+  std::optional<int> opt;
+  int counter = 0;
+  auto res    = [&]() -> std::optional<int> {
+    int val = NTH_TRY((nth::dfatal()), std::optional<int>(99));
+    ++counter;
+    return val;
+  }();
+  NTH_EXPECT(counter == 1);
+  NTH_EXPECT(res == 99);
+
+  counter = 0;
+  res     = [&]() -> std::optional<int> {
+    int val = NTH_TRY((nth::dfatal()), opt);
+    ++counter;
+    return val;
+  }();
+  NTH_EXPECT(counter == 0);
+  NTH_EXPECT(res == std::nullopt);
+}
+
+NTH_TEST("try/dfatal/not_defined/value_category") {
+  using namespace std::string_view_literals;
+  auto success = std::in_place_index<0>;
+  auto failure = std::in_place_index<1>;
+  auto run     = []<typename T>(nth::type_tag<T>, auto index) {
+    MercurialHandler handler;
+    std::remove_reference_t<T> value{index};
+    return NTH_TRY((nth::dfatal(handler)), static_cast<T>(value));
+  };
+  using T = MercurialHandler::type;
+  NTH_EXPECT(run(nth::type<T&>, success) == std::pair{0, "&"sv});
+  NTH_EXPECT(run(nth::type<T&>, failure) == std::pair{1, "&"sv});
+  NTH_EXPECT(run(nth::type<T&&>, success) == std::pair{0, "&&"sv});
+  NTH_EXPECT(run(nth::type<T&&>, failure) == std::pair{1, "&&"sv});
+  NTH_EXPECT(run(nth::type<T const&>, success) == std::pair{0, "const &"sv});
+  NTH_EXPECT(run(nth::type<T const&>, failure) == std::pair{1, "const &"sv});
+  NTH_EXPECT(run(nth::type<T const&&>, success) == std::pair{0, "const &&"sv});
+  NTH_EXPECT(run(nth::type<T const&&>, failure) == std::pair{1, "const &&"sv});
+}
+
+#endif  // defined(NTH_DFATAL)
 
 }  // namespace

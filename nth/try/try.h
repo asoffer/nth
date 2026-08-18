@@ -88,6 +88,10 @@ concept try_exit_handler = requires(H h, T t) {
 // Exit handler for use in main. Failures are reported as `return 1`.
 inline constexpr nth::internal_try::MainHandler try_main;
 
+// Exit handler that aborts if `NTH_DFATAL` is defined or dispatches to
+// another handler if not.
+inline constexpr nth::internal_try::DFatalHandler dfatal;
+
 }  // namespace nth
 
 #endif  // NTH_TRY_TRY_H

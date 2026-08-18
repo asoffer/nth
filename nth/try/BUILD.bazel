@@ -30,3 +30,13 @@ cc_test(
         "//nth/test:main",
     ],
 )
+
+cc_test(
+    name = "try_dfatal_test",
+    srcs = ["try_test.cc"],
+    local_defines = ["NTH_DFATAL"],
+    deps = [
+        ":try",
+        "//nth/test:main",
+    ],
+)

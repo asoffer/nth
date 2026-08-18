@@ -153,6 +153,83 @@ struct MainHandler {
   }
 };
 
+struct AbortResult {
+  [[noreturn]] AbortResult() { std::abort(); }
+
+  template <typename U>
+  constexpr operator U() const {
+    std::abort();
+  }
+};
+
+struct DFatalHandler {
+  static constexpr DFatalHandler operator()() { return {}; }
+
+  template <typename T>
+  static constexpr bool okay(T const& t) {
+    return default_try_exit_handler<T>().okay(t);
+  }
+
+  template <typename T>
+  static constexpr decltype(auto) transform_value(T const& v) {
+    return default_try_exit_handler<T>().transform_value(v);
+  }
+
+  template <typename T>
+  static constexpr decltype(auto) transform_value(T& v) {
+    return default_try_exit_handler<T>().transform_value(v);
+  }
+
+  template <typename T>
+  static constexpr decltype(auto) transform_value(T&& v) {
+    return default_try_exit_handler<T>().transform_value(NTH_MOVE(v));
+  }
+
+#if defined(NTH_DFATAL)
+  template <typename H>
+  static constexpr auto operator()(H&& h) {
+    return Impl<std::remove_cvref_t<H>>(NTH_FWD(h));
+  }
+
+  [[noreturn]] static constexpr AbortResult transform_return(auto const&) {
+    std::abort();
+  }
+
+ private:
+  template <typename H>
+  struct Impl : private H {
+    constexpr Impl(H const& h) : H(h) {}
+    constexpr Impl(H&& h) : H(NTH_MOVE(h)) {}
+    using H::okay;
+    using H::transform_value;
+
+    [[noreturn]] static constexpr AbortResult transform_return(auto const&) {
+      std::abort();
+    }
+  };
+
+#else
+  static constexpr decltype(auto) operator()(auto&& handler) {
+    return NTH_FWD(handler);
+  }
+
+  template <typename T>
+  static constexpr decltype(auto) transform_return(T const& v) {
+    return default_try_exit_handler<T>().transform_return(v);
+  }
+
+  template <typename T>
+  static constexpr decltype(auto) transform_return(T& v) {
+    return default_try_exit_handler<T>().transform_return(v);
+  }
+
+  template <typename T>
+  static constexpr decltype(auto) transform_return(T&& v) {
+    return default_try_exit_handler<T>().transform_return(NTH_MOVE(v));
+  }
+#endif
+};
+
 }  // namespace internal_try
 
 constexpr auto const& NthDefaultTryExitHandler(type_tag<absl::Status>) {
