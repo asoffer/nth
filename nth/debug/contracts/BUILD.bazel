@@ -55,6 +55,56 @@ cc_test(
         "//nth/debug/log",
         "//nth/debug/log:file_log_sink",
         "//nth/debug/log:sink",
+        "//nth/debug/log:vector_log_sink",
+        "//nth/format",
+    ],
+)
+
+cc_test(
+    name = "contracts_harden_test",
+    srcs = ["contracts_test.cc"],
+    copts = [
+        # We cannot directly test the aborting behavior.
+        "-DNTH_DEBUG_INTERNAL_NO_ABORT_FOR_TEST",
+        # Pin the mode. Unset other modes, in case --//nth/base:build is used.
+        "-UNTH_CLI_BUILD_MODE_OPTIMIZE",
+        "-UNTH_CLI_BUILD_MODE_HARDEN",
+        "-UNTH_CLI_BUILD_MODE_DEBUG",
+        "-DNTH_CLI_BUILD_MODE_HARDEN",
+    ],
+    deps = [
+        ":contracts",
+        ":violation",
+        "//nth/debug/internal:raw_check",
+        "//nth/debug/log",
+        "//nth/debug/log:file_log_sink",
+        "//nth/debug/log:sink",
+        "//nth/debug/log:vector_log_sink",
+        "//nth/format",
+    ],
+)
+
+cc_test(
+    name = "contracts_optimize_test",
+    srcs = ["contracts_test.cc"],
+    copts = [
+        # We cannot directly test the aborting behavior.
+        "-DNTH_DEBUG_INTERNAL_NO_ABORT_FOR_TEST",
+        # Pin the mode. Unset other modes, in case --//nth/base:build is used.
+        "-UNTH_CLI_BUILD_MODE_OPTIMIZE",
+        "-UNTH_CLI_BUILD_MODE_HARDEN",
+        "-UNTH_CLI_BUILD_MODE_DEBUG",
+        "-DNTH_CLI_BUILD_MODE_OPTIMIZE",
+    ],
+    deps = [
+        ":contracts",
+        ":violation",
+        "//nth/debug/internal:raw_check",
+        "//nth/debug/log",
+        "//nth/debug/log:file_log_sink",
+        "//nth/debug/log:sink",
+        "//nth/debug/log:vector_log_sink",
+        "//nth/format",
     ],
 )
 
