@@ -12,7 +12,7 @@ replacements/alternatives.
 will need a C++23-compliant compiler and a relatively recent copy of [Bazel](https://bazel.build/).
 Specifically,
 
-* Bazel version 9.1.0 or greater
+* Bazel version 10.0.0 or greater
 * Clang 19.1.3
 
 The `nth` libraries are intended to be used from your C++ code and always built from source. For
