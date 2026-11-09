@@ -43,6 +43,12 @@ NTH_TEST("format/cc/string") {
   NTH_EXPECT(cc(std::string("\"hello\n\"")) == R"("\"hello\n\"")");
 }
 
+NTH_TEST("format/cc/string/utf8") {
+  NTH_EXPECT(cc("caf\xc3\xa9") == "\"caf\xc3\xa9\"");
+  NTH_EXPECT(cc("\xf0\x9f\x98\x80\n") == "\"\xf0\x9f\x98\x80\\n\"");
+  NTH_EXPECT(cc("\xc3") == R"("\u00c3")");
+}
+
 NTH_TEST("format/cc/array") {
   NTH_EXPECT(cc(std::array<int, 0>{}) == "{}");
   NTH_EXPECT(cc(std::vector<double>{}) == "{}");

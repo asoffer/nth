@@ -88,4 +88,72 @@ static_assert(
 static_assert(nth::type<decltype(NthDefaultFormatter(nth::type<StringRef>))> ==
               nth::type<nth::text_formatter>);
 
+NTH_TEST("format/utf8/sequence-length/not-utf8") {
+  NTH_EXPECT(nth::Utf8SequenceLength("") == 0u);
+  NTH_EXPECT(nth::Utf8SequenceLength("a") == 0u);
+  NTH_EXPECT(nth::Utf8SequenceLength(std::string_view("\0", 1)) == 0u);
+  NTH_EXPECT(nth::Utf8SequenceLength("\x7f") == 0u);
+}
+
+NTH_TEST("format/utf8/sequence-length/well-formed") {
+  // Two bytes: U+0080, U+00E9, U+07FF.
+  NTH_EXPECT(nth::Utf8SequenceLength("\xc2\x80") == 2u);
+  NTH_EXPECT(nth::Utf8SequenceLength("\xc3\xa9") == 2u);
+  NTH_EXPECT(nth::Utf8SequenceLength("\xdf\xbf") == 2u);
+
+  // Three bytes: U+0800, U+20AC, U+D7FF, U+E000, U+FFFF.
+  NTH_EXPECT(nth::Utf8SequenceLength("\xe0\xa0\x80") == 3u);
+  NTH_EXPECT(nth::Utf8SequenceLength("\xe2\x82\xac") == 3u);
+  NTH_EXPECT(nth::Utf8SequenceLength("\xed\x9f\xbf") == 3u);
+  NTH_EXPECT(nth::Utf8SequenceLength("\xee\x80\x80") == 3u);
+  NTH_EXPECT(nth::Utf8SequenceLength("\xef\xbf\xbf") == 3u);
+
+  // Four bytes: U+10000, U+1F600, U+10FFFF.
+  NTH_EXPECT(nth::Utf8SequenceLength("\xf0\x90\x80\x80") == 4u);
+  NTH_EXPECT(nth::Utf8SequenceLength("\xf0\x9f\x98\x80") == 4u);
+  NTH_EXPECT(nth::Utf8SequenceLength("\xf4\x8f\xbf\xbf") == 4u);
+
+  // Only the leading sequence is measured.
+  NTH_EXPECT(nth::Utf8SequenceLength("\xc3\xa9" "abc") == 2u);
+  NTH_EXPECT(nth::Utf8SequenceLength("\xe2\x82\xac\xe2\x82\xac") == 3u);
+}
+
+NTH_TEST("format/utf8/sequence-length/ill-formed") {
+  // Continuation bytes cannot lead.
+  NTH_EXPECT(nth::Utf8SequenceLength("\x80") == 0u);
+  NTH_EXPECT(nth::Utf8SequenceLength("\xbf") == 0u);
+
+  // Bytes that never appear in UTF-8.
+  NTH_EXPECT(nth::Utf8SequenceLength("\xc0\x80") == 0u);
+  NTH_EXPECT(nth::Utf8SequenceLength("\xc1\xbf") == 0u);
+  NTH_EXPECT(nth::Utf8SequenceLength("\xf5\x80\x80\x80") == 0u);
+  NTH_EXPECT(nth::Utf8SequenceLength("\xff") == 0u);
+
+  // Overlong encodings.
+  NTH_EXPECT(nth::Utf8SequenceLength("\xe0\x9f\xbf") == 0u);
+  NTH_EXPECT(nth::Utf8SequenceLength("\xf0\x8f\xbf\xbf") == 0u);
+
+  // Surrogates: U+D800, U+DFFF.
+  NTH_EXPECT(nth::Utf8SequenceLength("\xed\xa0\x80") == 0u);
+  NTH_EXPECT(nth::Utf8SequenceLength("\xed\xbf\xbf") == 0u);
+
+  // Past U+10FFFF.
+  NTH_EXPECT(nth::Utf8SequenceLength("\xf4\x90\x80\x80") == 0u);
+
+  // Truncated.
+  NTH_EXPECT(nth::Utf8SequenceLength("\xc3") == 0u);
+  NTH_EXPECT(nth::Utf8SequenceLength("\xe2\x82") == 0u);
+  NTH_EXPECT(nth::Utf8SequenceLength("\xf0\x9f\x98") == 0u);
+
+  // A byte that should continue the sequence does not.
+  NTH_EXPECT(nth::Utf8SequenceLength("\xc3" "a") == 0u);
+  NTH_EXPECT(nth::Utf8SequenceLength("\xe2" "a\xac") == 0u);
+  NTH_EXPECT(nth::Utf8SequenceLength("\xe2\x82" "a") == 0u);
+  NTH_EXPECT(nth::Utf8SequenceLength("\xf0\x9f\x98" "a") == 0u);
+  NTH_EXPECT(nth::Utf8SequenceLength("\xf0\x9f\xc0\x80") == 0u);
+}
+
+static_assert(nth::Utf8SequenceLength("\xf0\x9f\x98\x80") == 4u);
+static_assert(nth::Utf8SequenceLength("\xed\xa0\x80") == 0u);
+
 }  // namespace

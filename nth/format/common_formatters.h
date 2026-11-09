@@ -129,11 +129,46 @@ struct byte_formatter {
   }
 };
 
+// The length of the well-formed UTF-8 encoding of a character other than ASCII
+// at the front of `s`, or zero if `s` does not begin with one.
+constexpr size_t Utf8SequenceLength(std::string_view s) {
+  if (s.empty()) { return 0; }
+  auto byte = [&](size_t k) { return static_cast<unsigned char>(s[k]); };
+  unsigned char lead = byte(0);
+  // The bounds of the byte after the lead, which exclude overlong encodings,
+  // surrogates, and code points past U+10FFFF.
+  unsigned char low  = 0x80;
+  unsigned char high = 0xbf;
+  size_t length      = 0;
+  if (lead >= 0xc2 and lead <= 0xdf) {
+    length = 2;
+  } else if (lead >= 0xe0 and lead <= 0xef) {
+    length = 3;
+    if (lead == 0xe0) { low = 0xa0; }
+    if (lead == 0xed) { high = 0x9f; }
+  } else if (lead >= 0xf0 and lead <= 0xf4) {
+    length = 4;
+    if (lead == 0xf0) { low = 0x90; }
+    if (lead == 0xf4) { high = 0x8f; }
+  } else {
+    return 0;
+  }
+  if (s.size() < length or byte(1) < low or byte(1) > high) { return 0; }
+  for (size_t k = 2; k < length; ++k) {
+    if (byte(k) < 0x80 or byte(k) > 0xbf) { return 0; }
+  }
+  return length;
+}
+
 // A formatter capable of formatting text as an escaped quotation.
 struct quote_formatter {
   void format(io::writer auto& w, std::string_view s) const {
     io::write_text(w, R"(")");
     size_t i = 0;
+    // The bytes remaining in a well-formed UTF-8 sequence, which are written as
+    // they are, since a JSON string may hold them. Any other byte outside ASCII
+    // is escaped.
+    size_t continuation = 0;
     for (char c : s) {
       switch (c) {
         case '\n':
@@ -161,7 +196,18 @@ struct quote_formatter {
           io::write_text(w, R"(\\)");
           break;
         default:
-          if (std::isprint(c)) {
+          if (continuation > 0) {
+            --continuation;
+            ++i;
+            continue;
+          }
+          if (size_t length = Utf8SequenceLength(s.substr(i)); length > 0) {
+            continuation = length - 1;
+            ++i;
+            continue;
+          }
+          if (static_cast<unsigned char>(c) < 0x80 and
+              std::isprint(static_cast<unsigned char>(c))) {
             ++i;
             continue;
           } else {
